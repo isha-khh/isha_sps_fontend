@@ -1,0 +1,44 @@
+﻿.table-011{
+    font-family:"微軟正黑體";
+    border-top:1px solid #dbdcdc;
+    border-left:1px solid #dbdcdc;
+    letter-spacing:1px;
+    margin-top:5px;
+}
+.table-011 td,
+.table-011 th{
+    padding:10px 0;
+    border-bottom:1px solid #dbdcdc;
+    border-right:1px solid #dbdcdc;
+}
+.table-011 .t1{
+    background:#959595;
+    background:-moz-linear-gradient(top,rgba(149,149,149,1) 0,rgba(13,13,13,1) 46%,rgba(1,1,1,1) 50%,rgba(10,10,10,1) 53%,rgba(78,78,78,1) 76%,rgba(56,56,56,1) 87%,rgba(27,27,27,1) 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,rgba(149,149,149,1)),color-stop(46%,rgba(13,13,13,1)),color-stop(50%,rgba(1,1,1,1)),color-stop(53%,rgba(10,10,10,1)),color-stop(76%,rgba(78,78,78,1)),color-stop(87%,rgba(56,56,56,1)),color-stop(100%,rgba(27,27,27,1)));
+    background:-webkit-linear-gradient(top,rgba(149,149,149,1) 0,rgba(13,13,13,1) 46%,rgba(1,1,1,1) 50%,rgba(10,10,10,1) 53%,rgba(78,78,78,1) 76%,rgba(56,56,56,1) 87%,rgba(27,27,27,1) 100%);
+    background:-o-linear-gradient(top,rgba(149,149,149,1) 0,rgba(13,13,13,1) 46%,rgba(1,1,1,1) 50%,rgba(10,10,10,1) 53%,rgba(78,78,78,1) 76%,rgba(56,56,56,1) 87%,rgba(27,27,27,1) 100%);
+    background:-ms-linear-gradient(top,rgba(149,149,149,1) 0,rgba(13,13,13,1) 46%,rgba(1,1,1,1) 50%,rgba(10,10,10,1) 53%,rgba(78,78,78,1) 76%,rgba(56,56,56,1) 87%,rgba(27,27,27,1) 100%);
+    background:linear-gradient(to bottom,rgba(149,149,149,1) 0,rgba(13,13,13,1) 46%,rgba(1,1,1,1) 50%,rgba(10,10,10,1) 53%,rgba(78,78,78,1) 76%,rgba(56,56,56,1) 87%,rgba(27,27,27,1) 100%);
+    color:#fff;
+    text-align:center;
+    font-size: 1rem;
+    font-weight:700;
+}
+.table-011 .t2{
+    background:#e3e3e3;
+    background:-moz-linear-gradient(top,#e3e3e3 0,#fcfcfc 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#e3e3e3),color-stop(100%,#fcfcfc));
+    background:-webkit-linear-gradient(top,#e3e3e3 0,#fcfcfc 100%);background:-o-linear-gradient(top,#e3e3e3 0,#fcfcfc 100%);
+    background:-ms-linear-gradient(top,#e3e3e3 0,#fcfcfc 100%);
+    background:linear-gradient(to bottom,#e3e3e3 0,#fcfcfc 100%);
+    color:#242424;
+    text-align:center;
+    font-size: 0.875rem;
+    padding:10px 0;
+}
+.table-011 .t3{
+    background-color:#FFF;
+    color:#7d7d7d;
+    text-align:center;
+    font-size: 0.875rem;
+}

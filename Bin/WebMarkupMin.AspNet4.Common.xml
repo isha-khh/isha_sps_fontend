@@ -1,0 +1,442 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WebMarkupMin.AspNet4.Common</name>
+    </assembly>
+    <members>
+        <member name="T:WebMarkupMin.AspNet4.Common.DefaultCssMinifierFactory">
+            <summary>
+            Default CSS minifier factory
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.DefaultCssMinifierFactory._default">
+            <summary>
+            Default instance of CSS minifier factory
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.DefaultCssMinifierFactory._current">
+            <summary>
+            Current instance of CSS minifier factory
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.DefaultCssMinifierFactory.Current">
+            <summary>
+            Gets or sets a instance of CSS minifier factory
+            </summary>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.DefaultJsMinifierFactory">
+            <summary>
+            Default JS minifier factory
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.DefaultJsMinifierFactory._default">
+            <summary>
+            Default instance of JS minifier factory
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.DefaultJsMinifierFactory._current">
+            <summary>
+            Current instance of JS minifier factory
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.DefaultJsMinifierFactory.Current">
+            <summary>
+            Gets or sets a instance of JS minifier factory
+            </summary>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.DefaultLogger">
+            <summary>
+            Default logger
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.DefaultLogger._default">
+            <summary>
+            Default instance of logger
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.DefaultLogger._current">
+            <summary>
+            Current instance of logger
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.DefaultLogger.Current">
+            <summary>
+            Gets or sets a instance of logger
+            </summary>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.Helpers.HttpHeadersHelpers">
+            <summary>
+            HTTP headers helpers
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.Helpers.HttpHeadersHelpers.IsEncodedContent(System.Collections.Specialized.NameValueCollection)">
+            <summary>
+            Checks whether the content is encoded
+            </summary>
+            <param name="headers">The HTTP headers</param>
+            <returns>Result of check (true - content is encoded; false - content is not encoded)</returns>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.HtmlMinificationManager">
+            <summary>
+            HTML minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HtmlMinificationManager._default">
+            <summary>
+            Default instance of HTML minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HtmlMinificationManager._current">
+            <summary>
+            Current instance of HTML minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HtmlMinificationManager._logger">
+            <summary>
+            Logger
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HtmlMinificationManager._cssMinifierFactory">
+            <summary>
+            CSS minifier factory
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HtmlMinificationManager._jsMinifierFactory">
+            <summary>
+            JS minifier factory
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.HtmlMinificationManager.Current">
+            <summary>
+            Gets or sets a instance of HTML minification manager
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.HtmlMinificationManager.Logger">
+            <summary>
+            Gets or sets a logger
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.HtmlMinificationManager.CssMinifierFactory">
+            <summary>
+            Gets or sets a CSS minifier factory
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.HtmlMinificationManager.JsMinifierFactory">
+            <summary>
+            Gets or sets a JS minifier factory
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.HtmlMinificationManager.#ctor">
+            <summary>
+            Constructs a instance of HTML minification manager
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.HtmlMinificationManager.#ctor(WebMarkupMin.Core.HtmlMinificationSettings,WebMarkupMin.Core.ICssMinifierFactory,WebMarkupMin.Core.IJsMinifierFactory,WebMarkupMin.Core.Loggers.ILogger)">
+            <summary>
+            Constructs a instance of HTML minification manager
+            </summary>
+            <param name="settings">HTML minification settings</param>
+            <param name="cssMinifierFactory">CSS minifier factory</param>
+            <param name="jsMinifierFactory">JS minifier factory</param>
+            <param name="logger">Logger</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream">
+            <summary>
+            HTTP compression response filter
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream._response">
+            <summary>
+            HTTP response
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream._originalStream">
+            <summary>
+            Original stream
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream._outputStream">
+            <summary>
+            Output stream
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream._outputStreamInitializedFlag">
+            <summary>
+            Flag that indicates if the output stream is initialized
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream._compressionManager">
+            <summary>
+            HTTP compression manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream._compressor">
+            <summary>
+            HTTP compressor
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream._acceptEncoding">
+            <summary>
+            Value of the Accept-Encoding HTTP header
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream._httpHeadersAppendedFlag">
+            <summary>
+            Flag that indicates if the HTTP headers is appended
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.HttpCompressionFilterStream.#ctor(System.Web.HttpResponseBase,WebMarkupMin.AspNet.Common.IHttpCompressionManager,System.String)">
+            <summary>
+            Constructs a instance of HTTP compression response filter
+            </summary>
+            <param name="response">HTTP response</param>
+            <param name="compressionManager">HTTP compression manager</param>
+            <param name="acceptEncoding">Value of the Accept-Encoding HTTP header</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.HttpCompressionManager">
+            <summary>
+            HTTP compression manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionManager._default">
+            <summary>
+            Default instance of HTTP compression manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.HttpCompressionManager._current">
+            <summary>
+            Current instance of HTTP compression manager
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.HttpCompressionManager.Current">
+            <summary>
+            Gets or sets a instance of HTTP compression manager
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.HttpCompressionManager.#ctor">
+            <summary>
+            Constructs a instance of HTTP compression manager
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.HttpCompressionManager.#ctor(System.Collections.Generic.IList{WebMarkupMin.AspNet.Common.Compressors.ICompressorFactory})">
+            <summary>
+            Constructs a instance of HTTP compression manager
+            </summary>
+            <param name="compressorFactories">List of HTTP compressor factories</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream">
+            <summary>
+            Markup minification response filter
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream._response">
+            <summary>
+            HTTP response
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream._originalStream">
+            <summary>
+            Original stream
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream._cachedStream">
+            <summary>
+            Stream that original content is read into
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream._configuration">
+            <summary>
+            WebMarkupMin configuration
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream._minificationManager">
+            <summary>
+            Markup minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream._currentUrl">
+            <summary>
+            Current URL
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream._encoding">
+            <summary>
+            Text encoding
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream.#ctor(System.Web.HttpResponseBase,WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IMarkupMinificationManager)">
+            <summary>
+            Constructs a instance of markup minification response filter
+            </summary>
+            <param name="response">HTTP response</param>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">Markup minification manager</param>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.MarkupMinificationFilterStream.#ctor(System.Web.HttpResponseBase,WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IMarkupMinificationManager,System.String,System.Text.Encoding)">
+            <summary>
+            Constructs a instance of markup minification response filter
+            </summary>
+            <param name="response">HTTP response</param>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">Markup minification manager</param>
+            <param name="currentUrl">Current URL</param>
+            <param name="encoding">Text encoding</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration">
+            <summary>
+            WebMarkupMin configuration
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration._instance">
+            <summary>
+            Instance of WebMarkupMin configuration
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration.Instance">
+            <summary>
+            Gets instance of WebMarkupMin configuration
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration.AllowMinificationInDebugMode">
+            <summary>
+            Gets or sets a flag for whether to allow markup minification during debugging
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration.AllowCompressionInDebugMode">
+            <summary>
+            Gets or sets a flag for whether to allow HTTP compression
+            of content during debugging
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration.#ctor">
+            <summary>
+            Constructs a instance of WebMarkupMin configuration
+            </summary>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.WebMarkupMinConfigurationExtensions">
+            <summary>
+            WebMarkupMin configuration extensions
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.WebMarkupMinConfigurationExtensions.IsMinificationEnabled(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration)">
+            <summary>
+            Checks whether the markup minification is enabled
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <returns>Result of check (true - minification is enabled; false - minification is disabled)</returns>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.WebMarkupMinConfigurationExtensions.IsCompressionEnabled(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration)">
+            <summary>
+            Checks whether the HTTP compression is enabled
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <returns>Result of check (true - compression is enabled; false - compression is disabled)</returns>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager">
+            <summary>
+            XHTML minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager._default">
+            <summary>
+            Default instance of XHTML minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager._current">
+            <summary>
+            Current instance of XHTML minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager._logger">
+            <summary>
+            Logger
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager._cssMinifierFactory">
+            <summary>
+            CSS minifier factory
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager._jsMinifierFactory">
+            <summary>
+            JS minifier factory
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager.Current">
+            <summary>
+            Gets or sets a instance of XHTML minification manager
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager.Logger">
+            <summary>
+            Gets or sets a logger
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager.CssMinifierFactory">
+            <summary>
+            Gets or sets a CSS minifier factory
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager.JsMinifierFactory">
+            <summary>
+            Gets or sets a JS minifier factory
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager.#ctor">
+            <summary>
+            Constructs a instance of XHTML minification manager
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.XhtmlMinificationManager.#ctor(WebMarkupMin.Core.XhtmlMinificationSettings,WebMarkupMin.Core.ICssMinifierFactory,WebMarkupMin.Core.IJsMinifierFactory,WebMarkupMin.Core.Loggers.ILogger)">
+            <summary>
+            Constructs a instance of XHTML minification manager
+            </summary>
+            <param name="settings">XHTML minification settings</param>
+            <param name="cssMinifierFactory">CSS minifier factory</param>
+            <param name="jsMinifierFactory">JS minifier factory</param>
+            <param name="logger">Logger</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.Common.XmlMinificationManager">
+            <summary>
+            XML minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.XmlMinificationManager._default">
+            <summary>
+            Default instance of XML minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.XmlMinificationManager._current">
+            <summary>
+            Current instance of XML minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.Common.XmlMinificationManager._logger">
+            <summary>
+            Logger
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.XmlMinificationManager.Current">
+            <summary>
+            Gets or sets a instance of XML minification manager
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.Common.XmlMinificationManager.Logger">
+            <summary>
+            Gets or sets a logger
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.XmlMinificationManager.#ctor">
+            <summary>
+            Constructs a instance of XML minification manager
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.Common.XmlMinificationManager.#ctor(WebMarkupMin.Core.XmlMinificationSettings,WebMarkupMin.Core.Loggers.ILogger)">
+            <summary>
+            Constructs a instance of XML minification manager
+            </summary>
+            <param name="settings">XML minification settings</param>
+            <param name="logger">Logger</param>
+        </member>
+    </members>
+</doc>

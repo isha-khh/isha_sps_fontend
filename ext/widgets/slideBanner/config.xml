@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="search" type="widgets">
+  <title>商品推廌</title>
+  <description>
+    商品推廌
+  </description>  
+  <img id="thumb" src=""/>
+  <assets>
+    <file id="control" href="slideBanner.ascx"/> 
+  </assets>
+
+</xml>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="cat_about" type="widgets">
+  <title>頁面選單:自訂單元</title>
+  <description>
+    頁面選單:自訂單元
+  </description>  
+  <img id="thumb" src=""/>
+  <assets>
+    <file id="control" href="cat_about.ascx"/>  
+  </assets>
+</xml>

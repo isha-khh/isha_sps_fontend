@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Config>
+  <Widgets>
+    <side1_bottom_widgets>
+      <File>ext/widgets/search/search.ascx</File>
+    </side1_bottom_widgets>
+    <side1_bottom_widgets>
+      <File>ext/widgets/cat_member/cat_member.ascx</File>
+    </side1_bottom_widgets>
+  </Widgets>
+</Config>

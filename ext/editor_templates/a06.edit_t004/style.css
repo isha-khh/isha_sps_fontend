@@ -1,0 +1,12 @@
+﻿.editor section.edit_t046 .list-inline>li{
+	display: inline-block;
+    padding: 1px;
+
+}
+
+.editor section.edit_t046 ul>li:hover>a>img {
+	opacity:0.85;
+	filter: alpha(opacity=85);
+}
+
+

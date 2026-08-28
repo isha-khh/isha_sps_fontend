@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="a009" type="frameset">
+  <title>中秋節淺色</title>
+  <description>
+    中秋節主題
+  </description>
+  <img id="thumb" src="thumb.jpg"/>
+  <assets>
+    <file id="cssfile" href="style.css"/>
+  </assets>
+</xml>

@@ -1,0 +1,102 @@
+﻿@charset "utf-8";
+/* CSS Document */
+
+/*----------------------- Banner Frame -----------------------*/
+/*------------------ .wrp-frame4 --------------------*/
+.banner .wrp_frame.border-LT,
+.banner .wrp_frame.border-RT {
+    width: 90px;
+    height: 90px;
+    top: -11px;
+}
+
+.banner .wrp_frame.border-LB,
+.banner .wrp_frame.border-RB {
+    width: 41px;
+    height: 31px;
+    bottom: -11px;
+}
+
+.banner .wrp_frame.border-LM,
+.banner .wrp_frame.border-RM {
+    width: 34px;
+    top: 79px;
+    bottom: 20px;
+}
+
+.banner .wrp_frame.border-LT {
+    background-image: url(images/frame4_LT.png);
+    left: -11px;
+}
+
+.banner .wrp_frame.border-CT {
+    background-image: url(images/frame4_CT.png);
+    background-position: center top;
+    background-size: 100% 52px;
+    top: -11px;
+    height: 52px;
+    left: 79px;
+    right: 79px;
+}
+
+.banner .wrp_frame.border-RT {
+    background-image: url(images/frame4_RT.png);
+    right: -11px;
+}
+
+.banner .wrp_frame.border-LM {
+    background-image: url(images/frame4_LM.png);
+    left: -11px;
+}
+
+.banner .wrp_frame.border-RM {
+    background-image: url(images/frame4_RM.png);
+    right: -11px;
+}
+
+.banner .wrp_frame.border-LB {
+    background-image: url(images/frame4_LB.png);
+    left: -11px;
+}
+
+.banner .wrp_frame.border-CB {
+    background-image: url(images/frame4_CB.png);
+    bottom: -11px;
+    height: 25px;
+    left: 30px;
+    right: 30px;
+}
+
+.banner .wrp_frame.border-RB {
+    background-image: url(images/frame4_RB.png);
+    right: -11px;
+}
+
+
+@media (max-width: 1199px) {
+    body.wrp-frame1 .banner .wrp_frame.border-LT,
+    body.wrp-frame1 .banner .wrp_frame.border-RT {
+        /*top: -25px;*/
+    }
+}
+
+@media (max-width: 991px) {
+    body.wrp-frame1 .banner .wrp_frame.border-LT {
+        /*top: -24px;
+        left: -19px;*/
+    }
+
+    body.wrp-frame1 .banner .wrp_frame.border-RT {
+        /*top: -24px;
+        right: -19px;*/
+    }
+}
+
+@media (max-width: 767px) {
+    body.wrp-frame1 .banner .wrp_frame {
+        /*display: none;*/
+    }
+}
+
+@media (max-width: 480px) {
+}

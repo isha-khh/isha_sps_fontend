@@ -1,0 +1,9 @@
+﻿
+/* -----------------------------   layout.css ---------------------------   */
+
+.editor section.edit_t001 h1.blog-post-title,
+.blog-post-item h2 {
+	letter-spacing:0;
+	font-size: 1.375rem;
+	margin-bottom:10px;
+}

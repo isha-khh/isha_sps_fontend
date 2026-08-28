@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<Config>
+  <AdminTemplate>~/admin/Templates/Template003/default.master</AdminTemplate>
+  <WebTemplate>~/Templates/TEZ_113073/default.master</WebTemplate>
+  <HomeContent>~/Templates/TEZ_113073/uc/eZHomeContent.ascx</HomeContent>
+</Config>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="edit008" type="editor">
+  <ccategory>內文樣板</ccategory>
+  <title>內文樣板10</title>
+  <description>
+    垂直頁籤效果
+  </description>
+  <img id="thumb" src="thumb11.jpg"/> 
+  <assets>
+    <file id="control" href="editor.html"/>
+    <file id="css" href="style.css"/>
+  </assets>
+</xml>

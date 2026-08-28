@@ -1,0 +1,30 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+/*4640*/
+.editor section.edit_t004 div.heading-title {
+	position:relative;
+	margin-bottom:40px;
+}
+
+/*4658*/
+    div.heading-title h1,
+	div.heading-title h2,
+	div.heading-title h3,
+	div.heading-title h4,
+	div.heading-title h5,
+	div.heading-title h6 {
+		margin:0;
+		padding:0;
+		background-color:#fff;
+		position:relative;
+		display:inline-block;
+		padding-left: 0;
+		padding-right: 15px;
+	}
+
+/*4721 Border Bottom */
+div.heading-title.heading-border-bottom {
+	border-bottom:#ccc 2px solid;
+}
+
+
+

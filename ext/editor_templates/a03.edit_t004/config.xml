@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="edit008" type="editor">
+  <ccategory>內文樣板</ccategory>
+  <title>內文+iframe樣板4</title>
+  <description>
+    左 youtube 右文
+  </description>
+  <img id="thumb" src="thumb04.jpg"/>  
+  <assets>
+    <file id="control" href="editor.html"/>
+    <file id="css" href="style.css"/>
+  </assets>
+</xml>

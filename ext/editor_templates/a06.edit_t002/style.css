@@ -1,0 +1,15 @@
+﻿
+/* -----------------------------   essentials.css ---------------------------   */
+/*4285*/
+.editor section.edit_t044 ul.clients-dotted>li {
+	text-align:center;
+	padding-top:30px;
+	padding-bottom:30px;
+	display:inline-block;
+}
+
+/*4292*/
+.editor section.edit_t044 ul.clients-dotted>li a {
+	text-align:center;
+	display:block;
+}

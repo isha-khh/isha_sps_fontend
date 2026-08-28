@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="edit002" type="editor">
+  <ccategory>表格</ccategory>
+  <title>表格樣版2</title>
+  <description>
+    條列式表格，紅色與銀色漸層色系
+  </description>  
+  <img id="thumb" src="tp2.gif"/>
+  <assets>
+    <file id="control" href="editor.html"/>
+    <file id="css" href="style.css"/>
+  </assets>
+</xml>

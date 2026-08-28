@@ -1,0 +1,30 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+
+/*579*/
+.line-through		{ text-decoration: line-through; }
+
+/*4640*/
+.editor section.edit_t030 div.heading-title {
+	position:relative;
+	margin-bottom:40px;
+}
+
+/*4656*/
+	.editor section.edit_t030 div.heading-title h1,
+	.editor section.edit_t030 div.heading-title h2,
+	.editor section.edit_t030 div.heading-title h3,
+	.editor section.edit_t030 div.heading-title h4,
+	.editor section.edit_t030 div.heading-title h5,
+	.editor section.edit_t030 div.heading-title h6 {
+		margin:0;
+		padding:0;
+		background-color:#fff;
+		position:relative;
+		display:inline-block;
+		padding-left: 0;
+		padding-right: 15px;
+	}
+
+
+/* -----------------------------  layout.css ---------------------------   */
+

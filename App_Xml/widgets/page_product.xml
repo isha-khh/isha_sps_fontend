@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<Config>
+  <Widgets>
+    <side1_bottom_widgets>
+      <File>ext/widgets/search/search.ascx</File>
+    </side1_bottom_widgets>
+    <side1_bottom_widgets>
+      <File>ext/widgets/cat_product/cat_product.ascx</File>
+    </side1_bottom_widgets>
+    <side1_bottom_widgets>
+      <File>ext/widgets/quickLink/quickLink.ascx</File>
+    </side1_bottom_widgets>
+    <side2_bottom_widgets>
+      <File>ext/widgets/slideBanner/slideBanner.ascx</File>
+    </side2_bottom_widgets>
+  </Widgets>
+</Config>

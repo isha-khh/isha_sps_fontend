@@ -1,0 +1,72 @@
+body {
+  background: #fff;
+}
+
+.hero {
+  background: #7ED321;
+  color: #fff;
+  padding: 100px 0;
+  margin-bottom: 140px;
+}
+.hero .logo {
+  background: url("images/brand-white.png") no-repeat center/cover;
+  font-size: 0;
+  width: 160px;
+  height: 40px;
+  margin: 0 auto 30px;
+  display: block;
+}
+.hero .lead {
+  margin-bottom: 40px;
+}
+.hero .btn.btn-light:hover,
+.hero .btn.btn-light:active,
+.hero .btn.btn-light:focus,
+.hero .btn.btn-light:active:focus {
+  background: #fff;
+  color: #7ED321;
+  box-shadow: none;
+}
+
+.tmb {
+  background: #fff;
+  color: #777;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 30px 20px;
+  display: block;
+  border-radius: 8px;
+  transition: 0.6s;
+}
+.tmb img {
+  max-width: 100%;
+  opacity: 0.8;
+  transition: 0.5s;
+}
+.tmb img + span {
+  padding-top: 20px;
+  display: block;
+}
+.tmb:hover, .tmb:active, .tmb:focus, .tmb:active:focus {
+  color: #333;
+  text-decoration: none;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+}
+.tmb:hover img, .tmb:active img, .tmb:focus img, .tmb:active:focus img {
+  opacity: 1;
+}
+
+.main-footer {
+  font-size: 0.9rem;
+  line-height: 1.2;
+  text-align: center;
+  padding-bottom: 200px;
+}
+.main-footer a,
+.main-footer a:hover,
+.main-footer a:active,
+.main-footer a:focus,
+.main-footer a:active:focus {
+  color: #7ED321;
+}/*# sourceMappingURL=landing.css.map */

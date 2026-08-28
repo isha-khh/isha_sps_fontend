@@ -1,0 +1,39 @@
+﻿.table-003{
+    font-family:"微軟正黑體";
+    border-top:1px solid #e6e3e5;
+    border-left:1px solid #e6e3e5;
+    letter-spacing:1px;
+    box-shadow:0 5px 3px #e9e5e5;
+    -webkit-box-shadow:0 1px 3px #e9e5e5;
+    -moz-box-shadow:0 1px 3px #e9e5e5;
+}
+.table-003 td,
+.table-003 th{
+    padding:10px 0;
+    border-bottom:1px solid #e6e3e5;
+    border-right:1px solid #e6e3e5;
+}
+.table-003 .t1{
+    background:#93cede;
+    background:-moz-linear-gradient(top,rgba(147,206,222,1) 0,rgba(117,189,209,1) 41%,rgba(73,165,191,1) 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,rgba(147,206,222,1)),color-stop(41%,rgba(117,189,209,1)),color-stop(100%,rgba(73,165,191,1)));
+    background:-webkit-linear-gradient(top,rgba(147,206,222,1) 0,rgba(117,189,209,1) 41%,rgba(73,165,191,1) 100%);
+    background:-o-linear-gradient(top,rgba(147,206,222,1) 0,rgba(117,189,209,1) 41%,rgba(73,165,191,1) 100%);
+    background:-ms-linear-gradient(top,rgba(147,206,222,1) 0,rgba(117,189,209,1) 41%,rgba(73,165,191,1) 100%);
+    background:linear-gradient(to bottom,rgba(147,206,222,1) 0,rgba(117,189,209,1) 41%,rgba(73,165,191,1) 100%);
+    color:#fff;
+    text-align:center;font-size: 1rem;
+    font-weight:700;
+}
+.table-003 tr{
+    background:#fff;
+    background:-moz-linear-gradient(top,#fff 0,#e5e5e5 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#e5e5e5));
+    background:-webkit-linear-gradient(top,#fff 0,#e5e5e5 100%);background:-o-linear-gradient(top,#fff 0,#e5e5e5 100%);
+    background:-ms-linear-gradient(top,#fff 0,#e5e5e5 100%);
+    background:linear-gradient(to bottom,#fff 0,#e5e5e5 100%);
+    color:#666;
+    text-align:center;
+    font-size: 0.875rem;
+    padding:10px 0;
+}

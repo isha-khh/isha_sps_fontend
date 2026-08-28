@@ -1,0 +1,52 @@
+<Backup>
+<DateTime>2016/2/15 下午 01:25:14</DateTime>
+<Subject>範本TEST</Subject>
+<Word>
+<![CDATA[
+<link href="/ext/editor_templates/edit004/style.css" rel="stylesheet" />
+<div class="frame-004">
+<div class="editor-frame frame-LT">&nbsp;</div>
+
+<div class="editor-frame frame-CT">&nbsp;</div>
+
+<div class="editor-frame frame-RT">&nbsp;</div>
+
+<div class="editor-frame frame-LM">&nbsp;</div>
+
+<div class="editor-frame frame-RM">&nbsp;</div>
+
+<div class="editor-frame frame-LB">&nbsp;</div>
+
+<div class="editor-frame frame-CB">&nbsp;</div>
+
+<div class="editor-frame frame-RB">&nbsp;</div>
+
+<div class="mid">
+<table border="1" cellpadding="1" cellspacing="1">
+	<tbody>
+		<tr>
+			<td>111 111 1 11111 1</td>
+			<td>22222 2 2 2</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>333 3 3 33333333 3333</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>44444444 444 4 44 4444 4444 4 44</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+</div>
+
+]]>
+</Word>
+</Backup>

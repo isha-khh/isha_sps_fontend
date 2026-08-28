@@ -1,0 +1,1189 @@
+{
+    "appliances": [
+        {
+            "name": "冷氣機",
+            "pic": "app-01.svg",
+            "desc": "冷氣機說明文字",
+            "details": {
+                "constant": {
+                    "power": 2200,
+                    "period": 180,
+                    "convert": 0.65
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 4
+                }
+            }
+        },
+        {
+            "name": "照明",
+            "pic": "app-10.svg",
+            "desc": "照明說明文字",
+            "details": {
+                "constant": {
+                    "power": [
+                        {
+                            "name": "省電燈泡",
+                            "value": 21
+                        },
+                        {
+                            "name": "白熾燈泡",
+                            "value": 60
+                        },
+                        {
+                            "name": "LED燈泡",
+                            "value": 9
+                        },
+                        {
+                            "name": "螢光燈管T8",
+                            "value": 40
+                        },
+                        {
+                            "name": "螢光燈管T5",
+                            "value": 28
+                        },
+                        {
+                            "name": "螢光燈管LED",
+                            "value": 14
+                        },
+                        {
+                            "name": "鹵素嵌燈",
+                            "value": 50
+                        },
+                        {
+                            "name": "LED嵌燈",
+                            "value": 3
+                        }
+                    ],
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "電視機",
+            "pic": "app-11.svg",
+            "desc": "電視機說明文字",
+            "details": {
+                "constant": {
+                    "power": 200,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 4
+                }
+            }
+        },
+        {
+            "name": "機上盒",
+            "pic": "app-32.svg",
+            "desc": "機上盒說明文字",
+            "details": {
+                "constant": {
+                    "power": 10,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "Wifi分享器",
+            "pic": "app-31.svg",
+            "desc": "Wifi分享器說明文字",
+            "details": {
+                "constant": {
+                    "power": 10,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "吸塵器",
+            "pic": "app-18.svg",
+            "desc": "吸塵器說明文字",
+            "details": {
+                "constant": {
+                    "power": 1100,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 2
+                        },
+                        {
+                            "label": "經常",
+                            "value": 3
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 5
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "電風扇",
+            "pic": "app-20.svg",
+            "desc": "電風扇說明文字",
+            "details": {
+                "constant": {
+                    "power": 55,
+                    "period": 180,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 3
+                }
+            }
+        },
+        {
+            "name": "音響",
+            "pic": "app-22.svg",
+            "desc": "音響說明文字",
+            "details": {
+                "constant": {
+                    "power": 200,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 3
+                        },
+                        {
+                            "label": "經常",
+                            "value": 5
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 8
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 4
+                }
+            }
+        },
+        {
+            "name": "DVD光碟機",
+            "pic": "app-23.svg",
+            "desc": "DVD光碟機說明文字",
+            "details": {
+                "constant": {
+                    "power": 30,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 3
+                        },
+                        {
+                            "label": "經常",
+                            "value": 5
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 8
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 3
+                }
+            }
+        },
+        {
+            "name": "電暖器",
+            "pic": "app-24.svg",
+            "desc": "電暖器說明文字",
+            "details": {
+                "constant": {
+                    "power": 1250,
+                    "period": 120,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "電熨斗",
+            "pic": "app-16.svg",
+            "desc": "電熨斗說明文字",
+            "details": {
+                "constant": {
+                    "power": 800,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 2
+                        },
+                        {
+                            "label": "經常",
+                            "value": 3
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 5
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "電腦(桌上型)",
+            "pic": "app-02.svg",
+            "desc": "電腦(桌上型)說明文字",
+            "details": {
+                "constant": {
+                    "power": 150,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 2
+                }
+            }
+        },
+        {
+            "name": "電腦(筆記型)",
+            "pic": "app-13.svg",
+            "desc": "電腦(筆記型)說明文字",
+            "details": {
+                "constant": {
+                    "power": 100,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 2
+                }
+            }
+        },
+        {
+            "name": "印表機",
+            "pic": "app-25.svg",
+            "desc": "印表機說明文字",
+            "details": {
+                "constant": {
+                    "power": 30,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 2
+                }
+            }
+        },
+        {
+            "name": "收音機",
+            "pic": "app-21.svg",
+            "desc": "收音機說明文字",
+            "details": {
+                "constant": {
+                    "power": 30,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 3
+                        },
+                        {
+                            "label": "經常",
+                            "value": 5
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 8
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "除濕機",
+            "pic": "app-26.svg",
+            "desc": "除濕機說明文字",
+            "details": {
+                "constant": {
+                    "power": 200,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 3
+                }
+            }
+        },
+        {
+            "name": "冰箱",
+            "pic": "app-12.svg",
+            "desc": "冰箱說明文字",
+            "details": {
+                "constant": {
+                    "power": 200,
+                    "period": 365,
+                    "convert": 0.55
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 4
+                }
+            }
+        },
+        {
+            "name": "電熱水瓶",
+            "pic": "app-09.svg",
+            "desc": "電熱水瓶說明文字",
+            "details": {
+                "constant": {
+                    "power": 100,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 3
+                }
+            }
+        },
+        {
+            "name": "電子鍋",
+            "pic": "app-06.svg",
+            "desc": "電子鍋說明文字",
+            "details": {
+                "constant": {
+                    "power": 1000,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 3
+                        },
+                        {
+                            "label": "經常",
+                            "value": 5
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 8
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 4
+                }
+            }
+        },
+        {
+            "name": "電鍋",
+            "pic": "app-07.svg",
+            "desc": "電鍋說明文字",
+            "details": {
+                "constant": {
+                    "power": 800,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 3
+                        },
+                        {
+                            "label": "經常",
+                            "value": 5
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 8
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 4
+                }
+            }
+        },
+        {
+            "name": "飲水機",
+            "pic": "app-08.svg",
+            "desc": "飲水機說明文字",
+            "details": {
+                "constant": {
+                    "power": 300,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 3
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 6
+                        },
+                        {
+                            "label": "經常",
+                            "value": 18
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 24
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 3
+                }
+            }
+        },
+        {
+            "name": "烘碗機",
+            "pic": "app-28.svg",
+            "desc": "烘碗機說明文字",
+            "details": {
+                "constant": {
+                    "power": 200,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 3
+                        },
+                        {
+                            "label": "經常",
+                            "value": 5
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 8
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "微波爐",
+            "pic": "app-17.svg",
+            "desc": "微波爐說明文字",
+            "details": {
+                "constant": {
+                    "power": 1200,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 2
+                        },
+                        {
+                            "label": "經常",
+                            "value": 3
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 5
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "電磁爐",
+            "pic": "app-30.svg",
+            "desc": "電磁爐說明文字",
+            "details": {
+                "constant": {
+                    "power": 1250,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 2
+                        },
+                        {
+                            "label": "經常",
+                            "value": 3
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 5
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "洗碗機",
+            "pic": "app-15.svg",
+            "desc": "洗碗機說明文字",
+            "details": {
+                "constant": {
+                    "power": 1000,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 3
+                        },
+                        {
+                            "label": "經常",
+                            "value": 5
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 8
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "抽油煙機",
+            "pic": "app-29.svg",
+            "desc": "抽油煙機說明文字",
+            "details": {
+                "constant": {
+                    "power": 350,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 2
+                        },
+                        {
+                            "label": "經常",
+                            "value": 3
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 5
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "烤麵包機",
+            "pic": "app-19.svg",
+            "desc": "烤麵包機說明文字",
+            "details": {
+                "constant": {
+                    "power": 800,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 2
+                        },
+                        {
+                            "label": "經常",
+                            "value": 3
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 5
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 0
+                }
+            }
+        },
+        {
+            "name": "電烤箱",
+            "pic": "app-14.svg",
+            "desc": "電烤箱說明文字",
+            "details": {
+                "constant": {
+                    "power": 800,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 2
+                        },
+                        {
+                            "label": "經常",
+                            "value": 3
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 5
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 3
+                }
+            }
+        },
+        {
+            "name": "洗衣機",
+            "pic": "app-03.svg",
+            "desc": "洗衣機說明文字",
+            "details": {
+                "constant": {
+                    "power": 500,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 2
+                        },
+                        {
+                            "label": "經常",
+                            "value": 3
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 5
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 4
+                }
+            }
+        },
+        {
+            "name": "乾衣機",
+            "pic": "app-27.svg",
+            "desc": "乾衣機說明文字",
+            "details": {
+                "constant": {
+                    "power": 1200,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 3
+                        },
+                        {
+                            "label": "經常",
+                            "value": 5
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 8
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 4
+                }
+            }
+        },
+        {
+            "name": "電熱水器(貯備型)",
+            "pic": "app-05.svg",
+            "desc": "電熱水器(貯備型)說明文字",
+            "details": {
+                "constant": {
+                    "power": 1107,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 1
+                        },
+                        {
+                            "label": "經常",
+                            "value": 1
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 1
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 3
+                }
+            }
+        },
+        {
+            "name": "吹風機",
+            "pic": "app-04.svg",
+            "desc": "吹風機說明文字",
+            "details": {
+                "constant": {
+                    "power": 800,
+                    "period": 365,
+                    "convert": 1
+                },
+                "variable": {
+                    "quantity": 1,
+                    "frequency": [
+                        {
+                            "label": "很少",
+                            "value": 1
+                        },
+                        {
+                            "label": "偶爾",
+                            "value": 2
+                        },
+                        {
+                            "label": "經常",
+                            "value": 3
+                        },
+                        {
+                            "label": "頻繁",
+                            "value": 5
+                        }
+                    ],
+                    "size": 1,
+                    "capacity": 1,
+                    "over": 3
+                }
+            }
+        }
+    ]
+}

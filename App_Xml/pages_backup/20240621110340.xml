@@ -1,0 +1,88 @@
+<Backup>
+<DateTime>2024/6/21 上午 11:15:01</DateTime>
+<Subject>認識源頭減量</Subject>
+<Word>
+<![CDATA[
+        <div class="ab_know">
+            <div class="df_cvs">
+                <div class="tit">
+                    <h4>我國自91年開始推動購物用塑膠袋及免洗餐具減量</h4>
+                    <p>之後逐步納入一次用飲料杯、塑膠托盤及包裝盒、產品過度包裝、塑膠吸管、塑膠微粒及網購包裝等相關品項，希望從源頭上減少廢棄物的產生。</p>
+                </div>
+           
+                
+                         <img class="img-fluid tableware_bg" src="../../Templates/TEZ_113073/images/about/tableware_bg.svg" alt="圖片"/>
+
+            </div>
+            <!--df_cvs -->
+
+
+            <div class="df_fx">
+
+                <div class="df_cld1">
+                    <div class="tit">
+                        <div class="h3 h3_1">指引</div>
+
+                        <ul class="nav">
+                            <li>機關學校以公帶私</li>
+                            <li>離島減廢</li>
+                            <li>環保夜市</li>
+                            <li>蔬果裸賣及包裝減量作業原則</li>
+                            <li>網購包裝減量指引</li>
+
+                        </ul>
+                    </div>
+                </div>
+                <!--df_cld1 -->
+
+                <div class="df_cld1">
+                    <div class="tit">
+                        <div class="h3 h3_2">行政指導</div>
+
+                        <ul class="nav">
+                            <li>離島飲料杯</li>
+                            <li>縣市規廣循環服務</li>
+                            <li>環保外送</li>
+
+                        </ul>
+                    </div>
+                </div>
+                <!--df_cld1 -->
+
+                <div class="df_cld1">
+                    <div class="tit">
+                        <div class="h3 h3_3">加強宣導</div>
+
+                        <ul class="nav">
+                            <li>環境教育</li>
+                            <li>民眾溝通</li>
+                        </ul>
+                    </div>
+            </div>
+            <!--df_cld1 -->
+
+            <div class="df_cld1">
+                <div class="tit">
+                    <div class="h3 h3_4">法令管制</div>
+
+                    <ul class="nav">
+                        <li>付費取得</li>
+                        <li>限制提供</li>
+                        <li>現用特定材質</li>
+                        <li>自備優惠</li>
+                        <li>循環杯借用</li>
+                    </ul>
+                </div>
+            </div>
+            <!--df_cld1 -->
+        </div>
+        <!--df_fx -->
+
+
+
+    </div>
+    <!-- ab_know-->
+
+]]>
+</Word>
+</Backup>

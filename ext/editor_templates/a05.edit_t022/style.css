@@ -1,0 +1,83 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+
+
+
+/* -----------------------------   layout.css ---------------------------   */
+/*5578*/
+.editor section.edit_t034 #portfolio {
+	overflow:hidden;
+}
+
+/*5582*/
+.editor section.edit_t034 #portfolio h2,
+.editor section.edit_t034 #portfolio h3 {
+	font-size: 1.125rem;
+	line-height:20px;
+	margin:0;
+	color:#111;
+}
+
+/*5597*/
+.editor section.edit_t034 #portfolio div.col-md-3 h2,
+.editor section.edit_t034 #portfolio div.col-md-3 h3 {
+	font-size: 1.125rem;
+	line-height:18px;
+}
+
+/*5701*/
+	.editor section.edit_t034 #portfolio.portfolio-gutter .item-box {
+		margin-bottom:30px;
+	}
+
+	.editor section.edit_t034 #portfolio.portfolio-nogutter .row>div, 
+	.editor section.edit_t034 #portfolio.portfolio-nogutter .item-box {
+	  padding: 0 !important;
+	  margin: 0 !important;
+	}
+
+	.editor section.edit_t034 #portfolio.portfolio-gutter .item-box .item-box-desc  {
+		margin-bottom:0 !important;
+		padding-bottom:0 !important;
+	}
+
+/*5898*/
+.editor section.edit_t034 .item-box {
+	overflow:hidden;
+	margin:0;
+	position:relative;
+	box-shadow:rgba(0,0,0,0.1) 0 0 5px;
+
+
+	-webkit-border-radius:0;
+	   -moz-border-radius:0;
+			border-radius:0;
+}
+.editor section.edit_t034 .mix-grid .item-box,
+.editor section.edit_t034 #portfolio .item-box {
+	box-shadow:none;
+}
+
+/*5934*/
+.editor section.edit_t034 .item-box-desc {
+	padding:30px 20px 20px 20px;
+	overflow:hidden;
+	margin-bottom:10px;
+	text-align:left !important;
+}
+
+/*5940*/
+.editor section.edit_t034 .item-box-desc p {
+	margin-top:20px;
+	display:block;
+	overflow:hidden; 
+	text-overflow:ellipsis;
+	/*white-space: nowrap;*/
+}
+
+/*5950*/
+.editor section.edit_t034 .item-box-desc h2,
+.editor section.edit_t034 .item-box-desc h3,
+.editor section.edit_t034 .item-box-desc h4,
+.editor section.edit_t034 .item-box-desc h5 {
+	padding:0; margin:0;
+}

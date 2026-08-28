@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="edit005" type="editor">
+  <ccategory>表格</ccategory>
+  <title>表格樣版5</title>
+  <description>
+    條列式表格，欄位間隔以不同色系區格，橘黃色漸層色系
+  </description>  
+  <img id="thumb" src="tp5.gif"/>
+  <assets>
+    <file id="control" href="editor.html"/>
+    <file id="css" href="style.css"/>
+  </assets>
+</xml>

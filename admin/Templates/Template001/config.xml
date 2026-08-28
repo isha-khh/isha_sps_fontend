@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="cat_template" type="master">
+  <title>樣版1</title>
+  <description>
+    樣版1描述
+  </description>  
+  <img id="thumb" src="~/admin/Templates/Template001/images/body_bg.jpg"/>
+  <assets>
+    <file id="control" href="~/admin/Templates/Template001/default.master"/>  
+  </assets>
+</xml>

@@ -1,0 +1,28 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+
+/*4324*/
+.editor section.edit_t021 div.alert {
+	border-left-color:rgba(0,0,0,0.1);
+	border-width:1px;
+	border-left-width:5px;
+}
+
+/*6521*/
+.editor section.edit_t021 .callout.alert p:last-child {
+	margin: 0;
+}
+
+/*6585*/
+.editor section.edit_t021 .callout .row {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.editor section.edit_t021 .callout {
+	padding: 30px 0;
+	color:#fff;
+}
+
+
+
+

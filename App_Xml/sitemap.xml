@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<website>
+	<pages id="home" title="首頁" url="~/">
+		<page id="home_index" title="首頁" src="index.aspx"/>
+	</pages>
+	<pages id="news" title="最新消息" url="~/page/news">
+		<page id="news_index" title="列表頁" src="index.aspx"/>
+		<page id="news_show" title="詳細頁" src="show.aspx"/>
+	</pages>
+
+
+
+
+	<pages id="about" title="自訂單元" url="~/page/about">
+		<page id="about_index" title="詳細頁" src="index.aspx"/>
+	</pages>
+
+	<pages id="download" title="檔案下載" url="~/page/download">
+		<page id="download_index" title="列表頁" src="index.aspx"/>
+
+	</pages>
+
+	<pages id="video" title="影音專區" url="~/page/video">
+		<page id="video_index" title="列表頁" src="index.aspx"/>
+
+	</pages>
+
+	<pages id="recycle" title="回收物查詢" url="~/page/recycle">
+		<page id="recycle_index" title="列表頁" src="index.aspx"/>
+
+	</pages>
+
+
+
+	<pages id="faq" title="常見問題" url="~/page/faq">
+		<page id="faq_index" title="列表頁" src="index.aspx"/>
+		<page id="faq_ask" title="提問頁" src="ask.aspx"/>
+	</pages>
+
+	<pages id="contact" title="聯絡我們" url="~/page/contact">
+		<page id="contact_index" title="表單" src="index.aspx"/>
+	</pages>
+</website>

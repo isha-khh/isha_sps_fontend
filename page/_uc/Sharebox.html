@@ -1,0 +1,57 @@
+<div class="share">
+    <ul class="nav">
+        <li>分享</li>
+ 
+        <li>
+            <a href="javascript:void(0);" onclick="shareToFB()" title="分享到 Facebook">
+                <img class="img-fluid d-block" src="../../images/all/share_fb.svg" alt="Facebook">
+            </a>
+        </li>
+    
+        <li>
+            <a href="javascript:void(0);" onclick="shareToLine()" title="分享到 LINE">
+                <img class="img-fluid d-block" src="../../images/all/share_line.svg" alt="LINE">
+            </a>
+        </li>
+     
+        <li>
+            <a href="javascript:void(0);" onclick="shareToThreads()" title="分享到 Threads">
+                <img class="img-fluid d-block" src="../../images/all/share_th.svg" alt="Threads">
+            </a>
+        </li>
+    
+    </ul>
+</div>
+
+
+<script>
+    // 取得當前頁面的完整網址與標題
+    const currentUrl = encodeURIComponent(window.location.href);
+    const pageTitle = encodeURIComponent(document.title);
+
+    // 彈出小視窗的共用函式
+    function openPopup(url) {
+        window.open(url, '_blank', 'width=600,height=500,scrollbars=yes,resizable=yes');
+    }
+
+    // 1. Facebook 分享
+    function shareToFB() {
+        const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`;
+        openPopup(fbUrl);
+    }
+
+    // 2. LINE 分享
+    function shareToLine() {
+        const lineUrl = `https://social-plugins.line.me/lineit/share?url=${currentUrl}&text=${pageTitle}`;
+        openPopup(lineUrl);
+    }
+
+    // 3. Threads 分享
+    function shareToThreads() {
+        const text = `${pageTitle} ${decodeURIComponent(currentUrl)}`;
+        const threadsUrl = `https://threads.net/intent/post?text=${encodeURIComponent(text)}`;
+        openPopup(threadsUrl);
+    }
+
+
+</script>

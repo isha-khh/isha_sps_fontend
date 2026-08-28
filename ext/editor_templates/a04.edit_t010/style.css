@@ -1,0 +1,49 @@
+﻿
+
+/* -----------------------------   essentials.css ---------------------------   */
+
+
+/*9788*/
+.editor section.edit_t049 .tab-content {
+	padding:15px 0;
+}
+
+/*9889*/
+.editor section.edit_t049 .nav-tabs.nav-stacked>li>a {
+	border-left:0 !important;
+	border-right:0 !important;
+	border:0 !important;
+	background-color:#fff;
+	color:#111;
+
+	-webkit-border-radius: 0 !important;
+	   -moz-border-radius: 0 !important;
+			border-radius: 0 !important;
+}
+.editor section.edit_t049 .nav-tabs.nav-stacked>li.active>a {
+		background-color:#fafafa;
+	}
+/*9903*/
+.editor section.edit_t049 div.tab-content.tab-stacked {
+	padding:17px;
+	background-color:#fafafa;
+}
+
+/*9934*/
+.editor section.edit_t049 .nav-tabs.nav-alternate {
+	background-color:transparent;
+}
+.editor section.edit_t049 div.tab-content.nav-alternate {
+	background-color:transparent;
+	padding:0;
+}
+
+/*9941*/
+.editor section.edit_t049 .nav-tabs.nav-alternate>li>a {
+	background-color:#fafafa;
+}
+.editor section.edit_t049 .nav-tabs.nav-alternate>li.active>a {
+	color:#fff !important;
+	background-color:#999;
+}
+

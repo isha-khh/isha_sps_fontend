@@ -1,0 +1,169 @@
+
+
+
+
+<div class="home_video_section">
+    <div class="sub_tag">Media Zone</div>
+    <h2 class="h2">影音專區</h2>
+
+    <div class="slider wid-video" data-aos="fade-up">
+
+        <div class="item">
+            <a href="#" class="video-card" title="石化產業智慧轉型——從數據到決策（另開新視窗）" target="_blank" rel="noopener noreferrer">
+                <div class="pic">
+                    <div class="ratio ratio-16x9">
+                        <img class="img-fluid d-block" src="images/home/ser_bg2.jpg" alt="石化產業智慧轉型——從數據到決策 影片封面" />
+                    </div>
+                </div>
+                <div class="tit">
+                    <div class="date">2025-01-19</div>
+                    <h3>石化產業智慧轉型——從數據到決策</h3>
+                </div>
+            </a>
+        </div><!-- /.item 1組 -->
+
+        <div class="item">
+            <a href="#" class="video-card" title="ESG 永續發展實務：石化廠的碳盤查經驗分享（另開新視窗）" target="_blank" rel="noopener noreferrer">
+                <div class="pic">
+                    <div class="ratio ratio-16x9">
+                        <img class="img-fluid d-block" src="images/home/ser_bg2.jpg" alt="ESG 永續發展實務 影片封面" />
+                    </div>
+                </div>
+                <div class="tit">
+                    <div class="date">2025-01-19</div>
+                    <h3>ESG 永續發展實務：石化廠的碳盤查經驗分享</h3>
+                </div>
+            </a>
+        </div><!-- /.item 1組 -->
+
+        <div class="item">
+            <a href="#" class="video-card" title="AIoT 工安監控應用：降低職災風險的關鍵（另開新視窗）" target="_blank" rel="noopener noreferrer">
+                <div class="pic">
+                    <div class="ratio ratio-16x9">
+                        <img class="img-fluid d-block" src="images/home/ser_bg2.jpg" alt="AIoT 工安監控應用 影片封面" />
+                    </div>
+                </div>
+                <div class="tit">
+                    <div class="date">2025-01-19</div>
+                    <h3>AIoT 工安監控應用：降低職災風險的關鍵</h3>
+                </div>
+            </a>
+        </div><!-- /.item 1組 -->
+
+        <div class="item">
+            <a href="#" class="video-card" title="全方位人員定位追蹤應用（另開新視窗）" target="_blank" rel="noopener noreferrer">
+                <div class="pic">
+                    <div class="ratio ratio-16x9">
+                        <img class="img-fluid d-block" src="images/home/ser_bg2.jpg" alt="全方位人員定位追蹤應用 影片封面" />
+                    </div>
+                </div>
+                <div class="tit">
+                    <div class="date">2025-01-19</div>
+                    <h3>全方位人員定位追蹤應用</h3>
+                </div>
+            </a>
+        </div><!-- /.item 1組 -->
+
+    </div><!-- /.wid-video -->
+
+    <div class="custom_box">
+        <button type="button" class="custom-arrow custom-prev" aria-label="上一則影片">
+            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="custom-arrow custom-next" aria-label="下一則影片">
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="slick-play-pause-btn" aria-label="暫停輪播" aria-pressed="false">
+            <i class="bi bi-pause-fill" aria-hidden="true"></i>
+            <span class="visually-hidden">暫停輪播</span>
+        </button>
+    </div><!-- /.custom_box -->
+
+    <a href="#" title="前往 查看更多影音專區" class="more_x">
+        <span>查看更多</span>
+        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        const $section = $('.home_video_section');
+        const $slider = $section.find('.wid-video');
+        const $prev = $section.find('.custom-prev');
+        const $next = $section.find('.custom-next');
+        const $pauseBtn = $section.find('.slick-play-pause-btn');
+
+        // 1. 初始化 Slick CenterMode 輪播
+        $slider.slick({
+            centerMode: true,
+            centerPadding: '120px',
+            slidesToShow: 3,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 3000,
+            infinite: true,
+            arrows: true,
+            prevArrow: $prev,
+            nextArrow: $next,
+            accessibility: true,
+            pauseOnHover: true,
+            pauseOnFocus: true,
+            responsive: [
+                {
+                    breakpoint: 992,
+                    settings: {
+                        slidesToShow: 2,
+                        centerPadding: '60px'
+                    }
+                },
+                {
+                    breakpoint: 768,
+                    settings: {
+                        slidesToShow: 1,
+                        centerPadding: '30px'
+                    }
+                }
+            ]
+        });
+
+        // 2. 排除複製節點的 Tab 焦點，避免重複按鍵
+        function fixSlickTabFocus() {
+            $slider.find('.slick-cloned a, .slick-cloned button').attr('tabindex', '-1').attr('aria-hidden', 'true');
+        }
+
+        fixSlickTabFocus();
+        $slider.on('afterChange', function () {
+            fixSlickTabFocus();
+        });
+
+        // 3. Tab 鍵聚焦時自動滾動到當前卡片
+        $slider.find('.slick-slide:not(.slick-cloned) a').on('focus', function () {
+            const slideIndex = $(this).closest('.slick-slide').data('slick-index');
+            $slider.slick('slickGoTo', slideIndex);
+        });
+
+        // 4. 暫停 / 播放按鈕切換
+        let isPaused = false;
+        $pauseBtn.on('click', function () {
+            if (!isPaused) {
+                $slider.slick('slickPause');
+                isPaused = true;
+                $(this).attr('aria-label', '播放輪播')
+                    .attr('aria-pressed', 'true')
+                    .find('i').removeClass('bi-pause-fill').addClass('bi-play-fill');
+                $(this).find('.visually-hidden').text('播放輪播');
+            } else {
+                $slider.slick('slickPlay');
+                isPaused = false;
+                $(this).attr('aria-label', '暫停輪播')
+                    .attr('aria-pressed', 'false')
+                    .find('i').removeClass('bi-play-fill').addClass('bi-pause-fill');
+                $(this).find('.visually-hidden').text('暫停輪播');
+            }
+        });
+    });
+</script>
+
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="cat_recycle" type="widgets">
+  <title>分類選單:回收物查詢</title>
+  <description>
+	  分類選單:回收物查詢
+  </description>  
+  <img id="thumb" src=""/>
+  <assets>
+    <file id="control" href="cat_recycle.ascx"/>
+    <file id="cssfile" href="style.css"/>    
+  </assets>
+  <maintain>
+    <version>1.0</version>
+    <source></source>
+  </maintain>
+</xml>

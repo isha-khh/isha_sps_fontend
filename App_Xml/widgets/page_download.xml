@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Config>
+  <Widgets>
+    <side1_bottom_widgets>
+      <File>ext/widgets/cat_download/cat_download.ascx</File>
+    </side1_bottom_widgets>
+  </Widgets>
+</Config>

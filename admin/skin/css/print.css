@@ -1,0 +1,204 @@
+﻿@charset "utf-8";
+/* CSS Document */
+.print * {
+	padding: 0;
+	margin: 0;
+    font-size: 12pt;
+}
+a[href]:after {
+    content: none !important;
+}
+.main .content .title h1 small,
+.main .content .title .col-sm-4,
+.main .content .content_box .btn-search,
+.main .content .content_box .search_panel,
+.main .content .content_box .clearfix,
+.main .content .content_box .pager_wrapper .btn-group,
+.main .content .content_box hr,
+.main .content .content_box .btn_wrapper,
+.hidden-print {
+    display: none !important;
+}
+
+.main .content {
+    margin-left: 0;
+}
+
+.main .content .title {
+    left: 0;
+}
+.main .content .title h1 {
+    font-size: 16pt;
+    text-align:center;
+}
+.main .content .content_box .table_wrapper {
+    margin-bottom: 1cm;
+}
+.main .content .content_box .table_wrapper table {
+    max-width: 19cm;
+    margin: 0 auto;
+}
+.main .content .content_box .table_wrapper table thead tr th {
+    text-align: center;
+    font-weight:bold;
+    border: 0.05cm solid #000;
+    background-color: #dddddd;
+}
+.main .content .content_box .table_wrapper table tbody tr td {
+    text-align: center;
+    border: 0.05cm solid #000;
+}
+
+.main .content_box .table_wrapper.contract_sg tr td.text-left {
+    text-align: left;
+}
+.main .content_box .table_wrapper.contract_sg tr th {
+    border: 0.05cm solid #000;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.main .content .content_box .pager_wrapper {
+    text-align: center;
+}
+.main .content .content_box .pager_wrapper .form-group {
+    display: inline-block;
+    width: 100px;
+}
+
+body.payment.detail .content .content_box .table_wrapper table tr td input,
+body.payment.detail .content .content_box .table_wrapper table tr td button {
+    display: none;
+}
+body.contract.detail .content .content_box .panel {
+    border:none;
+}
+body.contract.detail .content .content_box .panel .form-group {
+    margin: 0;
+    border: 0.05cm solid #000;
+}
+body.contract.detail .content .content_box .panel .form-group .col-md-2 {
+    width: 3.5cm;
+    float: left;
+    padding: 0.1cm 0.2cm;
+    text-align: right;
+}
+body.contract.detail .content .content_box .panel .form-group .col-md-10 {
+    width: 14cm;
+    float: left;
+    border-left: 0.05cm solid #000;
+    padding: 0.1cm 0.2cm;
+}
+
+.screen {
+    display:none;
+	text-align: center;
+	color: #F00;
+}
+.print {
+	width: 19cm;
+	height: 25.7cm;
+	padding: 1.2cm 1.5cm;
+	margin: 0 auto;
+}
+.print .title {
+	font-weight: bold;
+	border: 0.05cm solid #000;
+	text-align: center;
+	padding: 0.1cm 0.2cm;
+	line-height: 20pt;
+}
+.print table {
+	width: 100%;
+	border-collapse: collapse;
+    border-spacing: 0;
+    border-style: hidden;
+    border: 0.05cm solid #000;
+}
+.print table tr td {
+    border: 0.05cm solid #000;
+}
+.print table tr td table {
+    border-style: hidden;
+}
+.print table tr td table tr td {
+	border: 0.05cm solid #000;
+	text-align: center;
+	padding: 0.1cm 0.2cm;
+	font-size: 12pt;
+	line-height: 20pt;
+}
+.print table.t-left tr td {
+	text-align: left;
+	border: none;
+	vertical-align: top;
+}
+.print .w1 {
+	width: 1.8cm;
+}
+.print .w2 {
+	width: 2.2cm;
+}
+.print .w3 {
+	min-width: 2cm;
+}
+.print .w4 {
+	width: 3cm;
+    padding-right:0
+}
+.print .w5 {
+	width: 5cm;
+}
+.print .w6 {
+	width: 2.8cm;
+}
+.print .text-left {
+    text-align: left;
+}
+.print .t1 {
+    padding: 0.2cm 0.2cm;
+    line-height:28pt;
+}
+.print #ckeArea,
+.print .txtArea {
+    padding-left: 24pt;
+}
+.print .area1 {
+    height: 3cm;
+}
+.print .area2 {
+    height: 17cm;
+}
+.print .area1,
+.print .area2 {
+    vertical-align: top;
+    border:0.05cm solid #000;
+}
+.print .area1 table,
+.print .area2 table {
+    border: none;
+}
+.print .sign-order {
+    margin: 0;
+    border-collapse: collapse;
+    border: none;
+    border-style: hidden;
+}
+.print .sign-order .w1 {
+    padding-top: 0;
+    padding-bottom: 0;
+    border-right: none;
+}
+.print .sign-order .no-padding {
+    padding: 0;
+}
+.print .sign-order .no-padding table {
+    border-style: hidden;
+}
+.print .sign-order .no-padding table td {
+    min-width: 2cm;
+    padding: 0;
+}
+.print .sign-order .no-padding table td table td {
+    padding: 0.1cm 0.2cm;
+}

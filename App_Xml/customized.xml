@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+  <Grade>
+    <!--A:購物版, B:企業版-->
+    <Version>A</Version>
+    <!--設計等級-->
+    <Design>T1</Design>
+    <!--程式等級-->
+    <Code>S1</Code>
+  </Grade>
+  <Dir>
+    <!--更新不能蓋的資料夾-->
+      <DirPath>~/admin/xxx</DirPath>
+      <DirPath>~/admin/yyy</DirPath>
+  </Dir>
+  <File>
+    <!--更新不能蓋的檔案-->
+       <FilePath>~/aaa.aspx</FilePath>
+       <FilePath>~/xxx/bbb.aspx</FilePath>
+  </File>
+</Config>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="quickLink" type="widgets">
+  <title>快速連結</title>
+  <description>
+    快速連結
+  </description>  
+  <img id="thumb" src=""/>
+  <assets>
+    <file id="control" href="quickLink.ascx"/>
+    <file id="cssfile" href="style.css"/>    
+  </assets>
+
+</xml>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+    <Version>1.0</Version>   
+    <Wrp>
+        <Web>http://www.wrp.com.tw/webc/html/member/index.aspx</Web>
+        <Manual>http://www.wrp.com.tw/manual/api.ashx</Manual>
+        <Url>http://www.wrp.com.tw/api/</Url>        
+        <API>
+          <Client>newsezclient.ashx</Client>
+          <Important>newsimportant.ashx</Important>
+          <Update>update.ashx</Update>
+        </API>
+     </Wrp>  
+</Config>
+

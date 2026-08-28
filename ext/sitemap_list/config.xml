@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list id="sitemap" type="sitemap_list">
+  <item title="訊息列表" url="sitemap_news.ascx" source="news"/>
+  <item title="單元列表" url="sitemap_about.ascx" source="pages"/>
+  <item title="問題列表" url="sitemap_faq.ascx" source="qa"/>
+</list>

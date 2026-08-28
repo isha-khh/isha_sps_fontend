@@ -1,0 +1,46 @@
+<Backup>
+<DateTime>2024/6/5 下午 03:38:48</DateTime>
+<Subject>首頁區塊服務項目(勿刪)</Subject>
+<Word>
+<![CDATA[
+        <div class="container">
+        <div class="h1_c">
+            <label>服務項目</label>
+            <span>Service</span>
+        </div>
+            <div class="ser_box"  data-aos="zoom-in">
+                <a class="item" href="#" title="回收小學堂(另開視窗)">
+                   <img class="img-fluid d-block img-small mx-auto"  src="Templates/TEZ_113073/images/all/service_icon01.svg" alt="" />
+                    <h4>回收小學堂</h4>
+                    <p>Point<span>01</span></p>
+                </a>
+
+                <a class="item" href="#" title="回收攻略(另開視窗)">
+                   <img class="img-fluid d-block img-small mx-auto"  src="Templates/TEZ_113073/images/all/service_icon02.svg" alt="" />
+                    <h4>回收攻略</h4>
+                    <p>Point<span>02</span></p>
+                </a>
+
+                <a class="item" href="#" title="回收物去哪裡(另開視窗)">
+                   <img class="img-fluid d-block img-small mx-auto"  src="Templates/TEZ_113073/images/all/service_icon03.svg" alt="" />
+                    <h4>回收物去哪裡</h4>
+                    <p>Point<span>03</span></p>
+                </a>
+
+                <a class="item" href="#" title="回收站設置(另開視窗)">
+                   <img class="img-fluid d-block img-small mx-auto"  src="Templates/TEZ_113073/images/all/service_icon04.svg" alt="" />
+                    <h4>回收站設置</h4>
+                    <p>Point<span>04</span></p>
+                </a>
+
+
+
+
+            </div><!--ser_box-->
+
+
+        </div><!--container-->
+
+]]>
+</Word>
+</Backup>

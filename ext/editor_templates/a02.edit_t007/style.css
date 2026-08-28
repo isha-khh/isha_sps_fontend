@@ -1,0 +1,44 @@
+﻿.table-007{
+    font-family:"微軟正黑體";
+    border-top:1px solid #e8e8e8;
+    border-left:1px solid #e8e8e8;
+    letter-spacing:1px;
+}
+.table-007 td,
+.table-007 th{
+    padding:10px 0;
+    border-bottom:1px solid #e8e8e8;
+    border-right:1px solid #e8e8e8;
+}
+.table-007 .t1{
+    background:#b7deed;
+    background:-moz-linear-gradient(top,rgba(183,222,237,1) 0,rgba(113,206,239,1) 50%,rgba(33,180,226,1) 51%,rgba(183,222,237,1) 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,rgba(183,222,237,1)),color-stop(50%,rgba(113,206,239,1)),color-stop(51%,rgba(33,180,226,1)),color-stop(100%,rgba(183,222,237,1)));
+    background:-webkit-linear-gradient(top,rgba(183,222,237,1) 0,rgba(113,206,239,1) 50%,rgba(33,180,226,1) 51%,rgba(183,222,237,1) 100%);
+    background:-o-linear-gradient(top,rgba(183,222,237,1) 0,rgba(113,206,239,1) 50%,rgba(33,180,226,1) 51%,rgba(183,222,237,1) 100%);
+    background:-ms-linear-gradient(top,rgba(183,222,237,1) 0,rgba(113,206,239,1) 50%,rgba(33,180,226,1) 51%,rgba(183,222,237,1) 100%);
+    background:linear-gradient(to bottom,rgba(183,222,237,1) 0,rgba(113,206,239,1) 50%,rgba(33,180,226,1) 51%,rgba(183,222,237,1) 100%);
+    color:#fff;
+    text-align:center;
+    font-size: 1rem;
+    font-weight:700;
+}
+.table-007 tr:nth-child(even){
+    background-color:#FFF;
+    color:#666;
+    text-align:center;
+    font-size: 0.875rem;
+    padding:10px 0;
+}
+.table-007 tr:nth-child(odd){
+    color:#666;
+    background:#f7fbfc;
+    background:-moz-linear-gradient(top,rgba(247,251,252,1) 0,rgba(217,237,242,1) 40%,rgba(173,217,228,1) 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,rgba(247,251,252,1)),color-stop(40%,rgba(217,237,242,1)),color-stop(100%,rgba(173,217,228,1)));
+    background:-webkit-linear-gradient(top,rgba(247,251,252,1) 0,rgba(217,237,242,1) 40%,rgba(173,217,228,1) 100%);
+    background:-o-linear-gradient(top,rgba(247,251,252,1) 0,rgba(217,237,242,1) 40%,rgba(173,217,228,1) 100%);
+    background:-ms-linear-gradient(top,rgba(247,251,252,1) 0,rgba(217,237,242,1) 40%,rgba(173,217,228,1) 100%);
+    background:linear-gradient(to bottom,rgba(247,251,252,1) 0,rgba(217,237,242,1) 40%,rgba(173,217,228,1) 100%);
+    text-align:center;
+    font-size: 0.875rem;
+}

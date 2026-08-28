@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MetaBuilders.WebControls.CheckedListBox</name>
+    </assembly>
+    <members>
+        <member name="T:MetaBuilders.WebControls.CheckedListBox">
+            <summary>
+            Represents a list box control that allows single or multiple item selection via CheckBoxes.
+            </summary>
+            <remarks>
+            Use the CheckedListBox control to create a list control that allows single or multiple item selection via CheckBoxes.
+            The Height property may not have an effect in all browers.
+            </remarks>
+            <example>
+            <code>
+            <![CDATA[
+            <%@ Page Language="C#" trace="true" Debug="true" %>
+            <%@ Register TagPrefix="mbclb" Namespace="MetaBuilders.WebControls" Assembly="MetaBuilders.WebControls.CheckedListBox"%>
+            <script runat="server">
+                protected void checkedList_Changed( Object sender, EventArgs e ) {
+                    Result.Text = System.DateTime.Now.ToString();
+                    foreach( ListItem item in MyList.Items ) {
+                        if ( item.Selected ) {
+                            Result.Text += "<br>" + item.Text;
+                        }
+                    }
+                }
+                
+            </script>
+            <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+            <html>
+                <head>
+                </head>
+            	<body>
+            	<form runat="server">
+            
+                    <mbclb:CheckedListBox runat="server" ToolTip="Pick A Saying" id="MyList" onselectedindexchanged="checkedList_Changed" >
+                        <asp:ListItem value="The quick brown fox" />
+                        <asp:ListItem value="jumped over the lazy dog." />
+                        <asp:ListItem value="The quick brown fox jumped over the lazy dog." />
+                        <asp:ListItem value="The quick brown fox" />
+                        <asp:ListItem value="jumped over the lazy dog." />
+                        <asp:ListItem value="The quick brown fox" />
+                        <asp:ListItem value="jumped over the lazy dog." />
+                    </mbclb:CheckedListBox>
+                   
+                    <asp:Button runat="server" text="Click Me" />
+            		<br />
+            		<asp:Label runat="server" id="Result" />
+                    
+            	</form>
+            	
+            	</body>
+            </html>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="M:MetaBuilders.WebControls.CheckedListBox.#ctor">
+            <summary>
+            Creates a new instance of the <see cref="T:MetaBuilders.WebControls.CheckedListBox"/> class.
+            </summary>
+        </member>
+        <member name="M:MetaBuilders.WebControls.CheckedListBox.OnPreRender(System.EventArgs)">
+            <summary>
+            Overrides <see cref="M:System.Web.UI.Control.OnPreRender(System.EventArgs)"/>
+            </summary>
+        </member>
+        <member name="M:MetaBuilders.WebControls.CheckedListBox.RegisterClientScript">
+            <summary>
+            Register the client script for the control with the page.
+            </summary>
+        </member>
+        <member name="M:MetaBuilders.WebControls.CheckedListBox.Render(System.Web.UI.HtmlTextWriter)">
+            <summary>
+            Overrides <see cref="M:System.Web.UI.Control.Render(System.Web.UI.HtmlTextWriter)"/>
+            </summary>
+        </member>
+        <member name="M:MetaBuilders.WebControls.CheckedListBox.RenderBeginTag(System.Web.UI.HtmlTextWriter)">
+            <summary>
+            Overridden to give w3c dom compliant browsers a html4 writer
+            </summary>
+        </member>
+        <member name="M:MetaBuilders.WebControls.CheckedListBox.RenderContents(System.Web.UI.HtmlTextWriter)">
+            <summary>
+            Overrides <see cref="M:System.Web.UI.WebControls.WebControl.RenderContents(System.Web.UI.HtmlTextWriter)"/>
+            </summary>
+        </member>
+        <member name="M:MetaBuilders.WebControls.CheckedListBox.RenderEndTag(System.Web.UI.HtmlTextWriter)">
+            <summary>
+            Overridden to give w3c dom compliant browsers a html4 writer
+            </summary>
+        </member>
+        <member name="M:MetaBuilders.WebControls.CheckedListBox.RenderItem(System.Int32,System.Web.UI.HtmlTextWriter)">
+            <summary>
+            Renders one ListItem
+            </summary>
+            <param name="repeatIndex">The index of the ListItem to render.</param>
+            <param name="writer">The <see cref="T:System.Web.UI.HtmlTextWriter"/> to write to.</param>
+        </member>
+        <member name="M:MetaBuilders.WebControls.CheckedListBox.FindControl(System.String,System.Int32)">
+            <summary>
+            Overrides <see cref="M:System.Web.UI.Control.FindControl(System.String)"/>
+            </summary>
+        </member>
+        <member name="P:MetaBuilders.WebControls.CheckedListBox.TagKey">
+            <summary>
+            Overrides <see cref="P:System.Web.UI.WebControls.WebControl.TagKey"/>.
+            </summary>
+        </member>
+        <member name="P:MetaBuilders.WebControls.CheckedListBox.TagName">
+            <summary>
+            Overrides <see cref="P:System.Web.UI.WebControls.WebControl.TagName"/>.
+            </summary>
+        </member>
+        <member name="P:MetaBuilders.WebControls.CheckedListBox.BorderStyle">
+            <summary>
+            Overrides <see cref="P:System.Web.UI.WebControls.WebControl.BorderStyle"/>.
+            </summary>
+        </member>
+        <member name="P:MetaBuilders.WebControls.CheckedListBox.BorderWidth">
+            <summary>
+            Overrides <see cref="P:System.Web.UI.WebControls.WebControl.BorderWidth"/>.
+            </summary>
+        </member>
+    </members>
+</doc>

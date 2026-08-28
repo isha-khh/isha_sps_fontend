@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="edit001" type="editor">
+  <ccategory>表格</ccategory>
+  <title>表格樣版17</title>
+  <description>
+    條列式表格樣式，欄位間隔以不同色系區格，灰色系列
+  </description>  
+  <img id="thumb" src="tp17.gif"/>
+  <assets>
+    <file id="control" href="editor.html"/>
+    <file id="css" href="style.css"/>
+  </assets>
+</xml>

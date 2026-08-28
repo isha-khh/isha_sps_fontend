@@ -1,0 +1,93 @@
+﻿
+/* -----------------------------   essentials.css ---------------------------   */
+
+/*1403*/
+.editor section.edit_t033 .rounded {
+	-webkit-border-radius: 50% !important;
+	   -moz-border-radius: 50% !important;
+			border-radius: 50% !important;
+}
+
+
+/*5547*/
+.editor section.edit_t033 .box-inner {
+	padding:15px;
+	display:block;
+}
+/*5551*/
+.editor section.edit_t033 .box-inner h1,
+.editor section.edit_t033 .box-inner h2,
+.editor section.edit_t033 .box-inner h3,
+.editor section.edit_t033 .box-inner h4,
+.editor section.edit_t033 .box-inner h5,
+.editor section.edit_t033 .box-inner h6 {
+	font-size: 0.875rem;
+	line-height:17px;
+	padding-bottom:12px;
+	border-bottom:rgba(0,0,0,0.1) 1px solid;
+	margin-bottom:15px;
+}
+
+
+
+
+/* -----------------------------   layout.css ---------------------------   */
+
+/*6426*/
+.timeline {
+	position:relative;
+	padding-left:100px;
+}
+/*6434*/
+.timeline .timeline-item {
+	position:relative;
+	min-height:150px;
+	display:block;
+	margin-bottom:30px;
+}
+.timeline .timeline-item-bordered {
+	border-left:#ccc 1px dashed;
+	padding-left:20px;
+}
+
+/*6483*/
+.timeline .timeline-entry {
+	display: block;
+	border:rgba(0,0,0,0.1) 3px solid;
+	background-color:#fff;
+	padding-top: 10px;
+	top: 20px;
+	z-index:10;
+
+	position:absolute;
+	left: -102px;
+	right: auto;
+	width: 64px;
+	height: 64px;
+	font-size: 1.625rem;
+	text-align:center;
+	line-height:1;
+	color:#ccc;
+	font-weight:bold;
+	font-family:'Lato','Open Sans',Arial,Helvetica,sans-serif;
+}
+
+/*6503*/
+.timeline .timeline-entry>.timeline-vline {
+	position: absolute;
+	top: 50%; 
+	margin-top:-1px;
+	right: -40px;
+	width: 40px;
+	height: 0;
+	border-top: 1px dashed #CCC;
+}
+
+/*6521*/
+.timeline .timeline-entry>span {
+	display:block;
+	font-size: 0.875rem;
+	text-transform:uppercase;
+	font-weight:300;
+	font-family:'Open Sans',Arial,Helvetica,sans-serif;
+}

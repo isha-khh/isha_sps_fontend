@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="a003" type="frameset">
+  <title>邊框樣式a003</title>
+  <description>
+    歐式金色細邊框
+  </description>
+  <img id="thumb" src="thumb.jpg"/>
+  <assets>
+    <file id="cssfile" href="style.css"/>
+  </assets>
+</xml>

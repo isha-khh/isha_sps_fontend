@@ -1,0 +1,36 @@
+﻿.table-001{
+    font-family:"微軟正黑體";
+    border-top:1px solid #cfcfcf;
+    border-left:1px solid #cfcfcf;
+    letter-spacing:1px;
+}
+.table-001 td,
+.table-001 th{
+    padding:10px 0;
+    border-bottom:1px solid #cfcfcf;
+    border-right:1px solid #cfcfcf;
+}
+.table-001 .t1{
+    background:#aebcbf;
+    background:-moz-linear-gradient(top,#aebcbf 0,#6e7774 50%,#0a0e0a 51%,#0a0809 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#aebcbf),color-stop(50%,#6e7774),color-stop(51%,#0a0e0a),color-stop(100%,#0a0809));
+    background:-webkit-linear-gradient(top,#aebcbf 0,#6e7774 50%,#0a0e0a 51%,#0a0809 100%);
+    background:-o-linear-gradient(top,#aebcbf 0,#6e7774 50%,#0a0e0a 51%,#0a0809 100%);
+    background:-ms-linear-gradient(top,#aebcbf 0,#6e7774 50%,#0a0e0a 51%,#0a0809 100%);
+    background:linear-gradient(to bottom,#aebcbf 0,#6e7774 50%,#0a0e0a 51%,#0a0809 100%);
+    color:#fff;
+    text-align:center;
+    font-size: 1rem;font-weight:700;
+}
+.table-001 tr{
+    background:#fff;background:-moz-linear-gradient(top,#fff 0,#e5e5e5 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#e5e5e5));
+    background:-webkit-linear-gradient(top,#fff 0,#e5e5e5 100%);
+    background:-o-linear-gradient(top,#fff 0,#e5e5e5 100%);
+    background:-ms-linear-gradient(top,#fff 0,#e5e5e5 100%);
+    background:linear-gradient(to bottom,#fff 0,#e5e5e5 100%);
+    color:#666;
+    text-align:center;
+    font-size: 0.875rem;
+    padding:10px 0;
+}

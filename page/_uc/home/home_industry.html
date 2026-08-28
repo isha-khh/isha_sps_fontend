@@ -1,0 +1,170 @@
+<div class="home_industry_top">
+    <div class="sub_tag">Success Stories</div>
+    <h2 class="h2">產業案例</h2>
+</div>
+<div class="round_5" aria-hidden="true">
+    <img class="img-fluid d-block" src="images/home/round_5.jpg" alt="">
+</div>
+
+<div class="round_6" aria-hidden="true">
+    <img class="img-fluid d-block" src="images/home/round_6.png" alt="" />
+</div>
+
+<div class="home_industry_box"  >
+    <div class="ser_box">
+        <div class="slider wid-ind" data-aos="fade-up">
+            <div class="item">
+                <div class="d-flex">
+                    <div class="tit">
+                        <div class="tit_1">
+                            <a href="#" title="查看更多產業案例">
+                                <div class="d-flex  ">
+                                    <h3>AI 智慧安全帽偵測系統導入石化廠</h3>
+                                    <div class="i_number">01</div>
+                                </div>
+                                <p>
+                                    透過電腦視覺即時偵測人員安全裝備佩戴情況，顯著降低工安事故發生率，有效提升工地
+                                    安全管理效率。
+                                </p>
+                            </a>
+                        </div>
+                        <div class="mo_pa_box">
+                            <a href="#" title="查看更多產業案例" class="more_x">
+                                <span>查看更多</span>
+                                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            </a>
+                            <div class="custom_box">
+                                <button type="button" class="custom-arrow custom-prev" aria-label="上一則服務">
+                                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" class="custom-arrow custom-next" aria-label="下一則服務">
+                                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" class="slick-play-pause-btn" aria-label="暫停輪播" aria-pressed="false">
+                                    <i class="bi bi-pause-fill" aria-hidden="true"></i>
+                                    <span class="visually-hidden">暫停輪播</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="#" class="pic" title="查看更多產業案例內容">
+                        <div class="ratio ratio-4x3">
+                            <img class="img-fluid d-block" src="images/home/ser_bg.jpg" alt="" />
+                        </div>
+                    </a>
+
+
+                </div>
+            </div><!-- item 1組--->
+
+
+
+            <div class="item">
+                <div class="d-flex">
+                    <div class="tit">
+                        <div class="tit_1">
+                            <a href="#" title="查看更多產業案例">
+                                <div class="d-flex  ">
+                                    <h3>AI 智慧安全帽偵測系統導入石化廠</h3>
+                                    <div class="i_number">01</div>
+                                </div>
+                                <p>
+                                    透過電腦視覺即時偵測人員安全裝備佩戴情況，顯著降低工安事故發生率，有效提升工地
+                                    安全管理效率。
+                                </p>
+                            </a>
+                        </div>
+                        <div class="mo_pa_box">
+                            <a href="#" title="查看更多產業案例" class="more_x">
+                                <span>查看更多</span>
+                                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            </a>
+                            <div class="custom_box">
+                                <button type="button" class="custom-arrow custom-prev" aria-label="上一則服務">
+                                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" class="custom-arrow custom-next" aria-label="下一則服務">
+                                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" class="slick-play-pause-btn" aria-label="暫停輪播" aria-pressed="false">
+                                    <i class="bi bi-pause-fill" aria-hidden="true"></i>
+                                    <span class="visually-hidden">暫停輪播</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="#" class="pic" title="查看更多產業案例內容">
+                        <div class="ratio ratio-4x3">
+                            <img class="img-fluid d-block" src="images/home/ser_bg.jpg" alt="" />
+                        </div>
+                    </a>
+
+
+                </div>
+            </div><!-- item 1組--->
+
+
+        </div><!-- wid-ser--->
+    </div><!-- ser_box--->
+
+
+</div><!--home_industry_box-->
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.home_industry_box .ser_box').each(function () {
+            const $box = $(this);
+            const $slider = $box.find('.wid-ind');
+            const $prev = $box.find('.custom-prev');
+            const $next = $box.find('.custom-next');
+            const $pauseBtn = $box.find('.slick-play-pause-btn');
+
+            // 1.item 寫入 01, 02, 03...
+            $slider.children('.item').each(function (index) {
+                const formattedNumber = String(index + 1).padStart(2, '0');
+                $(this).find('.i_number').text(formattedNumber);
+            });
+
+         
+            $slider.slick({
+                autoplaySpeed: 3000,
+                infinite: true,
+                 autoplay: true, 
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                arrows: true,
+                prevArrow: $prev,
+                nextArrow: $next,
+                pauseOnHover: true,
+                pauseOnFocus: true
+            });
+
+            //  暫停 / 播放切換
+            let isPaused = false;
+            $pauseBtn.on('click', function () {
+                if (!isPaused) {
+                    $slider.slick('slickPause');
+                    isPaused = true;
+                    $(this).attr('aria-label', '播放輪播')
+                        .attr('aria-pressed', 'true')
+                        .find('i').removeClass('bi-pause-fill').addClass('bi-play-fill');
+                    $(this).find('.visually-hidden').text('播放輪播');
+                } else {
+                    $slider.slick('slickPlay');
+                    isPaused = false;
+                    $(this).attr('aria-label', '暫停輪播')
+                        .attr('aria-pressed', 'false')
+                        .find('i').removeClass('bi-play-fill').addClass('bi-pause-fill');
+                    $(this).find('.visually-hidden').text('暫停輪播');
+                }
+            });
+        });
+    });
+</script>
+
+

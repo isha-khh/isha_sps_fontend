@@ -1,0 +1,79 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+
+
+
+/* -----------------------------  layout.css ---------------------------   */
+
+/*6579*/
+	.editor section .edit_t029 .timeline_center li h3 { 
+		font-size: 1.875rem; 
+		line-height: 35px; 
+	}
+
+/*6568*/
+	 .editor section .edit_t029 .timeline_center li { 
+		padding: 0 0 25px 55%; 
+		position: relative; 
+		background: url('images/timeline_rightbg.png') no-repeat top center; 
+	}
+	.editor section .edit_t029 .timeline_center li:nth-child(even) { 
+		padding: 0 55% 25px 0; 
+		background: url('images/timeline_leftbg.png') no-repeat top center; 
+		text-align:right;
+	}
+/*6583*/
+	.editor section .edit_t029 .timeline_center li h3 span { 
+		position: absolute; 
+		right: 55%; 
+		top: 0px; 
+		font-size: 0.875rem;
+	}
+
+/*6605*/
+	.editor section .edit_t029 .timeline_center li:nth-child(even) h3 { 
+		text-align: right; 
+	}
+/*6608*/
+	.editor section .edit_t029 .timeline_center li:nth-child(even) h3 span { 
+		left: 55%; 
+		right: auto;
+	}
+
+/*6613*/
+	.editor section .edit_t029 .timeline_center li .timeline-desc { 
+		position: relative; 
+		font-size: 1rem; 
+		line-height: 31px; 
+	}
+/*6617*/
+	.editor section .edit_t029 .timeline_center li .timeline-desc:before { 
+		content: ""; 
+		width: 100%; 
+		height: 100%; 
+		position: absolute; 
+		left: -122%; 
+		top: 0; 
+	}
+/*6637*/
+	.editor section .edit_t029 .timeline_center li h3:before, 
+	.editor section .edit_t029 .timeline_center:after {
+		border-color: #333;
+	}
+
+/*6589*/
+	.editor section .edit_t029 .timeline_center li h3:before { 
+		content: ""; 
+		width: 15px; 
+		height: 15px; 
+		border-width: 4px; 
+		border-style: solid; 
+		position: absolute; 
+		left: 50%; 
+		top: 11px; 
+		margin-left: -7px; 
+		display: block; 
+		z-index: 1; 
+		
+		-webkit-border-radius: 100%; 
+				border-radius: 100%; 
+	}

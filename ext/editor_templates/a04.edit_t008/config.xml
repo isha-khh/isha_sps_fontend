@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="edit008" type="editor">
+  <ccategory>內文樣板</ccategory>
+  <title>內文樣板8</title>
+  <description>
+    標題 + 作者 凸顯排列
+  </description>
+  <img id="thumb" src="thumb08.jpg"/>
+  <assets>
+    <file id="control" href="editor.html"/>
+    <file id="css" href="style.css"/>
+  </assets>
+</xml>

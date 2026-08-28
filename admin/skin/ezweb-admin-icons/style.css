@@ -1,0 +1,126 @@
+@font-face {
+	font-family: 'ezweb-admin-icons';
+	src:url('fonts/ezweb-admin-icons.eot?-xef6xm');
+	src:url('fonts/ezweb-admin-icons.eot?#iefix-xef6xm') format('embedded-opentype'),
+		url('fonts/ezweb-admin-icons.woff?-xef6xm') format('woff'),
+		url('fonts/ezweb-admin-icons.ttf?-xef6xm') format('truetype'),
+		url('fonts/ezweb-admin-icons.svg?-xef6xm#ezweb-admin-icons') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="ezicon-"], [class*=" ezicon-"] {
+	font-family: 'ezweb-admin-icons';
+	speak: none;
+    font-size:16px;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.ezicon-ad:before {
+	content: "\e600";
+}
+
+.ezicon-album:before {
+	content: "\e601";
+}
+
+.ezicon-cart:before {
+	content: "\e602";
+}
+
+.ezicon-contact:before {
+	content: "\e603";
+}
+
+.ezicon-discuss:before {
+	content: "\e604";
+}
+
+.ezicon-gear:before {
+	content: "\e605";
+}
+
+.ezicon-global:before {
+	content: "\e606";
+}
+
+.ezicon-home:before {
+	content: "\e607";
+}
+
+.ezicon-key:before {
+	content: "\e608";
+}
+
+.ezicon-link:before {
+	content: "\e609";
+}
+
+.ezicon-logout:before {
+	content: "\e60a";
+}
+
+.ezicon-mail:before {
+	content: "\e60b";
+}
+
+.ezicon-manual:before {
+	content: "\e60c";
+}
+
+.ezicon-member:before {
+	content: "\e60d";
+}
+
+.ezicon-message:before {
+	content: "\e60e";
+}
+
+.ezicon-options:before {
+	content: "\e60f";
+}
+
+.ezicon-order:before {
+	content: "\e610";
+}
+
+.ezicon-page:before {
+	content: "\e611";
+}
+
+.ezicon-puzzle:before {
+	content: "\e612";
+}
+
+.ezicon-quest:before {
+	content: "\e613";
+}
+
+.ezicon-region:before {
+	content: "\e614";
+}
+
+.ezicon-report:before {
+	content: "\e615";
+}
+
+.ezicon-user:before {
+	content: "\e616";
+}
+
+.ezicon-vote:before {
+	content: "\e617";
+}
+
+.ezicon-wrp:before {
+	content: "\e618";
+}
+

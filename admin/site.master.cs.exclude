@@ -1,0 +1,144 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Collections;
+using System.Configuration;
+
+public partial class admin_site : ez.admin.MasterBase, BasePageToMaster
+{
+
+    public string BodyCssClass
+    {
+        get { return Body.Attributes["class"]; }
+        set { Body.Attributes["class"] = value; }
+    }
+
+    public ez.function _f = new ez.function();
+    public ez.admin.user.loginInfoType loginInfo = new ez.admin.user.loginInfoType();
+
+    public void loginStatusGet(ez.admin.user.loginInfoType _loginInfo)
+    {
+        loginInfo = _loginInfo;
+    }
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!Page.IsPostBack)
+        {
+
+            ez.data.info WebSet = new ez.data.info();
+            WebSet.Load();
+            if (!_f.isStrNull(WebSet.Data.logo))
+            {
+                LOGO_ALT.Visible = false;
+                LOGO.Visible = true;
+                LOGO.ImageUrl = WebSet.Dir + "/" + WebSet.Data.logo;
+            }
+           
+            ez.admin.configuration configuration = new ez.admin.configuration();
+            configuration.Load();
+            ezwebVersion.Text = configuration.Data.Version;
+            wrpImportant.Visible = false;
+            wrpImportantIcon.Visible = false;
+
+
+
+            if (!_f.isStrNull(loginInfo.Num))
+            {
+                u_id.Text = loginInfo.ID;
+                login_time.Text = loginInfo.LoginTime;
+                u_id2.Text = u_id.Text;
+                login_time2.Text = login_time.Text;
+
+                systemMenu(Repeater1, 0, loginInfo);
+                ViewState["menuRange"] = systemMenuNum();
+
+                try
+                {
+                    if (_f.isStrNull(Session[_f.SC + "_wrpImportNoReadCount"]) | _f.isStrNull(Session[_f.SC + "_wrpImportMoreLink"]))
+                    {
+                        Session[_f.SC + "_wrpImportMoreLink"] = "#";
+                        Session[_f.SC + "_wrpImportNoReadCount"] = "0";
+                        string apiUrl = configuration.Data.WrpApiUrl + configuration.Data.WrpApiImportant;
+                        string xmlData = _f.ReadPostFormContent(apiUrl, "host=" + Request.Url.Host);
+                        DataTable dt = _f.XmDataTable(xmlData, "row");
+                        foreach (DataRow row in dt.Rows)
+                        {
+                            if (_f.isStrNull(row["readtime"])) { Session[_f.SC + "_wrpImportNoReadCount"] = _f.Val(Session[_f.SC + "_wrpImportNoReadCount"]) + 1; }
+                        }
+                        dt = _f.XmDataTable(xmlData, "more");
+                        if (dt.Rows.Count > 0)
+                        {
+                            Session[_f.SC + "_wrpImportMoreLink"] = dt.Rows[0]["link"].ToString();
+                        }
+                    }
+
+                    if (_f.Val(Session[_f.SC + "_wrpImportNoReadCount"]) > 0)
+                    {
+                        wrpImportant.Text = "您有" + Session[_f.SC + "_wrpImportNoReadCount"].ToString() + "則重要公告未讀取";
+                        wrpImportant.ForeColor = System.Drawing.Color.Red;
+                        wrpImportant.NavigateUrl = Session[_f.SC + "_wrpImportMoreLink"].ToString();
+                        if (Session[_f.SC + "_wrpImportMoreLink"] != "#") { wrpImportant.Target = "_blank"; }
+                        wrpImportant.Visible = true;
+                        wrpImportantIcon.Visible = true;
+                    }
+                }
+                catch (Exception)
+                {
+                    
+                    //throw;
+                }
+
+                //登入後的首頁要載入WRP訊息
+                if (Request.Url.AbsolutePath.ToLower().IndexOf("admin/index2.aspx") > -1)
+                {
+                    ((MasterToAdminIndex2)this.Page).setWrpInfo(configuration.Data.WrpApiUrl, configuration.Data.WrpApiClient);
+
+
+                }
+                
+             
+            }
+            else
+            {
+            
+                bool isDM = isDesignMode();  //是否為設計師模式
+                ((MasterToAdminIndex)this.Page).setDesignMode(isDM);           
+               
+            }
+
+
+        }
+    }
+
+
+    #region 檢查是否使用設計師模式
+
+    protected bool isDesignMode()
+    {
+        bool isDM = false;      
+         if (!_f.isStrNull(ConfigurationManager.AppSettings["designIP"]))
+         {
+             string[] DesignIP = ConfigurationManager.AppSettings["designIP"].ToString().Split(',');
+             string myIP = _f.getIP();
+             foreach (string chkIP in DesignIP)
+             {
+                 if (chkIP == myIP)
+                 {
+                     isDM = true;
+                     break;
+                 }
+             }
+         }       
+      
+        return isDM;
+    }
+
+    #endregion
+   
+    
+}

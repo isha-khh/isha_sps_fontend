@@ -1,0 +1,35 @@
+﻿
+.owl-carousel .owl-item{
+	float: left;
+}
+
+/* -----------------------------   layout.css ---------------------------   */
+
+/*4261*/
+.editor section.edit_t042 .caption-primary,
+.editor section.edit_t042 .caption-warning,
+.editor section.edit_t042 .caption-info,
+.editor section.edit_t042 .caption-danger {
+	color:#fff;
+	background-color:#333;
+}
+
+/*6111*/
+.editor section.edit_t042  h1.blog-post-title {
+	font-size: 1.5rem;
+	margin-bottom:0;
+}
+
+/*6243*/
+	.editor section.edit_t042 .blog-single-small-media {
+		width:350px;
+		float:left;
+		margin-right:30px;
+		margin-bottom:20px;
+	}
+	.editor section.edit_t042 .blog-single-small-media.inverse {
+		float:right;
+		margin-right:0;
+		margin-left:30px;
+	}
+

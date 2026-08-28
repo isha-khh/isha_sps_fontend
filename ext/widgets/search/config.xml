@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="search" type="widgets">
+  <title>搜尋產品</title>
+  <description>
+    搜尋產品
+  </description>  
+  <img id="thumb" src=""/>
+  <assets>
+    <file id="control" href="search.ascx"/>
+    <file id="cssfile" href="style.css"/>    
+  </assets>
+
+</xml>

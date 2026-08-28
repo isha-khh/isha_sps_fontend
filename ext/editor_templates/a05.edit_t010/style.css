@@ -1,0 +1,60 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+
+/*10425*/
+.editor section.edit_t015 ul.testimonial-dotted {
+	overflow:hidden;
+}
+
+/*10432*/
+.editor section.edit_t015 ul.testimonial-dotted>li figure {
+	text-align:center;
+	display:block;
+}
+
+/*10436*/
+.editor section.edit_t015 ul.testimonial-dotted>li img {
+	display:inline-block;
+}
+
+/*10450*/
+.editor section.edit_t015 ul.testimonial-dotted>li:before {
+	content: '';
+	position: absolute;
+	height: 100%;
+	top: 0;
+	left: -1px;
+	border-left: 1px dashed rgba(0,0,0,0.3);
+}
+
+/*10466*/
+.editor section.edit_t015 div.testimonial p {
+	margin-top:0;
+}
+
+/*10470*/
+.editor section.edit_t015 div.testimonial>figure>img {
+	width:65px;
+	height:65px;
+
+	-webkit-border-radius: 3px;
+	   -moz-border-radius: 3px;
+			border-radius: 3px;
+}
+
+/*10479*/
+.editor section.edit_t015 .testimonial cite {
+	font-weight:bold;
+	text-shadow:none;
+}
+.editor section.edit_t015 .testimonial cite span {
+	display:block;
+	color:#888;
+	font-size: 0.75rem;
+	font-weight:300;
+}
+
+/*10492*/
+.editor section.edit_t015 .testimonial-content {
+	position:relative;
+	padding-left:75px;
+}

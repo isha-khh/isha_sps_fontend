@@ -1,0 +1,25 @@
+﻿
+/* -----------------------------   essentials.css ---------------------------   */
+
+/*9764*/
+.editor section.edit_t048 .nav-tabs>li>a {
+	color:#111;
+	font-weight:bold;
+
+	-webkit-border-radius: 3px !important;
+	   -moz-border-radius: 3px !important;
+			border-radius: 3px !important;
+}
+.editor section.edit_t04 .nav-tabs>li.active>a {
+		color:#000;
+	}
+.editor section.edit_t048 .nav-tabs.nav-justified>li>a {
+	-webkit-border-radius: 0 !important;
+	   -moz-border-radius: 0 !important;
+			border-radius: 0 !important;
+}
+
+/*9788*/
+.editor section.edit_t048 .tab-content {
+	padding:15px 0;
+}

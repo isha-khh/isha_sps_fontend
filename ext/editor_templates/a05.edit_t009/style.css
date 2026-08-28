@@ -1,0 +1,44 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+
+/*6616*/
+.callout .btn {
+	margin:6px 0 0 0;
+}	
+
+/*6590*/
+.callout {
+	padding: 30px 0;
+	color:#fff;
+
+	-webkit-transition: all .400s;
+	   -moz-transition: all .400s;
+		 -o-transition: all .400s;
+			transition: all .400s;
+}
+
+/*6638*/
+.callout.callout-transparent,
+.callout.callout-transparent h1,
+.callout.callout-transparent h2,
+.callout.callout-transparent h3,
+.callout.callout-transparent h4,
+.callout.callout-transparent h5,
+.callout.callout-transparent h6,
+.callout.callout-transparent p {
+	color:#111;
+	margin:0 !important;
+	font-weight:300;
+}	
+
+/*10809*/
+.editor section.edit_t012 .flexslider {
+		margin:0;
+		border:0;
+		padding:0;
+		overflow:hidden;
+		position:relative;
+	}
+
+
+
+

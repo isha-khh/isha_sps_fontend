@@ -1,0 +1,38 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+/*10470*/
+.editor section.edit_t016 div.testimonial>figure>img {
+	width:65px;
+	height:65px;
+
+	-webkit-border-radius: 3px;
+	   -moz-border-radius: 3px;
+			border-radius: 3px;
+}
+
+/*10479*/
+.editor section.edit_t016 .testimonial cite {
+	font-weight:bold;
+	text-shadow:none;
+}
+.editor section.edit_t016 .testimonial cite span {
+	display:block;
+	color:#888;
+	font-size: 0.75rem;
+	font-weight:300;
+}
+
+/*10492*/
+.editor section.edit_t016 .testimonial-content {
+	position:relative;
+	padding-left:75px;
+}
+
+/*10531*/
+.editor section.edit_t016 0div.testimonial-bordered {
+	border:#eaeaea 2px solid;
+	padding:30px 15px;
+	margin:30px 0;
+}
+
+
+

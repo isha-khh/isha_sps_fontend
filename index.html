@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-tw" class="no-js" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>高雄技術處</title>
+
+    <!-- 關閉Skype工具列 -->
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- 網站圖示 favicon.ico -->
+    <!-- generics -->
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="favicon.png" sizes="57x57">
+    <link rel="icon" type="image/png" href="favicon.png" sizes="76x76">
+    <link rel="icon" type="image/png" href="favicon.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="favicon.png" sizes="128x128">
+    <link rel="icon" type="image/png" href="favicon.png" sizes="228x228">
+    <!-- Android -->
+    <link rel="shortcut icon" href="./favicon.png" sizes="196x196">
+    <!-- iOS -->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+    <!-- Windows 8 IE 10-->
+    <meta name="msapplication-TileColor" content="#f4d44d">
+    <meta name="msapplication-TileImage" content="favicon.png">
+
+    <!-- <link rel="manifest" href="/site.webmanifest"> -->
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#f4d44d">
+    <meta name="theme-color" content="#ffffff">
+    <!--uc:HeadMeta-->
+
+
+    <script type="text/javascript" src="js/jquery-3.7.1.min.js"></script>
+
+    <script type="text/javascript" src="js/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/js/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
+
+
+
+    <link href="js/bootstrap-5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- slick -->
+    <link href="js/slick-1.8.1/slick/slick-theme.css" rel="stylesheet" />
+    <link href="js/slick-1.8.1/slick/slick.css" rel="stylesheet" />
+
+    <!-- bsnav -->
+    <link href="js/bsnav-master/dist/bsnav.min.css" rel="stylesheet" />
+    <!-- bootstrap icon -->
+    <link href="js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <link href="js/datepicker-1.0.10/dist/datepicker.css" rel="stylesheet" />
+
+    <!-- fancybox -->
+    <link href="js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
+
+    <link href="css/coreStyle.css" rel="stylesheet" />
+
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="/css/style_rwd.css" rel="stylesheet" />
+
+    <!--aos --->
+    <script type="text/javascript" src="js/aos-master/dist/aos.js"></script>
+    <link href="js/aos-master/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <script>
+        $(document).ready(function () {
+            $("header nav").load("page/_uc/nav.html");
+            $(".banner_home").load("page/_uc/banner_home.html");
+            $(".home_news").load("page/_uc/home/home_news.html");
+            $(".home_service").load("page/_uc/home/home_service.html");
+            $(".home_industry").load("page/_uc/home/home_industry.html");
+            $(".home_enterprise").load("page/_uc/home/home_enterprise.html");
+            $(".home_video").load("page/_uc/home/home_video.html");
+            $("footer").load("page/_uc/footer.html");
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.27"></script>
+
+
+    <!-- slick -->
+    <script type="text/javascript" src="js/slick-1.8.1/slick/slick.min.js"></script>
+
+    <!-- bsnav -->
+    <script type="text/javascript" src="js/bsnav-master/dist/bsnav.min.js"></script>
+
+    <!-- fancybox -->
+    <script type="text/javascript" src="js/fancybox-5.0.33/dist/fancybox/fancybox.umd.js"></script>
+
+    <!-- 滾動視差 -->
+    <script type="text/javascript" src="js/TweenLite.min.js"></script>
+    <script type="text/javascript" src="js/CSSPlugin.min.js"></script>
+
+    <script type="text/javascript" src="js/d3-7.9.0/package/dist/d3.js"></script>
+
+
+    <script type="text/javascript" src="js/coreScript.js"></script>
+
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+
+    <!--uc:HeadPageRes-->
+
+</head>
+
+
+
+<body class="home">
+    <!--loading -->
+    <div class="loading" id="pageLoading">
+        <div class="load-wrapper">
+
+            <div class="loadIcon">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 414 385" width="240" height="120">
+
+                    <g class="part-blue">
+                        <path style="fill:#2467B2;" d="M212.676,90.625l-92.624,92.629c16.897,16.902,44.303,16.902,61.195,0l29.425-29.424c24.703-24.704,64.759-24.704,89.463,0c24.692,24.697,24.692,64.748,0,89.451L183.06,360.352c16.903,16.892,44.297,16.892,61.195,0l119.073-119.074c24.698-24.693,24.698-64.749,0-89.452l-61.189-61.2C277.436,65.921,237.379,65.921,212.676,90.625z" />
+                        <path style="fill:#2467B2;" d="M327.173,89.065c17.822,0,32.266,14.443,32.266,32.261c0,17.822-14.443,32.266-32.266,32.266c-17.817,0-32.267-14.444-32.267-32.266C294.906,103.508,309.355,89.065,327.173,89.065z" />
+                    </g>
+
+                    <g class="part-cyan">
+                        <path style="fill:#1891AF;" d="M109.916,136.539L226.975,19.475c-16.892-16.893-44.292-16.893-61.19,0L46.717,138.539c-24.703,24.704-24.703,64.759,0,89.462l61.19,61.195c24.698,24.692,64.754,24.692,89.458,0l92.624-92.635c-16.892-16.903-44.292-16.903-61.189,0l-29.436,29.425c-24.698,24.703-64.754,24.703-89.457,0C85.213,201.293,85.213,161.242,109.916,136.539z" />
+                        <path style="fill:#1891AF;" d="M78.208,226.844c17.812,0,32.261,14.443,32.261,32.256c0,17.822-14.449,32.266-32.261,32.266c-17.822,0-32.266-14.443-32.266-32.266C45.942,241.287,60.386,226.844,78.208,226.844z" />
+                    </g>
+                </svg>
+            </div>
+
+
+            <div class="loadLogo">
+                <img class="img-fluid d-block" src="images/all/logo.svg" alt="LOGO" />
+            </div>
+        </div>
+    </div>
+    <!--Fancybox彈跳 -->
+    <div id="welcome-modal" class="Fancy_home" style="display: none;">
+        <div class="" style="width: 100%;">
+            <img class="img-fluid d-block" src="images/home/ser_bg.jpg" alt="活動公告" style="object-fit: cover; width: 100%; height: 100%;" />
+        </div>
+    </div>
+
+    <!-- 主要內容區塊-->
+    <a href="#main-content" class="visually-hidden-focusable">跳至主要內容</a>
+
+    <div class="page_wrapper">
+        <!--  導盲磚 -->
+        <header class="header">
+            <a href="#header-block" id="header-block" accesskey="U" title="上方功能區塊" class="visually-hidden-focusable">::: 上方功能區塊</a>
+            <nav class="nav" aria-label="主要導覽"></nav>
+        </header>
+
+        <div class="banner_home" aria-label="輪播廣告看板"></div>
+
+        <!--  主要內容區塊： -->
+        <main class="main" id="main-content" role="main">
+            <a href="#main-block" id="main-block" accesskey="C" title="中央主要內容區塊" class="visually-hidden-focusable">::: 主要內容區塊</a>
+
+            <div class="container-fluid px-0">
+                <div class="row gx-0 gy-4">
+
+                    <!--  side1 -->
+                    <div class="side side1  d-none" aria-label="分類選單">
+                        <a href="#left-block" id="left-block" accesskey="L" title="左側選單區塊" class="visually-hidden-focusable">::: 左側選單區塊</a>
+                        <div class="function-bar text-end d-flex d-lg-none justify-content-lg-end justify-content-between">
+                            <div class="sideNavBtn d-lg-none mb-2">
+
+                                <button type="button" class="btn btn-primary collapse-side-btn" aria-expanded="false" aria-controls="sideAutoUcCollapse">
+                                    <i class="icon fas fa-list" aria-hidden="true"></i>
+                                    <span>顯示分類</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-sidebar side_auto_uc multiple-collapse accordion lg-accordion accordion-blocks d-block">
+                            <div class="navbar" role="region" aria-label="分類篩選項目">
+                                <div class="collapse navbar-collapse justify-content-lg-end d-lg-block">
+                                    <div id="sideAutoUcCollapse" class="sideAutoUcCollapse">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- 主要內容容器 -->
+                    <div class="content">
+                        <div class="home_City">
+
+                            <div class="City_bg01" aria-hidden="true" data-aos="fade-up">
+                                <img class="img-fluid d-block" src="images/home/City_bg01.jpg" alt="" />
+                            </div>
+
+                        </div><!--City-->
+
+
+
+
+                        <div class="block_box e">
+
+
+                            <!--關於第一塊-->
+                            <div class="home_about d-flex">
+                                <div class="tit_left">
+                                    <div class="sub_tag">Platform</div>
+                                    <h2 class="h2">
+                                        智慧工安技術<span>產業資訊暨媒合平台</span>
+                                    </h2>
+                                    <p class="desc">
+                                        以智慧科技（5G、AIoT）為核心，促進製造業產業升級轉型，
+                                        實現安全管理精進與創新應用落地。媒合平台作為技術供應與
+                                        需求的橋樑，支持企業形成在地供應鏈。
+                                    </p>
+
+                                    <a href="#" title="前往查看看多" class="more_x ">
+                                        <span>查看看多</span>
+                                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                                    </a>
+                                </div><!--tit_left-->
+
+                                <div class="tit_right">
+                                    <div class="d-flex">
+                                        <div class="fade-box" data-aos="fade-left" data-aos-delay="100">
+                                            <span>01</span>
+                                            <p>
+                                                技術供需精準媒合，
+                                                縮短落地周期
+                                            </p>
+                                        </div><!--fade-box-->
+
+                                        <div class="fade-box" data-aos="fade-left" data-aos-delay="200">
+                                            <span>02</span>
+                                            <p>
+                                                推動南北平衡與，
+                                                數位經濟發展
+                                            </p>
+                                        </div><!--fade-box-->
+
+                                        <div class="fade-box" data-aos="fade-left" data-aos-delay="300">
+                                            <span>03</span>
+                                            <p>
+                                                整合政府補助資源，
+                                                降低導入成本
+                                            </p>
+                                        </div><!--fade-box-->
+
+                                        <div class="fade-box" data-aos="fade-left" data-aos-delay="400">
+                                            <span>04</span>
+                                            <p>
+                                                建構在地產業，
+                                                供應鏈生態系
+                                            </p>
+                                        </div><!--fade-box-->
+
+
+                                    </div>
+                                </div><!--tit_right-->
+
+                                <div class="round_1">
+                                    <img class="img-fluid d-block" src="images/home/round_1.jpg" alt="" />
+                                </div>
+
+                            </div><!--home_about-->
+                            <!--最新消息-->
+                            <div class="home_news"></div>
+
+                            <!--服務專區-->
+                            <div class="home_service"></div>
+
+
+                        </div><!--block_box-->
+                        <!--產業案例-->
+                        <div class="home_industry"> </div>
+
+
+
+                        <div class="block_box">
+                            <!--企業刊登-->
+                            <div class="home_enterprise"> </div>
+                        </div><!--block_box-->
+                        <!--影音專區-->
+                        <div class="home_video"> </div>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </main>
+
+
+        <a href="#footer-block" id="footer-block" accesskey="B" title="下方功能區塊" class="visually-hidden-focusable" tabindex="0">::: 下方功能區塊</a>
+        <!-- 頁尾區塊 -->
+        <footer class="footer" role="contentinfo">
+        </footer>
+    </div>
+
+
+
+
+    <script>
+        $(document).ready(function () {
+
+            //loading
+            setTimeout(function () {
+                $('.loading').addClass('is-loaded');
+
+                setTimeout(function () {
+                    $('.loading').remove();
+                }, 500);
+            }, 2000);
+        });
+
+        $(function () {
+            if (window.innerWidth > 767) {
+                $(window).on('scroll', function () {
+                    const offsetTop = $(this).scrollTop();
+
+                    // 1. .round_1 視差滾動
+                    const $news = $('.home_news');
+                    if ($news.length && offsetTop < $news.offset().top) {
+                        TweenLite.to(".round_1", 1, {
+                            y: -offsetTop / 15
+                        });
+                    }
+
+                    // 2. .round_3 視差滾動
+                    const $industry = $('.home_industry');
+                    if ($industry.length && offsetTop < $industry.offset().top) {
+                        TweenLite.to(".round_3", 1, {
+                            y: -offsetTop / 15
+                        });
+                    }
+
+                    // 3. .round_5 視差滾動
+                    const $enterprise = $('.home_enterprise');
+                    if ($enterprise.length && offsetTop < $enterprise.offset().top) {
+                        TweenLite.to(".round_5", 1, {
+                            y: -offsetTop / 15
+                        });
+                    }
+
+                }).trigger('scroll');
+            }
+        });
+        //Fancybox彈跳
+        document.addEventListener("DOMContentLoaded", function () {
+            Fancybox.show([
+                {
+                    src: "#welcome-modal",
+                    type: "inline"
+                }
+            ], {
+
+                autoFocus: true,
+                trapFocus: true,
+                dragToClose: false,
+                backdropClick: true
+            });
+        });
+    </script>
+
+</body>
+</html>
+

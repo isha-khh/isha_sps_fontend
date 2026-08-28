@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using ez.data;
+using System.Web.UI.HtmlControls;
+
+public partial class ext_submenu_sub_product_sub_product : ez.web.controls.SubNavControl
+{
+    product.kind proKind = new product.kind();
+    
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            ViewState["SubPage"] = "~/page/product/p02.aspx";
+            int Selroot = 0;
+
+            if (f.IsNumeric(this.sub_menu_para))
+            {
+                Selroot = f.Val(this.sub_menu_para);
+            }
+            Repeater2.DataSource = proKind.RowDataTable(Selroot, nation);//row[8]為kind傳入
+            Repeater2.DataBind();
+        }
+    }
+    protected void Repeater2_ItemDataBound(object sender, RepeaterItemEventArgs e)
+    {
+       
+        if (e.Item.ItemType != ListItemType.Header && e.Item.ItemType != ListItemType.Footer)
+        {
+
+            DataRowView row = (DataRowView)e.Item.DataItem;
+            HyperLink menu = (HyperLink)e.Item.FindControl("menu");
+
+            //宣告有無第二層BOOLEAN  submenuControl
+            if (Tiers>2)
+            {
+                Repeater Repeater3 = (Repeater)e.Item.FindControl("Repeater3");
+                ViewState["SubPage"] = "~/page/product/p02.aspx";
+                DataTable dt = proKind.RowDataTable(f.Val(row["num"]), nation);
+              
+                if (dt.Rows.Count > 0)
+                {
+                    Repeater3.DataSource = dt;//固定主分類
+                    Repeater3.DataBind();
+                    //menu.CssClass = "trigger";
+                    menu.CssClass = "dropdown-item dropdown-toggle";
+                    //menu.Attributes.Add("data-bs-toggle", "dropdown");
+                }
+            }
+            menu.NavigateUrl = ViewState["SubPage"].ToString() + "?kind=" + row["num"].ToString();
+            menu.Text = row["kind"].ToString();
+          
+
+        }
+    }
+    protected void Repeater3_ItemDataBound(object sender, RepeaterItemEventArgs e)
+    {
+
+        if (e.Item.ItemType != ListItemType.Header && e.Item.ItemType != ListItemType.Footer)
+        {
+            DataRowView row = (DataRowView)e.Item.DataItem;
+            HyperLink menu = (HyperLink)e.Item.FindControl("menu");
+            menu.NavigateUrl = ViewState["SubPage"].ToString() + "?kind=" + row["num"].ToString();
+            menu.Text = row["kind"].ToString();
+        }
+
+    }
+
+
+}

@@ -1,0 +1,47 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+/* 1403 rounded */
+.editor section.edit_t009 .rounded {
+	-webkit-border-radius: 50% !important;
+	   -moz-border-radius: 50% !important;
+			border-radius: 50% !important;
+}
+
+/*10466*/
+.editor section.edit_t009 div.testimonial p {
+	margin-top:0;
+}
+
+.editor section.edit_t009 div.testimonial>figure>img {
+	width:65px;
+	height:65px;
+
+	-webkit-border-radius: 3px;
+	   -moz-border-radius: 3px;
+			border-radius: 3px;
+}
+
+/*10479*/
+.editor section.edit_t009 .testimonial cite {
+	font-weight:bold;
+	text-shadow:none;
+}
+.editor section.edit_t009 .testimonial cite span {
+	display:block;
+	color:#888;
+	font-size: 0.75rem;
+	font-weight:300;
+}
+
+/*10492*/
+.editor section.edit_t009 .testimonial-content {
+	position:relative;
+	padding-left:75px;
+}
+
+/* 10531 bordered */
+.editor section.edit_t009 div.testimonial-bordered {
+	border:#eaeaea 2px solid;
+	padding:30px 15px;
+	margin:30px 0;
+}
+

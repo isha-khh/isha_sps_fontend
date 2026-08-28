@@ -1,0 +1,14 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+
+/*615*/
+.editor section.edit_t008 .border-bottom-dashed:before {
+	content: "";
+	display: block;
+	width: 100%;
+	height: 1px;
+	position: absolute;
+	bottom: -6px;
+	border-bottom: 1px dashed #999;
+}
+
+

@@ -1,0 +1,25 @@
+﻿/* -----------------------------   essentials.css ---------------------------   */
+
+
+/*4329*/
+.editor section.edit_t023 div.alert-default {
+	background-color:rgba(0,0,0,0.1);
+}
+
+/*6503*/
+.editor section.edit_t023 .callout.alert {
+	padding:20px 0;
+	color:#111;
+	margin-bottom:0;
+}
+
+/*6585*/
+.editor section.edit_t023 .callout .row {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.editor section.edit_t023 .callout {
+	padding: 30px 0;
+	color:#fff;
+}

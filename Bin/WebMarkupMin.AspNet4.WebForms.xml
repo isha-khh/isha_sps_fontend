@@ -1,0 +1,394 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WebMarkupMin.AspNet4.WebForms</name>
+    </assembly>
+    <members>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.Components.CompressedComponent">
+            <summary>
+            Compressed component
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.Components.CompressedComponent._configuration">
+            <summary>
+            WebMarkupMin configuration
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.Components.CompressedComponent._compressionManager">
+            <summary>
+            HTTP compression manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.Components.CompressedComponent._disableCompression">
+            <summary>
+            Flag for whether to disable HTTP compression of content
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.WebForms.Components.CompressedComponent.DisableCompression">
+            <summary>
+            Gets or sets a flag for whether to disable HTTP compression of content
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.Components.CompressedComponent.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IHttpCompressionManager)">
+            <summary>
+            Constructs a instance of compressed component
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="compressionManager">HTTP compression manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase">
+            <summary>
+            Base class of minified component
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase._configuration">
+            <summary>
+            WebMarkupMin configuration
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase._minificationManager">
+            <summary>
+            Markup minification manager
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase._disableMinification">
+            <summary>
+            Flag for whether to disable markup minification
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase.DisableMinification">
+            <summary>
+            Gets or sets a flag for whether to disable markup minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IMarkupMinificationManager)">
+            <summary>
+            Constructs a instance of minified component
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">Markup minification manager</param>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase.GetDefaultMinificationManager">
+            <summary>
+            Gets a instance of default markup minification manager
+            </summary>
+            <returns>Instance of default markup minification manager</returns>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.Components.MinifiedHtmlComponent">
+            <summary>
+            HTML minified component
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.Components.MinifiedHtmlComponent.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IHtmlMinificationManager)">
+            <summary>
+            Constructs a instance of HTML minified component
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">HTML minification manager</param>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.Components.MinifiedHtmlComponent.GetDefaultMinificationManager">
+            <summary>
+            Gets a instance of default HTML minification manager
+            </summary>
+            <returns>Instance of default HTML minification manager</returns>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.Components.MinifiedXhtmlComponent">
+            <summary>
+            XHTML minified component
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.Components.MinifiedXhtmlComponent.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IXhtmlMinificationManager)">
+            <summary>
+            Constructs a instance of XHTML minified component
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">XHTML minification manager</param>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.Components.MinifiedXhtmlComponent.GetDefaultMinificationManager">
+            <summary>
+            Gets a instance of default XHTML minification manager
+            </summary>
+            <returns>Instance of default XHTML minification manager</returns>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.CompressedMasterPage">
+            <summary>
+            Master page with support of HTTP compression
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.CompressedMasterPage._compressedComponent">
+            <summary>
+            Compressed component
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.WebForms.CompressedMasterPage.DisableCompression">
+            <summary>
+            Gets or sets a flag for whether to disable HTTP compression of content
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.CompressedMasterPage.#ctor">
+            <summary>
+            Constructs a instance of master page with support of HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.CompressedMasterPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IHttpCompressionManager)">
+            <summary>
+            Constructs a instance of master page with support of HTTP compression
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="compressionManager">HTTP compression manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.CompressedPage">
+            <summary>
+            Web Forms page with support of HTTP compression
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.CompressedPage._compressedComponent">
+            <summary>
+            Compressed component
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.WebForms.CompressedPage.DisableCompression">
+            <summary>
+            Gets or sets a flag for whether to disable HTTP compression of content
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.CompressedPage.#ctor">
+            <summary>
+            Constructs a instance of Web Forms page with support of HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.CompressedPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IHttpCompressionManager)">
+            <summary>
+            Constructs a instance of Web Forms page with support of HTTP compression
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="compressionManager">HTTP compression manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedHtmlMasterPage">
+            <summary>
+            Master page with support of HTML minification and HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedHtmlMasterPage.#ctor">
+            <summary>
+            Constructs a instance of master page with of HTML minification and HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedHtmlMasterPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IHtmlMinificationManager,WebMarkupMin.AspNet.Common.IHttpCompressionManager)">
+            <summary>
+            Constructs a instance of master page with of HTML minification and HTTP compression
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">HTML minification manager</param>
+            <param name="compressionManager">HTTP compression manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedHtmlPage">
+            <summary>
+            Web Forms page with support of HTML minification and HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedHtmlPage.#ctor">
+            <summary>
+            Constructs a instance of Web Forms page with support of HTML minification and HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedHtmlPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IHtmlMinificationManager,WebMarkupMin.AspNet.Common.IHttpCompressionManager)">
+            <summary>
+            Constructs a instance of Web Forms page with support of HTML minification and HTTP compression
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">HTML minification manager</param>
+            <param name="compressionManager">HTTP compression manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedMasterPageBase">
+            <summary>
+            Base class of master page with support of markup minification and HTTP compression
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedMasterPageBase._compressedComponent">
+            <summary>
+            Compressed component
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedMasterPageBase.DisableCompression">
+            <summary>
+            Gets or sets a flag for whether to disable HTTP compression of content
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedMasterPageBase.#ctor(WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase,WebMarkupMin.AspNet4.WebForms.Components.CompressedComponent)">
+            <summary>
+            Constructs a instance of master page with support of markup minification and HTTP compression
+            </summary>
+            <param name="minifiedComponent">Minified component</param>
+            <param name="compressedComponent">Compressed component</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedPageBase">
+            <summary>
+            Base class of Web Forms page with support of markup minification and HTTP compression
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedPageBase._compressedComponent">
+            <summary>
+            Compressed component
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedPageBase.DisableCompression">
+            <summary>
+            Gets or sets a flag for whether to disable HTTP compression of content
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedPageBase.#ctor(WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase,WebMarkupMin.AspNet4.WebForms.Components.CompressedComponent)">
+            <summary>
+            Constructs a instance of Web Forms page with support of markup minification and HTTP compression
+            </summary>
+            <param name="minifiedComponent">Minified component</param>
+            <param name="compressedComponent">Compressed component</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedXhtmlMasterPage">
+            <summary>
+            Master page with support of XHTML minification and HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedXhtmlMasterPage.#ctor">
+            <summary>
+            Constructs a instance of master page with support of XHTML minification and HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedXhtmlMasterPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IXhtmlMinificationManager,WebMarkupMin.AspNet.Common.IHttpCompressionManager)">
+            <summary>
+            Constructs a instance of master page with support of XHTML minification and HTTP compression
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">XHTML minification manager</param>
+            <param name="compressionManager">HTTP compression manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedXhtmlPage">
+            <summary>
+            Web Forms page with support of XHTML minification and HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedXhtmlPage.#ctor">
+            <summary>
+            Constructs a instance of Web Forms page with support of XHTML minification and HTTP compression
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedAndCompressedXhtmlPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IXhtmlMinificationManager,WebMarkupMin.AspNet.Common.IHttpCompressionManager)">
+            <summary>
+            Constructs a instance of Web Forms page with support of XHTML minification and HTTP compression
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">XHTML minification manager</param>
+            <param name="compressionManager">HTTP compression manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedHtmlMasterPage">
+            <summary>
+            Master page with support of HTML minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedHtmlMasterPage.#ctor">
+            <summary>
+            Constructs a instance of master page with support of HTML minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedHtmlMasterPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IHtmlMinificationManager)">
+            <summary>
+            Constructs a instance of master page with support of HTML minification
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">HTML minification manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedHtmlPage">
+            <summary>
+            Web Forms page with support of HTML minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedHtmlPage.#ctor">
+            <summary>
+            Constructs a instance of Web Forms page with support of HTML minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedHtmlPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IHtmlMinificationManager)">
+            <summary>
+            Constructs a instance of Web Forms page with support of HTML minification
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">HTML minification manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedMasterPageBase">
+            <summary>
+            Base class of master page with support of markup minification
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.MinifiedMasterPageBase._minifiedComponent">
+            <summary>
+            Minified component
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.WebForms.MinifiedMasterPageBase.DisableMinification">
+            <summary>
+            Gets or sets a flag for whether to disable markup minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedMasterPageBase.#ctor(WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase)">
+            <summary>
+            Constructs a instance of master page with support of markup minification
+            </summary>
+            <param name="minifiedComponent">Minified component</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedPageBase">
+            <summary>
+            Base class of Web Forms page with support of markup minification
+            </summary>
+        </member>
+        <member name="F:WebMarkupMin.AspNet4.WebForms.MinifiedPageBase._minifiedComponent">
+            <summary>
+            Minified component
+            </summary>
+        </member>
+        <member name="P:WebMarkupMin.AspNet4.WebForms.MinifiedPageBase.DisableMinification">
+            <summary>
+            Gets or sets a flag for whether to disable markup minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedPageBase.#ctor(WebMarkupMin.AspNet4.WebForms.Components.MinifiedComponentBase)">
+            <summary>
+            Constructs a instance of Web Forms page with support of markup minification
+            </summary>
+            <param name="minifiedComponent">Minified component</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedXhtmlMasterPage">
+            <summary>
+            Master page with support of XHTML minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedXhtmlMasterPage.#ctor">
+            <summary>
+            Constructs a instance of master page with support of XHTML minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedXhtmlMasterPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IXhtmlMinificationManager)">
+            <summary>
+            Constructs a instance of master page with support of XHTML minification
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">XHTML minification manager</param>
+        </member>
+        <member name="T:WebMarkupMin.AspNet4.WebForms.MinifiedXhtmlPage">
+            <summary>
+            Web Forms page with support of XHTML minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedXhtmlPage.#ctor">
+            <summary>
+            Constructs a instance of Web Forms page with support of XHTML minification
+            </summary>
+        </member>
+        <member name="M:WebMarkupMin.AspNet4.WebForms.MinifiedXhtmlPage.#ctor(WebMarkupMin.AspNet4.Common.WebMarkupMinConfiguration,WebMarkupMin.AspNet.Common.IXhtmlMinificationManager)">
+            <summary>
+            Constructs a instance of Web Forms page with support of XHTML minification
+            </summary>
+            <param name="configuration">WebMarkupMin configuration</param>
+            <param name="minificationManager">XHTML minification manager</param>
+        </member>
+    </members>
+</doc>

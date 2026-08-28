@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml id="cat_video" type="widgets">
+  <title>分類選單:影音專區</title>
+  <description>
+	  分類選單:影音專區
+  </description>  
+  <img id="thumb" src=""/>
+  <assets>
+    <file id="control" href="cat_video.ascx"/>
+    <file id="cssfile" href="style.css"/>    
+  </assets>
+  <maintain>
+    <version>1.0</version>
+    <source></source>
+  </maintain>
+</xml>

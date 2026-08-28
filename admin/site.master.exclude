@@ -1,0 +1,265 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="site.master.cs" Inherits="admin_site" %>
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>後端管理系統</title>
+    
+    <link href="<%= ResolveUrl("~/App_Script/bootstrap3/css/bootstrap.css")%>" rel="stylesheet" />
+    <link href="<%= ResolveUrl("~/App_Script/bootstrap_datepicker/css/datepicker.css")%>" rel="stylesheet">
+    <link href="<%= ResolveUrl("~/admin/skin/css/style.css")%>" rel="stylesheet" media="screen">
+      <!--[if lt IE 9]>
+	    <link href="<%= ResolveUrl("~/admin/skin/css/ie8-and-down.css")%>" rel="stylesheet" type="text/css" />
+    <![endif]-->
+    <script type="text/javascript" src="<%= ResolveUrl("~/App_Script/jquery-1.12.4.min.js")%>"></script>
+    <script type="text/javascript" src="<%= ResolveUrl("~/App_Script/admin.js")%>"></script>
+    <script type="text/javascript" src="<%= ResolveUrl("~/App_Script/bootstrap3/js/bootstrap.js")%>"></script>
+    <script type="text/javascript" src="<%= ResolveUrl("~/App_Script/bootstrap_datepicker/js/bootstrap-datepicker.js")%>"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            if ($('#<%=pageScroll.ClientID%>').val() != "") {
+                $(window).scrollTop($('#<%=pageScroll.ClientID%>').val());
+             }
+            $(window).scroll(function () {
+                $('#<%=pageScroll.ClientID%>').val($(window).scrollTop());
+            });
+
+            $("#goTop").click(function () {
+
+                $("html,body").animate({ scrollTop: 0 }, 800);
+
+                //$("html,body").animate({scrollTop:0},900,"easeOutBounce");
+
+                return false;
+            });
+
+            var side_height = $(window).height() - $('.header').height();
+            $(".side1").css({ "min-height": side_height });
+
+            if ($(window).width() < 768) {
+                $(".main").attr({ "class": "main side_hide" });
+            } else {
+                $(".main").attr({ "class": "main" });
+            }
+            $(window).resize(function () {
+                if ($(window).width() < 768) {
+                    $(".main").attr({ "class": "main side_hide" });
+                    $(".side1").css({ "min-height": side_height });
+                } else {
+                    $(".side1").css({ "min-height": side_height });
+                }
+            });
+
+            /*收合左側選單*/
+            $(".side-toggle").click(function () {
+                $(".main").toggleClass("side_hide", 500);
+            });
+
+            /*左側選單項目收合功能*/
+            $("ul.collapsible_item").hide();           
+            $("li.collapsible > a").click(function (e) {             
+               
+                e.preventDefault();
+
+                var cindex = $(this).index("li.collapsible > a");
+            
+                var collapsibles = $("li.collapsible > a");
+                for (i = 0; i < collapsibles.length; i++) {
+                    if ($(collapsibles[i]).hasClass("active") && i != cindex) {
+                        $(collapsibles[i]).removeClass("active");
+                        $(collapsibles[i]).parents("li.collapsible").find("ul.collapsible_item").slideUp();
+                        break;
+                    }
+                }
+               
+                $(this).parents("li.collapsible").find("ul.collapsible_item").slideToggle();
+                $(this).toggleClass("active");
+            });
+
+            /*進階搜尋收合*/
+            $('.btn-search').click(function () {
+                
+                if ($('.search_panel').css("display") == "none") {
+                    $(this).html('<span class="glyphicon glyphicon-search"></span> 回列表頁');
+                } else {
+                    $(this).html('<span class="glyphicon glyphicon-search"></span> 條件搜尋');
+                }
+
+                $('.search_panel').slideToggle();
+                $('#printArea').slideToggle();
+            });
+
+            /*日期選擇器*/
+            $(".datepicker").datepicker();
+            $('.datepicker').css("cursor", "pointer");          
+
+        });
+
+        $(document).ready(function () {
+            $('li.collapsible > a.num<%=ViewState["menuRange"] %>').siblings("ul.collapsible_item").show();
+            $('li.collapsible > a.num<%=ViewState["menuRange"] %>').addClass("active");
+        });
+
+    </script>
+
+    
+        <script src="<%= ResolveUrl("~/App_Script/jquery.msgbox.min.js")%>"></script>
+        <script type="text/javascript">
+            function msgbox(text) {
+                $.msgbox('<div style="min-width:200px;">' + text + '</div>');
+            }
+    </script>
+
+    <asp:ContentPlaceHolder id="head" runat="server">     
+    </asp:ContentPlaceHolder>
+
+</head>
+<body class="" id="Body" runat="server">
+<form id="form1" runat="server">
+    <asp:ScriptManager id="ScriptManager1" runat="server"></asp:ScriptManager>
+
+    <asp:HiddenField ID="pageScroll" runat="server" />
+
+    <div class="header_bg hidden-print">
+        <div class="header">	
+            <div class="navbar-wrapper">
+                <div class="navbar" role="navigation">
+                    <div class="navbar-header row">
+                      <div class="btn-group btn-user visible-xs hidden-login">
+                        <button class="btn btn-sm dropdown-toggle" data-toggle="dropdown" type="button">
+                          <span class="glyphicon glyphicon-user"></span>               
+                        </button>
+                        <ul class="dropdown-menu hidden-login" role="menu">
+                            <li class="b1"><a><span class="glyphicon glyphicon-user"></span> 登入帳號：<asp:Literal ID="u_id" runat="server"></asp:Literal></a></li>
+                            <li class="b2"><a><span class="glyphicon glyphicon-time"></span> 登入時間：<asp:Literal ID="login_time" runat="server"></asp:Literal></a></li>
+                            <li class="b3"><asp:HyperLink ID="logout" runat="server" NavigateUrl="~/admin/index.aspx"><span class="glyphicon glyphicon-off"></span> 登出系統</asp:HyperLink></li>
+                        </ul>
+                      </div><!-- /.btn-group -->
+                      <button type="button" class="btn btn-sm side-toggle hidden-login hidden-print">
+                        <span class="glyphicon glyphicon-align-justify"></span>
+                      </button>
+                      <div class="col-sm-4 login-center">
+                        <h1><asp:Image ID="LOGO" runat="server" Visible="false" /><asp:Literal ID="LOGO_ALT" runat="server" Text="後端管理系統"></asp:Literal></h1> 
+                          Ver <asp:Literal ID="ezwebVersion" runat="server"></asp:Literal>                                
+                                 
+                      </div>
+                      <div class="col-sm-8 hidden-xs hidden-login">
+                        <ul class="list-inline pull-right">
+                            <li>
+                                <asp:Image ID="wrpImportantIcon" runat="server" ImageUrl="~/admin/images/warning.jpg" />
+                                <asp:HyperLink ID="wrpImportant" runat="server"></asp:HyperLink>
+                            </li>
+                            <li class="b1"><span class="glyphicon glyphicon-user"></span> 登入帳號：<asp:Literal ID="u_id2" runat="server"></asp:Literal></li>
+                            <li class="b2"><span class="glyphicon glyphicon-time"></span> 登入時間：<asp:Literal ID="login_time2" runat="server"></asp:Literal></li>
+                            <li class="b3"><asp:HyperLink ID="logout2" runat="server" NavigateUrl="~/admin/index.aspx"><span class="glyphicon glyphicon-off"></span> 登出系統</asp:HyperLink></li>
+                        </ul>
+                      </div>
+                    </div><!-- /.row -->
+                </div><!-- /.navbar -->
+            </div><!-- /.navbar-wrapper -->
+            <div class="banner">
+
+            </div><!-- /.banner -->
+        </div><!-- /.header -->
+    </div><!-- /.header_bg -->
+
+    <div class="main_bg">
+        <div class="main">
+	        <div class="side1 hidden-print">
+    	        <ul class="list-unstyled">
+
+                    <asp:Repeater ID="Repeater1" runat="server" OnItemDataBound="systemMenu_ItemDataBound">
+                        <ItemTemplate>
+                    <li class="collapsible">
+                        <asp:HyperLink ID="link" runat="server"></asp:HyperLink>
+                        <ul class="collapsible_item">
+                            <asp:Repeater ID="Repeater2" runat="server"  OnItemDataBound="systemMenu_ItemDataBound">
+                                <ItemTemplate>
+                                    <li><asp:HyperLink ID="link" runat="server"></asp:HyperLink></li>
+                                </ItemTemplate>
+                            </asp:Repeater>                	      
+                        </ul>
+        	        </li>
+                        </ItemTemplate>
+                    </asp:Repeater>
+        	       
+
+                </ul>
+            </div><!-- /.side1 -->
+    
+            <div class="content">
+
+                    <!--loading-->
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+       <ContentTemplate>
+           <asp:UpdateProgress ID="UpdateProgress1" runat="server" DisplayAfter="1000">
+        <ProgressTemplate>
+            <div class="loadingBar">
+           <div class="text"  id="DivLoading">
+               <div><img src="../../App_Script/loadingbar/023.gif" /></div>
+               處理中請稍候…
+           </div>
+          <div class="bg"></div>  
+                   <style type="text/css">
+                       .loadingBar .bg{
+                           position:absolute;                           
+                           background-color:#000; 
+                           filter:alpha(opacity=50);
+                           -moz-opacity:0.5;
+                           opacity:0.5; 
+                           -khtml-opacity: 0.5;
+                           width:100%;
+                           height:100%;
+                           top:0px;
+                           left:0px;           
+                           z-index:50;         
+                       }
+                       .loadingBar .text{
+                           margin-left:-100px;
+                           width:100%;
+                           text-align:center;
+                            position:absolute;   
+                            color:#fff;
+                              z-index:51;                
+                       }
+                   </style> 
+                <script type="text/javascript">
+                    $(function () {
+                        $(window).scroll(function () {
+                            var scrollVal = $(this).scrollTop();
+                            scrollVal = parseInt(scrollVal) + 200;
+                            $("#DivLoading").css("top", scrollVal + "px");
+                        });
+                    });
+                </script>
+     </div>
+        </ProgressTemplate>        
+    </asp:UpdateProgress>
+       </ContentTemplate>
+    </asp:UpdatePanel>
+    <!--loading-->
+                
+
+            <asp:ContentPlaceHolder id="ContentPlaceHolder" runat="server">
+                <h1>Page Title</h1>
+    
+                  <p>content</p>
+            </asp:ContentPlaceHolder>
+            </div><!-- /.content -->
+    
+  	        <div id="floating"></div>
+        </div><!-- /.main -->
+    </div><!-- /.main_bg -->
+
+    <div class="footer_bg">
+      <div class="footer">
+      </div><!-- /.footer -->
+    </div><!-- /.footer_bg -->
+
+</form>
+</body>
+</html>

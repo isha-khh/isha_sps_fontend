@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-tw" class="no-js" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>高雄技術處</title>
+
+    <!-- 關閉Skype工具列 -->
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- 網站圖示 favicon.ico -->
+    <!-- generics -->
+    <link rel="icon" type="image/png" href="../../favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="../../favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="57x57">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="76x76">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="128x128">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="228x228">
+    <!-- Android -->
+    <link rel="shortcut icon" href="../../favicon.png" sizes="196x196">
+    <!-- iOS -->
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="180x180">
+    <!-- Windows 8 IE 10-->
+    <meta name="msapplication-TileColor" content="#f4d44d">
+    <meta name="msapplication-TileImage" content="../../favicon.png">
+
+    <!-- <link rel="manifest" href="/site.webmanifest"> -->
+    <link rel="mask-icon" href="../../safari-pinned-tab.svg" color="#f4d44d">
+    <meta name="theme-color" content="#ffffff">
+    <!--uc:HeadMeta-->
+
+
+    <script type="text/javascript" src="../../js/jquery-3.7.1.min.js"></script>
+
+    <script type="text/javascript" src="../../js/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../js/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
+
+
+
+    <link href="../../js/bootstrap-5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- slick -->
+    <link href="../../js/slick-1.8.1/slick/slick-theme.css" rel="stylesheet" />
+    <link href="../../js/slick-1.8.1/slick/slick.css" rel="stylesheet" />
+
+    <!-- bsnav -->
+    <link href="../../js/bsnav-master/dist/bsnav.min.css" rel="stylesheet" />
+    <!-- bootstrap icon -->
+    <link href="../../js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <link href="../../js/datepicker-1.0.10/dist/datepicker.css" rel="stylesheet" />
+
+    <!-- fancybox -->
+    <link href="../../js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
+
+    <link href="../../css/coreStyle.css" rel="stylesheet" />
+
+    <link href="../../css/style.css" rel="stylesheet" />
+    <link href="../../css/style_rwd.css" rel="stylesheet" />
+
+    <!--aos --->
+    <script type="text/javascript" src="../../js/aos-master/dist/aos.js"></script>
+    <link href="../../js/aos-master/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <script>
+        $(document).ready(function () {
+            $("header nav").load("../../page/_uc/nav.html");
+            $(".breadcrumb").load("../../page/_uc/breadcrumb.html");
+            $(".side2_new").load("../../page/_uc/side2_new.html");
+            $(".side2_banner").load("../../page/_uc/side2_banner.html");
+            $(".Sharebox").load("../../page/_uc/Sharebox.html");
+            $(".dot").load("../../page/news/_uc/dot.html");
+            $(".link").load("../../page/news/_uc/link.html");
+            $(".cont").load("../../page/news/_uc/cont.html");
+            $("footer").load("../../page/_uc/footer.html");
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.27"></script>
+
+
+    <!-- slick -->
+    <script type="text/javascript" src="../../js/slick-1.8.1/slick/slick.min.js"></script>
+
+    <!-- bsnav -->
+    <script type="text/javascript" src="../../js/bsnav-master/dist/bsnav.min.js"></script>
+
+    <!-- fancybox -->
+    <script type="text/javascript" src="../../js/fancybox-5.0.33/dist/fancybox/fancybox.umd.js"></script>
+
+    <!-- 滾動視差 -->
+    <script type="text/javascript" src="../../js/TweenLite.min.js"></script>
+    <script type="text/javascript" src="../../js/CSSPlugin.min.js"></script>
+
+    <script type="text/javascript" src="../../js/d3-7.9.0/package/dist/d3.js"></script>
+
+
+    <script type="text/javascript" src="../../js/coreScript.js"></script>
+
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+
+    <!--uc:HeadPageRes-->
+
+</head>
+
+
+
+<body class="news show">
+
+    <!-- 主要內容區塊-->
+    <a href="#main-content" class="visually-hidden-focusable">跳至主要內容</a>
+
+    <div class="page_wrapper">
+        <!--  導盲磚 -->
+        <header class="header">
+            <a href="#header-block" id="header-block" accesskey="U" title="上方功能區塊" class="visually-hidden-focusable">::: 上方功能區塊</a>
+            <nav class="nav" aria-label="主要導覽"></nav>
+        </header>
+
+        <!--麵包屑-->
+        <div class="breadcrumb" aria-label="麵包屑導覽"></div>
+
+        <!--  主要內容區塊： -->
+        <main class="main" id="main-content" role="main">
+            <a href="#main-block" id="main-block" accesskey="C" title="中央主要內容區塊" class="visually-hidden-focusable">::: 主要內容區塊</a>
+
+            <div class="container-fluid ">
+                <div class="row gx-0 gy-4">
+
+                    <!--  side1 -->
+                    <div class="side side1 d-none" aria-label="分類選單">
+                        <a href="#left-block" id="left-block" accesskey="L" title="左側選單區塊" class="visually-hidden-focusable d-none">::: 左側選單區塊</a>
+                        <div class="function-bar text-end d-flex d-lg-none justify-content-lg-end justify-content-between">
+                            <div class="sideNavBtn d-lg-none mb-2">
+
+                                <button type="button" class="btn btn-primary collapse-side-btn" aria-expanded="false" aria-controls="sideAutoUcCollapse">
+                                    <i class="icon fas fa-list" aria-hidden="true"></i>
+                                    <span>顯示分類</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-sidebar side_auto_uc multiple-collapse accordion lg-accordion accordion-blocks d-block">
+                            <div class="navbar" role="region" aria-label="分類篩選項目">
+                                <div class="collapse navbar-collapse justify-content-lg-end d-lg-block">
+                                    <div id="sideAutoUcCollapse" class="sideAutoUcCollapse">
+                                        <!--選單-->
+                                        <div class="side1_news"></div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- 主要內容容器  content-->
+                    <div class="content ">
+
+
+                        <div class="column_box">
+                            <div class="tit">
+
+                                <div class="tit_nsl">
+
+
+
+                                    <h3>114年度石化產業智慧化補助計畫正式開放申請</h3>
+                                    <div class="tit_three d-flex mb-2">
+                                        <div class="tit_three_left">
+
+                                            <div class="tag-wrap">
+                                                <!--程式判斷-->
+                                                <span class="badge-tag ">活動資訊</span>
+                                                <span class="badge-tag  d-none">產業新知</span>
+                                                <span class="badge-tag  d-none">訊息轉知</span>
+                                            </div>
+                                            <div class="part-line"></div>
+                                            <div class="date">2026-04-15</div>
+                                        </div>
+                                        <!--分享-->
+                                        <div class="Sharebox"></div>
+
+                                    </div><!--tit_three-->
+
+
+
+                                </div><!--tit_nsl-->
+
+
+
+                                <ul class="nav ul-key">
+                                    <li><a href="#" title="前往產業AI" tabindex="0">產業AI</a></li>
+                                    <li><a href="#" title="前往技術文件" tabindex="0">技術文件</a></li>
+                                </ul>
+                            </div>
+
+
+                            <div class="ratio ratio-4x3">
+                                <img class="img-fluid d-block" src="../../images/all/new_logo.jpg" alt="">
+                            </div>
+
+                            <div class="Contributor">撰稿人 / 設計研發組研究員 郭憶璇、江宛庭</div>
+
+
+                            <!--編輯器-->
+                            <div class="txt editor mb-md-5 mb-4">
+                                <p>
+                                    設計已不只是產品外觀與美學工具，而是協助企業理解市場、整合技術、回應永續議題，建立創新策略的核心驅動力。台灣設計研究院《產業設計創新趨勢與應用方法》提出「設計驅動產業創新模式」，涵蓋三大執行階段：瞭解現況與趨勢、發展解決方案、建構產品策略與迭代。書中以自行車 AI 工具開發、工具機沉浸展示、循環石材材料研發等跨產業案例，說明設計如何在不確定時代降低創新風險、提升決策精準度，並加速技術與市場需求的連結。
+
+                                </p>
+
+                                <p>世界改變的速度大幅加快，產業不僅要回應市場，也必須面對數位轉型、環境永續與社會責任等多重挑戰。過往所仰賴的開發模式與營運策略，已難以因應變化快速的市場，因此產業需具備新的思維與方法來面對未來的不確定性與轉型挑戰（Gutsche，2021）。</p>
+
+                            </div>
+
+
+                            <div class="dk_conbo mb-md-5 mb-4">
+                                <!--附件下載-->
+                                <div class="dot mb-md-5 mb-4"> </div> <!--dot-->
+                                <!--相關連結-->
+                                <div class="link mb-md-5 mb-4"> </div> <!--dow_t-->
+                                <!--聯繫人資訊-->
+                                <div class="cont "> </div> <!--dow_t-->
+                            </div><!--dk_conbo-->
+
+
+                            <a href="../../page/news/index.html" title="返回" class="more_x">
+                                <span>返回</span>
+                                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            </a>
+
+
+                        </div><!--column_box-->
+
+
+
+
+
+
+
+
+                    </div><!--content-->
+                    <!-- side2 -->
+                    <div class="side side2" id="side2-block" aria-label="相關選單">
+                        <a href="#side2-block" id="right-block" accesskey="R" title="右側選單區塊" class="visually-hidden-focusable">::: 右側選單區塊</a>
+                        <!--熱門文章-->
+                        <div class="side2_new"></div>
+                        <!--廣告-->
+                        <div class="side2_banner"></div>
+                        <!-- 選單內容 -->
+                    </div>
+                </div><!--row-->
+            </div>
+
+
+            <div class="s_round_6" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_6.png" alt="">
+            </div>
+
+            <div class="s_round_3" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_3.jpg" alt="">
+            </div>
+        </main>
+
+
+        <a href="#footer-block" id="footer-block" accesskey="B" title="下方功能區塊" class="visually-hidden-focusable" tabindex="0">::: 下方功能區塊</a>
+        <!-- 頁尾區塊 -->
+        <footer class="footer" role="contentinfo">
+        </footer>
+    </div>
+
+
+
+
+    <script>
+
+        $(function () {
+            if (window.innerWidth > 767) {
+                $(window).on('scroll', function () {
+                    const offsetTop = $(this).scrollTop();
+
+                    // 1. .s_round_1 視差滾動
+                    const $industry = $('.footer');
+                    if ($industry.length && offsetTop < $industry.offset().top) {
+                        TweenLite.to(".s_round_6, .s_round_3", 1, {
+                            y: -offsetTop / 15
+                        });
+                    }
+
+
+                }).trigger('scroll');
+            }
+        });
+
+    </script>
+
+</body>
+</html>
+

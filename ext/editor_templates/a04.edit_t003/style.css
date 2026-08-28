@@ -1,0 +1,10 @@
+﻿/* ---------------------------  layout.css  --------------------------------------- */
+
+/*6064*/
+.editor section.edit_t013 .blog-post-item {
+	display:block;
+	margin-bottom:80px;
+	padding-bottom:60px;
+	border-bottom:#eee 1px solid;
+	position:relative;
+}

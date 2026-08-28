@@ -1,0 +1,31 @@
+<Backup>
+<DateTime>2024/6/5 下午 03:37:29</DateTime>
+<Subject>首頁區塊關於(勿刪)</Subject>
+<Word>
+<![CDATA[
+        <div class="container">
+
+        <div class="tb_ite_left" data-aos="fade-right">
+                <div class="tit">
+                    <h2><span class="d-block">環保部自民國86年1月起</span>推動「<span class="red">全民參與回饋式資源回收四合一計畫</span>」</h2>
+      
+                    <p>主要是由「社區民眾」透過家戶垃圾分類，將各類自家戶產出之小型資源物品，結合「地方政府清潔隊」、「回收商」及「回收基金」之力量予以回收再利用。</p>
+                    <p>透過此四者合一，建立完整回收網路，確保資源物品確實回收再利用或妥善處理，並使參與民眾、清潔隊及回收商獲得合理利潤或獎勵，以確保回收體系之完整循環。</p>
+            </div>
+        </div><!--tb_ite_left-->
+
+
+           <div class="tb_ite" data-aos="fade-left">
+                <a class="mapro_big" data-fancybox href="https://youtu.be/6jQH55_RxTk?si=FQMtNWgq1uMUcgPA" title="惜食清盤零浪費 宣導廣告">
+                    <img class="img-fluid " src="Templates/TEZ_113073/images/all/tube.jpg" alt="背景圖片" />
+
+                </a>
+            </div>
+        <!-- tb_ite-->
+
+
+       </div><!--container-->
+
+]]>
+</Word>
+</Backup>

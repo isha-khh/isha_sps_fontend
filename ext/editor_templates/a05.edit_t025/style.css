@@ -1,0 +1,22 @@
+﻿/* -----------------------------   layout.css ---------------------------   */
+/*6258*/
+.editor section.edit_t040 .comments {
+	margin-top:60px;
+}
+.editor section.edit_t040 .comments .comment-item {
+	margin:40px 0;
+}
+
+/*6269*/
+.editor section.edit_t040 .comments span.user-avatar {
+	background:#eee;
+	width:64px; height:64px;
+	float:left;
+	margin-right:10px;
+}
+
+/*6283*/
+.editor section.edit_t040 .comments h4 {
+	font-size: 1rem;
+}
+

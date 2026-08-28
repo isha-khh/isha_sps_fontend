@@ -1,0 +1,83 @@
+﻿@charset "utf-8";
+/* CSS Document */
+
+/*----------------------- Banner Frame -----------------------*/
+/*------------------ .wrp-frame2 --------------------*/
+.banner .wrp_frame.border-LT,
+.banner .wrp_frame.border-RB {
+    width: 10px;
+    height: 10px;
+}
+
+.banner .wrp_frame.border-RT,
+.banner .wrp_frame.border-LB {
+    width: 200px;
+    height: 170px;
+}
+
+.banner .wrp_frame.border-CT,
+.banner .wrp_frame.border-CB {
+    height: 10px;
+}
+
+.banner .wrp_frame.border-LM,
+.banner .wrp_frame.border-RM {
+    width: 10px;
+}
+
+.banner .wrp_frame.border-LT {
+    background-image: url(images/frame1_LT.png);
+    left: -6px;
+    top: -6px;
+}
+
+.banner .wrp_frame.border-CT {
+    background-image: url(images/frame1_CT.png);
+    top: -6px;
+}
+
+.banner .wrp_frame.border-RT {
+    background-image: url(images/frame2_RT.png);
+    right: -41px;
+    top: -53px;
+}
+
+.banner .wrp_frame.border-LM {
+    background-image: url(images/frame1_LM.png);
+    left: -6px;
+}
+
+.banner .wrp_frame.border-RM {
+    background-image: url(images/frame1_RM.png);
+    right: -6px;
+}
+
+.banner .wrp_frame.border-LB {
+    background-image: url(images/frame2_LB.png);
+    left: -41px;
+    bottom: -53px;
+}
+
+.banner .wrp_frame.border-CB {
+    background-image: url(images/frame1_CB.png);
+    bottom: -6px;
+}
+
+.banner .wrp_frame.border-RB {
+    background-image: url(images/frame1_RB.png);
+    right: -6px;
+    bottom: -6px;
+}
+
+
+@media (max-width: 1199px) {
+}
+
+@media (max-width: 991px) {
+}
+
+@media (max-width: 767px) {
+}
+
+@media (max-width: 480px) {
+}

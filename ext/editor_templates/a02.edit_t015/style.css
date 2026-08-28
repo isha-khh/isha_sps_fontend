@@ -1,0 +1,36 @@
+﻿.table-015 {
+    font-family: "微軟正黑體";
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    letter-spacing: 1px;
+}
+
+.table-015 td,
+.table-015 th {
+    padding: 10px 0;
+    border-bottom: 1px solid #fff;
+    border-right: 1px solid #fff;
+}
+
+.table-015 .t1 {
+    background-color: #fa5e74;
+    color: #fff;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.table-015 tr:nth-child(even) {
+    color: #de7685;
+    background-color: #fedde6;
+    text-align: center;
+    font-size: 0.875rem;
+    padding: 10px 0;
+}
+
+.table-015 tr:nth-child(odd) {
+    color: #fff;
+    background-color: #f9cad7;
+    text-align: center;
+    font-size: 0.875rem;
+}
