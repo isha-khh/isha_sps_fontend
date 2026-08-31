@@ -1,0 +1,21 @@
+/*
+ * 過渡期策略：
+ * 舊站 (coreStyle.css / style.css / style_rwd.css / type.css) 是既有完整的視覺系統，
+ * 這裡先只引入 Tailwind 的 theme + utilities layer，「不」引入 preflight（CSS reset），
+ * 避免跟舊站的 Bootstrap Reboot / 自訂樣式互相打架。
+ *
+ * 之後元件一個一個換成 Tailwind utility 樣式時，可以視情況再打開 preflight，
+ * 或針對單一元件自行處理 reset。
+ *
+ * 舊站樣式表本身是用 <link> 直接掛進 <head>（見 src/app/layout.tsx 的 LEGACY_STYLESHEETS），
+ * 不會經過這支 globals.css。
+ */
+/* 中文字型，原本是 <head> 裡的 <link>，理由同上，改用 CSS @import 避免手刻 <head> */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap");
+
+@import "tailwindcss/theme.css" layer(theme) prefix(tw);
+@import "tailwindcss/utilities.css" layer(utilities) prefix(tw);
+
+@theme inline {
+  --font-sans: var(--font-noto-sans-tc), "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+}
