@@ -3,6 +3,7 @@ import Header from "@/components/layout/Headers";
 import Footer from "@/components/layout/Footer";
 import CategorySidebar from "@/components/layout/CategorySidebar";
 import Breadcrumb, { type BreadcrumbItem } from "@/components/layout/Breadcrumb";
+import MarqueeTrack from "@/components/ui/MarqueeTrack";
 
 /**
  * 積木元件：內頁共用版型（news、serve…之後每個內頁都套這個）。
@@ -64,9 +65,7 @@ export default function InnerPageShell({
         {title && (
           <div className="section-title-wrap">
             <div className="marquee-bg" aria-hidden="true">
-              <div className="marquee-track">
-                <span>SMART SAFETY </span>
-              </div>
+              <MarqueeTrack />
             </div>
 
             <h2 className="main-title">
