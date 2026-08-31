@@ -1,5 +1,10 @@
+import HeroImage from "@/components/ui/HeroImage";
+
 /**
  * 過渡期元件：內容照抄舊站的 page/_uc/banner_home.html。
+ *
+ * 主視覺圖（下面的 HeroImage）會登記一項 loading 任務，PageLoader
+ * 要等它真的載入完成才會收起載入畫面，見 lib/loading-store.ts。
  */
 export default function Banner() {
   return (
@@ -46,7 +51,7 @@ export default function Banner() {
                 <img className="img-fluid d-block" src="/images/banner/banner_Light.png" alt="" />
               </div>
 
-              <img
+              <HeroImage
                 className="img-fluid d-block"
                 src="/images/banner/banner_bg.jpg"
                 alt="智慧化職安防護與產業數位轉型主視覺"
