@@ -1,0 +1,95 @@
+
+
+
+
+
+@media (min-width: 992px) {
+}
+@media (min-width: 1680px) {
+}
+@media (max-width: 1679px) {
+}
+@media (max-width: 1399px) {
+}
+@media (max-width: 1199px) {
+}
+@media (max-width: 991px) {
+    .bsnav-mobile.in .bsnavclose.close-btn {
+        transform: scale(1);
+    }
+}
+@media (max-width: 767px) {
+    /*智慧技術*/
+    /* 1. 外層容器改為垂直排列 */
+    .sm_techn {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    /* 2. 左側選單改為橫向滑動 Bar */
+    .sm_techn_left {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
+        border-right: none;
+        border-bottom: 2px solid #e2e8f0;
+        -webkit-overflow-scrolling: touch; /* 滑動順暢 */
+    }
+
+        /* 隱藏原生捲軸但保留滑動功能 */
+        .sm_techn_left::-webkit-scrollbar {
+            display: none;
+        }
+
+    .sm_techn_left {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+        /* 3. 頁籤項目調整為橫向按鈕 */
+        .sm_techn_left .tab-btn {
+            flex: 0 0 auto;
+            width: auto;
+            padding: 12px 18px;
+            border-bottom: none;
+        }
+
+            /* 選中狀態改為底部線條高亮 */
+            .sm_techn_left .tab-btn.active {
+                border-left: none;
+                border-bottom: 3px solid #ea580c;
+                background-color: #fff;
+            }
+
+            /* 手機版橫向滑動時隱藏右側小箭頭 */
+            .sm_techn_left .tab-btn .arrow-icon {
+                display: none;
+            }
+
+    /* 4. 右側內容區塊內距調整 */
+    .sm_techn_right {
+        padding: 16px 12px;
+    }
+
+    /* 5. Checkbox 觸控熱區放大（符合無障礙手指點擊 44x44px 規範） */
+    .project_fx .form-check {
+        width: 100%; /* 單行單個，方便手指點選 */
+        padding: 8px 0 8px 2.2rem;
+        margin-bottom: 0;
+    }
+
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .form-check-label {
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    /*智慧技術*/
+}
+@media (max-width: 425px) {
+}
