@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <dwsync>
-<file name="AxisProxy.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="dataZoomAction.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="DataZoomModel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="dataZoomProcessor.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="DataZoomView.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="helper.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="history.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="InsideZoomModel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="InsideZoomView.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="install.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="installCommon.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="installDataZoomInside.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="installDataZoomSelect.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="installDataZoomSlider.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="roams.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="SelectZoomModel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="SelectZoomView.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="SliderZoomModel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="SliderZoomView.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
+<file name="AxisProxy.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="dataZoomAction.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="DataZoomModel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="dataZoomProcessor.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="DataZoomView.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="helper.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="history.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="InsideZoomModel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="InsideZoomView.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="install.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="installCommon.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="installDataZoomInside.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="installDataZoomSelect.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="installDataZoomSlider.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="roams.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="SelectZoomModel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="SelectZoomView.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="SliderZoomModel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="SliderZoomView.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
 </dwsync>

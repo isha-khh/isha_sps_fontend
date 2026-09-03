@@ -1,0 +1,40 @@
+/* CSS Document */
+
+ body.dragging, body.dragging * {
+  cursor: move !important;
+}
+
+.dragged {
+  position: absolute;
+  opacity: 0.5;
+  z-index: 2000;
+}
+
+ol.example{  
+    background-color:white;
+	overflow:auto;
+	width:95%;
+	height:500px;	
+	list-style-position:outside;
+	list-style-type:disc ;	  
+    margin:0px;
+}
+
+ol.example li {
+  margin:2px;
+  border-bottom:dashed;
+  border-bottom-width:1px;
+  border-bottom-color:silver;
+  width:98%;
+  cursor:pointer;
+}
+
+ol.example li.placeholder {
+  position: relative;  
+  border:solid;
+  border-width:1px;
+  border-color:silver;
+}
+ol.example li.placeholder:before {
+  position: absolute;  
+}

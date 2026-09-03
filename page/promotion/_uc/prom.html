@@ -1,0 +1,160 @@
+ <!--公司簡介-->
+<div class="cont">
+    <div class="dow-name">
+
+        <i class="bi bi-buildings me-1" aria-hidden="true"></i>
+        <span>公司簡介</span>
+    </div>
+
+
+
+
+    <div class="prom_section">
+        <div class="slider wid-prom">
+            <div class="indu_box d-flex ">
+                <div class="pic">
+                    <div class="ratio ratio-4x3">
+                        <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="智慧公安技術 公司標誌">
+                    </div>
+
+                </div>
+
+
+                <div class="tit_ind">
+
+                    <div class="tit_nsl">
+
+                        <div class="h3_solid">
+                            <div class="me_sod_bu">智慧公安技術</div>
+                        </div>
+
+                        <div class="txt editor">
+                            專注於提供企業數位轉型與智慧工安解決方案，協助客戶優化營運流程、降低風險並提升作業效率。<br>
+                            我們整合物聯網與雲端技術，打造安全、穩定且可擴充的系統平台，協助企業落實智慧化管理。
+
+                        </div>
+
+                        <a href="#" title="www.eztrust.com(另開視窗)" target="_blank" class="blue"><i class="bi bi-globe me-1"></i><span>www.eztrust.com</span></a>
+
+
+                    </div><!--tit_nsl-->
+
+                </div><!--tit-->
+            </div><!--indu_box 1組-->
+
+
+            <div class="indu_box d-flex ">
+                <div class="pic">
+                    <div class="ratio ratio-4x3">
+                        <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="智慧公安技術 公司標誌">
+                    </div>
+
+                </div>
+
+
+                <div class="tit_ind">
+
+                    <div class="tit_nsl">
+
+                        <div class="h3_solid">
+                            <div class="me_sod_bu">智慧公安技術</div>
+                        </div>
+
+                        <div class="txt editor">
+                            專注於提供企業數位轉型與智慧工安解決方案，協助客戶優化營運流程、降低風險並提升作業效率。<br>
+                            我們整合物聯網與雲端技術，打造安全、穩定且可擴充的系統平台，協助企業落實智慧化管理。
+
+                        </div>
+
+                        <a href="#" title="www.eztrust.com(另開視窗)" target="_blank" class="blue"><i class="bi bi-globe me-1"></i><span>www.eztrust.com</span></a>
+
+
+                    </div><!--tit_nsl-->
+
+                </div><!--tit-->
+            </div><!--indu_box 1組-->
+
+
+
+        </div><!--wid-prom-->
+    </div><!--prom_section-->
+
+
+
+    <div class="custom_box">
+        <button type="button" class="custom-arrow custom-prev" aria-label="上一則影片">
+            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="custom-arrow custom-next" aria-label="下一則影片">
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="slick-play-pause-btn" aria-label="暫停輪播" aria-pressed="false">
+            <i class="bi bi-pause-fill" aria-hidden="true"></i>
+            <span class="visually-hidden">暫停輪播</span>
+        </button>
+    </div><!-- /.custom_box -->
+
+
+
+</div><!--cont-->
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $cont.find('.wid-prom');
+        const $prev = $cont.find('.custom-prev');
+        const $next = $cont.find('.custom-next');
+        const $pauseBtn = $cont.find('.slick-play-pause-btn');
+
+        // 1. 初始化 Slick 輪播
+        $slider.slick({
+            infinite: true,
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 3000,
+            arrows: true,
+            prevArrow: $prev,
+            nextArrow: $next
+        });
+
+        // 2. 排除複製節點的 Tab 焦點
+        function fixSlickTabFocus() {
+            $slider.find('.slick-cloned a, .slick-cloned button').attr('tabindex', '-1').attr('aria-hidden', 'true');
+        }
+
+        fixSlickTabFocus();
+        $slider.on('afterChange', function () {
+            fixSlickTabFocus();
+        });
+
+        // 3. Tab 鍵聚焦時自動滾動到當前卡片
+        $slider.find('.slick-slide:not(.slick-cloned) a').on('focus', function () {
+            const slideIndex = $(this).closest('.slick-slide').data('slick-index');
+            $slider.slick('slickGoTo', slideIndex);
+        });
+
+        // 4. 暫停 / 播放按鈕切換
+        let isPaused = false;
+        $pauseBtn.on('click', function () {
+            if (!isPaused) {
+                $slider.slick('slickPause');
+                isPaused = true;
+                $(this).attr('aria-label', '播放輪播')
+                    .attr('aria-pressed', 'true')
+                    .find('i').removeClass('bi-pause-fill').addClass('bi-play-fill');
+                $(this).find('.visually-hidden').text('播放輪播');
+            } else {
+                $slider.slick('slickPlay');
+                isPaused = false;
+                $(this).attr('aria-label', '暫停輪播')
+                    .attr('aria-pressed', 'false')
+                    .find('i').removeClass('bi-play-fill').addClass('bi-pause-fill');
+                $(this).find('.visually-hidden').text('暫停輪播');
+            }
+        });
+    });
+</script>
+

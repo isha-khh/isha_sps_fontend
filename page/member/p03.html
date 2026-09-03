@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="zh-tw" class="no-js" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>高雄技術處</title>
+
+    <!-- 關閉Skype工具列 -->
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- 網站圖示 favicon.ico -->
+    <!-- generics -->
+    <link rel="icon" type="image/png" href="../../favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="../../favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="57x57">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="76x76">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="128x128">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="228x228">
+    <!-- Android -->
+    <link rel="shortcut icon" href="../../favicon.png" sizes="196x196">
+    <!-- iOS -->
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="180x180">
+    <!-- Windows 8 IE 10-->
+    <meta name="msapplication-TileColor" content="#f4d44d">
+    <meta name="msapplication-TileImage" content="../../favicon.png">
+
+    <!-- <link rel="manifest" href="../../jssite.webmanifest"> -->
+    <link rel="mask-icon" href="../../safari-pinned-tab.svg" color="#f4d44d">
+    <meta name="theme-color" content="#ffffff">
+    <!--uc:HeadMeta-->
+
+
+    <script type="text/javascript" src="../../js/jquery-4.0.0.min.js"></script>
+
+    <script type="text/javascript" src="../../js/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../js/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
+
+
+
+    <link href="../../js/bootstrap-5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- slick -->
+    <link href="../../js/slick-2.0.0/slick/slick-theme.css" rel="stylesheet" />
+    <link href="../../js/slick-2.0.0/slick/slick.css" rel="stylesheet" />
+
+    <!-- bsnav -->
+    <link href="../../js/bsnav-master/dist/bsnav.min.css" rel="stylesheet" />
+    <!-- bootstrap icon -->
+    <link href="../../js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <link href="../../js/datepicker-1.0.10/dist/datepicker.css" rel="stylesheet" />
+
+    <!-- 上傳檔案 -->
+    <script src="../../js/dropzone.js"></script>
+
+
+    <!-- fancybox -->
+    <link href="../../js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
+
+    <link href="../../css/coreStyle.css" rel="stylesheet" />
+
+    <link href="../../css/style.css" rel="stylesheet" />
+    <link href="../../css/style_rwd.css" rel="stylesheet" />
+
+    <!--aos --->
+    <script type="text/javascript" src="../../js/aos-master/dist/aos.js"></script>
+    <link href="../../js/aos-master/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <script>
+        $(document).ready(function () {
+            $("header nav").load("../../page/_uc/nav.html");
+            $(".breadcrumb").load("../../page/_uc/breadcrumb.html");
+            $("footer").load("../../page/_uc/footer.html");
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.27"></script>
+
+
+    <!-- slick -->
+    <script type="text/javascript" src="../../js/slick-2.0.0/slick/slick.min.js"></script>
+
+    <!-- bsnav -->
+    <script type="text/javascript" src="../../js/bsnav-master/dist/bsnav.min.js"></script>
+
+    <!-- fancybox -->
+    <script type="text/javascript" src="../../js/fancybox-5.0.33/dist/fancybox/fancybox.umd.js"></script>
+
+    <!-- 滾動視差 -->
+    <script type="text/javascript" src="../../js/TweenLite.min.js"></script>
+    <script type="text/javascript" src="../../js/CSSPlugin.min.js"></script>
+
+
+
+    <script type="text/javascript" src="../../js/coreScript.js"></script>
+
+
+    <!---日期-->
+    <link rel="stylesheet" href="../../js/flatpickr/flatpickr.css" />
+
+    <script src="../../js/flatpickr/flatpickr.js"></script>
+    <!--多語系-->
+    <script src="../../js/flatpickr/zh.js"></script>
+
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+
+    <!--uc:HeadPageRes-->
+
+</head>
+
+
+
+<body class="member register p02">
+    <!-- 彈跳 -->
+    <div class="modal fade" id="staticmembership" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticmembership" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>完成註冊</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                </div>
+                <div class="modal-body">
+                    <div class="txt editor"></div>
+                    <p class="text-center">恭喜您！已完成會員註冊程序。</p>
+
+                    <div class="card-footer d-flex justify-content-center">
+                        <a class="btn-theme" href="../../page/member/login.html" title="前往會員專區">前往會員專區<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要內容區塊-->
+    <a href="#main-content" class="visually-hidden-focusable">跳至主要內容</a>
+
+    <div class="page_wrapper">
+        <!--  導盲磚 -->
+        <header class="header">
+            <a href="#header-block" id="header-block" accesskey="U" title="上方功能區塊" class="visually-hidden-focusable">::: 上方功能區塊</a>
+            <nav class="nav" aria-label="主要導覽"></nav>
+        </header>
+
+        <!--標題-->
+        <div class="section-title-wrap">
+
+            <div class="marquee-bg" aria-hidden="true">
+                <div class="marquee-track">
+                    <span>SMART SAFETY </span>
+                </div>
+            </div>
+
+
+            <h2 class="main-title">
+                <span class="tit_tw">完成註冊</span>
+            </h2>
+        </div>
+        <!--麵包屑-->
+        <div class="breadcrumb" aria-label="麵包屑導覽"></div>
+
+        <!--  主要內容區塊：-->
+        <main class="main" id="main-content" role="main">
+            <a href="#main-block" id="main-block" accesskey="C" title="中央主要內容區塊" class="visually-hidden-focusable">::: 主要內容區塊</a>
+
+            <div class="container-fluid ">
+                <div class="row gx-0 gy-4">
+
+                    <!--  side1 -->
+                    <div class="side side1 d-none" aria-label="分類選單">
+                        <a href="#left-block" id="left-block" accesskey="L" title="左側選單區塊" class="visually-hidden-focusable d-none">::: 左側選單區塊</a>
+                        <div class="function-bar text-end d-flex d-lg-none justify-content-lg-end justify-content-between">
+                            <div class="sideNavBtn d-lg-none mb-2">
+
+                                <button type="button" class="btn btn-primary collapse-side-btn" aria-expanded="false" aria-controls="sideAutoUcCollapse">
+                                    <i class="icon fas fa-list" aria-hidden="true"></i>
+                                    <span>顯示分類</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-sidebar side_auto_uc multiple-collapse accordion lg-accordion accordion-blocks d-block">
+                            <div class="navbar" role="region" aria-label="分類篩選項目">
+                                <div class="collapse navbar-collapse justify-content-lg-end d-lg-block">
+                                    <div id="sideAutoUcCollapse" class="sideAutoUcCollapse">
+                                        <!--選單-->
+                                        <div class="side1_serve"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- 主要內容容器  content-->
+                    <div class="content ">
+
+                        <div class="step-progress ">
+                            <ul class="nav nav-pills step step-round">
+                                <li class="col text-center active">
+                                    <a><span>使用條款</span></a>
+                                </li>
+                                <li class="col text-center active">
+                                    <a><span>帳號設定</span></a>
+                                </li>
+                                <li class="col text-center active">
+                                    <a><span>填寫資料</span></a>
+                                </li>
+                                <li class="col text-center active">
+                                    <a><span>完成註冊</span></a>
+                                </li>
+                            </ul>
+                        </div><!--step-progress-->
+
+
+
+                        <div class="frame-small-box ">
+                            <h3 class="mb-4 me_sho">
+                                帳號註冊
+                            </h3>
+                            <div class="menb_inp_box d-flex">
+
+                                <div class="menb_inp_tit form-group">
+                                    <label class="mb-2">電子郵件(登入帳號)</label>
+                                    <input type="text" class="form-control " placeholder="請輸入電子郵件" value="email@gmail.com" disabled>
+                                    <!--程式判斷-->
+                                    <!--<p class="mb-0 cont_p">沿用個人會員資料</p>-->
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit   form-group ">
+                                    <label class="mb-2">會員密碼</label>
+
+
+                                    <div class="pwd position-relative">
+                                        <input type="password"
+                                               class="form-control pe-5"
+                                               id="password2"
+                                               placeholder="請輸入會員密碼"
+                                               required
+                                               aria-required="true" value="123456" disabled />
+
+
+                                        <button type="button"
+                                                class="btn icon-eyes position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent"
+                                                data-id="password2"
+                                                aria-label="顯示密碼"
+                                                title="顯示密碼"
+                                                aria-pressed="false">
+                                            <i class="bi bi-eye-slash" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+
+                                </div><!---menb_inp_tit-->
+
+                            </div><!--menb_inp_box-->
+
+
+                            <h3 class="mb-4 me_sho  mt-4 ">
+                                個人資料
+                            </h3>
+
+                            <div class="menb_inp_box d-flex">
+
+                                <div class="menb_inp_tit  form-group">
+                                    <label class="mb-2">姓名</label>
+                                    <input type="text" class="form-control" placeholder="請輸入姓名" value="王小名" disabled>
+                                    <!--程式判斷-->
+                                    <!--<p class="mb-0 cont_p">沿用個人會員資料</p>-->
+                                </div><!---menb_inp_tit-->
+
+
+
+                                <div class="menb_inp_tit form-group">
+                                    <label class="mb-2">聯絡電話</label>
+                                    <input type="text" class="form-control" placeholder="請輸入聯絡電話" value="04XXXXXXXX" disabled>
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group">
+                                    <label class="mb-2">手機</label>
+                                    <input type="text" class="form-control" placeholder="請輸入手機" value="09XXXXXXXX" disabled>
+                                </div><!---menb_inp_tit-->
+
+
+
+                            </div><!--menb_inp_box -->
+
+
+                            <h3 class="mb-4 me_sho  mt-4 ">
+                                公司資料
+                            </h3>
+
+                            <div class="menb_inp_box d-flex">
+
+                                <div class="menb_inp_tit form-group ">
+                                    <label class="mb-2">所屬公司名稱</label>
+                                    <input type="text" class="form-control" placeholder="請輸入所屬公司名稱" value="智慧工安" disabled>
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group   ">
+                                    <label class="mb-2">產業別</label>
+                                    <select class="form-select" aria-label="請選擇" disabled>
+                                        <option selected="">工業</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group   ">
+                                    <label class="mb-2">職稱</label>
+                                    <input type="text" class="form-control" placeholder="請輸入職稱" value="業務" disabled>
+                                </div><!---menb_inp_tit-->
+
+
+                                <div class="menb_inp_tit form-group  w-100 ">
+                                    <label class="mb-2">LOGO圖像</label>
+                                    <div class="menb_logo">
+                                        <img class="img-fluid d-block" src="../../images/all/menb_logo.jpg" alt="" style="width:200px;height:200px;">
+
+                                    </div>
+
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group   ">
+                                    <label class="mb-2">公司負責人姓名</label>
+                                    <input type="text" class="form-control" placeholder="請輸入公司負責人姓名" value="王小名" disabled>
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group   ">
+                                    <label class="mb-2">成立日期</label>
+                                    <input type="text" placeholder="開始日期" id="startDate" class="form-control areadrp  sideByside" value="2026.8.26" disabled />
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group   ">
+                                    <label class="mb-2">統一編號</label>
+                                    <input type="text" class="form-control" placeholder="請輸入統一編號" value="123456" disabled>
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group   ">
+                                    <label class="mb-2">公司電話</label>
+                                    <input type="text" class="form-control" placeholder="公司電話" value="04XXXXXXXX" disabled>
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group   ">
+                                    <label class="mb-2">資本總額</label>
+                                    <input type="text" class="form-control" placeholder="資本總額" value="2千萬" disabled>
+                                </div><!---menb_inp_tit-->
+
+
+
+                                <div class="menb_inp_tit form-group  w-100 ">
+                                    <label class="mb-2">公司地址</label>
+                                    <div class="col-12 col-sm">
+                                        <div class="row g-2">
+
+                                            <div class="col-6  mb-md-0 mb-2">
+                                                <select class="form-select" aria-label="縣市" disabled>
+                                                    <option selected="">台中市</option>
+                                                    <option value="1">基隆市</option>
+                                                    <option value="2">台北市</option>
+                                                </select>
+                                            </div>
+
+
+                                            <div class="col-6  mb-md-0 mb-2">
+                                                <select class="form-select" aria-label="鄉鎮市區" disabled>
+                                                    <option selected="">北區</option>
+                                                    <option value="1">中正區</option>
+                                                    <option value="2">信義區</option>
+                                                </select>
+                                            </div>
+
+
+                                            <div class="col-12">
+                                                <input type="text" class="form-control" placeholder="地址" value="高雄市左營區博愛三路12號15樓" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group  w-100 ">
+                                    <label class="mb-2">公司網址</label>
+                                    <input type="text" class="form-control" placeholder="公司網址" value="www.eztrust.com" disabled>
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit form-group   w-100">
+                                    <label class="mb-2">公司簡介</label>
+                                    <textarea class="form-control" rows="5" disabled>說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明說明
+                                        </textarea>
+                                </div><!---menb_inp_tit-->
+
+
+
+                                <div class="menb_inp_tit form-group  w-100 ">
+                                    <label class="mb-2">主要產品暨服務</label>
+                                    <select class="form-select" aria-label="請選擇" disabled>
+                                        <option selected="">產品</option>
+                                    </select>
+                                </div><!---menb_inp_tit-->
+
+
+                                <div class="menb_inp_tit form-group  w-100 ">
+                                    <label class="mb-2"><span class="red me-1">*</span>應用情境(可多選)</label>
+                                    <div class="project_fx project_three d-flex">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxContext" checked="" disabled>
+                                            <label class="form-check-label" for="fxContext">
+                                                有害氣體監測與暴露風險預警
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxContext" disabled>
+                                            <label class="form-check-label" for="fxContext">
+                                                人員、車輛與作業環境影像辨識與風險預警
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxContext" checked="" disabled>
+                                            <label class="form-check-label" for="fxContext">
+                                                人員、作業場所安全動態即時監測
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxContext" disabled>
+                                            <label class="form-check-label" for="fxContext">
+                                                設備與管線即時監控與風險預警
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxContext" disabled>
+                                            <label class="form-check-label" for="fxContext">
+                                                工廠營運數據整合與化學品整合監控管理
+                                            </label>
+                                        </div><!--form-check-->
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxContext">
+                                            <label class="form-check-label" for="fxContext">
+                                                巡檢系統提升異常發現與即時應變效能
+                                            </label>
+                                        </div><!--form-check-->
+
+
+
+                                    </div><!--project_fx-->
+                                </div><!---menb_inp_tit-->
+
+
+                                <div class="menb_inp_tit form-group  w-100 ">
+                                    <label class="mb-2"><span class="red me-1">*</span>應用範疇(可多選)</label>
+                                    <div class="project_fx d-flex">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxScope" checked="" disabled>
+                                            <label class="form-check-label" for="fxScope">
+                                                人員
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxScope" disabled>
+                                            <label class="form-check-label" for="fxScope">
+                                                環境
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxScope" checked="" disabled>
+                                            <label class="form-check-label" for="fxScope">
+                                                設備
+                                            </label>
+                                        </div><!--form-check-->
+
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxScope" disabled>
+                                            <label class="form-check-label" for="fxScope">
+                                                生管
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxScope" checked="" disabled>
+                                            <label class="form-check-label" for="fxScope">
+                                                能源
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxScope" disabled>
+                                            <label class="form-check-label" for="fxScope">
+                                                倉儲
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxScope">
+                                            <label class="form-check-label" for="fxScope">
+                                                運輸
+                                            </label>
+                                        </div><!--form-check-->
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="fxScope" disabled>
+                                            <label class="form-check-label" for="fxScope">
+                                                消防應變
+                                            </label>
+                                        </div><!--form-check-->
+
+
+                                    </div><!--project_fx-->
+                                </div><!---menb_inp_tit-->
+                                <!--智慧技術-->
+                                <div class="menb_inp_tit form-group  w-100 ">
+                                    <label class="mb-2"><span class="red me-1">*</span>智慧技術(可多選)</label>
+                                    <div class="sm_techn d-flex">
+                                        <!-- 左側選單：使用 Tablist 語意 -->
+                                        <div class="sm_techn_left" role="tablist" aria-label="技術分類選單">
+                                            <button type="button" class="tab-btn active" role="tab" id="tab_smt_1" aria-selected="true" aria-controls="panel_smt_1">
+                                                感測端點 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="tab-btn" role="tab" id="tab_smt_2" aria-selected="false" aria-controls="panel_smt_2">
+                                                系統部署 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="tab-btn" role="tab" id="tab_smt_3" aria-selected="false" aria-controls="panel_smt_3">
+                                                通訊方式 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="tab-btn" role="tab" id="tab_smt_4" aria-selected="false" aria-controls="panel_smt_4">
+                                                作業輔助 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="tab-btn" role="tab" id="tab_smt_5" aria-selected="false" aria-controls="panel_smt_5">
+                                                模擬決策 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                        </div><!--sm_techn_left-->
+                                        <!-- 右側內容區 -->
+                                        <div class="sm_techn_right flex-grow-1">
+
+                                            <!--  1：感測端點 -->
+                                            <div id="panel_smt_1" class="tab-panel" role="tabpanel" aria-labelledby="tab_smt_1">
+
+                                                <!-- 區塊 1 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_1_1">
+                                                        <span class="title-text">感測裝置</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_1_1" class="collapse-body show">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 溫度 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="溫度" id="fxScope_1_1_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_1">溫度</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 氣體濃度 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="氣體濃度" id="fxScope_1_1_2" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_2">氣體濃度</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 壓力 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="壓力" id="fxScope_1_1_3" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_3">壓力</label>
+                                                            </div><!---form-check-->
+                                                            <!-- FTIR -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="FTIR" id="fxScope_1_1_4" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_4">FTIR</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 流量 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="流量" id="fxScope_1_1_5" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_5">流量</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 風速 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="風速" id="fxScope_1_1_6" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_6">風速</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 流速 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="流速" id="fxScope_1_1_7" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_7">流速</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 功率 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="功率" id="fxScope_1_1_8" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_8">功率</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 液位 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="液位" id="fxScope_1_1_9" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_9">液位</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 電流 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="電流" id="fxScope_1_1_10" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_10">電流</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 重量 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="重量" id="fxScope_1_1_11" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_11">重量</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 振動 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="振動" id="fxScope_1_1_12" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_12">振動</label>
+                                                            </div><!---form-check-->
+                                                            <!-- pH值 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="pH值" id="fxScope_1_1_13" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_13">pH值</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 厚度 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="厚度" id="fxScope_1_1_14" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_14">厚度</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 水質 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="水質" id="fxScope_1_1_15" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_15">水質</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 導電度 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="導電度" id="fxScope_1_1_16" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_16">導電度</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope_1_1_17" disabled>
+                                                                <label class="form-check-label" for="fxScope_1_1_17">其他</label>
+                                                            </div><!---form-check-->
+                                                        </div><!---project_fx-->
+
+
+                                                    </div><!---collapse-body-->
+                                                </div><!---accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_1_2">
+                                                        <span class="title-text">視覺裝置</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+
+                                                    <div id="collapse_1_2" class="collapse-body" style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 可見光 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="可見光" id="fxScope1_2_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope1_2_1">可見光</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 不可見光 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="不可見光" id="fxScope1_2_2" disabled>
+                                                                <label class="form-check-label" for="fxScope1_2_2">不可見光</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope1_2_3" disabled>
+                                                                <label class="form-check-label" for="fxScope1_2_3">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+
+                                                    </div><!---collapse-body-->
+                                                </div><!---accordion-item-->
+                                                <!-- 區塊 3 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_1_3">
+                                                        <span class="title-text">生物表徵</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+
+                                                    <div id="collapse_1_3" class="collapse-body" style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 血氧 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="血氧" id="fxScope1_3_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope1_3_1">血氧</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 體溫 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="體溫" id="fxScope1_3_2" disabled>
+                                                                <label class="form-check-label" for="fxScope1_3_2">體溫</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 血壓 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="血壓" id="fxScope1_3_3" disabled>
+                                                                <label class="form-check-label" for="fxScope1_3_3">血壓</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 倒臥 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="倒臥" id="fxScope1_3_4" disabled>
+                                                                <label class="form-check-label" for="fxScope1_3_4">倒臥</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 血壓 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="脈搏" id="fxScope1_3_5" disabled>
+                                                                <label class="form-check-label" for="fxScope1_3_5">脈搏</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 血壓 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="呼吸" id="fxScope1_3_6" disabled>
+                                                                <label class="form-check-label" for="fxScope1_3_6">呼吸</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 血壓 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope1_3_7" disabled>
+                                                                <label class="form-check-label" for="fxScope1_3_7">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+
+                                                    </div><!---collapse-body-->
+                                                </div><!---accordion-item-->
+                                                <!-- 區塊 4 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_1_4">
+                                                        <span class="title-text">定位方式</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+
+                                                    <div id="collapse_1_4" class="collapse-body" style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- GPS -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="GPS" id="fxScope1_4_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope1_4_1">GPS</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 陀螺儀 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="陀螺儀" id="fxScope1_4_2" disabled>
+                                                                <label class="form-check-label" for="fxScope1_4_2">陀螺儀</label>
+                                                            </div><!---form-check-->
+                                                            <!-- UWB -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="UWB" id="fxScope1_4_3" disabled>
+                                                                <label class="form-check-label" for="fxScope1_4_3">UWB</label>
+                                                            </div><!---form-check-->
+                                                            <!-- RFID -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="RFID" id="fxScope1_4_4" disabled>
+                                                                <label class="form-check-label" for="fxScope1_4_4">RFID</label>
+                                                            </div><!---form-check-->
+                                                            <!-- LoRa -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="LoRa" id="fxScope1_4_5" disabled>
+                                                                <label class="form-check-label" for="fxScope1_4_5">LoRa</label>
+                                                            </div><!---form-check-->
+                                                            <!-- Barcode/QRcode -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="Barcode/QRcode" id="fxScope1_4_6" disabled>
+                                                                <label class="form-check-label" for="fxScope1_4_6">Barcode/QRcode</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 藍芽 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="藍芽" id="fxScope1_4_7" disabled>
+                                                                <label class="form-check-label" for="fxScope1_4_7">藍芽</label>
+                                                            </div><!---form-check-->
+                                                            <!-- Zigbee -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="Zigbee" id="fxScope1_4_8" disabled>
+                                                                <label class="form-check-label" for="fxScope1_4_8">Zigbee</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope1_4_9" disabled>
+                                                                <label class="form-check-label" for="fxScope1_4_9">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+
+                                                    </div><!---collapse-body-->
+                                                </div><!---accordion-item-->
+
+
+
+
+                                            </div><!-- /#panel_smt_1 -->
+                                            <!--  2：系統部署 -->
+                                            <div id="panel_smt_2" class="tab-panel d-none" role="tabpanel" aria-labelledby="tab_smt_2">
+                                                <!-- 區塊 1 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_2_1">
+                                                        <span class="title-text">運算技術</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_2_1" class="collapse-body show">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 雲端運算 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="雲端運算" id="fxScope2_1_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope2_1_1">雲端運算</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 邊緣運算 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="邊緣運算" id="fxScope2_1_2" disabled>
+                                                                <label class="form-check-label" for="fxScope2_1_2">邊緣運算</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope2_1_3" disabled>
+                                                                <label class="form-check-label" for="fxScope2_1_3">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_2_2">
+                                                        <span class="title-text">數據儲存</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_2_2" class="collapse-body " style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 地端資料庫 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="地端資料庫" id="fxScope2_2_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope2_2_1">地端資料庫</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 雲端資料庫 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="雲端資料庫" id="fxScope2_2_2" disabled>
+                                                                <label class="form-check-label" for="fxScope2_2_2">雲端資料庫</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope2_2_3" disabled>
+                                                                <label class="form-check-label" for="fxScope2_2_3">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+
+
+
+
+
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 3 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_2_3">
+                                                        <span class="title-text">演算法</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_2_3" class="collapse-body " style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 機器學習 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="機器學習" id="fxScope2_3_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope2_3_1">機器學習</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 深度學習 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="深度學習" id="fxScope2_3_2" disabled>
+                                                                <label class="form-check-label" for="fxScope2_3_2">深度學習</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope2_3_3" disabled>
+                                                                <label class="form-check-label" for="fxScope2_3_3">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 4 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_2_4">
+                                                        <span class="title-text">生成式AI</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_2_4" class="collapse-body " style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- SLM -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="SLM" id="fxScope2_4_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope2_4_1">SLM</label>
+                                                            </div><!---form-check-->
+                                                            <!-- Rag -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="Rag" id="fxScope2_4_2" disabled>
+                                                                <label class="form-check-label" for="fxScope2_4_2">Rag</label>
+                                                            </div><!---form-check-->
+                                                            <!-- LLM -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="LLM" id="fxScope2_4_3" disabled>
+                                                                <label class="form-check-label" for="fxScope2_4_3">LLM</label>
+                                                            </div><!---form-check-->
+                                                            <!-- Agent -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="Agent" id="fxScope2_4_5" disabled>
+                                                                <label class="form-check-label" for="fxScope2_4_5">Agent</label>
+                                                            </div><!---form-check-->
+                                                            <!-- VLM -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="VLM" id="fxScope2_4_6" disabled>
+                                                                <label class="form-check-label" for="fxScope2_4_6">VLM</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope2_4_7" disabled>
+                                                                <label class="form-check-label" for="fxScope2_4_7">其他</label>
+                                                            </div><!---form-check-->
+
+
+                                                        </div><!---project_fx-->
+
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+
+                                            </div><!-- /#panel_smt_2 -->
+                                            <!-- 3：通訊方式 -->
+                                            <div id="panel_smt_3" class="tab-panel d-none" role="tabpanel" aria-labelledby="tab_smt_3">
+                                                <!-- 區塊 1 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_3_1">
+                                                        <span class="title-text">光通訊 (含有線通訊)</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_3_1" class="collapse-body show">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 光纖 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="光纖" id="fxScope3_1_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope3_1_1">光纖</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 工業網路 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="工業網路" id="fxScope3_1_2" disabled>
+                                                                <label class="form-check-label" for="fxScope3_1_2">工業網路</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope3_1_3" disabled>
+                                                                <label class="form-check-label" for="fxScope3_1_3">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_3_2">
+                                                        <span class="title-text">無線通訊</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_3_2" class="collapse-body " style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- Wi-Fi -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="Wi-Fi" id="fxScope3_2_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope3_2_1">Wi-Fi</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 4G -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="4G" id="fxScope3_2_2" disabled>
+                                                                <label class="form-check-label" for="fxScope3_2_2">4G</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 5G -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="5G" id="fxScope3_2_3" disabled>
+                                                                <label class="form-check-label" for="fxScope3_2_3">5G</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 藍芽 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="藍芽" id="fxScope3_2_4" disabled>
+                                                                <label class="form-check-label" for="fxScope3_2_4">藍芽</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 5G -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope3_2_5" disabled>
+                                                                <label class="form-check-label" for="fxScope3_2_5">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+
+                                            </div><!-- /#panel_smt_3 -->
+                                            <!-- 4：作業輔助 -->
+                                            <div id="panel_smt_4" class="tab-panel d-none" role="tabpanel" aria-labelledby="tab_smt_4">
+                                                <!-- 區塊 1-->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_4_1">
+                                                        <span class="title-text">智慧巡檢</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_4_1" class="collapse-body show">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 手持裝置 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="手持裝置" id="fxScope4_1_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope4_1_1">手持裝置</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 穿戴裝置 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="穿戴裝置" id="fxScope4_1_2" disabled>
+                                                                <label class="form-check-label" for="fxScope4_1_2">穿戴裝置</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope4_1_3" disabled>
+                                                                <label class="form-check-label" for="fxScope4_1_3">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_4_2">
+                                                        <span class="title-text">無人載具</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_4_2" class="collapse-body " style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 陸面型 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="陸面型" id="fxScope4_2_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope4_2_1">陸面型</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 軌道型 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="軌道型" id="fxScope4_2_2" disabled>
+                                                                <label class="form-check-label" for="fxScope4_2_2">軌道型</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 空中型 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="空中型" id="fxScope4_2_3" disabled>
+                                                                <label class="form-check-label" for="fxScope4_2_3">空中型</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 機械手臂 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="機械手臂" id="fxScope4_2_4" disabled>
+                                                                <label class="form-check-label" for="fxScope4_2_4">機械手臂</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="水上型" id="fxScope4_2_5" disabled>
+                                                                <label class="form-check-label" for="fxScope4_2_5">水上型</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope4_2_6" disabled>
+                                                                <label class="form-check-label" for="fxScope4_2_6">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 3 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_4_3">
+                                                        <span class="title-text">XR虛擬實境</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_4_3" class="collapse-body " style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- MR -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="MR" id="fxScope4_3_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope4_3_1">MR</label>
+                                                            </div><!---form-check-->
+                                                            <!-- AR -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="AR" id="fxScope4_3_2" disabled>
+                                                                <label class="form-check-label" for="fxScope4_3_2">AR</label>
+                                                            </div><!---form-check-->
+                                                            <!-- VR -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="VR" id="fxScope4_3_3" disabled>
+                                                                <label class="form-check-label" for="fxScope4_3_3">VR</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope4_2_4" disabled>
+                                                                <label class="form-check-label" for="fxScope4_2_4">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+
+
+
+                                            </div><!-- /#panel_smt_3 -->
+                                            <!-- 5：模擬決策 -->
+                                            <div id="panel_smt_5" class="tab-panel d-none" role="tabpanel" aria-labelledby="tab_smt_5">
+                                                <!-- 區塊 1 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_5_1">
+                                                        <span class="title-text">數位孿生</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_5_1" class="collapse-body show">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 3D模型 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="3D模型" id="fxScope5_1_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope5_1_1">3D模型</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 數據、影像串接 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="數據、影像串接" id="fxScope5_1_2" disabled>
+                                                                <label class="form-check-label" for="fxScope5_1_2">數據、影像串接</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope5_1_3" disabled>
+                                                                <label class="form-check-label" for="fxScope5_1_3">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_5_2">
+                                                        <span class="title-text">參數最佳化</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_5_2" class="collapse-body " style="display: none;">
+                                                        <div class="project_fx d-flex flex-wrap gap-3 pt-2">
+                                                            <!-- 陸面型 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="最適化操作參數建議" id="fxScope5_2_1" checked disabled>
+                                                                <label class="form-check-label" for="fxScope5_2_1">最適化操作參數建議</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 最適化自動控制 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="軌道最適化自動控制型" id="fxScope5_2_2" disabled>
+                                                                <label class="form-check-label" for="fxScope5_2_2">最適化自動控制</label>
+                                                            </div><!---form-check-->
+                                                            <!-- 其他 -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope5_2_3" disabled>
+                                                                <label class="form-check-label" for="fxScope5_2_3">其他</label>
+                                                            </div><!---form-check-->
+
+                                                        </div><!---project_fx-->
+
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+
+
+
+                                            </div><!-- /#panel_smt_3 -->
+
+
+
+
+                                        </div><!--sm_techn_right-->
+                                    </div><!--sm_techn-->
+                                </div><!---menb_inp_tit-->
+
+                                <div class="menb_inp_tit  form-group w-100 ">
+                                    <label class="mb-2">獲獎事蹟暨重要合作案例</label>
+                                    <input type="text" class="form-control" placeholder="請輸入獲獎事蹟暨重要合作案例" value="說明說明說明說明說明"  disabled>
+                                </div><!---menb_inp_tit-->
+
+
+
+                                <div class="menb_inp_tit  form-group w-100 ">
+                                    <label class="mb-2">工廠名稱</label>
+                                    <input type="text" class="form-control" placeholder="請輸入工廠名稱" value="智慧工安工廠"  disabled>
+                                </div><!---menb_inp_tit-->
+
+
+                                <div class="menb_inp_tit form-group  w-100 ">
+                                    <label class="mb-2">工廠地址</label>
+                                    <div class="col-12 col-sm">
+                                        <div class="row g-2">
+
+                                            <div class="col-6  mb-md-0 mb-2">
+                                                <select class="form-select" aria-label="縣市" disabled>
+                                                    <option selected="">台中市</option>
+                                                    <option value="1">基隆市</option>
+                                                    <option value="2">台北市</option>
+                                                </select>
+                                            </div>
+
+
+                                            <div class="col-6  mb-md-0 mb-2">
+                                                <select class="form-select" aria-label="鄉鎮市區" disabled>
+                                                    <option selected="">北區</option>
+                                                    <option value="1">中正區</option>
+                                                    <option value="2">信義區</option>
+                                                </select>
+                                            </div>
+
+
+                                            <div class="col-12">
+                                                <input type="text" class="form-control" placeholder="地址" value="高雄市左營區博愛三路12號15樓"   disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!---menb_inp_tit-->
+
+
+
+
+                            </div><!--menb_inp_box -->
+
+
+                            <!-- 上傳文件-->
+                            <h3 class="mb-4 me_sho mt-md-5 mt-4">
+                                上傳文件<label>(<span class="red me-1">*</span>為必填欄位)</label>
+                            </h3>
+                            <div class="menb_inp_tit form-group  w-100 ">
+
+                                <div class="d-flex dow-document">
+                                    <!--公司登記證明文件-->
+                                    <div class="tit_dow">
+                                        <label class="mb-2">公司登記證明文件</label>
+                                        <div class="pt-2" >
+                                            <img class="img-fluid d-block" src="../../images/all/menb_logo2.jpg" alt="" >
+
+                                        </div>
+
+                                    </div><!---tit_dow-->
+                                    <!--工廠登記證明文件-->
+                                    <div class="tit_dow">
+                                        <label class="mb-2">工廠登記證明文件</label>
+                                        <div class="pt-2" >
+                                            <img class="img-fluid d-block" src="../../images/all/menb_logo2.jpg" alt="">
+
+                                        </div>
+                                    </div><!---tit_dow-->
+                                    <!--技術服務能量/相關登錄證明-->
+                                    <div class="tit_dow">
+                                        <label class="mb-2">技術服務能量/相關登錄證明</label>
+                                        <div class="pt-2" >
+                                            <img class="img-fluid d-block" src="../../images/all/menb_logo2.jpg" alt="">
+
+                                        </div>
+                                    </div><!---tit_dow-->
+                                    <!--智慧工安技術產業資訊暨媒合平台登錄申請書-->
+                                    <div class="tit_dow">
+                                        <label class="mb-2">智慧工安技術產業資訊暨媒合平台登錄申請書</label>
+                                        <div class="pt-2" >
+                                            <img class="img-fluid d-block" src="../../images/all/menb_logo2.jpg" alt="">
+
+                                        </div>
+
+                                    </div><!---tit_dow-->
+
+                                </div><!--dow-document-->
+
+
+
+
+                            </div><!---menb_inp_tit-->
+                            <!-- 其他佐證文件-->
+                            <h3 class="mb-4 me_sho mt-md-5 mt-4">
+                                其他佐證文件
+                            </h3>
+                            <div class="menb_inp_tit form-group  w-100 ">
+
+                                <div class="d-flex dow-document">
+                                    <!--公司登記證明文件-->
+                                    <div class="tit_dow">
+                                        <label class="mb-2">如營業登記證明、證書等</label>
+                                        <div class=" ">
+                                            <img class="img-fluid d-block" src="../../images/all/menb_logo2.jpg" alt="">
+
+                                        </div>
+
+
+                                    </div><!---tit_dow-->
+
+
+                                </div><!--dow-document-->
+
+
+                            </div><!---menb_inp_tit-->
+
+
+
+
+
+
+                            <div class="review_box">
+
+                                <label>審查方式</label>
+                                <div class="review_box_r">
+                                    <!--程式判斷 d-none-->
+                                    <span class="d-none">基本資料檢核</span>
+                                    <span class="d-none">文件審查</span>
+                                    <span class="">文件審查＋至少5位專家審查</span>
+                                </div>
+                            </div><!---review_box-->
+
+
+
+
+                            <div class="card-footer d-flex    justify-content-center">
+                                <a class="btn-theme"  href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#staticmembership" title="確認送出">確認送出<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                            </div>
+                        </div><!--frame-small-box -->
+
+
+
+
+                    </div><!--content-->
+                    <!-- side2 -->
+                    <div class="side side2 d-none" id="side2-block" aria-label="相關選單">
+                        <a href="#side2-block" id="right-block" accesskey="R" title="右側選單區塊" class="visually-hidden-focusable">::: 右側選單區塊</a>
+
+
+                        <!-- 選單內容 -->
+                    </div>
+                </div><!--row-->
+            </div>
+
+
+
+            <div class="s_round_6" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_6.png" alt="">
+            </div>
+
+            <div class="s_round_3" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_3.jpg" alt="">
+            </div>
+        </main>
+
+
+        <a href="#footer-block" id="footer-block" accesskey="B" title="下方功能區塊" class="visually-hidden-focusable" tabindex="0">::: 下方功能區塊</a>
+        <!-- 頁尾區塊 -->
+        <footer class="footer" role="contentinfo">
+        </footer>
+    </div>
+
+
+
+
+    <script>
+
+        //日期
+        const startPicker = flatpickr("#startDate", {
+            locale: "zh",
+            dateFormat: "Y-m-d",
+            disableMobile: true,
+            onChange: function (selectedDates, dateStr, instance) {
+                endPicker.set("minDate", dateStr);
+            }
+        });
+
+        const endPicker = flatpickr("#endDate", {
+            locale: "zh",
+            dateFormat: "Y-m-d",
+            disableMobile: true,
+            onChange: function (selectedDates, dateStr, instance) {
+                startPicker.set("maxDate", dateStr);
+            }
+        });
+
+
+
+
+        $(document).ready(function () {
+            //智慧技術
+            // 1. 左側頁籤切換（支援桌機與手機版）
+            $(".sm_techn_left").on("click", ".tab-btn", function () {
+                var $btn = $(this);
+                var targetPanelId = $btn.attr("aria-controls");
+
+                // 更新頁籤選取狀態（無障礙 aria-selected）
+                $(".sm_techn_left .tab-btn")
+                    .removeClass("active")
+                    .attr("aria-selected", "false");
+
+                $btn.addClass("active")
+                    .attr("aria-selected", "true");
+
+                // 切換右側對應內容面板
+                $(".sm_techn_right .tab-panel").addClass("d-none");
+                $("#" + targetPanelId).removeClass("d-none");
+
+                // 手機版 (螢幕寬度小於 768px)：點擊頁籤自動平滑捲動至視窗中央
+                if (window.innerWidth < 768) {
+                    var $tabList = $(".sm_techn_left");
+                    var scrollLeft = $btn.position().left + $tabList.scrollLeft() - ($tabList.width() / 2) + ($btn.outerWidth() / 2);
+                    $tabList.stop().animate({ scrollLeft: scrollLeft }, 250);
+                }
+            });
+
+            // 2. 右側次標題收合 / 展開（無障礙 aria-expanded 動態同步）
+            $(document).on("click", ".btn-collapse", function () {
+                var $header = $(this);
+                var targetId = $header.attr("aria-controls");
+                var $body = $("#" + targetId);
+                var isExpanded = $header.attr("aria-expanded") === "true";
+
+                if (isExpanded) {
+                    $body.stop().slideUp(200, function () {
+                        $header.attr("aria-expanded", "false");
+                    });
+                } else {
+                    $body.stop().slideDown(200, function () {
+                        $header.attr("aria-expanded", "true");
+                    });
+                }
+            });
+
+            Dropzone.autoDiscover = false;
+
+            $(".uplo_cpo").each(function () {
+                var $wrap = $(this);
+                var $previewNode = $wrap.find(".dz-image-preview");
+
+                // 擷取並移除模板節點
+                var previewTemplate = $previewNode.parent().html();
+                $previewNode.remove();
+
+                var myDropzone = new Dropzone($wrap[0], {
+                    url: "/upload",
+                    maxFiles: 1,
+                    maxFilesize: 10, // 配合您的說明可改成 10MB
+                    // 加上 .pdf 與 application/pdf
+                    acceptedFiles: ".jpg,.jpeg,.png,.pdf,application/pdf",
+                    thumbnailWidth: 80,
+                    thumbnailHeight: 80,
+                    parallelUploads: 1,
+                    previewTemplate: previewTemplate,
+                    autoQueue: false,
+                    previewsContainer: $wrap.find(".files")[0],
+                    clickable: $wrap.find(".fileinput-button")[0],
+
+                    init: function () {
+                        var dz = this;
+                        var $actions = $wrap.find(".actions-wrap");
+
+
+                        dz.on("addedfile", function (file) {
+                            $actions.hide();
+
+                            // 若上傳的是 PDF，Dropzone 無法自動產生縮圖，改用預設圖示替代
+                            if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+
+                                dz.emit("thumbnail", file, "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' fill='%230052cc' viewBox='0 0 16 16'><path d='M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 1.5 13 5h-3.5V1.5zM4.5 9.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z'/></svg>");
+                            }
+                        });
+
+                        // 2. 刪除檔案時重新顯示按鈕
+                        dz.on("removedfile", function (file) {
+                            $actions.show();
+                        });
+                    }
+                });
+            });
+
+            //密碼開關
+            $(".icon-eyes").click(function () {
+                var $btn = $(this);
+                var inputId = $btn.data('id');
+                var inputEl = document.getElementById(inputId);
+
+                if (inputEl.type === "password") {
+                    // 切換為顯示密碼
+                    inputEl.type = "text";
+                    $btn.find('.bi').removeClass("bi-eye-slash").addClass("bi-eye");
+                    $btn.attr('aria-label', '隱藏密碼');
+                    $btn.attr('title', '隱藏密碼');
+                    $btn.attr('aria-pressed', 'true');
+                } else {
+                    // 切換為隱藏密碼
+                    inputEl.type = "password";
+                    $btn.find('.bi').removeClass("bi-eye").addClass("bi-eye-slash");
+                    $btn.attr('aria-label', '顯示密碼');
+                    $btn.attr('title', '顯示密碼');
+                    $btn.attr('aria-pressed', 'false');
+                }
+            });
+        });
+
+
+
+
+        //標題
+        $(function () {
+            const $track = $('.marquee-track');
+            const $firstSpan = $track.find('span').first();
+
+            if ($firstSpan.length) {
+                const windowWidth = $(window).width();
+                let totalWidth = $firstSpan.outerWidth(true);
+
+                // 1. 自動複製，直到文字總寬度至少大於螢幕寬度（確保大螢幕不留白）
+                while (totalWidth < windowWidth * 1.5) {
+                    $track.append($firstSpan.clone());
+                    totalWidth = $track.outerWidth(true);
+                }
+
+                // 2. 將整組內容完整複製一份加入尾端，搭配 CSS -50% 達成完美無縫滾動
+                const currentContent = $track.html();
+                $track.append(currentContent);
+            }
+        });
+
+        $(function () {
+            if (window.innerWidth > 767) {
+                $(window).on('scroll', function () {
+                    const offsetTop = $(this).scrollTop();
+
+                    // 1. .s_round_1 視差滾動
+                    const $industry = $('.footer');
+                    if ($industry.length && offsetTop < $industry.offset().top) {
+                        TweenLite.to(".s_round_6, .s_round_3", 1, {
+                            y: -offsetTop / 15
+                        });
+                    }
+
+
+                }).trigger('scroll');
+            }
+        });
+
+    </script>
+
+
+</body>
+</html>
+

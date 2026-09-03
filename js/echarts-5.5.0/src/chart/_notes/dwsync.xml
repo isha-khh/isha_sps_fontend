@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <dwsync>
-<file name="bar.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="boxplot.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="candlestick.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="custom.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="effectScatter.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="funnel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="gauge.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="graph.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="heatmap.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="line.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="lines.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="map.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="parallel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="pictorialBar.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="pie.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="radar.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="sankey.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="scatter.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="sunburst.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="themeRiver.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="tree.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
-<file name="treemap.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134321992800000000" Dst="0" />
+<file name="bar.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="boxplot.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="candlestick.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="custom.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="effectScatter.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="funnel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="gauge.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="graph.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="heatmap.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="line.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="lines.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="map.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="parallel.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="pictorialBar.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="pie.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="radar.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="sankey.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="scatter.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="sunburst.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="themeRiver.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="tree.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
+<file name="treemap.ts" server="demo2.eztrust.tw//isha/" local="133515047400000000" remote="134328991800000000" Dst="0" />
 </dwsync>

@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="Facebook" xml:space="preserve">
+<value>Facebook</value>
+</data>
+<data name="Mail" xml:space="preserve">
+<value>Mail</value>
+</data>
+<data name="上一步" xml:space="preserve">
+<value>Previous</value>
+</data>
+<data name="上一頁" xml:space="preserve">
+<value>Previous</value>
+</data>
+<data name="下一頁" xml:space="preserve">
+<value>Next</value>
+</data>
+<data name="下午" xml:space="preserve">
+<value>Afternoon</value>
+</data>
+<data name="不拘" xml:space="preserve">
+<value>Whatever</value>
+</data>
+<data name="主題" xml:space="preserve">
+<value>Subject</value>
+</data>
+<data name="交易失敗" xml:space="preserve">
+<value>Transaction fails</value>
+</data>
+<data name="交易成功" xml:space="preserve">
+<value>Trading Success</value>
+</data>
+<data name="交易明細" xml:space="preserve">
+<value>Transaction Details</value>
+</data>
+<data name="交易金額" xml:space="preserve">
+<value>Order amount</value>
+</data>
+<data name="付款出貨資料" xml:space="preserve">
+<value>Payment, shipping information</value>
+</data>
+<data name="付款失敗" xml:space="preserve">
+<value>Payment failed</value>
+</data>
+<data name="付款成功" xml:space="preserve">
+<value>Payments success</value>
+</data>
+<data name="付款方式" xml:space="preserve">
+<value>Payment</value>
+</data>
+<data name="以下為您的購物資訊" xml:space="preserve">
+<value>The following information for your shopping</value>
+</data>
+<data name="備註" xml:space="preserve">
+<value>Remark</value>
+</data>
+<data name="出貨明細" xml:space="preserve">
+<value>Shipping details</value>
+</data>
+<data name="出貨表單填寫" xml:space="preserve">
+<value>Ship form</value>
+</data>
+<data name="分類" xml:space="preserve">
+<value>Category</value>
+</data>
+<data name="列印本頁" xml:space="preserve">
+<value>Print</value>
+</data>
+<data name="列表" xml:space="preserve">
+<value>List</value>
+</data>
+<data name="刪除" xml:space="preserve">
+<value>Del</value>
+</data>
+<data name="刪除所有選購的商品" xml:space="preserve">
+<value>Remove all</value>
+</data>
+<data name="前往會員專區首頁" xml:space="preserve">
+<value>Go to Member Home</value>
+</data>
+<data name="加入收件人清單" xml:space="preserve">
+<value>Join the recipient list</value>
+</data>
+<data name="加入統編清單" xml:space="preserve">
+<value>Join the FEIN list</value>
+</data>
+<data name="加入購物車" xml:space="preserve">
+<value>Add to Cart</value>
+</data>
+<data name="加入購物車失敗" xml:space="preserve">
+<value>Add to Cart failure</value>
+</data>
+<data name="加入購物車成功" xml:space="preserve">
+<value>Add to Cart success</value>
+</data>
+<data name="原價" xml:space="preserve">
+<value>Original price</value>
+</data>
+<data name="取消" xml:space="preserve">
+<value>Cancel</value>
+</data>
+<data name="合計" xml:space="preserve">
+<value>Total</value>
+</data>
+<data name="同上" xml:space="preserve">
+<value>Ditto</value>
+</data>
+<data name="否" xml:space="preserve">
+<value>No</value>
+</data>
+<data name="售價" xml:space="preserve">
+<value>Price</value>
+</data>
+<data name="商品不存在或已下架" xml:space="preserve">
+<value>Product does not exist or has been off the shelf</value>
+</data>
+<data name="商品備註說明" xml:space="preserve">
+<value>Product Remark</value>
+</data>
+<data name="商品出貨日" xml:space="preserve">
+<value>Shipping date</value>
+</data>
+<data name="商品分類列表" xml:space="preserve">
+<value>Categories list</value>
+</data>
+<data name="商品列表" xml:space="preserve">
+<value>Product list</value>
+</data>
+<data name="商品名稱" xml:space="preserve">
+<value>Name</value>
+</data>
+<data name="商品圖" xml:space="preserve">
+<value>Photo</value>
+</data>
+<data name="商品已寄出" xml:space="preserve">
+<value>Goods have been sent</value>
+</data>
+<data name="商品明細" xml:space="preserve">
+<value>Product Details</value>
+</data>
+<data name="商品暫停銷售" xml:space="preserve">
+<value>Product does not sales</value>
+</data>
+<data name="商品櫥窗" xml:space="preserve">
+<value>&lt;span class=&quot;txt-tw&quot;&gt;Product&lt;/span&gt;</value>
+</data>
+<data name="商品注意事項" xml:space="preserve">
+<value>Product Notes</value>
+</data>
+<data name="商品詳細介紹" xml:space="preserve">
+<value>Product Introduction</value>
+</data>
+<data name="商品調貨中" xml:space="preserve">
+<value>Transfer cargo of merchandise</value>
+</data>
+<data name="商品退貨" xml:space="preserve">
+<value>Return Merchandise</value>
+</data>
+<data name="啟用失敗" xml:space="preserve">
+<value>Enable failure</value>
+</data>
+<data name="單價" xml:space="preserve">
+<value>Price</value>
+</data>
+<data name="回列表頁" xml:space="preserve">
+<value>Back</value>
+</data>
+<data name="回前頁" xml:space="preserve">
+<value>Back</value>
+</data>
+<data name="回覆" xml:space="preserve">
+<value>Reply</value>
+</data>
+<data name="回覆第n則留言" xml:space="preserve">
+<value>Article {n} Reply Comments</value>
+</data>
+<data name="圖片尚未建立" xml:space="preserve">
+<value>Sorry, there are no pictures</value>
+</data>
+<data name="圖示" xml:space="preserve">
+<value>Illustration</value>
+</data>
+<data name="地址" xml:space="preserve">
+<value>Add</value>
+</data>
+<data name="填寫留言內容" xml:space="preserve">
+<value>Enter message content</value>
+</data>
+<data name="女" xml:space="preserve">
+<value>Woman</value>
+</data>
+<data name="姓名" xml:space="preserve">
+<value>Name</value>
+</data>
+<data name="宅配單號" xml:space="preserve">
+<value>Delivery No.</value>
+</data>
+<data name="密碼不同" xml:space="preserve">
+<value>Passwords are different</value>
+</data>
+<data name="已收款" xml:space="preserve">
+<value>Received</value>
+</data>
+<data name="已結案" xml:space="preserve">
+<value>Closed</value>
+</data>
+<data name="已退款" xml:space="preserve">
+<value>Refunded</value>
+</data>
+<data name="帳號尚未啟用" xml:space="preserve">
+<value>Account has not been enabled</value>
+</data>
+<data name="帳號已停用" xml:space="preserve">
+<value>Account is disabled</value>
+</data>
+<data name="帳號已啟用" xml:space="preserve">
+<value>Account Enabled</value>
+</data>
+<data name="帳號或密碼不正確" xml:space="preserve">
+<value>Account or password is incorrect</value>
+</data>
+<data name="帳號狀態異常" xml:space="preserve">
+<value>Account status is incorrect</value>
+</data>
+<data name="常見問題" xml:space="preserve">
+<value>FAQ</value>
+</data>
+<data name="年" xml:space="preserve">
+<value>Year</value>
+</data>
+<data name="庫存不足" xml:space="preserve">
+<value>Inventory shortage</value>
+</data>
+<data name="必填" xml:space="preserve">
+<value>Required</value>
+</data>
+<data name="忘記密碼" xml:space="preserve">
+<value>Forgot</value>
+</data>
+<data name="快速連結" xml:space="preserve">
+<value>&lt;span class=&quot;txt-tw&quot;&gt;Fast Link&lt;/span&gt;</value>
+</data>
+<data name="性別" xml:space="preserve">
+<value>Sex</value>
+</data>
+<data name="恭喜您已完成會員註冊程序" xml:space="preserve">
+<value>Congratulations! Have completed the registration process.</value>
+</data>
+<data name="您必需閱讀且同意會員條款" xml:space="preserve">
+<value>You must read and agree to the Membership Terms</value>
+</data>
+<data name="您的帳號已正式啟用" xml:space="preserve">
+<value>Your account has been officially opened</value>
+</data>
+<data name="您輸入的帳號尚未註冊" xml:space="preserve">
+<value>This account is not registered</value>
+</data>
+<data name="您輸入的帳號已註冊過" xml:space="preserve">
+<value>Your account has been registered</value>
+</data>
+<data name="我已同意並閱讀會員條款" xml:space="preserve">
+<value>I have read and agreed to the &lt;a&gt;terms of membership&lt;/a&gt;</value>
+</data>
+<data name="我要提問" xml:space="preserve">
+<value>Question</value>
+</data>
+<data name="我要留言" xml:space="preserve">
+<value>Leave a message</value>
+</data>
+<data name="我要結帳" xml:space="preserve">
+<value>Checkout</value>
+</data>
+<data name="抬頭" xml:space="preserve">
+<value>Title</value>
+</data>
+<data name="捐贈慈善機構" xml:space="preserve">
+<value>Donate to charity</value>
+</data>
+<data name="推薦商品" xml:space="preserve">
+<value>&lt;span class=&quot;txt-tw&quot;&gt;Featured Products&lt;/span&gt;</value>
+</data>
+<data name="提問內容" xml:space="preserve">
+<value>Content</value>
+</data>
+<data name="提問者" xml:space="preserve">
+<value>Asker</value>
+</data>
+<data name="收件人" xml:space="preserve">
+<value>Addressee</value>
+</data>
+<data name="收件人基本資料" xml:space="preserve">
+<value>Recipient Information</value>
+</data>
+<data name="收件人清單" xml:space="preserve">
+<value>Recipient list</value>
+</data>
+<data name="收件地址" xml:space="preserve">
+<value>Shipping Address</value>
+</data>
+<data name="收貨時間" xml:space="preserve">
+<value>Time of receipt</value>
+</data>
+<data name="數量" xml:space="preserve">
+<value>Quantity</value>
+</data>
+<data name="數量請輸入正確" xml:space="preserve">
+<value>Please enter the correct number</value>
+</data>
+<data name="料號" xml:space="preserve">
+<value>Model</value>
+</data>
+<data name="新增留言" xml:space="preserve">
+<value>New Message</value>
+</data>
+<data name="日" xml:space="preserve">
+<value>Day</value>
+</data>
+<data name="早上" xml:space="preserve">
+<value>Morning</value>
+</data>
+<data name="是" xml:space="preserve">
+<value>Yes</value>
+</data>
+<data name="是否可於假日收貨" xml:space="preserve">
+<value>Holiday receipt</value>
+</data>
+<data name="時間" xml:space="preserve">
+<value>Time</value>
+</data>
+<data name="最尾頁" xml:space="preserve">
+<value>Last</value>
+</data>
+<data name="最新商品" xml:space="preserve">
+<value>New Products</value>
+</data>
+<data name="最新消息" xml:space="preserve">
+<value>News</value>
+</data>
+<data name="會員密碼" xml:space="preserve">
+<value>Password</value>
+</data>
+<data name="會員密碼有變更才需填寫" xml:space="preserve">
+<value>Password, there is a change was required to fill</value>
+</data>
+<data name="會員專區" xml:space="preserve">
+<value>Member</value>
+</data>
+<data name="會員帳號" xml:space="preserve">
+<value>Account</value>
+</data>
+<data name="會員您好" xml:space="preserve">
+<value>, hello! Welcome to back.</value>
+</data>
+<data name="會員條款" xml:space="preserve">
+<value>Membership Terms</value>
+</data>
+<data name="會員登入" xml:space="preserve">
+<value>Login</value>
+</data>
+<data name="會員登出" xml:space="preserve">
+<value>Logout</value>
+</data>
+<data name="會員註冊" xml:space="preserve">
+<value>Registration</value>
+</data>
+<data name="會員資料修改" xml:space="preserve">
+<value>Modify</value>
+</data>
+<data name="月" xml:space="preserve">
+<value>Month</value>
+</data>
+<data name="服務未啟用" xml:space="preserve">
+<value>Service is not enabled</value>
+</data>
+<data name="未收款" xml:space="preserve">
+<value>Not received</value>
+</data>
+<data name="未滿" xml:space="preserve">
+<value>Less than</value>
+</data>
+<data name="未結案" xml:space="preserve">
+<value>Not closed</value>
+</data>
+<data name="未處理" xml:space="preserve">
+<value>Untreated</value>
+</data>
+<data name="未讀取留言" xml:space="preserve">
+<value>Unread Message</value>
+</data>
+<data name="未連絡到客戶" xml:space="preserve">
+<value>No contact to the customer</value>
+</data>
+<data name="查無資料" xml:space="preserve">
+<value>No Data...</value>
+</data>
+<data name="查詢" xml:space="preserve">
+<value>Inquiry</value>
+</data>
+<data name="格式不正確" xml:space="preserve">
+<value>Incorrect format</value>
+</data>
+<data name="消費明細" xml:space="preserve">
+<value>Consumer details</value>
+</data>
+<data name="消費者" xml:space="preserve">
+<value>Consumer</value>
+</data>
+<data name="清單" xml:space="preserve">
+<value>List</value>
+</data>
+<data name="清除重填" xml:space="preserve">
+<value>Reset</value>
+</data>
+<data name="熱賣商品" xml:space="preserve">
+<value>Hot Products</value>
+</data>
+<data name="生日" xml:space="preserve">
+<value>Birthday</value>
+</data>
+<data name="生日不正確" xml:space="preserve">
+<value>Incorrect birthday</value>
+</data>
+<data name="產品搜尋" xml:space="preserve">
+<value>&lt;span class=&quot;txt-tw&quot;&gt;Product Search&lt;/span&gt;</value>
+</data>
+<data name="產品櫥窗" xml:space="preserve">
+<value>Product</value>
+</data>
+<data name="男" xml:space="preserve">
+<value>Male</value>
+</data>
+<data name="留言內容" xml:space="preserve">
+<value>Content</value>
+</data>
+<data name="留言時間" xml:space="preserve">
+<value>Time</value>
+</data>
+<data name="留言者" xml:space="preserve">
+<value>Name</value>
+</data>
+<data name="留言記錄" xml:space="preserve">
+<value>Message Record</value>
+</data>
+<data name="發票寄送日" xml:space="preserve">
+<value>Invoice date</value>
+</data>
+<data name="發票號" xml:space="preserve">
+<value>Invoice No.</value>
+</data>
+<data name="發票資訊" xml:space="preserve">
+<value>Invoice</value>
+</data>
+<data name="發送失敗" xml:space="preserve">
+<value>Failed to send</value>
+</data>
+<data name="發送成功" xml:space="preserve">
+<value>Sent successfully</value>
+</data>
+<data name="發送成功請至您的信箱收取" xml:space="preserve">
+<value>Sent successfully, go to your mailbox to receive password notification letter.</value>
+</data>
+<data name="目前尚無資料" xml:space="preserve">
+<value>There is no information</value>
+</data>
+<data name="相簿分類" xml:space="preserve">
+<value>Category</value>
+</data>
+<data name="相簿專區" xml:space="preserve">
+<value>Album</value>
+</data>
+<data name="相關商品" xml:space="preserve">
+<value>Related Products</value>
+</data>
+<data name="確認密碼" xml:space="preserve">
+<value>Confirm</value>
+</data>
+<data name="確認送出" xml:space="preserve">
+<value>Submit</value>
+</data>
+<data name="第一頁" xml:space="preserve">
+<value>First</value>
+</data>
+<data name="等待付款" xml:space="preserve">
+<value>Wait Payment</value>
+</data>
+<data name="等待付款單據" xml:space="preserve">
+<value>Wait for payment documents</value>
+</data>
+<data name="管理者" xml:space="preserve">
+<value>Supervisor</value>
+</data>
+<data name="統編" xml:space="preserve">
+<value>FEIN</value>
+</data>
+<data name="統編資料清單" xml:space="preserve">
+<value>FEIN list</value>
+</data>
+<data name="縣市" xml:space="preserve">
+<value>County</value>
+</data>
+<data name="總計" xml:space="preserve">
+<value>Total</value>
+</data>
+<data name="繼續購物" xml:space="preserve">
+<value>Continue Shopping</value>
+</data>
+<data name="聯絡地址" xml:space="preserve">
+<value>Address</value>
+</data>
+<data name="聯絡我們" xml:space="preserve">
+<value>Contact Us</value>
+</data>
+<data name="聯絡表單" xml:space="preserve">
+<value>Contact form</value>
+</data>
+<data name="聯絡資訊" xml:space="preserve">
+<value>Contact Information</value>
+</data>
+<data name="聯絡電話" xml:space="preserve">
+<value>Phone</value>
+</data>
+<data name="若要查詢訂單處理狀況或交易記錄請至交易記錄中查詢" xml:space="preserve">
+<value>If you want to check the order processing status or transaction records, please query &lt;a href=&quot;../order/index.aspx&quot;&gt;transaction records&lt;/a&gt;</value>
+</data>
+<data name="處理中請稍候" xml:space="preserve">
+<value>Processing, please wait...</value>
+</data>
+<data name="處理情形" xml:space="preserve">
+<value>Status</value>
+</data>
+<data name="補寄認證信" xml:space="preserve">
+<value>Send certified</value>
+</data>
+<data name="規格" xml:space="preserve">
+<value>Specification</value>
+</data>
+<data name="訂單查詢" xml:space="preserve">
+<value>Order Inquiry</value>
+</data>
+<data name="訂單編號" xml:space="preserve">
+<value>Order number</value>
+</data>
+<data name="訂單總金額" xml:space="preserve">
+<value>Order Total</value>
+</data>
+<data name="訂單處理中" xml:space="preserve">
+<value>Order processing</value>
+</data>
+<data name="訂購人" xml:space="preserve">
+<value>Purchaser</value>
+</data>
+<data name="訂購人基本資料" xml:space="preserve">
+<value>Order of personal data</value>
+</data>
+<data name="訂購日期" xml:space="preserve">
+<value>Order Date</value>
+</data>
+<data name="註冊成功" xml:space="preserve">
+<value>Successful registration</value>
+</data>
+<data name="請填寫正確信箱我們將盡快回覆您" xml:space="preserve">
+<value>Please fill in the correct mailbox, we will reply you as soon as possible, thank you!</value>
+</data>
+<data name="請確認以上的資料是否正確以免造成無法聯繫或出貨" xml:space="preserve">
+<value>Please confirm whether the above information is correct, to avoid causing unable to contact or shipping</value>
+</data>
+<data name="請至少勾選一項" xml:space="preserve">
+<value>Please tick at least one</value>
+</data>
+<data name="請至您註冊會員的語系頁面修改" xml:space="preserve">
+<value>Please go to your language page modification registered members</value>
+</data>
+<data name="請輸入您當初申請會員時所填寫的信箱" xml:space="preserve">
+<value>Please enter your application for membership had filled out mail</value>
+</data>
+<data name="請輸入關鍵字" xml:space="preserve">
+<value>Please enter a keyword</value>
+</data>
+<data name="請選擇" xml:space="preserve">
+<value>Select</value>
+</data>
+<data name="請重新整理驗證碼" xml:space="preserve">
+<value>Please refresh verification code</value>
+</data>
+<data name="變更" xml:space="preserve">
+<value>Modify</value>
+</data>
+<data name="變更成功" xml:space="preserve">
+<value>Modify success</value>
+</data>
+<data name="資料不符合" xml:space="preserve">
+<value>Data does not match</value>
+</data>
+<data name="資料總數" xml:space="preserve">
+<value>Total</value>
+</data>
+<data name="購物清單" xml:space="preserve">
+<value>Shopping List</value>
+</data>
+<data name="購物資訊" xml:space="preserve">
+<value>Shopping Information</value>
+</data>
+<data name="購物車" xml:space="preserve">
+<value>Cart</value>
+</data>
+<data name="購物須知" xml:space="preserve">
+<value>Notes</value>
+</data>
+<data name="運費" xml:space="preserve">
+<value>Freight</value>
+</data>
+<data name="運費規則" xml:space="preserve">
+<value>Shipping Rules</value>
+</data>
+<data name="郵遞區號" xml:space="preserve">
+<value>Zip code</value>
+</data>
+<data name="鄉鎮區" xml:space="preserve">
+<value>Area</value>
+</data>
+<data name="配送狀態" xml:space="preserve">
+<value>Delivery Status</value>
+</data>
+<data name="開通驗證碼錯誤" xml:space="preserve">
+<value>Active code is incorrect</value>
+</data>
+<data name="關於我們" xml:space="preserve">
+<value>About US</value>
+</data>
+<data name="電子郵件" xml:space="preserve">
+<value>E-mail</value>
+</data>
+<data name="電話" xml:space="preserve">
+<value>Tel</value>
+</data>
+<data name="非會員訂單查詢" xml:space="preserve">
+<value>Non-members order inquiry</value>
+</data>
+<data name="頁次" xml:space="preserve">
+<value>Page</value>
+</data>
+<data name="額外費用" xml:space="preserve">
+<value>Premium</value>
+</data>
+<data name="類別" xml:space="preserve">
+<value>Category</value>
+</data>
+<data name="顯示" xml:space="preserve">
+<value>Display</value>
+</data>
+<data name="首頁" xml:space="preserve">
+<value>Home</value>
+</data>
+<data name="驗證碼" xml:space="preserve">
+<value>Verification</value>
+</data>
+<data name="驗證碼輸入錯誤" xml:space="preserve">
+<value>Verification code input errors</value>
+</data>
+<data name="點選後可自動填入資料" xml:space="preserve">
+<value>After the click can automatically fill in information</value>
+</data>
+<data name="次選單" xml:space="preserve">
+<value>Sub Menu</value>
+</data>
+<data name="請至您的信箱收取認證信來正式啟用您的帳號" xml:space="preserve">
+<value>請至您的信箱收取認證信來正式啟用您的帳號</value>
+</data>
+<data name="FaceBook登入" xml:space="preserve">
+<value>FaceBook登入</value>
+</data>
+<data name="GOOGLE登入" xml:space="preserve">
+<value>GOOGLE登入</value>
+</data>
+<data name="登入中請稍候" xml:space="preserve">
+<value>登入中請稍候</value>
+</data>
+<data name="來源" xml:space="preserve">
+<value>來源</value>
+</data>
+<data name="查看更多" xml:space="preserve">
+<value>more</value>
+</data>
+<data name="不需統編" xml:space="preserve">
+<value>不需統編</value>
+</data>
+<data name="傳真" xml:space="preserve">
+<value>傳真</value>
+</data>
+<data name="首頁單元列表" xml:space="preserve">
+<value>首頁單元列表</value>
+</data>
+<data name="首頁FB粉絲團" xml:space="preserve">
+<value>首頁FB粉絲團</value>
+</data>
+<data name="以Facebook帳號繼續" xml:space="preserve">
+<value>以 Facebook 帳號繼續</value>
+</data>
+<data name="SigninwithGoogle" xml:space="preserve">
+<value>Sign in with Google</value>
+</data>
+<data name="ATM轉帳填寫" xml:space="preserve">
+<value>ATM轉帳填寫</value>
+</data>
+<data name="轉帳後五碼" xml:space="preserve">
+<value>轉帳後五碼</value>
+</data>
+<data name="轉帳日期" xml:space="preserve">
+<value>轉帳日期</value>
+</data>
+<data name="管理" xml:space="preserve">
+<value>管理</value>
+</data>
+<data name="送出" xml:space="preserve">
+<value>送出</value>
+</data>
+<data name="Ig" xml:space="preserve">
+<value>Ig</value>
+</data>
+<data name="Youtobe" xml:space="preserve">
+<value>Youtobe</value>
+</data>
+<data name="Tweeter" xml:space="preserve">
+<value>Tweeter</value>
+</data>
+<data name="Pinterest" xml:space="preserve">
+<value>Pinterest</value>
+</data>
+<data name="立即購買" xml:space="preserve">
+<value>立即購買</value>
+</data>
+<data name="Twitter" xml:space="preserve">
+<value>Twitter</value>
+</data>
+<data name="Line" xml:space="preserve">
+<value>Line</value>
+</data>
+<data name="促銷" xml:space="preserve">
+<value>促銷</value>
+</data>
+<data name="小計" xml:space="preserve">
+<value>小計</value>
+</data>
+<data name="符合活動" xml:space="preserve">
+<value>符合活動</value>
+</data>
+<data name="未符合" xml:space="preserve">
+<value>未符合</value>
+</data>
+<data name="查詢結果沒有資料" xml:space="preserve">
+<value>查詢結果沒有資料</value>
+</data>
+<data name="確定" xml:space="preserve">
+<value>Ok</value>
+</data>
+<data name="關閉" xml:space="preserve">
+<value>Close</value>
+</data>
+<data name="相簿封面圖片" xml:space="preserve">
+<value>相簿封面圖片</value>
+</data>
+<data name="服務時間" xml:space="preserve">
+<value>服務時間</value>
+</data>
+<data name="服務訊息" xml:space="preserve">
+<value>服務訊息</value>
+</data>
+<data name="最新訊息" xml:space="preserve">
+<value>最新訊息</value>
+</data>
+<data name="檔案下載" xml:space="preserve">
+<value>檔案下載</value>
+</data>
+<data name="檔案名稱" xml:space="preserve">
+<value>檔案名稱</value>
+</data>
+<data name="建立時間" xml:space="preserve">
+<value>建立時間</value>
+</data>
+<data name="下載" xml:space="preserve">
+<value>下載</value>
+</data>
+<data name="另開視窗" xml:space="preserve">
+<value>另開視窗</value>
+</data>
+<data name="影音專區" xml:space="preserve">
+<value>影音專區</value>
+</data>
+<data name="背景圖片" xml:space="preserve">
+<value>背景圖片</value>
+</data>
+<data name="回收物查詢" xml:space="preserve">
+<value>回收物查詢</value>
+</data>
+<data name="回收一點通" xml:space="preserve">
+<value>回收一點通</value>
+</data>
+<data name="回收分類" xml:space="preserve">
+<value>回收分類</value>
+</data>
+<data name="回收方式" xml:space="preserve">
+<value>回收方式</value>
+</data>
+<data name="物品" xml:space="preserve">
+<value>物品</value>
+</data>
+<data name="真抱歉我們找不到您查詢項目的說明" xml:space="preserve">
+<value>真抱歉我們找不到您查詢項目的說明</value>
+</data>
+<data name="其它回收管道" xml:space="preserve">
+<value>其它回收管道</value>
+</data>
+<data name="說明" xml:space="preserve">
+<value>說明</value>
+</data>
+</root>
