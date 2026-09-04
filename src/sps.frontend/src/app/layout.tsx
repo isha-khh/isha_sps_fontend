@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import BootstrapModalRouteCleanup from "@/components/BootstrapModalRouteCleanup";
+import { notoSansTC } from "@/lib/fonts";
 import "./globals.css";
 
 // ------------------------------------------------------------------
@@ -24,9 +26,24 @@ import "./globals.css";
 //    import 都會直接建置失敗（coreStyle 是 module not found，
 //    style_rwd 甚至讓 Turbopack 整個 panic）。所以這三支改用一般的
 //    <link>，直接交給瀏覽器載入——不合法的 url() 只會讓瀏覽器 404
-//    那張背景圖，不影響其他樣式，跟原本舊站的行為一致。這裡刻意不包在
-//    自己寫的 <head> 元素裡：單獨的 <link> 元素放在樹裡任何地方，
-//    React 19 都會自動 hoist 進 document 的 <head>。
+//    那張背景圖，不影響其他樣式，跟原本舊站的行為一致。
+//
+//    【踩過的坑】一開始這裡沒有給 `precedence`，想說「單獨的 <link>
+//    元素放在樹裡任何地方，React 19 都會自動 hoist 進 <head>」——這句
+//    話只對一半：React 只有在給了 `precedence` 的時候，才會把
+//    `<link rel="stylesheet">` 當成正式的 Stylesheet Resource 處理
+//    （搬進 <head>、去重、依 precedence 排序）。沒給 `precedence` 的
+//    話，React 就把它當成普通 host element，「照 JSX 寫的位置」原樣
+//    渲染——用 curl 撈 SSR 出來的原始 HTML 實測過，這三個 <link> 真的
+//    是被塞在 <body> 開頭、`</head>` 後面，不在 <head> 裡。這解釋了
+//    使用者回報「即使 production build，首次載入/重新整理還是會閃一下
+//    沒套樣式的畫面」——瀏覽器對 <head> 裡的 stylesheet 有很穩定的
+//    render-blocking 保證（整份文件不會畫出任何東西，直到樣式表載完），
+//    <body> 裡的 <link> 沒有這個保證那麼牢靠。加上 `precedence` 之後
+//    確認三支都正確出現在 <head>（用一樣的 curl 方式驗證過）。三支給
+//    同一個 precedence 值，確保彼此之間維持 coreStyle → style →
+//    style_rwd 這個原本 JSX 裡寫的載入順序（React 對同一個
+//    precedence 的規則是照渲染順序插入）。
 // ------------------------------------------------------------------
 import "../../public/js/bootstrap-5.3.2/dist/css/bootstrap.min.css";
 import "../../public/js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css";
@@ -51,24 +68,41 @@ export const metadata: Metadata = {
     template: "%s | 高雄技術處",
   },
   description: "智慧工安技術產業資訊暨媒合平台",
+  // 之前這裡漏了 `public/favicon.ico`（客戶實際的品牌 icon）會被
+  // `src/app/favicon.ico`蓋掉——Next.js App Router 有一個檔案慣例：
+  // `app/favicon.ico` 存在的話，會自動幫你產生一個 <link rel="icon">
+  // 指過去，而且這個「檔案慣例」的優先權比這裡 `metadata.icons` 設定
+  // 的還高。專案一開始 scaffold 出來的 `app/favicon.ico` 其實是
+  // Next.js 預設的黑底白三角形 logo，不是客戶的圖，一直沒被換掉/刪掉，
+  // 導致瀏覽器分頁圖示長期顯示錯的（Next.js 預設）icon，這裡設定的
+  // 客戶真正 icon 反而完全沒生效。已經把那個檔案刪掉，讓下面這份
+  // 設定真的能生效。
+  //
+  // 其餘幾個尺寸（android-chrome-192x192／256x256、mask-icon）是
+  // `public/` 裡本來就有、但一直沒有接進 `<head>` 的既有素材，一併補上：
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/android-chrome-256x256.png", sizes: "256x256", type: "image/png" },
       { url: "/favicon.ico" },
     ],
     apple: "/apple-touch-icon.png",
+    other: [{ rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#f4d44d" }],
   },
   manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="zh-tw">
+    <html lang="zh-tw" className={notoSansTC.variable}>
       <body>
         {LEGACY_SITE_STYLESHEETS.map((href) => (
-          <link key={href} rel="stylesheet" href={href} />
+          <link key={href} rel="stylesheet" href={href} precedence="legacy-site" />
         ))}
+
+        <BootstrapModalRouteCleanup />
 
         {children}
 

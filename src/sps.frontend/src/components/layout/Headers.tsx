@@ -276,24 +276,24 @@ export default function Headers() {
 
                 {/* 推廣專區 */}
                 <li className="nav-item dropdown dropdown-left fadeup">
-                  <a href="/page/serve/index.html" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+                  <Link href="/promotion" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
                     <span className="title-main">推廣專區</span>
-                  </a>
+                  </Link>
                   <ul className="dropdown-menu">
                     <li className="hover_r_sider dropdown-submenu">
-                      <a className="dropdown-item dropdown-toggle" href="/page/serve/index.html" title="產業案例">
+                      <Link className="dropdown-item" href="/promotion" title="產業案例">
                         產業案例
-                      </a>
+                      </Link>
                     </li>
                     <li className="hover_r_sider dropdown-submenu">
-                      <a className="dropdown-item dropdown-toggle" href="/page/video/index.html" title="影音專區">
+                      <Link className="dropdown-item" href="/promotion/video" title="影音專區">
                         影音專區
-                      </a>
+                      </Link>
                     </li>
                     <li className="hover_r_sider dropdown-submenu">
-                      <a className="dropdown-item" href="/page/serve/index.html" title="我要投稿">
+                      <Link className="dropdown-item" href="/promotion/contribute" title="我要投稿">
                         我要投稿
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </li>
@@ -319,26 +319,26 @@ export default function Headers() {
 
                 {/* 常見問題 */}
                 <li className="nav-item">
-                  <a className="nav-link" href="/page/faq/index.html">
+                  <Link className="nav-link" href="/faq">
                     <span className="title-main">常見問題</span>
-                  </a>
+                  </Link>
                 </li>
 
                 {/* 會員中心 */}
                 <li className="nav-item dropdown dropdown-left fadeup">
-                  <a href="/page/member/login.html" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+                  <Link href="/member/login" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
                     <span className="title-main">會員中心</span>
-                  </a>
+                  </Link>
                   <ul className="dropdown-menu">
                     <li className="hover_r_sider dropdown-submenu">
-                      <a className="dropdown-item dropdown-toggle" href="/page/member/login.html" title="我要登入">
+                      <Link className="dropdown-item dropdown-toggle" href="/member/login" title="我要登入">
                         我要登入
-                      </a>
+                      </Link>
                     </li>
                     <li className="hover_r_sider dropdown-submenu">
-                      <a className="dropdown-item dropdown-toggle" href="/page/member/register.html" title="註冊會員">
+                      <Link className="dropdown-item dropdown-toggle" href="/member/register" title="註冊會員">
                         註冊會員
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </li>

@@ -9,13 +9,122 @@
  *
  * 舊站樣式表本身是用 <link> 直接掛進 <head>（見 src/app/layout.tsx 的 LEGACY_STYLESHEETS），
  * 不會經過這支 globals.css。
+ *
+ * 【重要、之後每次想在全新設計的元件上用 `tw:` utility 都要記得的坑】
+ * 這裡的 Tailwind 是用 `@layer utilities` 載入的（見下面兩行 @import）。
+ * CSS Cascade Layers 規定「沒有 layer 的規則永遠贏過有 layer 的規則」，
+ * 跟 selector 的 specificity 高低完全無關。Bootstrap／coreStyle.css／
+ * style.css 都是用一般 `<link>` 掛進來的，全部不在任何 layer 裡——
+ * 所以只要 Bootstrap 或舊站對某個裸元素（`ul`、`a`…）本來就有預設值
+ * （例如 `ul { margin-bottom: 1rem }`、`a { color: #090909 }`），任何
+ * `tw:` utility 想蓋掉它都會輸，即使 class selector 理論上比 element
+ * selector 更精準（實測 `CategoryTabStrip` 就踩到三次：margin、
+ * padding、color 都各自被蓋回去）。
+ *
+ * 遇到這種情況，不要一直加 `tw:` utility 想蓋過去，直接跳過 Tailwind：
+ * 用 inline `style`（沒有 hover/focus 這類狀態時）或另外寫一段不透過
+ * `@layer` 的一般 CSS（像下面 `.no-scrollbar`、`.category-tab-strip`
+ * 這樣，需要 hover 才寫得出來的時候用這招）。
  */
-/* 中文字型，原本是 <head> 裡的 <link>，理由同上，改用 CSS @import 避免手刻 <head> */
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap");
-
+/*
+ * 中文字型改用 next/font/google 自架（見 src/lib/fonts.ts），不再用
+ * CSS `@import` 去 fonts.googleapis.com 拿。`@import` 本身是一段序列
+ * 請求鏈（主 CSS→解析到 @import→Google Fonts CSS→解析出字型網址→
+ * 字型檔本體），而且换字型當下文字還是會因為字型 metrics 不同重新
+ * 排版——這是使用者回報「CSS 都正確擺進 <head> 了，畫面還是會閃一下」
+ * 剩下的那段（FOUT，字型換字造成的版面抖動，不是樣式表遺漏）。
+ * next/font 自己網域伺服、少一段對外請求，且會自動幫 fallback 字型
+ * 校正 metrics（size-adjust 等），大幅降低換字時的抖動幅度。
+ */
 @import "tailwindcss/theme.css" layer(theme) prefix(tw);
 @import "tailwindcss/utilities.css" layer(utilities) prefix(tw);
 
 @theme inline {
   --font-sans: var(--font-noto-sans-tc), "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+}
+
+/*
+ * 普通、沒有 `tw:` 前綴的一次性小工具 class，不是 Tailwind utility，
+ * 不用透過 @layer——給橫向捲動但不想看到捲軸的區塊用（例如
+ * CategoryTabStrip 手機版）。純粹隱藏捲軸的視覺，捲動功能還在，
+ * 滑鼠/觸控拖曳都正常。
+ *
+ * 沒隱藏捲軸的話，`overflow-x: auto` 的容器在某些瀏覽器/系統下會
+ * 「預留」捲軸的垂直空間，即使桌機寬度下內容根本沒有超出、不需要
+ * 捲動也一樣——會讓整個框看起來比設計稿多出一截高度。
+ */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * CategoryTabStrip（/news 分類頁籤）的樣式。這是全新設計、沒有舊站
+ * class 可以沿用，原本想用 `tw:` utility 刻，結果 margin／padding／
+ * color 全部被舊站的裸元素樣式蓋掉（見上面那段說明），改寫成一般
+ * CSS，不透過 Tailwind 的 `@layer`，才能穩定蓋過 Bootstrap／舊站的
+ * `ul`／`a` 預設值。
+ */
+.category-tab-strip {
+  margin: 0 0 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #0d6efd;
+  background: #fff;
+}
+
+.category-tab-strip ul {
+  display: flex;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.category-tab-strip li {
+  text-align: center;
+}
+
+.category-tab-strip li + li {
+  border-left: 1px solid #0d6efd;
+}
+
+.category-tab-strip a {
+  display: block;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.category-tab-strip a:hover {
+  color: #0d6efd;
+}
+
+.category-tab-strip a[aria-current="page"] {
+  color: #0d6efd;
+  border-bottom: 3px solid #0d6efd;
+}
+
+@media (min-width: 768px) {
+  .category-tab-strip {
+    margin-bottom: 1.25rem;
+  }
+
+  .category-tab-strip ul {
+    width: auto;
+  }
+
+  .category-tab-strip li {
+    flex: 1;
+  }
+
+  .category-tab-strip a {
+    padding: 1rem 0.5rem;
+  }
 }

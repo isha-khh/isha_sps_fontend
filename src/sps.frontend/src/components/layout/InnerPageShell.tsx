@@ -27,6 +27,7 @@ export default function InnerPageShell({
   titleAside,
   breadcrumb,
   banner,
+  topBar,
   sidebar,
   aside,
   decorations,
@@ -37,6 +38,13 @@ export default function InnerPageShell({
   titleAside?: ReactNode;
   breadcrumb: BreadcrumbItem[];
   banner?: ReactNode;
+  /**
+   * 麵包屑下方、側欄+內容那個三欄 row *外面* 的滿版區塊——目前給
+   * 公告事項列表頁的分類頁籤用（見 CategoryTabStrip.tsx），這種頁籤
+   * 客戶要求是橫跨整個內容寬度，不是塞進 `sidebar` 那個窄欄位裡，
+   * 所以另外開一個滿版插槽，沒給就不渲染。
+   */
+  topBar?: ReactNode;
   sidebar?: ReactNode;
   /** 右側欄（熱門文章／廣告圖片這類），對應舊站的 `.side.side2`，沒給就不渲染 */
   aside?: ReactNode;
@@ -92,6 +100,8 @@ export default function InnerPageShell({
           </a>
 
           <div className="container-fluid">
+            {topBar}
+
             <div className="row gx-0 gy-4">
               <CategorySidebar hidden={!sidebar}>{sidebar}</CategorySidebar>
 

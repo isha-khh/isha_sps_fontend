@@ -16,6 +16,8 @@ export interface NewsListCardData {
   description: string;
   /** 活動時間／地點這類條列資訊，沒有就不顯示 */
   meta?: NewsListCardMeta[];
+  /** 標題下方的關鍵字連結，沒有就不顯示；跟詳情頁 `ul-key` 是同一組資料 */
+  keywords?: string[];
 }
 
 const META_ICON_CLASS: Record<NewsListCardMeta["icon"], string> = {
@@ -25,7 +27,8 @@ const META_ICON_CLASS: Record<NewsListCardMeta["icon"], string> = {
 
 /**
  * 積木元件：新聞列表頁（page/news）用的卡片，對應舊站 news/index.html
- * 裡的 `.item`（縮圖 + 標籤/日期/狀態 + 標題 + 說明 + 活動資訊條列）。
+ * 裡的 `.item`（縮圖 + 標籤/日期/狀態 + 標題 + 說明 + 活動資訊條列 +
+ * 關鍵字連結 + 右側箭頭圖示）。
  */
 export default function NewsListCard({ data }: { data: NewsListCardData }) {
   return (
@@ -70,7 +73,23 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
                 </ul>
               )}
             </div>
+
+            <div className="news-arrow" aria-hidden="true">
+              <img className="img-fluid d-block" src="/images/home/arrow_black.svg" alt="" />
+            </div>
           </a>
+
+          {data.keywords && data.keywords.length > 0 && (
+            <ul className="nav ul-key">
+              {data.keywords.map((keyword) => (
+                <li key={keyword}>
+                  <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                    {keyword}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
