@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
-import CategoryTabList from "@/components/layout/CategoryTabList";
+import CategoryTabStrip from "@/components/news/CategoryTabStrip";
+import NewsBanner from "@/components/news/NewsBanner";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
 import SearchBar from "@/components/ui/SearchBar";
@@ -26,14 +27,31 @@ const SIDEBAR_BANNERS: SidebarBannerItem[] = [
 ];
 
 /**
- * 最新消息列表：InnerPageShell 提供版型、CategoryTabList 當左側分類、
- * SearchBar 做搜尋列、NewsListCard 排列表、Pagination 分頁、右側欄用
- * PopularPosts＋SidebarBanner。
+ * 最新消息列表：InnerPageShell 提供版型、上方輪播 banner（NewsBanner）、
+ * 滿版分類頁籤（CategoryTabStrip）、SearchBar 做搜尋列、NewsListCard
+ * 排列表、Pagination 分頁、右側欄用 PopularPosts＋SidebarBanner。
  *
- * `?category=` 這個 query string 是真的會篩選文章、也會反映在側欄
+ * 客戶後來要求公告事項改版：分類選單從原本側欄的圓角膠囊按鈕
+ * （`CategoryTabList`，`/serve` 還在用這個樣式）換成滿版的方框頁籤
+ * （`CategoryTabStrip`），版面也跟著從「側欄+內容+右欄」三欄變成
+ * 「內容+右欄」兩欄——分類頁籤改放進 `InnerPageShell` 的 `topBar`
+ * 插槽，橫跨整個內容寬度，不再佔用一欄。另外補了最上面那條輪播
+ * banner（`NewsBanner`，對應舊站 page/_uc/banner.html，`/serve` 沒有
+ * 這塊，不用一起加）。
+ *
+ * `?category=` 這個 query string 是真的會篩選文章、也會反映在頁籤
  * active 狀態上的——之前這裡雖然畫了分類按鈕，但頁面沒有讀
  * `searchParams`，點了只是換網址、畫面完全沒變化，是一個沒接起來的
- * 假動作，這次一起補上。
+ * 假動作，之前已經補上，這次改版沿用同一套邏輯。
+ *
+ * `CategoryTabStrip` 的 `items` 裡刻意沒有「全部」這個頁籤——客戶
+ * 設計稿沒有這顆按鈕，只保留「活動資訊／產業新知／外部消息」三個。
+ * 但下面「沒有 `category` 就顯示全部文章」這段邏輯（`activeHref`／
+ * `articles` 那兩行三元運算式）刻意保留，沒有跟著砍掉：一來拿掉
+ * 「全部」頁籤不代表 `/news`（沒帶 `?category=`）這個網址本身不該
+ * 顯示全部文章，二來怕客戶之後改主意要把「全部」按鈕加回來，到時候
+ * 只要在 `items` 陣列補一行 `{ label: "全部", href: "/news" }` 就好，
+ * 不用重新兜篩選邏輯。
  *
  * 文章資料（含這裡用不到的內文/附件等欄位）統一從 `@/lib/news-data`
  * 讀，`/news/[id]` 詳情頁也是讀同一份，不要各自维护一份假資料。
@@ -53,11 +71,11 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
       <InnerPageShell
         title="最新消息"
         breadcrumb={category ? [{ label: "公告事項", href: "/news" }, { label: category }] : [{ label: "公告事項" }]}
-        sidebar={
-          <CategoryTabList
+        banner={<NewsBanner />}
+        topBar={
+          <CategoryTabStrip
             activeHref={activeHref}
             items={[
-              { label: "全部", href: "/news" },
               { label: "活動資訊", href: "/news?category=活動資訊" },
               { label: "產業新知", href: "/news?category=產業新知" },
               { label: "外部消息", href: "/news?category=外部消息" },
@@ -90,6 +108,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
                 title: article.title,
                 description: article.description,
                 meta: article.meta,
+                keywords: article.keywords,
               }}
             />
           ))}

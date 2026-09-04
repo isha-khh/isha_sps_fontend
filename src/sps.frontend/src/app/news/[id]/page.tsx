@@ -6,8 +6,7 @@ import Badge from "@/components/ui/Badge";
 import MoreLink from "@/components/ui/MoreLink";
 import ShareBox from "@/components/ui/ShareBox";
 import ZoomableImage from "@/components/ui/ZoomableImage";
-import LinkListBox from "@/components/news/LinkListBox";
-import ArticleContactInfo from "@/components/news/ArticleContactInfo";
+import EditableArticleBody from "@/components/puck/EditableArticleBody";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import { NEWS_ARTICLES, getNewsArticle } from "@/lib/news-data";
@@ -123,16 +122,21 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
 
           <ZoomableImage src={article.image} alt={article.title} caption={article.title} />
 
-          {article.contributor && <div className="Contributor">撰稿人 / {article.contributor}</div>}
-
-          {/* CMS 編輯器（CKEditor）產出的 HTML，由管理員撰寫，不是使用者輸入，這裡信任它 */}
-          <div className="txt editor mb-md-5 mb-4" dangerouslySetInnerHTML={{ __html: article.bodyHtml }} />
-
-          <div className="dk_conbo mb-md-5 mb-4">
-            <LinkListBox icon="bi-file-earmark-arrow-down" title="附件下載" items={article.attachments ?? []} />
-            <LinkListBox icon="bi-link-45deg" title="相關連結" items={article.relatedLinks ?? []} />
-            <ArticleContactInfo />
-          </div>
+          {/*
+            撰稿人／文章內文／附件下載／相關連結／聯繫人資訊，整段交給
+            EditableArticleBody 管——目前先用「泡泡懸浮圖標」測試可編輯
+            內容，見 components/puck/EditableArticleBody.tsx 的說明：
+            存檔先寫 localStorage，沒編輯過就照舊顯示這幾個欄位原本的
+            樣子。標題／分類／日期／關鍵字／封面圖是頁面模板本身的欄位，
+            不算「公告內文」，留在這裡不受影響。
+          */}
+          <EditableArticleBody
+            storageKey={`sps-puck-content:news:${article.id}`}
+            contributor={article.contributor}
+            bodyHtml={article.bodyHtml}
+            attachments={article.attachments ?? []}
+            relatedLinks={article.relatedLinks ?? []}
+          />
 
           <MoreLink href="/news" label="返回" title="返回" />
         </div>
