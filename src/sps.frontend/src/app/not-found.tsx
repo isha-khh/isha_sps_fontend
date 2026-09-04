@@ -46,11 +46,19 @@ export default function NotFound() {
           className="column_box text-center"
           style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "50vh" }}
         >
-          <h2 className="h2" style={{ fontSize: "clamp(4rem, 10vw, 8rem)" }}>
-            404
-          </h2>
 
+          <h2 className="h2" hidden={true} style={{ fontSize: "clamp(4rem, 10vw, 8rem)" }}>
+            找不到頁面
+          </h2>
+            <img
+                className="not-found-illustration"
+                src="/images/not-found/not-found.svg"
+                alt=""
+                aria-hidden="true"
+                style={{ width: "clamp(120px, 20vw, 200px)", height: "auto", marginBottom: "1.5rem" }}
+            />
           <p className="desc mb-4">您要找的頁面不存在，可能是網址打錯了，或這個頁面已經被移除。</p>
+
 
           <Link href="/" className="btn_a d-inline-flex align-items-center justify-content-center" title="回首頁">
             回首頁

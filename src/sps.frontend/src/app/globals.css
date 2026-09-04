@@ -39,10 +39,6 @@
 @import "tailwindcss/theme.css" layer(theme) prefix(tw);
 @import "tailwindcss/utilities.css" layer(utilities) prefix(tw);
 
-@theme inline {
-  --font-sans: var(--font-noto-sans-tc), "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-}
-
 /*
  * 普通、沒有 `tw:` 前綴的一次性小工具 class，不是 Tailwind utility，
  * 不用透過 @layer——給橫向捲動但不想看到捲軸的區塊用（例如
@@ -160,4 +156,55 @@
  */
 .main .side .nav > li a {
   transition-property: color, background-position !important;
+}
+
+/*
+ * 404 頁插圖進場動畫：跳起來、正反搖晃幾下、回到原位。
+ * 純粹是「頁面一載入播一次」的單次動畫，沒有互動/中斷/物理效果需求，
+ * 用 CSS `@keyframes`（GPU 加速的 transform）就夠了，不需要為了這個
+ * 額外裝 Framer Motion 或 GSAP——這兩個都要多引入一包 JS 執行期，
+ * 這個專案目前完全沒有裝任何動畫函式庫（舊站的 TweenLite 只是拿來做
+ * 首頁滾動視差用的舊版全域腳本，不是給這種進場動畫用的）。
+ *
+ * `prefers-reduced-motion` 的人跳過動畫、直接看靜止的插圖。
+ */
+@keyframes not-found-bounce {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  15% {
+    transform: translateY(-24px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-24px) rotate(15deg);
+  }
+  35% {
+    transform: translateY(-24px) rotate(-15deg);
+  }
+  45% {
+    transform: translateY(-24px) rotate(15deg);
+  }
+  55% {
+    transform: translateY(-24px) rotate(-15deg);
+  }
+  65% {
+    transform: translateY(-24px) rotate(15deg);
+  }
+  80% {
+    transform: translateY(-10px) rotate(-6deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+.not-found-illustration {
+  animation: not-found-bounce 0.9s cubic-bezier(0.1, 1.2, 0.64, 1) 0.1s 1 both;
+  transform-origin: 50% 90%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .not-found-illustration {
+    animation: none;
+  }
 }

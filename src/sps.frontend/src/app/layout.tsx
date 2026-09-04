@@ -96,7 +96,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="zh-tw" className={notoSansTC.variable}>
+    <html lang="zh-tw" data-scroll-behavior="smooth" className={notoSansTC.variable}>
       <body>
         {LEGACY_SITE_STYLESHEETS.map((href) => (
           <link key={href} rel="stylesheet" href={href} precedence="legacy-site" />
