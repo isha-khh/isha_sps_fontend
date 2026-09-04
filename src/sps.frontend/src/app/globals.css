@@ -128,3 +128,36 @@
     padding: 1rem 0.5rem;
   }
 }
+
+/*
+ * 修「文字忽然變大變小」那個閃爍——這不是 FOUC，是舊站
+ * coreStyle.css 裡側欄分類選單（`.main .side .nav > li a`，常見問題
+ * 側欄、CategoryTabList 都在用這個結構）本身的 `transition: 0.3s all
+ * ease` 造成的。`all` 包含 font-size 這類跟版面有關的屬性，只要連結
+ * 的計算樣式在頁面畫出來之後又變了一次（切換分類時的 client-side
+ * 導航重新渲染、或首次載入時樣式表/字型套用的時間點前後有落差），
+ * font-size 就會跟著「動畫」過去、而不是瞬間套用——使用者用 Chrome
+ * DevTools 的 Animations 面板實測到，好幾個 `a`／`a.active` 元素的
+ * font-size 動畫軌長度接近 250ms，時間點對得上「畫面看起來像字忽然
+ * 變大變小」的描述。
+ *
+ * 這個規則的 `:hover`／`.active` 狀態（coreStyle.css 同一段的
+ * `.main .side .nav > li a:hover/:focus/.active`）其實只改
+ * `color`／`background-position`，`transition: all` 真正用到的只有
+ * 這兩個屬性，font-size 是意外的副作用。coreStyle.css 是廠商共用
+ * 樣板，不直接改那份檔案。
+ *
+ * 【踩過的坑】一開始想全站蓋掉裸元素 `a` 的 `transition: all`（想說
+ * 反正舊站兩份全站 `a:hover` 規則也只改 `color`），結果差點搞出新
+ * 的迴歸：`.card-footer a.btn-theme:hover` 那個按鈕的 hover 上浮
+ * 效果（`transform: translateY(-3px)` + `box-shadow` + `opacity`）
+ * 自己完全沒有宣告 `transition`，是「借用」裸元素 `a { transition:
+ * all }` 才有辦法動畫的——全站蓋掉會讓這類按鈕的 hover 動畫瞬間跳過
+ * 去，反而變成新 bug。所以範圍收斂到只蓋這一個側欄分類選單的
+ * selector（跟原本 coreStyle.css 那條規則同一個 selector，用
+ * `!important` 是因為同 specificity 平手時，載入順序上 coreStyle.css
+ * 排在 globals.css 後面、原本會贏）。
+ */
+.main .side .nav > li a {
+  transition-property: color, background-position !important;
+}
