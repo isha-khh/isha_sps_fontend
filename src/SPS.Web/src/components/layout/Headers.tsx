@@ -199,9 +199,14 @@ export default function Headers() {
                   </ul>
                 </li>
 
-                {/* 服務專區：/serve 已經做出來了，主連結跟「產業輔導」/「輔助資源」這兩個可以直接點的子項改成真的路由。
-                    「技術工具」/「人才培育」是 disabled 的第二層 toggle（本來就點不了，見下面註解），
-                    「技術文件」這種再往下一層的細分類目前 /serve 沒有對應的篩選條件，先維持原本的路徑字串。 */}
+                {/* 服務專區：分類其實是兩層（盤點細節見 serve-data.ts 開頭的說明），
+                    這裡「技術工具」/「人才培育」是分組標籤，disabled、本來就點不了
+                    （見下面 dropdown-toggle disabled 那則註解），真正可以點的是底下
+                    的葉節點——都改成 `/serve?category=<葉節點>`，對應 /serve 頁面
+                    現在讀的 `?category=` 就是葉節點名稱，不是分組名稱。
+                    「產業輔導」這一組只有一個葉節點「輔導」，組本身的連結跟葉節點
+                    連去同一個地方；「輔助資源」有兩個葉節點，組本身沒有單一對應的
+                    分類，連去 /serve 總覽。 */}
                 <li className="nav-item dropdown dropdown-left fadeup">
                   <Link href="/serve" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
                     <span className="title-main">服務專區</span>
@@ -209,65 +214,65 @@ export default function Headers() {
                   <ul className="dropdown-menu">
                     <li className="hover_r_sider dropdown-submenu">
                       {/* 程式判斷第2層不能點多家 disabled */}
-                      <a className="dropdown-item dropdown-toggle disabled" href="/page/serve/index.html" title="技術工具">
+                      <Link className="dropdown-item dropdown-toggle disabled" href="/serve" title="技術工具">
                         技術工具
-                      </a>
+                      </Link>
                       <ul className="dropdown-menu">
                         <li>
-                          <a className="dropdown-item" href="#" title="產業AI">
+                          <Link className="dropdown-item" href="/serve?category=產業AI" title="產業AI">
                             產業AI
-                          </a>
+                          </Link>
                         </li>
                         <li>
-                          <a className="dropdown-item" href="/page/serve/index.html" title="技術文件">
+                          <Link className="dropdown-item" href="/serve?category=技術文件" title="技術文件">
                             技術文件
-                          </a>
+                          </Link>
                         </li>
                       </ul>
                     </li>
                     <li className="hover_r_sider dropdown-submenu">
-                      <a className="dropdown-item dropdown-toggle disabled" href="/page/serve/index.html" title="人才培育">
+                      <Link className="dropdown-item dropdown-toggle disabled" href="/serve" title="人才培育">
                         人才培育
-                      </a>
+                      </Link>
                       <ul className="dropdown-menu">
                         <li>
-                          <a className="dropdown-item" href="#" title="知識加值">
+                          <Link className="dropdown-item" href="/serve?category=知識加值" title="知識加值">
                             知識加值
-                          </a>
+                          </Link>
                         </li>
                         <li>
-                          <a className="dropdown-item" href="#" title="XR">
+                          <Link className="dropdown-item" href="/serve?category=XR" title="XR">
                             XR
-                          </a>
+                          </Link>
                         </li>
                       </ul>
                     </li>
                     <li className="hover_r_sider dropdown-submenu">
-                      <Link className="dropdown-item" href="/serve?category=產業輔導" title="產業輔導">
+                      <Link className="dropdown-item" href="/serve?category=輔導" title="產業輔導">
                         產業輔導
                       </Link>
                       <ul className="dropdown-menu">
                         <li>
-                          <a className="dropdown-item" href="#" title="輔導">
+                          <Link className="dropdown-item" href="/serve?category=輔導" title="輔導">
                             輔導
-                          </a>
+                          </Link>
                         </li>
                       </ul>
                     </li>
                     <li className="hover_r_sider dropdown-submenu">
-                      <Link className="dropdown-item" href="/serve?category=輔助資源" title="輔助資源">
+                      <Link className="dropdown-item" href="/serve" title="輔助資源">
                         輔助資源
                       </Link>
                       <ul className="dropdown-menu">
                         <li>
-                          <a className="dropdown-item" href="#" title="本計畫補助">
+                          <Link className="dropdown-item" href="/serve?category=本計畫補助" title="本計畫補助">
                             本計畫補助
-                          </a>
+                          </Link>
                         </li>
                         <li>
-                          <a className="dropdown-item" href="#" title="政府補助資源">
+                          <Link className="dropdown-item" href="/serve?category=政府補助資源" title="政府補助資源">
                             政府補助資源
-                          </a>
+                          </Link>
                         </li>
                       </ul>
                     </li>

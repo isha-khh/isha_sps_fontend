@@ -13,6 +13,12 @@ export interface CategoryTabItem {
  *   <CategorySidebar>
  *     <CategoryTabList activeHref="/news" items={[...]} />
  *   </CategorySidebar>
+ *
+ * key 用 `item.label` 不是 `item.href`：`/serve` 那個「全部／分類1／
+ * 分類2」是照舊站原樣的裝飾性連結（三個連結都指回同一個網址，不是真的
+ * 篩選，見 serve-data.ts 的說明），href 會重複，用 href 當 key 會撞
+ * React 的重複 key 警告；label 在同一份清單裡一定是唯一的，用它當 key
+ * 才穩。
  */
 export default function CategoryTabList({
   items,
@@ -24,7 +30,7 @@ export default function CategoryTabList({
   return (
     <ul className="nav wid-cont">
       {items.map((item) => (
-        <li key={item.href}>
+        <li key={item.label}>
           <a href={item.href} title={item.label} className={item.href === activeHref ? "active" : undefined}>
             {item.label}
           </a>

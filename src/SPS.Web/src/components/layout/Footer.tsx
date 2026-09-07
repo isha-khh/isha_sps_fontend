@@ -5,9 +5,11 @@ import Link from "next/link";
  * 沒有自己的互動邏輯——「訂閱電子報」按鈕的捲動行為是掛在 Header 上
  * （原本就是 nav.html 的 script 在控制），這裡純粹是內容。
  *
- * 「公告事項」連到真的存在的 `/news`，用 next/link（ESLint 的
- * no-html-link-for-pages 規則對已存在的路由會直接噴錯，其他還沒蓋的
- * 頁面連結維持原本的 <a> 字串，等頁面做出來再一起換）。
+ * 「公告事項」／「產業案例」／「會員中心」／「常見問題」連到真的
+ * 存在的路由，用 next/link（ESLint 的 no-html-link-for-pages 規則對
+ * 已存在的路由會直接噴錯）；其餘（我要媒合、關於我們、網站導覽、
+ * 功能專區）對應頁面還沒蓋出來，維持原本的 `<a href="#">`／舊站
+ * 靜態頁字串，等頁面做出來再一起換。
  */
 export default function Footer() {
   return (
@@ -93,19 +95,19 @@ export default function Footer() {
                   </a>
                 </li>
                 <li>
-                  <a href="#" title="前往 產業案例">
+                  <Link href="/promotion" title="前往 產業案例">
                     產業案例
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/page/member/login.html" title="前往 會員中心">
+                  <Link href="/member/login" title="前往 會員中心">
                     會員中心
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" title="前往 常見問題">
+                  <Link href="/faq" title="前往 常見問題">
                     常見問題
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a href="#" title="前往 網站導覽">
