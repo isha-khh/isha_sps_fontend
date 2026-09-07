@@ -4,7 +4,7 @@
     {
       "name": "sps.frontend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "src/sps.frontend"],
+      "runtimeArgs": ["run", "dev", "--prefix", "src/SPS.Web"],
       "port": 3000,
       "autoPort": true
     },
