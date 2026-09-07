@@ -1,0 +1,162 @@
+@charset "utf-8";
+body{
+	/*--網頁內容設定-----------------------------------------------------*/
+	/*scrollbar-3dlight-color:    #fdce23; /*左上外框邊緣*/
+	/*scrollbar-highlight-color:  #ffedaa; /*左上外框內綠*/
+	/*scrollbar-arrow-color:      #ffffff; /*箭頭*/
+	/*scrollbar-base-color:       #fdce23; /*不知作用*/
+	/*scrollbar-darkshadow-color: #fdce23; /*右下外框邊緣*/
+	/*scrollbar-shadow-color:     #d7a800; /*右下外框內綠*/
+	/*scrollbar-face-color:       #fdce23; /*面板*/
+	/*scrollbar-track-color:      #fdce23; /*面板底色*/
+	background-color: #fff;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+	margin: 0px;
+	background-image: url(../images/index.jpg);
+	background-repeat: no-repeat;
+	text-align: center;
+	background-position: center top;
+	}
+body.p2 {
+	background-image: url(../images/index2.jpg);
+	background-repeat: no-repeat;
+}
+
+	
+td{
+    color:#000000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:9pt;
+	line-height:16pt;
+}
+ul{list-style:none;margin:0;padding:0;}
+li{float:left;}
+
+/*--連結設定-----------------------------------------------------------*/
+a:link    {color:#0070e2;text-decoration: none;}
+a:visited {color:#0070e2;text-decoration: none;}
+a:hover   {color:#bd0050;text-decoration: underline;}/
+.link00:hover   {position:relative;top:-2px;right:0px;}
+
+.eztrust:link    {color:#919191;}
+.eztrust:visited {color:#919191 ;}
+.eztrust:hover   {color:#bd0050;font-weight:bold;text-decoration: none;}
+
+.link01:link    {color:#ff6600;padding:3px 3px 0px 3px;text-decoration:underline;}
+.link01:visited {color:#ff6600;padding:3px 3px 0px 3px;text-decoration:underline;}
+.link01:hover   {color:#ffffff; background-color:#ff6600;text-decoration:none;padding:3px 3px 0px 3px;}
+
+/*跳頁數字vs下方連結*/
+#topg ul{list-style:none;margin:0; padding:0;}
+#topg ul li{float:left;margin-left:1px;}
+#topg ul li a{background:url("../../european/images/home/topg.gif") 0 0 no-repeat;width:15px;height:15px;display:block;color:#000000;font-family:Tahoma;font-size:11px;}
+#topg ul li a:hover{background:url("../../european/images/home/topgo.gif") 0 0 no-repeat;color:#ffffff;}
+#topg ul li span{padding:5px 4px;}
+
+#dlink ul{list-style:none;margin:0;padding:0;float:right;}
+#dlink ul li{float:left;margin-left:1px;text-align:center;background:url("../../european/images/home/dlink.gif") 0 2px no-repeat;}
+#dlink ul li a{color:#404040;}
+#dlink ul li a:hover{color:#ffffff;background-color:#666666;text-decoration:none;}
+#dlink ul li span{padding:3px 10px 0px 18px;font-size:11px;}
+
+/*左側商品類分層選單*/
+#bt_p1 a{background:url("../../european/images/home/left_pbt01bg.gif") 0 100% no-repeat #357e39;font-size:10pt;color:#ffffff;font-weight:bold;text-decoration:none; width:160px; height:24px;display:inherit;padding:5px 3px 0 3px;}
+#bt_p1 a:hover{text-decoration: underline;}
+#bt_p2 a{ background-color:#d8d8d8; border-top:1px solid #ffffff;font-size:9pt;color:#626262;text-decoration:none;width:160px;height:24px;display:inherit;padding:5px 3px 0 15px;}
+#bt_p2 a:hover{text-decoration: underline;}
+#bt_p3 a{ background:url("../../european/images/home/left_pbt3line.gif") center 100% repeat-x;font-size:9pt;color:#4e9853;text-decoration:none;width:160px;height:25px;display:inherit;padding:7px 3px 0 15px;}
+#bt_p3 a:hover{text-decoration: underline;}
+
+/*--底圖背景---------------------------------------------------------------------------------------*/
+.bgc0{background-position:center 0; background-repeat:no-repeat;}
+.bg1000{background-position:100% 0; background-repeat:no-repeat}
+.bg0100{background-position:0 100%; background-repeat:no-repeat}
+.bg00{background-position:0 0; background-repeat:no-repeat}
+.bg100100{background-position:100% 100%; background-repeat:no-repeat}
+.fl{float:left;}
+.fr{float:right;}
+.pady8{padding:8px 0;}
+.padx8{padding:0 8px;}
+.pad10{padding:10px;}
+.padx20{padding:0 20px;}
+.mary8{margin:8px 0;}
+.marx8{margin:0 8px;}
+.mary15{margin:15px 0;}
+
+/*--切版常用背景圖設定---------------------------------------------------------------------------------------*/
+.bg_left01{background:url(../../european/images/home/bg_left01.jpg) no-repeat 100% 0;}
+.bg_left02{background:url(../../european/images/home/bg_left02.jpg) repeat-y 100% 0;}
+.bg_left03{background:url(../../european/images/home/bg_left03.jpg) no-repeat 100% 100%;}
+.bg_right01{background:url(../../european/images/home/bg_right01.jpg) no-repeat 0 0;}
+.bg_right02{background:url(../../european/images/home/bg_right02.jpg) repeat-y 0 0;}
+.bg_right03{background:url(../../european/images/home/bg_right03.jpg) no-repeat 0 100%;}
+.bg_top{background:url(../../european/images/home/bg_top.jpg) 0 0 no-repeat;height:254px;}
+.bg_down{background:url(../../european/images/home/bg_down.jpg) 0 0 no-repeat;height:179px;}
+
+/*--表格設定-----------------------------------------------------------------------------------*/
+.table1 {
+	border-top:1px solid #dddddd;
+	border-left:1px solid #dddddd;
+}
+.td1 {
+	padding:3px;
+	border-top:1px solid #ffffff;border-left:1px solid #ffffff;
+	border-bottom:1px solid #dddddd;border-right:1px solid #dddddd;
+}
+.td_p1{color:#ffffff;background:url(../../european/css/images/td_p1.gif) 0 0 repeat-x #009ddf;}
+.td_w{color:#000000;background-color:#ffffff;}
+.td_g{color:#000000;background-color:#ebebeb;}
+
+/*--表格字型、大小、行距設定-----------------------------------------------------------------------------------*/
+.ttable1 {
+	border-top:1px solid #cccccc;
+	border-left:1px solid #cccccc;
+}
+.ttd1 {
+	color:#ffffff;
+	padding:0 3px;
+	border-bottom:1px solid #cccccc;
+	border-right:1px solid #cccccc;
+}
+
+/*--直線設定------------------------------------------------------------*/
+.lineb{background:url(../../european/css/images/lineb.gif) 0 center repeat-x;}
+.linew{background:url(../../european/css/images/linew.gif) 0 center repeat-x;}
+.lineg{background:url(../../european/css/images/lineg.gif) 0 center repeat-x;}
+
+.linedownb{background:url(../../european/css/images/lineb.gif) 0 100% repeat-x;padding:3px 0;}
+.linedowng{background:url(../../european/css/images/lineg.gif) 0 100% repeat-x;padding:3px 0;}
+.linedownw{background:url(../../european/css/images/linew.gif) 0 100% repeat-x;padding:3px 0;}
+
+/*--圖外框--------------------------------------------------------------*/
+.imageborder{border: 1px solid  #CCCCCC}
+
+/*--按鈕設定（圖片按鈕）-----------------------------------------------*/
+.inputno {border:0px;background-color:transparent;color:000;cursor:pointer;}
+.input02 {color:#ffffff;border:0;padding:3px 0 0 1px;background-image:url("../../european/css/images/inpbg2.gif");background-color:transparent;width:40px;height:25px;cursor:pointer;}
+.input03 {color:#ffffff;border:0;padding:3px 0 0 1px;background-image:url("../../european/css/images/inpbg3.gif");background-color:transparent;width:50px;height:25px;cursor:pointer;}
+.input04 {color:#ffffff;border:0;padding:3px 0 0 1px;background-image:url("../../european/css/images/inpbg4.gif");background-color:transparent;width:70px;height:25px;cursor:pointer;}
+.input05 {color:#ffffff;border:0;padding:3px 0 0 1px;background-image:url("../../european/css/images/inpbg5.gif");background-color:transparent;width:80px;height:25px;cursor:pointer;}
+.input06 {color:#ffffff;border:0;padding:3px 0 0 1px;background-image:url("../../european/css/images/inpbg6.gif");background-color:transparent;width:90px;height:25px;cursor:pointer;}
+.input07 {color:#ffffff;border:0;padding:3px 0 0 1px;background-image:url("../../european/css/images/inpbg7.gif");background-color:transparent;width:100px;height:25px;cursor:pointer;}
+.input08 {color:#ffffff;border:0;padding:3px 0 0 1px;background-image:url("../../european/css/images/inpbg8.gif");background-color:transparent;width:110px;height:25px;cursor:pointer;}
+.input09 {color:#ffffff;border:0;padding:3px 0 0 1px;background-image:url("../../european/css/images/inpbg9.gif");background-color:transparent;width:120px;height:25px;cursor:pointer;}
+
+/*--設定下拉式選單-------------------------------------------------*/
+.option01{background-color:#7a963d;color:#ffffff;margin:0 3px;width:130px;}
+.option02{background-color:#87d7e0;color:#000000;font-size:xx-small;}
+.option03{background-color:#000000;color:#ffffff;padding:5px;}
+
+/*--填寫欄位設定-------------------------------------------------*/
+.inputkw01{color:#000000;background-color:#ffffff;border:1px solid #d7d7d7;}
+.inputkw02{color:#000000;background-color:#ffffff;border:1px solid #d7d7d7;overflow-y:auto;}
+
+/*--元件設定---------------------------------------------------------------------------------------*/
+/*--各式字型大小--------------------------------------------------------*/
+.t_v{writing-mode:tb-rl;}/*--直行*/
+.texto {overflow:hidden;text-indent:-5000px;}
+.copy{color:#919191;letter-spacing:1pt;font-family:Tahoma;}
+.t_pic{overflow:hidden;line-height:500px;}
+.t_nb{font-weight:normal;}
+.t_b{font-weight:bold;}

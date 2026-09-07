@@ -4,3 +4,11 @@
 
 # OS
 .DS_Store
+
+# .NET
+bin/
+obj/
+appsettings.Local.json
+appsettings.*.local.json
+
+Uploads/

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 1245 245" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(0.4096,0,0,0.4096,244.845057,121.945177)">
+        <g transform="matrix(1,0,0,1,-555.555556,-297.5955)">
+            <clipPath id="_clip1">
+                <rect x="0" y="0" width="1111.111" height="595.191"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g id="g691" transform="matrix(14.979388,0,0,14.979388,0,0)">
+                    <g id="g457" transform="matrix(1,0,0,1,0.123,-0.003)">
+                        <path id="path453" d="M25.412,39.737C36.384,39.737 45.279,30.841 45.279,19.87C45.279,8.898 36.383,0.003 25.412,0.003L8.389,0.003L8.389,5.677L25.412,5.677C33.247,5.677 39.599,12.029 39.599,19.863C39.599,27.698 33.247,34.049 25.412,34.049L5.551,34.049L5.551,8.515L-0.123,8.515L-0.123,39.724L25.412,39.737Z" style="fill:rgb(16,89,152);fill-rule:nonzero;"/>
+                        <path id="polygon455" d="M67.974,39.725L74.053,39.725L57.03,0.003L50.951,0.003L67.974,39.725Z" style="fill:rgb(44,182,175);fill-rule:nonzero;"/>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+    <g transform="matrix(1.138545,0,0,1.138545,-29.190982,-90.187786)">
+        <text x="450.666px" y="243px" style="font-family:'PingFangSC-Regular', 'PingFang SC', sans-serif;font-size:163.834px;fill:rgb(90,90,90);">平台管理</text>
+    </g>
+</svg>

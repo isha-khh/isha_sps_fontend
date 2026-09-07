@@ -1,0 +1,31 @@
+/*
+ * Puck 編輯器 chrome 主題覆寫：只影響編輯器周邊（toolbar / sidebar / 欄位 / 按鈕），
+ * 不影響中央 canvas 與渲染內容 — 後者固定保持白底，對齊前台呈現。
+ *
+ * 觸發條件：<html data-mode="dark">（由 ConfigProvider 設定）
+ *
+ * 原理：Puck 內建用 --puck-color-grey-01（深）到 --puck-color-grey-12（淺）做明暗階梯，
+ * dark mode 下翻轉整條 ramp 即可讓 chrome 跟著轉暗。canvas 本身用字面 `background: white`，
+ * 不吃變數，自然不受影響。
+ */
+
+[data-mode="dark"] {
+  /* Grey ramp 翻轉：01(near-black) <-> 12(near-white) */
+  --puck-color-grey-01: #fafafa;
+  --puck-color-grey-02: #f5f5f5;
+  --puck-color-grey-03: #efefef;
+  --puck-color-grey-04: #dcdcdc;
+  --puck-color-grey-05: #c3c3c3;
+  --puck-color-grey-06: #ababab;
+  --puck-color-grey-07: #949494;
+  --puck-color-grey-08: #767676;
+  --puck-color-grey-09: #5a5a5a;
+  --puck-color-grey-10: #404040;
+  --puck-color-grey-11: #292929;
+  --puck-color-grey-12: #181818;
+
+  /* white/black 翻轉：chrome 中表單欄位、下拉選單、按鈕等用 --puck-color-white 當底，
+     canvas 用字面 `background: white` 不受影響 */
+  --puck-color-white: #181818;
+  --puck-color-black: #fafafa;
+}

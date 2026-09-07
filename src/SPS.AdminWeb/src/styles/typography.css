@@ -1,0 +1,34 @@
+/** Typography config for tailwindcss **/
+@theme {
+    --font-sans: "Inclusive Sans", sans-serif;
+
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-base: 16px;
+    --text-lg: 18px;
+    --text-xl: 20px;
+}
+
+[data-font-family="default"] {
+    --font-sans: "Inclusive Sans", sans-serif;
+}
+[data-font-family="dm-sans"] {
+    --font-sans: "DM Sans", sans-serif;
+}
+[data-font-family="wix"] {
+    --font-sans: "Wix Madefor Text", sans-serif;
+}
+[data-font-family="inclusive"] {
+    --font-sans: "Inclusive Sans", sans-serif;
+}
+[data-font-family="ar-one"] {
+    --font-sans: "AR One Sans", sans-serif;
+}
+
+body {
+    @apply font-sans text-base;
+}
+
+strong {
+    @apply font-medium;
+}

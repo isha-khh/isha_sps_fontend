@@ -1,0 +1,141 @@
+# ==============================================
+# 石化產業媒合平台 (SPS) - Docker Compose
+# ==============================================
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # SPS API 服務
+  # ===========================================
+  sps-api:
+    image: sps-api:latest
+    container_name: sps-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    ports:
+      - "5000:8080"   # HTTP
+      - "5001:8081"   # HTTPS (if configured)
+    environment:
+      # ASP.NET Core 設定
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      # 站點設定
+      - App__AdminBaseUrl=${App__AdminBaseUrl}
+      - App__BaseUrl=${App__BaseUrl}
+      - App__ApiBaseUrl=${App__ApiBaseUrl}
+      # 資料庫連線 (從 .env 讀取)
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+
+      # JWT 設定
+      - JWT_Setting__Key=${JWT_SECRET_KEY}
+      - JWT_Setting__Issuer=SPS.API
+      - JWT_Setting__Audience=SPS.API
+      - JWT_Setting__Expires=1440
+
+      # CORS 設定
+      - CORS_Setting__WithOrigins=${CORS_ORIGINS:-http://localhost:3000}
+
+      # Email 設定
+      - Email_Setting__SmtpServer=${SMTP_SERVER}
+      - Email_Setting__SmtpPort=${SMTP_PORT:-587}
+      - Email_Setting__SmtpUsername=${SMTP_USERNAME}
+      - Email_Setting__SmtpPassword=${SMTP_PASSWORD}
+      - Email_Setting__FromEmail=${SMTP_FROM_EMAIL}
+
+      # Redis (如果使用)
+      - ConnectionStrings__Redis=${REDIS_CONNECTION_STRING:-}
+
+      # 應用程式設定
+      - AppSettings__FrontendUrl=${FRONTEND_URL:-http://localhost:3000}
+      - AppSettings__EnableSwagger=${ENABLE_SWAGGER:-false}
+
+      # 資料庫遷移
+      - Database__AutoMigrate=${AUTO_MIGRATE:-false}
+
+    volumes:
+      # 持久化檔案儲存
+      - sps-files:/app/wwwroot
+      # 掛載日誌 (可選)
+      - ./logs:/app/logs
+
+    depends_on:
+      - sps-db
+
+    networks:
+      - sps-network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # ===========================================
+  # PostgreSQL 資料庫
+  # ===========================================
+  sps-db:
+    image: postgres:16-alpine
+    container_name: sps-db
+    environment:
+      - POSTGRES_DB=SPS
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      # 持久化資料庫資料
+      - sps-db-data:/var/lib/postgresql/data
+    networks:
+      - sps-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ===========================================
+  # Redis (可選 - 用於快取和 SignalR)
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    container_name: sps-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - sps-redis-data:/data
+    networks:
+      - sps-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+# ===========================================
+# 持久化儲存卷
+# ===========================================
+volumes:
+  sps-db-data:
+    driver: local
+  sps-redis-data:
+    driver: local
+  sps-files:
+    driver: local
+
+# ===========================================
+# 網路設定
+# ===========================================
+networks:
+  sps-network:
+    driver: bridge
