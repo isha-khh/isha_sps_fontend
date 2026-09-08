@@ -2795,6 +2795,7 @@ a.more_x.more_x_gu,
     justify-content: space-between;
     padding-bottom: 20px;
 }
+.matching.show .breadcrumb,
 .news.show .breadcrumb {
     margin-top: 110px;
 }
