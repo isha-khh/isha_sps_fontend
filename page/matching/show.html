@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-tw" class="no-js" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>高雄技術處</title>
+
+    <!-- 關閉Skype工具列 -->
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- 網站圖示 favicon.ico -->
+    <!-- generics -->
+    <link rel="icon" type="image/png" href="../../favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="../../favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="57x57">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="76x76">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="128x128">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="228x228">
+    <!-- Android -->
+    <link rel="shortcut icon" href="../../favicon.png" sizes="196x196">
+    <!-- iOS -->
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="180x180">
+    <!-- Windows 8 IE 10-->
+    <meta name="msapplication-TileColor" content="#f4d44d">
+    <meta name="msapplication-TileImage" content="../../favicon.png">
+
+    <!-- <link rel="manifest" href="/site.webmanifest"> -->
+    <link rel="mask-icon" href="../../safari-pinned-tab.svg" color="#f4d44d">
+    <meta name="theme-color" content="#ffffff">
+    <!--uc:HeadMeta-->
+
+
+    <script type="text/javascript" src="../../js/jquery-4.0.0.min.js"></script>
+
+    <script type="text/javascript" src="../../js/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../js/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
+
+
+
+    <link href="../../js/bootstrap-5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- slick -->
+    <link href="../../js/slick-2.0.0/slick/slick-theme.css" rel="stylesheet" />
+    <link href="../../js/slick-2.0.0/slick/slick.css" rel="stylesheet" />
+
+    <!-- bsnav -->
+    <link href="../../js/bsnav-master/dist/bsnav.min.css" rel="stylesheet" />
+    <!-- bootstrap icon -->
+    <link href="../../js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <link href="../../js/datepicker-1.0.10/dist/datepicker.css" rel="stylesheet" />
+
+    <!-- fancybox -->
+    <link href="../../js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
+
+    <link href="../../css/coreStyle.css" rel="stylesheet" />
+
+    <link href="../../css/style.css" rel="stylesheet" />
+    <link href="../../css/style_rwd.css" rel="stylesheet" />
+
+    <!--aos --->
+    <script type="text/javascript" src="../../js/aos-master/dist/aos.js"></script>
+    <link href="../../js/aos-master/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <script>
+        $(document).ready(function () {
+            $("header nav").load("../../page/_uc/nav.html");
+            $(".breadcrumb").load("../../page/_uc/breadcrumb.html");
+            $("footer").load("../../page/_uc/footer.html");
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.27"></script>
+
+
+    <!-- slick -->
+    <script type="text/javascript" src="../../js/slick-2.0.0/slick/slick.min.js"></script>
+
+    <!-- bsnav -->
+    <script type="text/javascript" src="../../js/bsnav-master/dist/bsnav.min.js"></script>
+
+    <!-- fancybox -->
+    <script type="text/javascript" src="../../js/fancybox-5.0.33/dist/fancybox/fancybox.umd.js"></script>
+
+    <!-- 滾動視差 -->
+    <script type="text/javascript" src="../../js/TweenLite.min.js"></script>
+    <script type="text/javascript" src="../../js/CSSPlugin.min.js"></script>
+
+
+
+    <script type="text/javascript" src="../../js/coreScript.js"></script>
+
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+
+    <!--uc:HeadPageRes-->
+
+</head>
+
+
+
+<body class="matching enterprise show">
+    <!-- 彈跳 -->
+    <div class="modal fade" id="staticmembership" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticmembership" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>取得聯繫窗口</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                </div>
+                <div class="modal-body">
+                    <p>為了提供您更精準的服務，請勾選您想了解的智慧技術 (可複選)</p>
+                    <div class="project_fx d-flex">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="fxScope" checked="">
+                            <label class="form-check-label" for="fxScope">
+                                感測端點
+                            </label>
+                        </div><!--form-check-->
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="fxScope">
+                            <label class="form-check-label" for="fxScope">
+                                系統部署
+                            </label>
+                        </div><!--form-check-->
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="fxScope">
+                            <label class="form-check-label" for="fxScope">
+                                通訊方式
+                            </label>
+                        </div><!--form-check-->
+
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="fxScope">
+                            <label class="form-check-label" for="fxScope">
+                                作業輔助
+                            </label>
+                        </div><!--form-check-->
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="fxScope">
+                            <label class="form-check-label" for="fxScope">
+                                模擬決策
+                            </label>
+                        </div><!--form-check-->
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="fxScope">
+                            <label class="form-check-label" for="fxScope">
+                                未指定
+                            </label>
+                        </div><!--form-check-->
+
+
+
+                    </div><!--project_fx-->
+
+                    <div class="card-footer d-flex justify-content-center">
+                        <a class="btn-outline-dark me-2" href="#" title="取消">取消</a>
+                        <a class="btn-theme mat_Send" href="#" title="送出" aria-expanded="false" aria-controls="contactInfo">送出</a>
+                    </div>
+
+                    <div class="co_m_botom" id="contactInfo" style="display: none;">
+                        <h4>連系窗口資訊</h4>
+                        <ul class="nav">
+                            <li>
+                                <span class="label"><i class="bi bi-person"></i>聯絡人：</span>
+                                <p class="mb-0">王小名</p>
+                            </li>
+                            <li>
+                                <span class="label"><i class="bi bi-telephone me-1"></i>電話：</span>
+                                <a href="tel:+886-7-550-3115" title="撥打電話至 +886-7-550-3115">+886-7-550-3115</a>
+                            </li>
+                        </ul>
+                    </div>
+
+
+
+
+                </div><!--modal-body-->
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要內容區塊-->
+    <a href="#main-content" class="visually-hidden-focusable">跳至主要內容</a>
+
+    <div class="page_wrapper">
+        <!--  導盲磚 -->
+        <header class="header">
+            <a href="#header-block" id="header-block" accesskey="U" title="上方功能區塊" class="visually-hidden-focusable">::: 上方功能區塊</a>
+            <nav class="nav" aria-label="主要導覽"></nav>
+        </header>
+
+        <!--標題-->
+        <div class="section-title-wrap">
+
+            <div class="marquee-bg" aria-hidden="true">
+                <div class="marquee-track">
+                    <span>SMART SAFETY </span>
+                </div>
+            </div>
+
+
+            <h2 class="main-title">
+                <span class="tit_tw">企業名錄</span>
+            </h2>
+        </div>
+        <!--麵包屑-->
+        <div class="breadcrumb" aria-label="麵包屑導覽"></div>
+
+        <!--  主要內容區塊： -->
+        <main class="main" id="main-content" role="main">
+            <a href="#main-block" id="main-block" accesskey="C" title="中央主要內容區塊" class="visually-hidden-focusable">::: 主要內容區塊</a>
+
+            <div class="container-fluid ">
+                <div class="row gx-0 gy-4">
+
+                    <!--  side1 -->
+                    <div class="side side1" aria-label="分類選單">
+                        <a href="#left-block" id="left-block" accesskey="L" title="左側選單區塊" class="visually-hidden-focusable d-none">::: 左側選單區塊</a>
+                        <div class="function-bar text-end d-flex d-lg-none justify-content-lg-end justify-content-between">
+                            <div class="sideNavBtn d-lg-none mb-2">
+
+                                <button type="button" class="btn btn-primary collapse-side-btn" aria-expanded="false" aria-controls="sideAutoUcCollapse">
+                                    <i class="icon fas fa-list" aria-hidden="true"></i>
+                                    <span>顯示分類</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-sidebar side_auto_uc multiple-collapse accordion lg-accordion accordion-blocks d-block">
+                            <div class="navbar" role="region" aria-label="分類篩選項目">
+                                <div class="collapse navbar-collapse justify-content-lg-end d-lg-block">
+                                    <div id="sideAutoUcCollapse" class="sideAutoUcCollapse">
+                                        <!--選單-->
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- 主要內容容器  content-->
+                    <div class="content ">
+
+
+
+                        <div class="ente_box">
+
+                            <div class="item_box d-flex mb-4">
+                                <div class="pic">
+                                    <div class="ratio ratio-4x3">
+                                        <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="智慧公安技術 公司標誌">
+                                    </div>
+
+                                </div>
+
+
+                                <div class="tit">
+
+                                    <div class="tit_nsl">
+
+                                        <div class="h3_solid">
+                                            <h3>智慧公安技術</h3>
+                                        </div>
+
+                                        <ul class="nav">
+                                            <li class="su_1">供給端</li>
+                                            <li class="su_2">需求端</li>
+                                        </ul>
+
+                                    </div><!--tit_nsl-->
+
+                                </div><!--tit-->
+                            </div><!--item_box-->
+
+
+                            <div class="item_box_six d-flex">
+                                <div class="item_box_six_1">
+                                    <div class="pic">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div><!--pic-->
+                                    <div class="tit">
+                                        <div class="tit_dt">
+                                            <label>公司負責人</label><span>王小名</span>
+                                        </div>
+                                    </div><!--pic-->
+
+
+                                </div><!--item_box_six_1-->
+
+                                <div class="item_box_six_1">
+                                    <div class="pic">
+                                        <i class="bi bi-calendar4-week"></i>
+                                    </div><!--pic-->
+                                    <div class="tit">
+                                        <div class="tit_dt">
+                                            <label>成立日期</label><span>2020-6-1</span>
+                                        </div>
+                                    </div><!--pic-->
+
+
+                                </div><!--item_box_six_1-->
+                                <div class="item_box_six_1">
+                                    <div class="pic">
+                                        <i class="bi bi-person-vcard"></i>
+                                    </div><!--pic-->
+                                    <div class="tit">
+                                        <div class="tit_dt">
+                                            <label>統一編號</label><span>123456</span>
+                                        </div>
+                                    </div><!--pic-->
+
+
+                                </div><!--item_box_six_1-->
+                                <div class="item_box_six_1">
+                                    <div class="pic">
+                                        <i class="bi bi-coin"></i>
+                                    </div><!--pic-->
+                                    <div class="tit">
+                                        <div class="tit_dt">
+                                            <label>資本總額</label><span>500,000元</span>
+                                        </div>
+                                    </div><!--pic-->
+
+
+                                </div><!--item_box_six_1-->
+                                <div class="item_box_six_1">
+                                    <div class="pic">
+                                        <i class="bi bi-envelope-at"></i>
+                                    </div><!--pic-->
+                                    <div class="tit">
+                                        <div class="tit_dt">
+                                            <label>聯繫窗口</label>
+                                            <a href="javascript:void(0)"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#staticmembership"
+                                               class="connec_s"
+                                               title="取得聯絡方式">
+                                                取得聯絡方式
+                                            </a>
+
+                                        </div>
+                                    </div><!--pic-->
+
+
+                                </div><!--item_box_six_1-->
+                                <div class="item_box_six_1">
+                                    <div class="pic">
+                                        <i class="bi bi-globe"></i>
+                                    </div><!--pic-->
+                                    <div class="tit">
+                                        <div class="tit_dt">
+                                            <label>公司網址</label>
+                                            <a href="#" title="www.eztrust.com(另開視窗)" class="blue" target="_blank">www.eztrust.com</a>
+                                        </div>
+                                    </div><!--pic-->
+
+
+                                </div><!--item_box_six_1-->
+
+
+
+
+
+                            </div><!-- item_box_six-->
+
+
+                        </div><!--ente_box-->
+
+
+                        <div class="item_box_two d-flex">
+                        
+                            <div class="item_box_two_1">
+                                <div class="dow-name "><i class="bi bi-buildings"></i><span>公司簡介</span></div>
+                                <div class="txt editor">
+                                    專注於提供企業數位轉型與智慧工安解決方案，協助客戶優化營運流程、降低風險並提升作業效率。<br />
+                                    我們整合物聯網與雲端技術，打造安全、穩定且可擴充的系統平台，協助企業落實智慧化管理。<br />公司擁有專業顧問團隊與豐富的專案經驗，提供客製化的諮詢、系統導入與後續維運服務，致力成為企業最值得信賴的長期合作夥伴。
+
+                                </div>
+
+                            </div><!---item_box_two_1-->
+
+                   
+                            <div class="item_box_two_1">
+                                <div class="dow-name "><i class="bi bi-file-earmark-text"></i><span>主要產品暨服務</span></div>
+
+                                <p>我們提供涵蓋智慧公案、設備監控、數據分析與系統整合的完整解決方案</p>
+                                <div class="mat_prod_box d-flex  mb-4">
+                                    <div class="pic">
+                                        <div class="ratio ratio-4x3">
+                                            <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="智慧公安技術 公司標誌">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="pic">
+                                        <div class="ratio ratio-4x3">
+                                            <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="智慧公安技術 公司標誌">
+                                        </div>
+
+                                    </div>
+                                </div><!--mat_prod_box-->
+                                <h5 class="mb-3"><i class="bi bi-caret-right-fill me-1 blue"></i>應用情境</h5>
+                                <ul class="nav ul-key  mb-4">
+                                    <li><a href="#" title="有害氣體監測與暴露風險預警">有害氣體監測與暴露風險預警</a></li>
+                                    <li><a href="#" title="人員、車輛與作業環境影像辨識與風險預警">人員、車輛與作業環境影像辨識與風險預警</a></li>
+
+                                </ul>
+
+                                <h5 class="mb-3"><i class="bi bi-caret-right-fill me-1 blue"></i>應用範疇</h5>
+                                <ul class="nav ul-key mb-4">
+                                    <li><a href="#" title="人員">人員</a></li>
+                                    <li><a href="#" title="環境">環境</a></li>
+                                    <li><a href="#" title="設備">設備</a></li>
+                                    <li><a href="#" title="生管">生管</a></li>
+                                </ul>
+
+                                <h5 class="mb-3"><i class="bi bi-caret-right-fill me-1 blue"></i>智慧技術</h5>
+                                <!--智慧技術-->
+                                <div class="menb_inp_tit form-group w-100">
+                                   
+                                    <div class="sm_techn d-flex">
+                                        <!-- 左側選單：使用 Tablist 語意 -->
+                                        <div class="sm_techn_left" role="tablist" aria-label="技術分類選單">
+                                            <button type="button" class="tab-btn active" role="tab" id="tab_smt_1" aria-selected="true" aria-controls="panel_smt_1">
+                                                感測端點 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="tab-btn" role="tab" id="tab_smt_2" aria-selected="false" aria-controls="panel_smt_2">
+                                                系統部署 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="tab-btn" role="tab" id="tab_smt_3" aria-selected="false" aria-controls="panel_smt_3">
+                                                通訊方式 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="tab-btn" role="tab" id="tab_smt_4" aria-selected="false" aria-controls="panel_smt_4">
+                                                作業輔助 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="tab-btn" role="tab" id="tab_smt_5" aria-selected="false" aria-controls="panel_smt_5">
+                                                模擬決策 <i class="bi bi-chevron-right arrow-icon" aria-hidden="true"></i>
+                                            </button>
+                                        </div><!--sm_techn_left-->
+                                        <!-- 右側內容區 -->
+                                        <div class="sm_techn_right flex-grow-1">
+
+                                            <!-- 1：感測端點 -->
+                                            <div id="panel_smt_1" class="tab-panel" role="tabpanel" aria-labelledby="tab_smt_1">
+
+                                                <!-- 區塊 1 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_1_1">
+                                                        <span class="title-text">感測裝置</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_1_1" class="collapse-body show">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="溫度">溫度</a></li>
+                                                            <li><a href="#" title="氣體濃度">氣體濃度</a></li>
+                                                            <li><a href="#" title="壓力">壓力</a></li>
+                                                            <li><a href="#" title="FTIR">FTIR</a></li>
+                                                            <li><a href="#" title="流量">流量</a></li>
+                                                            <li><a href="#" title="風速">風速</a></li>
+                                                            <li><a href="#" title="流速">流速</a></li>
+                                                            <li><a href="#" title="功率">功率</a></li>
+                                                            <li><a href="#" title="液位">液位</a></li>
+                                                            <li><a href="#" title="電流">電流</a></li>
+                                                            <li><a href="#" title="重量">重量</a></li>
+                                                            <li><a href="#" title="振動">振動</a></li>
+                                                            <li><a href="#" title="pH值">pH值</a></li>
+                                                            <li><a href="#" title="厚度">厚度</a></li>
+                                                            <li><a href="#" title="水質">水質</a></li>
+                                                            <li><a href="#" title="導電度">導電度</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!---collapse-body-->
+                                                </div><!---accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_1_2">
+                                                        <span class="title-text">視覺裝置</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_1_2" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="可見光">可見光</a></li>
+                                                            <li><a href="#" title="不可見光">不可見光</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!---collapse-body-->
+                                                </div><!---accordion-item-->
+                                                <!-- 區塊 3 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_1_3">
+                                                        <span class="title-text">生物表徵</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_1_3" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="血氧">血氧</a></li>
+                                                            <li><a href="#" title="體溫">體溫</a></li>
+                                                            <li><a href="#" title="血壓">血壓</a></li>
+                                                            <li><a href="#" title="倒臥">倒臥</a></li>
+                                                            <li><a href="#" title="脈搏">脈搏</a></li>
+                                                            <li><a href="#" title="呼吸">呼吸</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!---collapse-body-->
+                                                </div><!---accordion-item-->
+                                                <!-- 區塊 4 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_1_4">
+                                                        <span class="title-text">定位方式</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_1_4" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="GPS">GPS</a></li>
+                                                            <li><a href="#" title="陀螺儀">陀螺儀</a></li>
+                                                            <li><a href="#" title="UWB">UWB</a></li>
+                                                            <li><a href="#" title="RFID">RFID</a></li>
+                                                            <li><a href="#" title="LoRa">LoRa</a></li>
+                                                            <li><a href="#" title="Barcode/QRcode">Barcode/QRcode</a></li>
+                                                            <li><a href="#" title="藍芽">藍芽</a></li>
+                                                            <li><a href="#" title="Zigbee">Zigbee</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!---collapse-body-->
+                                                </div><!---accordion-item-->
+
+                                            </div><!-- /#panel_smt_1 -->
+                                            <!-- 2：系統部署 -->
+                                            <div id="panel_smt_2" class="tab-panel d-none" role="tabpanel" aria-labelledby="tab_smt_2">
+
+                                                <!-- 區塊 1 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_2_1">
+                                                        <span class="title-text">運算技術</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_2_1" class="collapse-body show">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="雲端運算">雲端運算</a></li>
+                                                            <li><a href="#" title="邊緣運算">邊緣運算</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_2_2">
+                                                        <span class="title-text">數據儲存</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_2_2" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="地端資料庫">地端資料庫</a></li>
+                                                            <li><a href="#" title="雲端資料庫">雲端資料庫</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 3 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_2_3">
+                                                        <span class="title-text">演算法</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_2_3" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="機器學習">機器學習</a></li>
+                                                            <li><a href="#" title="深度學習">深度學習</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 4 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_2_4">
+                                                        <span class="title-text">生成式AI</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_2_4" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="SLM">SLM</a></li>
+                                                            <li><a href="#" title="Rag">Rag</a></li>
+                                                            <li><a href="#" title="LLM">LLM</a></li>
+                                                            <li><a href="#" title="Agent">Agent</a></li>
+                                                            <li><a href="#" title="VLM">VLM</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+
+                                            </div><!-- /#panel_smt_2 -->
+                                            <!-- 3：通訊方式 -->
+                                            <div id="panel_smt_3" class="tab-panel d-none" role="tabpanel" aria-labelledby="tab_smt_3">
+
+                                                <!-- 區塊 1 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_3_1">
+                                                        <span class="title-text">光通訊 (含有線通訊)</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_3_1" class="collapse-body show">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="光纖">光纖</a></li>
+                                                            <li><a href="#" title="工業網路">工業網路</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_3_2">
+                                                        <span class="title-text">無線通訊</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_3_2" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="Wi-Fi">Wi-Fi</a></li>
+                                                            <li><a href="#" title="4G">4G</a></li>
+                                                            <li><a href="#" title="5G">5G</a></li>
+                                                            <li><a href="#" title="藍芽">藍芽</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+
+                                            </div><!-- /#panel_smt_3 -->
+                                            <!-- 4：作業輔助 -->
+                                            <div id="panel_smt_4" class="tab-panel d-none" role="tabpanel" aria-labelledby="tab_smt_4">
+
+                                                <!-- 區塊 1-->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_4_1">
+                                                        <span class="title-text">智慧巡檢</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_4_1" class="collapse-body show">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="手持裝置">手持裝置</a></li>
+                                                            <li><a href="#" title="穿戴裝置">穿戴裝置</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_4_2">
+                                                        <span class="title-text">無人載具</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_4_2" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="陸面型">陸面型</a></li>
+                                                            <li><a href="#" title="軌道型">軌道型</a></li>
+                                                            <li><a href="#" title="空中型">空中型</a></li>
+                                                            <li><a href="#" title="機械手臂">機械手臂</a></li>
+                                                            <li><a href="#" title="水上型">水上型</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 3 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="false" aria-controls="collapse_4_3">
+                                                        <span class="title-text">XR虛擬實境</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_4_3" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="MR">MR</a></li>
+                                                            <li><a href="#" title="AR">AR</a></li>
+                                                            <li><a href="#" title="VR">VR</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+
+                                            </div><!-- /#panel_smt_4 -->
+                                            <!-- 5：模擬決策 -->
+                                            <div id="panel_smt_5" class="tab-panel d-none" role="tabpanel" aria-labelledby="tab_smt_5">
+
+                                                <!-- 區塊 1 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_5_1">
+                                                        <span class="title-text">數位孿生</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_5_1" class="collapse-body show">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="3D模型">3D模型</a></li>
+                                                            <li><a href="#" title="數據、影像串接">數據、影像串接</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+                                                <!-- 區塊 2 -->
+                                                <div class="accordion-item mb-3">
+                                                    <button type="button" class="accordion-header btn-collapse" aria-expanded="true" aria-controls="collapse_5_2">
+                                                        <span class="title-text">參數最佳化</span>
+                                                        <i class="bi bi-chevron-down toggle-icon" aria-hidden="true"></i>
+                                                    </button>
+                                                    <div id="collapse_5_2" class="collapse-body" style="display: none;">
+                                                        <ul class="nav ul-key mt-2">
+                                                            <li><a href="#" title="最適化操作參數建議">最適化操作參數建議</a></li>
+                                                            <li><a href="#" title="最適化自動控制">最適化自動控制</a></li>
+                                                            <li><a href="#" title="其他">其他</a></li>
+                                                        </ul>
+                                                    </div><!--collapse-body-->
+                                                </div><!--accordion-item-->
+
+                                            </div><!-- /#panel_smt_5 -->
+
+                                        </div><!--sm_techn_right-->
+                                    </div><!--sm_techn-->
+                                </div><!---menb_inp_tit-->
+
+
+
+                            </div><!---item_box_two_1-->
+
+
+                            <div class="item_box_two_1 ">
+                                <div class="dow-name "><i class="bi bi-award"></i><span>獲獎事蹟暨重要合作案例</span></div>
+
+                                <p>榮獲ISO 9001 品質管理認證，並與多家國內外企業合作</p>
+
+                                <div class="mat_Award_box d-flex  mb-4">
+                                    <div class="pic">
+                                        <div class="ratio ratio-4x3">
+                                            <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="智慧公安技術 公司標誌">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="pic">
+                                        <div class="ratio ratio-4x3">
+                                            <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="智慧公安技術 公司標誌">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="pic">
+                                        <div class="ratio ratio-4x3">
+                                            <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="智慧公安技術 公司標誌">
+                                        </div>
+
+                                    </div>
+
+                                </div><!--mat_Award_box-->
+
+                                <div class="mat_cooperate_box">
+                                    <h5 class="blue">合作案例</h5>
+                                    <p>與多家製造與化工產業企業合作，提供整合型智慧工安平台與顧問輔導服務，協助客戶提升安全管理與營運效能。</p>
+
+                                </div><!--mat_cooperate_box-->
+
+
+                            </div><!---item_box_two_1-->
+
+                        </div><!---item_box_two-->
+
+
+
+                        <a href="../../page/matching/enterprise.html" title="返回" class="more_x mt-5">
+                            <span>返回</span>
+                            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                        </a>
+
+
+                    </div><!--content-->
+                    <!-- side2 -->
+                    <div class="side side2 d-none" id="side2-block" aria-label="相關選單">
+                        <a href="#side2-block" id="right-block" accesskey="R" title="右側選單區塊" class="visually-hidden-focusable">::: 右側選單區塊</a>
+
+                        <!--廣告-->
+                        <div class="side2_banner"></div>
+                        <!-- 選單內容 -->
+                    </div>
+                </div><!--row-->
+            </div>
+
+
+
+            <div class="s_round_6" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_6.png" alt="">
+            </div>
+
+            <div class="s_round_3" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_3.jpg" alt="">
+            </div>
+        </main>
+
+
+        <a href="#footer-block" id="footer-block" accesskey="B" title="下方功能區塊" class="visually-hidden-focusable" tabindex="0">::: 下方功能區塊</a>
+        <!-- 頁尾區塊 -->
+        <footer class="footer" role="contentinfo">
+        </footer>
+    </div>
+
+
+
+
+    <script>
+
+          
+        $(document).ready(function () {
+            //智慧技術
+            // 1. 左側頁籤切換（支援桌機與手機版）
+            $(".sm_techn_left").on("click", ".tab-btn", function () {
+                var $btn = $(this);
+                var targetPanelId = $btn.attr("aria-controls");
+
+                // 更新頁籤選取狀態（無障礙 aria-selected）
+                $(".sm_techn_left .tab-btn")
+                    .removeClass("active")
+                    .attr("aria-selected", "false");
+
+                $btn.addClass("active")
+                    .attr("aria-selected", "true");
+
+                // 切換右側對應內容面板
+                $(".sm_techn_right .tab-panel").addClass("d-none");
+                $("#" + targetPanelId).removeClass("d-none");
+
+                // 手機版 (螢幕寬度小於 768px)：點擊頁籤自動平滑捲動至視窗中央
+                if (window.innerWidth < 768) {
+                    var $tabList = $(".sm_techn_left");
+                    var scrollLeft = $btn.position().left + $tabList.scrollLeft() - ($tabList.width() / 2) + ($btn.outerWidth() / 2);
+                    $tabList.stop().animate({ scrollLeft: scrollLeft }, 250);
+                }
+            });
+
+            // 2. 右側次標題收合 / 展開（無障礙 aria-expanded 動態同步）
+            $(document).on("click", ".btn-collapse", function () {
+                var $header = $(this);
+                var targetId = $header.attr("aria-controls");
+                var $body = $("#" + targetId);
+                var isExpanded = $header.attr("aria-expanded") === "true";
+
+                if (isExpanded) {
+                    $body.stop().slideUp(200, function () {
+                        $header.attr("aria-expanded", "false");
+                    });
+                } else {
+                    $body.stop().slideDown(200, function () {
+                        $header.attr("aria-expanded", "true");
+                    });
+                }
+            });
+
+            Dropzone.autoDiscover = false;
+
+
+
+
+        });
+
+        $(function () {
+            // 聯繫窗口展開
+            $(document).on("click", ".mat_Send", function (e) {
+                e.preventDefault();
+
+                var $btn = $(this);
+             
+                var targetId = ($btn.attr("aria-controls") || "").trim();
+                var $targetPanel = $("#" + targetId);
+
+                if ($targetPanel.length) {
+                    $targetPanel.slideDown(250, function () {
+                        $btn.attr("aria-expanded", "true");
+                    });
+                }
+            });
+        });
+
+
+        //標題
+        $(function () {
+            const $track = $('.marquee-track');
+            const $firstSpan = $track.find('span').first();
+
+            if ($firstSpan.length) {
+                const windowWidth = $(window).width();
+                let totalWidth = $firstSpan.outerWidth(true);
+
+                // 1. 自動複製，直到文字總寬度至少大於螢幕寬度（確保大螢幕不留白）
+                while (totalWidth < windowWidth * 1.5) {
+                    $track.append($firstSpan.clone());
+                    totalWidth = $track.outerWidth(true);
+                }
+
+                // 2. 將整組內容完整複製一份加入尾端，搭配 CSS -50% 達成完美無縫滾動
+                const currentContent = $track.html();
+                $track.append(currentContent);
+            }
+        });
+
+        $(function () {
+            if (window.innerWidth > 767) {
+                $(window).on('scroll', function () {
+                    const offsetTop = $(this).scrollTop();
+
+                    // 1. .s_round_1 視差滾動
+                    const $industry = $('.footer');
+                    if ($industry.length && offsetTop < $industry.offset().top) {
+                        TweenLite.to(".s_round_6, .s_round_3", 1, {
+                            y: -offsetTop / 15
+                        });
+                    }
+
+
+                }).trigger('scroll');
+            }
+        });
+
+    </script>
+
+
+</body>
+</html>
+
