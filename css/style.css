@@ -1266,9 +1266,9 @@ body   .main .side .nav > li + li {
 
 
 
-/*我要媒合 企業名錄 */
-
-
+/*我要媒合 媒合對接 index */
+.matching.index   {
+}
 /* 浮動面板樣式 */
 .ma_sear_panel {
     position: absolute;

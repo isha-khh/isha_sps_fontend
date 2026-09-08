@@ -134,7 +134,18 @@
 
             <div class="marquee-bg" aria-hidden="true">
                 <div class="marquee-track">
-                    <span>SMART SAFETY </span>
+                    <!-- 第一組 -->
+                    <div class="marquee-group">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                    <!-- 第二組-->
+                    <div class="marquee-group" aria-hidden="true">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
                 </div>
             </div>
 
@@ -411,26 +422,7 @@
 
 
     <script>
-        //標題
-        $(function () {
-            const $track = $('.marquee-track');
-            const $firstSpan = $track.find('span').first();
-
-            if ($firstSpan.length) {
-                const windowWidth = $(window).width();
-                let totalWidth = $firstSpan.outerWidth(true);
-
-                // 1. 自動複製，直到文字總寬度至少大於螢幕寬度（確保大螢幕不留白）
-                while (totalWidth < windowWidth * 1.5) {
-                    $track.append($firstSpan.clone());
-                    totalWidth = $track.outerWidth(true);
-                }
-
-                // 2. 將整組內容完整複製一份加入尾端，搭配 CSS -50% 達成完美無縫滾動
-                const currentContent = $track.html();
-                $track.append(currentContent);
-            }
-        });
+   
     
         $(function () {
             if (window.innerWidth > 767) {

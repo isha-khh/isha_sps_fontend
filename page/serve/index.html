@@ -133,9 +133,19 @@
 
             <div class="marquee-bg" aria-hidden="true">
                 <div class="marquee-track">
-                    <span>SMART SAFETY </span>
-                </div>
-            </div>
+                    <!-- 第一組 -->
+                    <div class="marquee-group">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                    <!-- 第二組 -->
+                    <div class="marquee-group" aria-hidden="true">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                </div>            </div>
 
 
             <h2 class="main-title">
@@ -240,49 +250,6 @@
                                 </div><!--item_box-->
                             </div><!--item 1組-->
 
-                            <div class="col-lg-4 col-md-6 col-12   mb-md-4 mb-4">
-                                <div class="item_box">
-
-                                    <a href="../../page/serve/show.html" class="pic" title="114年度石化產業智慧化補助計畫正式開放申請">
-                                        <div class="ratio ratio-4x3">
-                                            <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="">
-                                        </div>
-                                    </a>
-                                    <div class="tit mt-4">
-                                        <a href="../../page/serve/show.html" title="114年度石化產業智慧化補助計畫正式開放申請">
-                                            <div class="tit_nsl">
-                                                <div class="tit_three d-flex mb-2">
-                                                    <div class="tag-wrap">
-                                                        <!--程式判斷-->
-                                                        <span class="badge-tag mb-0 ">技術公具</span>
-                                                        <span class="badge-tag  mb-0 d-none">人才培育</span>
-                                                        <span class="badge-tag  mb-0 d-none">產業輔導</span>
-                                                        <span class="badge-tag  mb-0 d-none">輔助資源</span>
-                                                    </div>
-                                                    <div class="date">2026-04-15</div>
-                                                </div><!--tit_three-->
-                                                <div class="h3_solid">
-                                                    <h3>114年度石化產業智慧化補助計畫正式開放申請</h3>
-                                                </div>
-                                                <p>提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。</p>
-                                                <ul class="nav d-block mb-3 ">
-                                                    <li class="">
-                                                        <i class="bi bi-file-earmark-arrow-down"></i>
-                                                        <span>下載文件</span>
-
-                                                    </li>
-                                                </ul>
-                                            </div><!--tit_nsl-->
-                                        </a>
-
-                                        <ul class="nav ul-key">
-                                            <li><a href="#" title="前往產業AI" tabindex="0">產業AI</a></li>
-                                            <li><a href="#" title="前往技術文件" tabindex="0">技術文件</a></li>
-
-                                        </ul>
-                                    </div><!--tit-->
-                                </div><!--item_box-->
-                            </div><!--item 1組-->
 
                             <div class="col-lg-4 col-md-6 col-12  item  mb-md-4 mb-4">
                                 <div class="item_box">
@@ -459,27 +426,6 @@
 
 
     <script>
-        //標題
-        $(function () {
-            const $track = $('.marquee-track');
-            const $firstSpan = $track.find('span').first();
-
-            if ($firstSpan.length) {
-                const windowWidth = $(window).width();
-                let totalWidth = $firstSpan.outerWidth(true);
-
-                // 1. 自動複製，直到文字總寬度至少大於螢幕寬度（確保大螢幕不留白）
-                while (totalWidth < windowWidth * 1.5) {
-                    $track.append($firstSpan.clone());
-                    totalWidth = $track.outerWidth(true);
-                }
-
-                // 2. 將整組內容完整複製一份加入尾端，搭配 CSS -50% 達成完美無縫滾動
-                const currentContent = $track.html();
-                $track.append(currentContent);
-            }
-        });
-
         $(function () {
             if (window.innerWidth > 767) {
                 $(window).on('scroll', function () {

@@ -239,7 +239,7 @@
                             </div><!--dk_conbo-->
 
 
-                            <a href="../../page/news/index.html" title="返回" class="more_x">
+                            <a href="../../page/news/index.html" title="返回" class="more_x more_x_767">
                                 <span>返回</span>
                                 <i class="bi bi-arrow-right" aria-hidden="true"></i>
                             </a>
@@ -288,6 +288,12 @@
 
 
     <script>
+
+        $(document).ready(function () {
+            if ($(window).width() < 768) {
+                $(' .more_x_767').insertAfter('.side2'); 
+            }
+        });
 
         $(function () {
             if (window.innerWidth > 767) {
