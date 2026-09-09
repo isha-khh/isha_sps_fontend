@@ -70,9 +70,7 @@ export default async function PromotionVideoPage({ searchParams }: PageProps<"/p
           <>
             <PopularPosts
               items={PROMOTION_VIDEOS.map((video) => ({ href: "#", title: video.title, date: video.date, image: video.thumbnail }))}
-              moreHref="/promotion/video"
               heading="熱門影片"
-              moreLabel="查看更多影片"
               imageRatio="ratio-16x9"
             />
             <SidebarBanner items={SIDEBAR_BANNERS} />

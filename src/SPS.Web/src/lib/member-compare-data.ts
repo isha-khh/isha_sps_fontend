@@ -38,43 +38,47 @@ export const COMPARE_ROWS: CompareRow[] = [
     ],
   },
   {
+    // 2026-09-09 對照舊站同一天的更新：這幾列原本跟其他列一樣統一寫
+    // 「不可刊登／可刊登」，改成照每一列的動作各自換用對應的動詞
+    // （建立／建置／投稿／提供），語意更準確——「標籤建置」用「刊登」
+    // 讀起來就很怪。
     label: "建立公司專頁",
     cells: [
-      { icon: "x", text: "不可刊登" },
-      { icon: "x", text: "不可刊登" },
-      { icon: "x", text: "不可刊登" },
-      { icon: "check", text: "可刊登" },
-      { icon: "check", text: "可刊登" },
+      { icon: "x", text: "不可建立" },
+      { icon: "x", text: "不可建立" },
+      { icon: "x", text: "不可建立" },
+      { icon: "check", text: "可建立" },
+      { icon: "check", text: "可建立" },
     ],
   },
   {
     label: "標籤建置",
     cells: [
-      { icon: "x", text: "不可刊登" },
-      { icon: "x", text: "不可刊登" },
-      { icon: "x", text: "不可刊登" },
-      { icon: "check", text: "可刊登" },
-      { icon: "check", text: "可刊登" },
+      { icon: "x", text: "不可建置" },
+      { icon: "x", text: "不可建置" },
+      { icon: "x", text: "不可建置" },
+      { icon: "check", text: "可建置" },
+      { icon: "check", text: "可建置" },
     ],
   },
   {
     label: "投稿產業案例",
     cells: [
-      { icon: "x", text: "不可刊登" },
-      { icon: "x", text: "不可刊登" },
-      { icon: "check", text: "可刊登" },
-      { icon: "check", text: "可刊登" },
-      { icon: "check", text: "可刊登" },
+      { icon: "x", text: "不可投稿" },
+      { icon: "x", text: "不可投稿" },
+      { icon: "check", text: "可投稿" },
+      { icon: "check", text: "可投稿" },
+      { icon: "check", text: "可投稿" },
     ],
   },
   {
     label: "参與媒合",
     cells: [
-      { icon: "x", text: "不可刊登" },
-      { icon: "check", text: "可刊登" },
-      { icon: "check", text: "可刊登" },
-      { icon: "check", text: "可刊登" },
-      { icon: "check", text: "可刊登" },
+      { icon: "x", text: "不提供" },
+      { icon: "check", text: "可提供" },
+      { icon: "check", text: "可提供" },
+      { icon: "check", text: "可提供" },
+      { icon: "check", text: "可提供" },
     ],
   },
   { label: "下載平台資源", cells: ["僅公開資訊下載", "公開+部分資訊下載", "完整資訊下載", "完整資訊下載", "完整資訊下載"] },

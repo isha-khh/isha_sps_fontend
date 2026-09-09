@@ -2,6 +2,10 @@ import SectionTitle from "@/components/ui/SectionTitle";
 import MoreLink from "@/components/ui/MoreLink";
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
+import { fetchPromotionCases } from "@/lib/api.server";
+import { sortByViewCount } from "@/lib/content-list-utils";
+import type { PromotionCase } from "@/lib/types";
+import { PROMOTION_FALLBACK_IMAGE } from "@/lib/promotion-data";
 
 interface IndustryCaseData {
   href: string;
@@ -25,15 +29,36 @@ const CASES: IndustryCaseData[] = [
   },
 ];
 
+function toIndustryCaseData(item: PromotionCase): IndustryCaseData {
+  return {
+    href: `/promotion/${item.id}`,
+    title: item.title,
+    description: item.summary,
+    image: item.coverImageUrl ?? PROMOTION_FALLBACK_IMAGE,
+  };
+}
+
 const CAROUSEL_ID = "home-industry";
 
 /**
  * 首頁「產業案例」，對應舊站 page/_uc/home/home_industry.html。
  *
+ * 對到真後端 `GET /api/SuccessCase`（跟 `/promotion` 共用
+ * `fetchPromotionCases`），取瀏覽數最高的前 2 筆——「案例」本來就是
+ * 挑亮點展示，用熱門度排序比用最新發布時間更符合「首頁精選」的用途
+ * （跟 `/promotion` 側欄「熱門文章」同一套 `sortByViewCount`）。
+ * `backendAvailable:false`（連不到後端）才退回假資料，真後端回應但
+ * 剛好 0 筆已發布案例時要照實顯示（見下面 `visibleCases` 的判斷）。
+ *
  * 編號（01、02…）舊站是用 jQuery 在 `$(document).ready` 裡塞進
  * `.i_number` 的，這裡直接用陣列索引算，不用另外寫一段 DOM 操作。
  */
-export default function HomeIndustry() {
+export default async function HomeIndustry() {
+  const { items, backendAvailable } = await fetchPromotionCases();
+  const visibleCases = backendAvailable
+    ? sortByViewCount(items).slice(0, 2).map(toIndustryCaseData)
+    : CASES;
+
   return (
     <div className="home_industry">
       <div className="home_industry_top">
@@ -61,7 +86,7 @@ export default function HomeIndustry() {
               pauseOnHover: true,
               pauseOnFocus: true,
             }}
-            slides={CASES.map((item, index) => (
+            slides={visibleCases.map((item, index) => (
               <div className="d-flex" key={item.href}>
                 <div className="tit">
                   <div className="tit_1">

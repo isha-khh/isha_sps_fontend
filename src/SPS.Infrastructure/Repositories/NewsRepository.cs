@@ -47,6 +47,7 @@ public class NewsRepository : Repository<News, int>, INewsRepository
             .Include(n => n.Title)
             .Include(n => n.Introduction)
             .Include(n => n.Category)
+            .Include(n => n.Picture)
             .AsQueryable();
 
         // 搜索過濾
@@ -165,5 +166,23 @@ public class NewsRepository : Repository<News, int>, INewsRepository
             .Include(et => et.Tag)
             .Select(et => et.Tag.Name)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<int, List<string>>> GetNewsTagsBatchAsync(
+        List<int> newsIds, CancellationToken cancellationToken = default)
+    {
+        // 列表頁一次要顯示一整頁的標簽，逐筆呼叫 GetNewsTagsAsync 會是
+        // N+1 查詢——一頁 20~100 筆就是 20~100 次額外查詢。這裡一次把
+        // 整頁的 EntityId 都丟進 IN 子句查完，再依 EntityId 分組回傳。
+        var idStrings = newsIds.Select(id => id.ToString()).ToList();
+        var rows = await _context.Set<EntityTag>()
+            .Where(et => et.EntityType == EntityType.News && idStrings.Contains(et.EntityId))
+            .Include(et => et.Tag)
+            .Select(et => new { et.EntityId, TagName = et.Tag.Name })
+            .ToListAsync(cancellationToken);
+
+        return rows
+            .GroupBy(r => int.Parse(r.EntityId))
+            .ToDictionary(g => g.Key, g => g.Select(r => r.TagName).ToList());
     }
 }
