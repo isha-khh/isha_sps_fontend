@@ -12,3 +12,5 @@ appsettings.Local.json
 appsettings.*.local.json
 
 Uploads/
+node_modules/
+launchSettings.json

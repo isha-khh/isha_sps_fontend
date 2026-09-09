@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import InnerPageShell from "@/components/layout/InnerPageShell";
@@ -7,21 +8,30 @@ import ZoomableImage from "@/components/ui/ZoomableImage";
 import MoreLink from "@/components/ui/MoreLink";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
-import CompanyIntroCarousel from "@/components/promotion/CompanyIntroCarousel";
-import { INDUSTRY_CASES, getIndustryCase } from "@/lib/promotion-data";
+import { PuckRenderer } from "@/components/puck/PuckRenderer";
+import { fetchPromotionCases, fetchPromotionCaseDetail } from "@/lib/api.server";
+import { formatIsoDate, sortByViewCount } from "@/lib/content-list-utils";
+import { INDUSTRY_CASES, PROMOTION_FALLBACK_IMAGE, getIndustryCase } from "@/lib/promotion-data";
 
-export function generateStaticParams() {
-  return INDUSTRY_CASES.map((item) => ({ id: item.id }));
-}
-
-// 跟 news/[id]、serve/[id] 是同一個理由：目前資料是固定假資料，
-// generateStaticParams 已經窮舉所有合法 id，不在名單裡的一律當路由層級
-// 的 404，見那兩支檔案裡更完整的說明。
-export const dynamicParams = false;
+/**
+ * 查一筆產業案例，後端沒有（或連不到）才退回假資料用 id 查找。
+ * `cache()` 包起來的理由跟 news/[id]/page.tsx 一樣——`generateMetadata`
+ * 跟頁面本身都要查同一筆資料，這裡走 axios，沒特別處理過的重複呼叫
+ * 不會自動合併。
+ *
+ * 沒有 `generateStaticParams`／`dynamicParams = false`——真後端資料
+ * 是動態的（目前 26 筆，會持續增減），不能在 build time 窮舉所有
+ * 合法 id，理由跟 news/[id]/page.tsx 完全一樣。
+ */
+const getCase = cache(async (id: string) => {
+  const backendCase = await fetchPromotionCaseDetail(id);
+  if (backendCase) return backendCase;
+  return getIndustryCase(id) ?? null;
+});
 
 export async function generateMetadata({ params }: PageProps<"/promotion/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const item = getIndustryCase(id);
+  const item = await getCase(id);
   return { title: item?.title ?? "找不到頁面" };
 }
 
@@ -29,47 +39,57 @@ const SIDEBAR_BANNERS: SidebarBannerItem[] = [
   { href: "#", image: "/images/all/new_logo.jpg", title: "114年度石化產業智慧化補助計畫正式開放申請" },
 ];
 
-const COMPANY_INTRO_SLIDES = [
-  {
-    name: "智慧公安技術",
-    logo: "/images/all/new_logo.jpg",
-    description: "專注於提供企業數位轉型與智慧工安解決方案，協助客戶優化營運流程、降低風險並提升作業效率。我們整合物聯網與雲端技術，打造安全、穩定且可擴充的系統平台，協助企業落實智慧化管理。",
-    website: "https://www.eztrust.com",
-  },
-];
-
 /**
  * 產業案例詳情頁，對應舊站 page/promotion/show.html。
  *
- * 跟 news/[id] 結構幾乎一樣（標題/標籤/日期/分享 → 封面圖 → 撰稿人 →
- * 內文），差異只在內文下方那塊：news 是附件下載/相關連結/聯繫人資訊，
- * 這裡換成「公司簡介」輪播（CompanyIntroCarousel，對應 `.prom`）。
- * 目前沒有像 EditableArticleBody 那樣接 Puck 可編輯——那個目前只有
- * news 在測試，等確定要推廣到其他內容類型再一起加。
+ * 2026-09-08 對接真後端後的改動：
+ * - 內文改用 `PuckRenderer` 顯示真後端的 `content`（Puck 區塊 JSON，
+ *   跟 News/FAQ 同一套格式），不再用 `dangerouslySetInnerHTML` 直接
+ *   塞假資料的 `bodyHtml`。
+ * - 拿掉「撰稿人」跟「公司簡介輪播」（`CompanyIntroCarousel`）這兩塊：
+ *   真後端 `SuccessCase` 沒有撰稿人欄位；「公司簡介」原本想顯示
+ *   logo／介紹／網址，但 `SuccessCase.CompanyName` 只是一段自由
+ *   文字，沒有連到真正的 `Company` 資料表（那邊才有這些欄位），沒有
+ *   可靠的方式拼出真資料，2026-09-08 跟使用者確認後整個拿掉，記錄在
+ *   docs/改版規劃.md，`CompanyIntroCarousel.tsx` 也一併刪除（拿掉這裡
+ *   之後就沒有其他地方在用了）。
+ * - 封面圖優先用 `item.coverImageUrl`，沒設定圖片的案例才退回
+ *   `PROMOTION_FALLBACK_IMAGE` 佔位。
+ * - 「熱門產業案例」側欄一樣改用 `sortByViewCount()` 照點閱率排序。
  */
 export default async function PromotionShowPage({ params }: PageProps<"/promotion/[id]">) {
   const { id } = await params;
-  const item = getIndustryCase(id);
+  const item = await getCase(id);
 
   if (!item) {
     notFound();
   }
 
-  const popularItems = INDUSTRY_CASES.filter((c) => c.id !== item.id).map((c) => ({
-    href: `/promotion/${c.id}`,
-    title: c.title,
-    date: c.date,
-    image: c.image,
-  }));
+  const { items: backendItems, backendAvailable } = await fetchPromotionCases();
+  const popularSource = backendAvailable ? backendItems : INDUSTRY_CASES;
+  const popularItems = sortByViewCount(popularSource)
+    .filter((c) => c.id !== item.id)
+    .slice(0, 5)
+    .map((c) => ({
+      href: `/promotion/${c.id}`,
+      title: c.title,
+      date: formatIsoDate(c.publishedDate),
+      image: c.coverImageUrl || PROMOTION_FALLBACK_IMAGE,
+    }));
 
   return (
     <>
       <BodyClass className="news serve promotion show" />
       <InnerPageShell
-        breadcrumb={[{ label: "推廣專區" }, { label: "產業案例", href: "/promotion" }, { label: item.title }]}
+        breadcrumb={[
+          { label: "推廣專區" },
+          { label: "產業案例", href: "/promotion" },
+          ...(item.industry ? [{ label: item.industry, href: `/promotion?industry=${encodeURIComponent(item.industry)}` }] : []),
+          { label: item.title },
+        ]}
         aside={
           <>
-            <PopularPosts items={popularItems} moreHref="/promotion" heading="熱門產業案例" moreLabel="查看更多產業案例" />
+            <PopularPosts items={popularItems} heading="熱門產業案例" />
             <SidebarBanner items={SIDEBAR_BANNERS} />
           </>
         }
@@ -90,15 +110,15 @@ export default async function PromotionShowPage({ params }: PageProps<"/promotio
               <h3>{item.title}</h3>
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">
-                  <div className="date">{item.date}</div>
+                  <div className="date">{formatIsoDate(item.publishedDate)}</div>
                 </div>
                 <ShareBox />
               </div>
             </div>
 
-            {item.keywords && item.keywords.length > 0 && (
+            {item.tags && item.tags.length > 0 && (
               <ul className="nav ul-key">
-                {item.keywords.map((keyword) => (
+                {item.tags.map((keyword) => (
                   <li key={keyword}>
                     <a href="#" title={`前往${keyword}`} tabIndex={0}>
                       {keyword}
@@ -109,16 +129,9 @@ export default async function PromotionShowPage({ params }: PageProps<"/promotio
             )}
           </div>
 
-          <ZoomableImage src={item.image} alt={item.title} caption={item.title} />
+          <ZoomableImage src={item.coverImageUrl || PROMOTION_FALLBACK_IMAGE} alt={item.title} caption={item.title} />
 
-          {item.contributor && <div className="Contributor">撰稿人 / {item.contributor}</div>}
-
-          {/* CMS 編輯器產出的 HTML，由管理員撰寫，不是使用者輸入，這裡信任它 */}
-          <div className="txt editor mb-md-5 mb-4" dangerouslySetInnerHTML={{ __html: item.bodyHtml }} />
-
-          <div className="dk_conbo mb-md-5 mb-4">
-            <CompanyIntroCarousel slides={COMPANY_INTRO_SLIDES} />
-          </div>
+          <PuckRenderer content={item.content} />
 
           <MoreLink href="/promotion" label="返回" title="返回" />
         </div>

@@ -1,94 +1,66 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { motion } from "motion/react";
+
+/**
+ * 一輪要重複幾次文字——這裡沒有實際量測畫面寬度，用固定次數保守抓
+ * 到「就算是超寬螢幕/4K 顯示器，這個次數的文字排起來也絕對超過
+ * 2 倍畫面寬」這個安全值。抓太少會在超寬螢幕上看到跑馬燈跑到底、
+ * 還沒接上下一輪就先看到空白；文字重複只是幾個 `<span>`，抓寬鬆一點
+ * 成本很低，故意留餘裕。
+ */
+const REPEAT_COUNT = 16;
 
 /**
  * 積木元件：內頁標題背後那條跑馬燈大字（`.marquee-bg` > `.marquee-track`）。
  *
- * 對照舊站 page/news/index.html、page/serve/index.html 裡的 `<script>`：
- * 畫面上原本只有一顆 `<span>`，「鋪滿整排、無縫循環」的效果是 mount 後
- * 用 jQuery 動態做出來的，不是單靠 CSS 動畫：
+ * 2026-09-09 改用 Motion（原 Framer Motion）驅動動畫，取代原本手刻、
+ * 掛載後用 jQuery 風格的 `cloneNode` 動態複製 DOM 的版本。原本那版的
+ * 複雜度幾乎都來自「怎麼確保有夠多重複文字填滿整排」這件事：
+ * 用 `getBoundingClientRect()` 量目前寬度，量不夠就繼續複製，湊到
+ * 1.5 倍螢幕寬才停手——量測要等網頁字型（Noto Sans TC，字重 900）真的
+ * 載入完成才準，字型還沒套用時量到的是系統預設字型的寬度（通常較窄），
+ * 複製份數會算少，因此還要另外等 `document.fonts.ready` 才能量，邏輯
+ * 不簡單，也是「第一次進頁面效果跑不對、重新整理才正常」那個 bug的
+ * 根源（量測時機卡到字型還沒換上來的空窗期）。
  *
- *   1. 把同一顆 `<span>` 複製到 track 總寬度 >= 1.5 倍螢幕寬，避免大
- *      螢幕上文字跑完、後面留白
- *   2. 再把「整組」內容完整複製一份接到尾端——這樣配合 CSS 的
- *      `translateX(-50%)` 動畫，移動剛好半個 track 寬度時，畫面內容會
- *      跟一開始完全重疊，才是真正無縫循環，不是跑到一半卡一下再跳回去
+ * 換掉的做法：與其「量出剛好夠用的份數」，直接**固定重複夠多次**
+ * （見上面 `REPEAT_COUNT` 的說明），SSR 階段就渲染好，完全不用等
+ * 掛載後再量測/複製——不用管字型什麼時候載完，也不會有上述那個
+ * bug（問題根源是「量測時機」，這裡直接不量測，問題不會發生），也
+ * 沒有 React Strict Mode 重複執行 effect 導致複製兩次的風險（本來就
+ * 沒有 effect 在做這件事了）。
  *
- * 這支元件轉 React 時之前只搬了最外層 markup，這段動態複製漏掉了——
- * 所以只有一顆很窄的 `<span>`，40 秒動畫幾乎看不出在動，跟舊站 demo
- * 「不間斷、很快」的感覺對不起來，這裡把邏輯補回來。
+ * 動畫改用 Motion 的 `animate`／`transition.repeat: Infinity`，宣告式
+ * 寫法，不用 ref 操作 DOM，也不用 `useEffect`。原本掛在 `.marquee-track`
+ * 上的 CSS `animation: marqueeScroll 40s linear infinite`
+ * （`public/css/style.css`）要蓋掉，見 `globals.css` 裡對應的說明，
+ * 不然兩邊會同時想控制同一個 `transform`，畫面會抖動/互相打架。
  *
- * 用 ref 直接操作 DOM（跟 Carousel 處理 slick clone 節點是同一種考量）：
- * 這些是純裝飾、`aria-hidden` 的文字，不需要響應式資料或事件，用 React
- * state 重新渲染反而沒必要；`hasDuplicated` 這個 ref 用來擋掉開發模式下
- * React Strict Mode 重複呼叫 effect，避免複製兩次。
- *
- * 【首次進頁面吃不到樣式，重新整理才正常的成因】
- * 這顆字用的是 Google Fonts 載入的 Noto Sans TC（`layout.tsx` 裡那個
- * `<link>`），字重還特別指定 900——瀏覽器「第一次」還沒快取這個字型
- * 檔案的時候，字型是用網路非同步抓的，效果可以看
- * https://fonts.google.com 的 FOUT（先顯示系統預設字型，字型載完再
- * 換上來）。這支元件的複製邏輯是掛載後**馬上**去量 `<span>` 的寬度
- * 決定要複製幾份，如果量的當下 Noto Sans TC 還沒真的套用，量到的是
- * 系統預設字型（通常比較窄）的寬度，複製份數就會算少；等字型真的載完
- * 換上來，文字實際變寬了，但份數已經定型（`hasDuplicated` 擋掉重跑），
- * 畫面上就會是「份數不夠、盖不滿整排、CSS -50% 動畫的無縫循環也對不
- * 起來」——不是真的「沒套用 CSS」，是「量到錯的寬度」。重新整理會正常
- * 是因為那時候字型已經被瀏覽器快取，一要求就直接可用，量測時機再也
- * 碰不到這個空窗期。
- *
- * 修法：改成等 `document.fonts.ready`（瀏覽器原生 API，専門用來確認
- * 「這個文件用到的字型是不是都真的載入完成了」）這個 Promise resolve
- * 之後才量測、複製，不要一掛載就馬上量。不支援這個 API 的極舊瀏覽器
- * 才退回「掛載就量」的舊行為（略有機率再踩到同一個問題，但比完全不做
- * 保護好）。
+ * 無縫循環的原理不變：內容重複兩輪（`runA`／`runB`，每輪都已經多到
+ * 能蓋滿 2 倍螢幕寬），對整組做 `translateX` 從 0% 到 -50%——因為兩輪
+ * 內容一模一樣，移動剛好半個總寬度時，畫面內容會跟一開始完全重疊，
+ * 才是真正無縫循環，不是跑到一半卡一下再跳回去。
  */
-export default function MarqueeTrack({ text = "SMART SAFETY " }: { text?: string }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const hasDuplicated = useRef(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const duplicate = () => {
-      if (cancelled || hasDuplicated.current) return;
-      hasDuplicated.current = true;
-
-      const track = trackRef.current;
-      const firstSpan = track?.querySelector("span");
-      if (!track || !firstSpan) return;
-
-      const targetWidth = window.innerWidth * 1.5;
-
-      // 1. 複製到總寬度至少蓋過 1.5 倍螢幕寬
-      // guard 只是防呆上限（例如字型 API 不支援、量測仍然量到 0 導致
-      // 迴圈跑不完），不是原本邏輯的一部分。
-      let guard = 0;
-      while (track.getBoundingClientRect().width < targetWidth && guard < 50) {
-        track.appendChild(firstSpan.cloneNode(true));
-        guard += 1;
-      }
-
-      // 2. 把目前這一整組內容完整複製一份接到尾端，搭配 CSS -50% 動畫
-      //    達成無縫循環
-      track.insertAdjacentHTML("beforeend", track.innerHTML);
-    };
-
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(duplicate);
-    } else {
-      duplicate();
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+export default function MarqueeTrack({
+  text = "SMART SAFETY ",
+  /** 跑完一輪（0% 到 -50%）要花幾秒，數字越小跑越快。舊站 CSS 動畫原本也是 40 秒 */
+  durationSeconds = 150,
+}: {
+  text?: string;
+  durationSeconds?: number;
+}) {
+  const runA = Array.from({ length: REPEAT_COUNT }, (_, i) => <span key={`a-${i}`}>{text}</span>);
+  const runB = Array.from({ length: REPEAT_COUNT }, (_, i) => <span key={`b-${i}`}>{text}</span>);
 
   return (
-    <div className="marquee-track" ref={trackRef}>
-      <span>{text}</span>
-    </div>
+    <motion.div
+      className="marquee-track"
+      animate={{ x: ["0%", "-50%"] }}
+      transition={{ duration: durationSeconds, ease: "linear", repeat: Infinity }}
+    >
+      {runA}
+      {runB}
+    </motion.div>
   );
 }

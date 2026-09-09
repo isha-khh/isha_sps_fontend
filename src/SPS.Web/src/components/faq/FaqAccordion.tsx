@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PuckRenderer } from "@/components/puck/PuckRenderer";
 
 export interface FaqAccordionItemData {
   question: string;
@@ -22,6 +23,12 @@ export interface FaqAccordionItemData {
  * 寫死 `"true"`，即使第 2、3 項其實用 inline style 蓋成隱藏——這裡讓
  * `aria-expanded` 老實反映「這個項目現在到底是不是展開」，不是照抄
  * 那組對不起來的狀態。
+ *
+ * `item.answer` 改用 `PuckRenderer` 顯示，不是直接印字串/
+ * `dangerouslySetInnerHTML`——串上真的後端後才發現 `Question.answer`
+ * 其實是 Puck 區塊 JSON（不是純 HTML），假資料（faq-data.ts）也跟著
+ * 改成同樣格式（`wrapHtmlAsPuckContent`），這樣不管是假資料還是真的
+ * API 資料，這裡都是同一套渲染路徑，不用另外判斷資料來源。
  */
 export default function FaqAccordion({ items, defaultOpenIndex = 0 }: { items: FaqAccordionItemData[]; defaultOpenIndex?: number | null }) {
   const [openIndex, setOpenIndex] = useState<number | null>(defaultOpenIndex);
@@ -50,7 +57,9 @@ export default function FaqAccordion({ items, defaultOpenIndex = 0 }: { items: F
 
             <div id={panelId} className={`collapse-body${isOpen ? " show" : ""}`} style={isOpen ? undefined : { display: "none" }}>
               <div className="qa_right">
-                <div className="txt editor">{item.answer}</div>
+                <div className="txt editor">
+                  <PuckRenderer content={item.answer} />
+                </div>
               </div>
             </div>
           </div>

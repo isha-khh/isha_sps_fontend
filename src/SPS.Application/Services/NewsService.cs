@@ -24,6 +24,11 @@ public class NewsService : INewsService
         NewsQueryParameters parameters, CancellationToken cancellationToken = default)
     {
         var pagedResult = await _unitOfWork.News.GetPagedAsync(parameters, cancellationToken);
+
+        // 一次批次查完這一頁所有新聞的標簽，避免逐筆呼叫造成 N+1 查詢
+        var tagsByNewsId = await _unitOfWork.News.GetNewsTagsBatchAsync(
+            pagedResult.Items.Select(n => n.Id).ToList(), cancellationToken);
+
         var response = new PagedResult<NewsListItemResponse>
         {
             Items = pagedResult.Items.Select(n => new NewsListItemResponse
@@ -32,11 +37,14 @@ public class NewsService : INewsService
                 Title = n.Title?.DefaultText ?? string.Empty,
                 Introduction = n.Introduction?.DefaultText,
                 StartDate = n.StartDate,
+                EndDate = n.EndDate,
                 Published = n.Published,
                 CategoryId = n.CategoryId,
                 CategoryName = n.Category?.Name,
                 ViewCount = n.ViewCount,
-                CreatedTime = n.CreatedTime
+                CreatedTime = n.CreatedTime,
+                Tags = tagsByNewsId.GetValueOrDefault(n.Id, new List<string>()),
+                ImageUrl = n.Picture?.DefaultImageUri
             }).ToList(),
             TotalCount = pagedResult.TotalCount,
             Page = pagedResult.Page,
@@ -70,7 +78,8 @@ public class NewsService : INewsService
             ViewCount = news.ViewCount,
             Tags = tags,
             CreatedTime = news.CreatedTime,
-            UpdatedTime = news.UpdatedTime
+            UpdatedTime = news.UpdatedTime,
+            ImageUrl = news.Picture?.DefaultImageUri
         });
     }
 
