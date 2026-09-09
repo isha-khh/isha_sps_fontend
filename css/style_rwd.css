@@ -1,4 +1,4 @@
-
+﻿
 
 
 
@@ -8,6 +8,26 @@
 @media (min-width: 1680px) {
 }
 @media (max-width: 1800px) {
+    .ab_list3 .tit {
+        left: 5%;
+     
+    }
+    .ab_list1 .tit p {
+        width:40%;
+        
+    }
+    .main-title {
+        padding-left: 5%;
+    }
+    .s_meu_lk {
+        right: 5%;
+    }
+    .video .sele_video {
+        padding: 40px 5% 20px;
+    }
+    .s_round_3 {
+        width: 15%;
+    }
     .banner_section .slick-play-pause-btn {
         bottom: -11%;
         right: 7%;
@@ -47,6 +67,15 @@
 }
 
 @media (max-width: 1199px) {
+    .dow-prove .dow-prove_1 a p {
+        font-size: 0.875rem;
+    }
+    .ab_list3 {
+        padding: 0 0;
+    }
+    .item .item_box .tit {
+        padding: 0 18px 15px;
+    }
     .banner_section .slick-play-pause-btn {
         bottom: -14%;
         right: 6%;
@@ -101,6 +130,141 @@
 
 
 @media (max-width: 991px) {
+    .member .frame-small-box {
+        width: 100%;
+    }
+  
+    /*關於我們*/
+    .title-wrap_md {
+        position: absolute;
+        left: 20px;
+        top: 2%;
+        z-index: 10;
+    }
+  
+    .milestone-section {
+        display: flex !important;
+        flex-direction: row !important;
+        height: auto !important;
+        min-height: auto;
+        overflow: visible !important;
+        padding: 0 16px 80px 16px;
+        background-color: #f2f7fc;
+        padding: 100px 20px 0;
+    }
+
+ 
+    .axis-line {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 8%;
+        width: 1px;
+        z-index: 1;
+    }
+
+
+    .fixed-left {
+        position: sticky !important;
+        top: 0;
+        width: 8% !important;
+        height: auto !important;
+        flex-shrink: 0;
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center; 
+        align-items: flex-end;
+        padding: 0 10px 0 0 !important;
+        box-sizing: border-box;
+        z-index: 5;
+    }
+
+  
+        .fixed-left .title-wrap,
+        .fixed-left  .year-fixed-display {
+            display: none !important;
+        }
+
+ 
+    .elevator-box {
+        display: block !important;
+        width: 65px;
+        margin-right: -24px;
+        transform: unset;
+        position: sticky;
+        top: 0;
+        left: 4.7%;
+        height: 50px;
+        top: 23vh;
+        z-index: 10;
+        margin-top: 30px;
+        align-self: unset;
+    }
+
+        .elevator-box svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+  
+    .indicator-pointer {
+        display: block !important;
+        position: sticky !important;
+        left: 7%;
+        margin-left: -4px;
+        background-color: #0066cc;
+        border-radius: 50%;
+        z-index: 10;
+        top: 20vh;
+    }
+
+        .indicator-pointer::after {
+            display: none; 
+        }
+
+  
+    .right-viewport {
+        width: 72% !important;
+        height: auto !important;
+        overflow: visible !important;
+        box-sizing: border-box;
+    }
+
+
+    .history-list {
+        position: static !important;
+        width: 100% !important;
+        padding: 0 0 0 0 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+ 
+    .history-item {
+        margin-bottom: 30px;
+        opacity: 1 !important; 
+    }
+
+    .card-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0066cc;
+        margin: 0 0 14px 0;
+    }
+
+    .card-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    
+
+
+    /*關於我們END*/
+
     .side1 .side1_news ul li a {
         padding: 15px 15px !important;
     }
@@ -394,6 +558,194 @@
     }
 }
 @media (max-width: 767px) {
+
+    .project_fx {
+        gap: 0 ;
+    }
+    .project_fx.project_three .form-check {
+        width: 100%;
+    }
+
+    .menb_inp_box .menb_inp_tit {
+        width: 100%;
+    }
+    .compare-table thead th {
+        padding: 5px 10px;
+     
+    }
+    .compare-table tbody th, .compare-table tbody td {
+        padding: 10px 10px;
+
+    }
+    .compare-table tbody th, .compare-table tbody td {
+        white-space: normal;
+    }
+    .menb_compare_box .compare-table {
+        width: 800px!important;
+    }
+    .menb_compare_box {
+        overflow-x: auto;
+        white-space: nowrap;
+     
+    }
+
+    .menb_type {
+        margin-bottom: 30px;
+    }
+    .menb_type_card .card_inner .t_s1 {
+        top: -6px;
+
+    }
+    .menb_type_item {
+        flex: 100%;
+        margin-bottom: 0;
+    }
+    .peer_box {
+        margin-bottom: 20px;
+    }
+    .card-footer a {
+        font-size: 0.75rem;
+    }
+    .step-progress {
+        margin-top: 20px;
+    }
+    .melo_box_right_2 a {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    .login a.more_x.more_x_gu {
+        margin: 0 auto;
+    }
+    .melo_box_right {
+        margin-top: 30px;
+        text-align: center;
+        background-color: #f0f7ff;
+        padding: 30px;
+    }
+    .member .frame-small-box {
+        padding: 20px;
+    }
+    .melo_box_left {
+        padding-right: 0;
+    }
+
+    .melo_box_right,
+    .melo_box_left {
+        width: 100%;
+    }
+    .title-wrap_md {
+        right: 0;
+    }
+    .title-wrap .h3_tit {
+         text-align: center; 
+    }
+    .right-viewport {
+        width: 85% !important;
+    
+    }
+    .ab_list3 {
+        padding: 30px 15px;
+    }
+    .ab_list3 .tit .h3_tit {
+        text-align: center;
+    }
+    .ab_list3 .tit p {
+        font-size: 4rem;
+        line-height: 80px;
+        text-align: center;
+    }
+    .ab_list3 .tit {
+        position: static;
+        transform: unset;
+    }
+    .ab_list3 .pic {
+        max-width: 300px;
+    
+    }
+    .fixed-left {
+        display: none!important;
+    }
+    .ab_list1   .s_round_6 {
+      display:none;
+    }
+    .ab_list1 .tit{
+        padding:0 15px;
+
+    }
+  
+    .ab_list1 {
+       padding-top:30px;
+    }
+   .ab_list1 .tit p {
+        width: 100%;
+    }
+    .ab_list1 .tit {
+        position: static;
+        transform: unset;
+    }
+    /*關於我們*/
+    .elevator-box {
+        top: 15vh;
+        transform: translateX(-35px);
+    }
+    .indicator-pointer {
+        top: 12vh;
+        left: 20px;
+    }
+ 
+    /*關於我們 end*/
+    .faq .main .side1 .wid-faq {
+        margin-bottom: 20px;
+     
+    }
+    .faq .faq_box .qa_right {
+        margin-left: 0;
+        padding: 15px;
+    }
+    .faq .faq_box .accordion-header {
+        font-size: 1rem;
+      
+    }
+    .faq .faq_box .accordion-header .num {
+        width: 40px;
+        height: 40px;
+   
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .search .form-select, .search .textarea.form-control, .search .input.form-control, .search2 .form-select, .search2 .textarea.form-control, .search2 .input.form-control {
+        height: auto;
+  
+    }
+    .form-select, textarea.form-control, input.form-control {
+        height: auto;
+    }
+    .search2 .btn_a {
+        width: 120px;
+        height: 37px;
+    }
+    .faq .main .content,
+    .faq .main .side1 {
+        width: 100%;
+    }
+    body:not(.home) .s_round_3 {
+        width: 25%;
+        top: -2%;
+    }
+    .error_title {
+        font-size: 2rem;
+  
+    }
+    .error_wrap_top img {
+        width: 250px;
+       
+    }
+    .error_content {
+        margin: 0 auto 3%;
+        text-align: center;
+        padding: 40px 20px;
+    }
     .more_x.more_x_767 {
         margin: 0 auto 40px;
     }
@@ -984,13 +1336,21 @@
             font-size: 0.95rem;
         }
 
-        /*���z�޳N*/
+        /*智慧技術*/
+    .collapse-body {
+        padding:  0;
+    }
+        .collapse-body .project_fx {
+            gap:0 !important;
+        }
 
         .sm_techn {
             flex-direction: column;
             min-height: auto;
         }
-
+            .sm_techn .sm_techn_left {
+                width: auto;
+            }
 
         .sm_techn_left {
             width: 100%;
@@ -1016,7 +1376,7 @@
             .sm_techn_left .tab-btn {
                 flex: 0 0 auto;
                 width: auto;
-                padding: 12px 18px;
+                padding: 7px 13px;
                 border-bottom: none;
             }
 
@@ -1039,22 +1399,51 @@
 
 
         .project_fx .form-check {
-            width: 100%;
             padding: 8px 0 8px 2.2rem;
             margin-bottom: 0;
         }
 
-        .form-check-input {
-            width: 1.25rem;
-            height: 1.25rem;
-        }
+     
 
         .form-check-label {
             font-size: 1rem;
             cursor: pointer;
         }
+    .dow-prove .dow-prove_1 i {
+        font-size: 2rem;
+    
+    }
+    .dow-prove .dow-prove_1 a {
+        padding: 22px 10px;
+        height: 100%;
+    }
+    .dow-document .tit_dow {
+        width: 100%;
+    
+    }
+    .review_box label {
+        width: 160px;
+    }
+    .review_box .review_box_r span {
+        font-size: 1rem;
+    }
+    .review_box {
+        margin-bottom: 20px;
+    
+    }
+    .checkbox {
+        font-size: 0.875rem;
+       
+    }
+    .tit_dow .files .upl_tit {
+        flex-wrap: wrap;
+    }
+    .tit_dow .btn-outline-danger {
+     
+        margin-top: 10px;
+    }
 
-        /*���z�޳N*/
+        /*智慧技術*/
     }
 
     @media (max-width: 425px) {

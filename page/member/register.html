@@ -51,11 +51,10 @@
     <link href="../../js/slick-2.0.0/slick/slick.css" rel="stylesheet" />
 
     <!-- bsnav -->
-    <link href="../../jsjs/bsnav-master/dist/bsnav.min.css" rel="stylesheet" />
+    <link href="../../js/bsnav-master/dist/bsnav.min.css" rel="stylesheet" />
     <!-- bootstrap icon -->
     <link href="../../js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
 
-    <link href="../../js/datepicker-1.0.10/dist/datepicker.css" rel="stylesheet" />
 
     <!-- fancybox -->
     <link href="../../js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
@@ -67,7 +66,7 @@
 
     <!--aos --->
     <script type="text/javascript" src="../../js/aos-master/dist/aos.js"></script>
-    <link href="../../jsjs/aos-master/dist/aos.css" rel="stylesheet">
+    <link href="../../js/aos-master/dist/aos.css" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
@@ -129,7 +128,18 @@
 
             <div class="marquee-bg" aria-hidden="true">
                 <div class="marquee-track">
-                    <span>SMART SAFETY </span>
+                    <!-- 第一組 -->
+                    <div class="marquee-group">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                    <!-- 第二組-->
+                    <div class="marquee-group" aria-hidden="true">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
                 </div>
             </div>
 
@@ -314,26 +324,6 @@
 
     <script>
 
-        //標題
-        $(function () {
-            const $track = $('.marquee-track');
-            const $firstSpan = $track.find('span').first();
-
-            if ($firstSpan.length) {
-                const windowWidth = $(window).width();
-                let totalWidth = $firstSpan.outerWidth(true);
-
-                // 1. 自動複製，直到文字總寬度至少大於螢幕寬度（確保大螢幕不留白）
-                while (totalWidth < windowWidth * 1.5) {
-                    $track.append($firstSpan.clone());
-                    totalWidth = $track.outerWidth(true);
-                }
-
-                // 2. 將整組內容完整複製一份加入尾端，搭配 CSS -50% 達成完美無縫滾動
-                const currentContent = $track.html();
-                $track.append(currentContent);
-            }
-        });
 
         $(function () {
             if (window.innerWidth > 767) {

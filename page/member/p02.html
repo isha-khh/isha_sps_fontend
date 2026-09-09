@@ -158,7 +158,18 @@
 
             <div class="marquee-bg" aria-hidden="true">
                 <div class="marquee-track">
-                    <span>SMART SAFETY </span>
+                    <!-- 第一組 -->
+                    <div class="marquee-group">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                    <!-- 第二組-->
+                    <div class="marquee-group" aria-hidden="true">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
                 </div>
             </div>
 
@@ -474,7 +485,7 @@
                                 </div><!---menb_inp_tit-->
 
 
-                                <div class="menb_inp_tit form-group  w-100 ">
+                                <div class="menb_inp_tit form-group  w-100  mt-md-0 mt-3">
                                     <label class="mb-2"><span class="red me-1">*</span>應用情境(可多選)</label>
                                     <div class="project_fx project_three d-flex">
                                         <div class="form-check">
@@ -1200,10 +1211,14 @@
                                                                 <input class="form-check-input" type="checkbox" value="數據、影像串接" id="fxScope5_1_2">
                                                                 <label class="form-check-label" for="fxScope5_1_2">數據、影像串接</label>
                                                             </div><!---form-check-->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="預設模擬" id="fxScope5_1_3">
+                                                                <label class="form-check-label" for="fxScope5_1_3">預設模擬</label>
+                                                            </div><!---form-check-->
                                                             <!-- 其他 -->
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope5_1_3">
-                                                                <label class="form-check-label" for="fxScope5_1_3">其他</label>
+                                                                <input class="form-check-input" type="checkbox" value="其他" id="fxScope5_1_4">
+                                                                <label class="form-check-label" for="fxScope5_1_4">其他</label>
                                                             </div><!---form-check-->
 
                                                         </div><!---project_fx-->
@@ -1778,8 +1793,8 @@ $(".uplo_cpo").each(function () {
         maxFilesize: 10, // 配合您的說明可改成 10MB
         // 加上 .pdf 與 application/pdf
         acceptedFiles: ".jpg,.jpeg,.png,.pdf,application/pdf",
-        thumbnailWidth: 400,
-        thumbnailHeight: 300,
+        thumbnailWidth: 100,
+        thumbnailHeight: 142,
         parallelUploads: 1,
         previewTemplate: previewTemplate,
         autoQueue: false,
@@ -1835,26 +1850,6 @@ $(".uplo_cpo").each(function () {
 
 
 
-        //標題
-        $(function () {
-            const $track = $('.marquee-track');
-            const $firstSpan = $track.find('span').first();
-
-            if ($firstSpan.length) {
-                const windowWidth = $(window).width();
-                let totalWidth = $firstSpan.outerWidth(true);
-
-                // 1. 自動複製，直到文字總寬度至少大於螢幕寬度（確保大螢幕不留白）
-                while (totalWidth < windowWidth * 1.5) {
-                    $track.append($firstSpan.clone());
-                    totalWidth = $track.outerWidth(true);
-                }
-
-                // 2. 將整組內容完整複製一份加入尾端，搭配 CSS -50% 達成完美無縫滾動
-                const currentContent = $track.html();
-                $track.append(currentContent);
-            }
-        });
 
         $(function () {
             if (window.innerWidth > 767) {

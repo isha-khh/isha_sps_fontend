@@ -63,7 +63,7 @@ body  .btn.btn-primary {
     z-index: 9999 !important;
     width: auto !important;
     height: auto !important;
-    padding: 0.75rem 1.25rem !important;
+    padding: 0.5rem 1rem !important;
     margin: 0 !important;
     overflow: visible !important;
     clip: auto !important;
@@ -166,6 +166,7 @@ a:focus-visible {
     height: 100vh;
     background: url(../images/all/footer_bg2.svg) no-repeat center bottom;
     background-size: 100%;
+    padding: 0 20px;
 }
 
     .error_wrap_top img {
@@ -1264,11 +1265,123 @@ body   .main .side .nav > li + li {
     margin: 0 auto;
 }
 
-
-
-/*我要媒合 媒合對接 index */
-.matching.index   {
+/*我要媒合 媒合對接 詳細頁 show */
+.wid-pub .slick-track {
+    margin-left: 0 !important;
+    margin-right: auto !important;
 }
+.matching.show .wid-pub   .tit_three {
+    padding-bottom: 10px;
+}
+.matching.show .wid-pub .item   .tit h3 {
+    font-size: 1.125rem;
+}
+.matching.show .wid-pub .item  .tag-wrap .badge-tag,
+.matching.show .wid-pub .item .tit ul li {
+    font-size: 0.875rem;
+}
+.matching.show .wid-pub .item .tit {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 15px !important;
+    border: 1px solid #d8d8d8 !important;
+    border-radius: 10px !important;
+    background-color: #fff !important;
+    display: block;
+}
+.matching.show .wid-pub .item:hover .tit {
+    box-shadow: rgba(0, 102, 255, 0.25) 0px 8px 20px;
+}
+.matching.show .wid-pub .item {
+    padding: 0 10px;
+   
+}
+.matching.show .custom_box {
+    position: absolute;
+    right: 40px;
+    top: 44px;
+}
+/*我要媒合 媒合對接 index */
+.public_box {
+    padding: 20px;
+    background-color: #f4f8ff;
+    border-radius: 12px;
+}
+.matching.index .tit_nsl ul {
+    gap: 0 25px
+}
+.matching.index .publish_bk {
+    display: block !important;
+}
+.publish_banner a:hover {
+    opacity: 0.7;
+}
+.publish_banner a img{
+    width:100%;
+}
+.publish_banner {
+    padding: 0 12%;
+}
+.matching .publish_s .project_fx .form-check {
+    background-color: unset;
+    width: auto;
+    padding: 0;
+    border-radius: 0;
+    padding-left: 1.5em;
+}
+.matching.index .modal-dialog.modal-dialog_w7 {
+    max-width: 70%;
+}
+.matching.index   .searchma_tching.mb-md-5.mb-4{
+    margin-bottom:20px!important;
+}
+
+.matching .more_x.me_Publish {
+    width: 100%;
+    margin: 0 0 20px auto;
+    /* background: linear-gradient(90deg, #fb8ab1 0%, #E91E63 100%); */
+    padding: 40px;
+    border-radius: 10px;
+}
+    .matching .more_x.me_Publish span {
+        font-size:1.25rem;
+    }
+    .matching .more_x.me_Publish i {
+        background-color: unset;
+        color: #fff;
+        font-size: 2rem;
+    }
+    .matching .more_x.me_Publish:hover i {
+        transform: translateX(0);
+    }
+        .matching.index .modal textarea {
+            height: 200px;
+        }
+.matching.index .modal .peer.d-flex {
+    justify-content: center;
+    background-color: #e9f0f4;
+    padding: 20px;
+    border-radius: 10px;
+    color: #000;
+}
+.Disclaimer {
+    overflow-Y: auto;
+    height: 200px;
+    border: 1px solid #c2c2c2;
+    border-radius: 10px;
+    padding:20px;
+}
+.matching.index .column_box .item .sup_xbox {
+    justify-content: space-between;
+    align-items: center;
+}
+.matching.index    .column_box .item .tit {
+    padding-left: 0;
+    width:100%;
+}
+
+
+
 /* 浮動面板樣式 */
 .ma_sear_panel {
     position: absolute;
@@ -1562,11 +1675,13 @@ a.det_more {
         align-items: center;
         gap: 0 20px
     }
-.matching .main .content {
+.matching.enterprise   .main .content {
     width: 100%;
 }
     /*會員登入頁 member*/
-
+.login  a.more_x.more_x_gu {
+    justify-content: center;
+}
     .so_pass {
     position: relative;
 }
@@ -1672,6 +1787,7 @@ a.det_more {
             border: 1px solid #a8a8a8;
             border-radius: 10px;
             margin-top: 40px;
+            background-color: #fff;
         }
         .melo_box_right .melo_box_right_1 {
          /*   padding: 30px;
@@ -3477,6 +3593,7 @@ a.more_x.more_x_gu,
 .faq .faq_box .qa_left .title-text {
     flex: 1;
     padding-left: 10px;
+    padding-right:10px;
 }
 .faq .faq_box .qa_left {
     display: flex;
@@ -3502,7 +3619,10 @@ a.more_x.more_x_gu,
     font-size: 1.25rem;
     font-weight: 600;
     color: rgb(34, 34, 34);
-    padding: 0 12px;
+    padding: 0 0;
+}
+.faq  .collapse-body {
+    padding: 8px 0;
 }
 .faq .main .side1 .nav > li + li {
     border-top: 1px solid #bebebe;
@@ -4037,8 +4157,350 @@ a.more_x.more_x_gu,
 }
 
 
+/*關於我們*/
+
+.about .main .content {
+    width: 100%;
+}
+.about   .main > .container-fluid {
+    padding: 0px ;
+}
+.about  .page_wrapper {
+    overflow: clip;
+}
 
 
+
+/*地圖*/
+.ab_list3 .pic {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 0 0 auto;
+    z-index: 10;
+    position: relative;
+}
+
+/* 初始隱藏狀態 */
+.ab_list3 .map-pin,
+.ab_list3 .map-pin-shadow,
+.ab_list3 .arrow-flow {
+    opacity: 0;
+}
+
+/* 滾動到此處（AOS 添加 .aos-animate）或無 AOS 時執行動畫 */
+.ab_list3 .pic.aos-animate .map-pin,
+.ab_list3 .pic:not([data-aos]) .map-pin {
+    transform-origin: 244px 412px;
+    animation: dropPinOnce 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards;
+}
+
+.ab_list3 .pic.aos-animate .map-pin-shadow,
+.ab_list3 .pic:not([data-aos]) .map-pin-shadow {
+    transform-origin: 244px 412px;
+    animation: fadeShadowOnce 0.75s ease-out 0.1s forwards;
+}
+
+.ab_list3 .pic.aos-animate .arrow-flow,
+.ab_list3 .pic:not([data-aos]) .arrow-flow {
+    transform-origin: 244px 380px;
+    animation: popArrowOnce 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 箭頭順時針延遲依序綻放 */
+.ab_list3 .pic.aos-animate .arrow-1,
+.ab_list3 .pic:not([data-aos]) .arrow-1 {
+    animation-delay: 0.8s;
+}
+
+.ab_list3 .pic.aos-animate .arrow-2,
+.ab_list3 .pic:not([data-aos]) .arrow-2 {
+    animation-delay: 0.92s;
+}
+
+.ab_list3 .pic.aos-animate .arrow-3,
+.ab_list3 .pic:not([data-aos]) .arrow-3 {
+    animation-delay: 1.04s;
+}
+
+.ab_list3 .pic.aos-animate .arrow-4,
+.ab_list3 .pic:not([data-aos]) .arrow-4 {
+    animation-delay: 1.16s;
+}
+
+@keyframes dropPinOnce {
+    0% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.5);
+    }
+
+    65% {
+        opacity: 1;
+        transform: translateY(3px) scale(1.04, 0.96);
+    }
+
+    85% {
+        transform: translateY(-2px) scale(0.98, 1.02);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeShadowOnce {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+
+    100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+}
+
+@keyframes popArrowOnce {
+    0% {
+        opacity: 0;
+        transform: scale(0.15);
+    }
+
+    60% {
+        opacity: 0.9;
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+/*地圖EWD*/
+
+
+.ab_list3,
+.ab_list1 {
+    position: relative;
+}
+.ab_list3 {
+    background: linear-gradient(0deg,rgba(255, 255, 255, 1) 0%, rgba(57, 168, 247, 1) 48%, rgba(4, 123, 209, 1) 100%);
+    padding: 0 12%;
+}
+    .ab_list3:before {
+        content: " ";
+        display: block;
+        position: absolute;
+        background: url(../images/all/ab_list1_bg4.jpg) no-repeat;
+        width: 100%;
+        height: 500px;
+        background-size: cover;
+        left: 0;
+        bottom:0;
+        mix-blend-mode: color-burn;
+       
+    }
+
+      
+        .ab_list3 .tit {
+            position: absolute;
+            left: 12%;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+        }
+    .ab_list1 .tit {
+        position: absolute;
+        left: 5%;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+.ab_list3 .pic img {
+    position:relative;
+    margin: 0 0 0 auto;
+    z-index: 20;
+}
+.ab_list3 .tit .h3_tit {
+    color: #ffffffeb;
+    background: unset;
+    -webkit-text-fill-color: unset;
+}
+
+.ab_list3 .tit p {
+    font-size: 5rem;
+    color: #fff;
+    font-weight: 900;
+    line-height: 90px;
+}
+            .ab_list3 .tit p span{
+                display:block;
+                
+            }
+        .ab_list1 .tit p {
+        width: 60%;
+        line-height: normal;
+        line-height: 32px;
+        }
+          
+
+        .ab_list2 .s_round_3 {
+            mix-blend-mode: multiply
+
+        }
+
+
+.milestone-section {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    background-color: #e9f0f4;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* 垂直線 */
+.axis-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 38%;
+    width: 1px;
+    background-color: #bcbcbc;
+    z-index: 2;
+}
+
+/* 中間藍點與橫線*/
+.indicator-pointer {
+    position: absolute;
+    top: 29vh;
+    left: 37.9%;
+    width: 18px;
+    height: 18px;
+    margin-left: -5px;
+    background-color: #0066cc;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+    .indicator-pointer::after {
+        content: "";
+        position: absolute;
+        top: 7px;
+        left: 10px;
+        width: 95px;
+        height: 1px;
+        background-color: #0066cc;
+    }
+
+/* 左側固定舞台 */
+.fixed-left {
+    width: 38%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 130px 0 0 5vw;
+    box-sizing: border-box;
+    z-index: 5;
+    user-select: none;
+}
+
+
+.h3_tit {
+    font-size: clamp(2rem, 3vw, 3.125rem);
+    font-weight: bold;
+    background: #2f6ea7;
+    background: linear-gradient(to right, #2f6ea7 16%, #0e3f6b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+.title-wrap .h3_tit {
+    color: #0d2b45;
+    margin: 6px 0 0 0;
+}
+
+.elevator-box {
+    align-self: center;
+    /* margin-right: -81px; */
+    top: 33%;
+    left: 33%;
+    position: fixed;
+    z-index: 10;
+}
+
+.year-fixed-display {
+    font-size:10rem;
+    font-weight: 900;
+    color: #0066cc;
+    line-height: 0.82;
+    margin-bottom: 0;
+    letter-spacing: -2px;
+}
+
+/* 右側視窗容器 */
+.right-viewport {
+    width: 62%;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+
+.history-list {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding-left: 125px;
+    padding-right: 15%;
+    box-sizing: border-box;
+    padding-top: calc(30vh - 14px);
+    transition: transform 0.5s ease;
+    will-change: transform;
+}
+
+/* 每個年份區塊 */
+.history-item {
+    margin-bottom: 120px;
+    opacity: 0.25;
+    transition: opacity 0.4s ease;
+}
+
+    .history-item.active {
+        opacity: 1;
+    }
+
+.card-title {
+    font-size: 1.625rem;
+    font-weight: 700;
+    color: #0066cc;
+    margin: 0 0 20px 0;
+    line-height: 1;
+}
+
+.card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .card-list li {
+        position: relative;
+        font-size: 1rem;
+        color: #222;
+        line-height: 1.9;
+        margin-bottom: 12px;
+      /*  padding-left: 18px;*/
+    }
+
+        .card-list li::before {
+      /*      content: "•";
+            position: absolute;
+            left: 0;
+            color: #7fa4c6;*/
+        }
 
 /*首頁*/
 .sub_tag {

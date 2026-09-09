@@ -55,7 +55,6 @@
     <!-- bootstrap icon -->
     <link href="../../js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
 
-    <link href="../../js/datepicker-1.0.10/dist/datepicker.css" rel="stylesheet" />
 
     <!-- fancybox -->
     <link href="../../js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
@@ -129,7 +128,18 @@
 
             <div class="marquee-bg" aria-hidden="true">
                 <div class="marquee-track">
-                    <span>SMART SAFETY </span>
+                    <!-- 第一組 -->
+                    <div class="marquee-group">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                    <!-- 第二組-->
+                    <div class="marquee-group" aria-hidden="true">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
                 </div>
             </div>
 
@@ -250,35 +260,35 @@
                                         </tr>
                                         <tr>
                                             <th scope="row">建立公司專頁</th>
-                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可刊登</td>
-                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可刊登</td>
-                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
+                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可建立</td>
+                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可建立</td>
+                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可建立</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可建立</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可建立</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">標籤建置</th>
-                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可刊登</td>
-                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可刊登</td>
-                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
+                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可建置</td>
+                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可建置</td>
+                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可建置</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可建置</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可建置</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">投稿產業案例</th>
-                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可刊登</td>
-                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
+                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可投稿</td>
+                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可投稿</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可投稿</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可投稿</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可投稿</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">参與媒合</th>
-                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
-                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可刊登</td>
+                                            <td><i class="bi bi-x-circle-fill" aria-hidden="true"></i>不提供</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可提供</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可提供</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可提供</td>
+                                            <td><i class="bi bi-check-circle-fill" aria-hidden="true"></i>可提供</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">下載平台資源</th>
@@ -344,28 +354,6 @@
 
     <script>
    
-
-        //標題
-        $(function () {
-            const $track = $('.marquee-track');
-            const $firstSpan = $track.find('span').first();
-
-            if ($firstSpan.length) {
-                const windowWidth = $(window).width();
-                let totalWidth = $firstSpan.outerWidth(true);
-
-                // 1. 自動複製，直到文字總寬度至少大於螢幕寬度（確保大螢幕不留白）
-                while (totalWidth < windowWidth * 1.5) {
-                    $track.append($firstSpan.clone());
-                    totalWidth = $track.outerWidth(true);
-                }
-
-                // 2. 將整組內容完整複製一份加入尾端，搭配 CSS -50% 達成完美無縫滾動
-                const currentContent = $track.html();
-                $track.append(currentContent);
-            }
-        });
-
         $(function () {
             if (window.innerWidth > 767) {
                 $(window).on('scroll', function () {
