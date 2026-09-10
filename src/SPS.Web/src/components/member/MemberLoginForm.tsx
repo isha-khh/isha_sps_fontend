@@ -20,9 +20,9 @@ import { getApiErrorMessage } from "@/lib/error-utils";
  * - 登入成功後端把 Token 設進 HttpOnly Cookie（不是回應 body），這裡
  *   拿到的只有 `member` 資訊，存進 `useAuthStore` 給畫面顯示「目前是誰
  *   登入」用。
- * - 登入後導去哪裡：舊站原本連去 `member/index.html`（會員中心首頁），
- *   目前整個平台都還沒有這個頁面/後端（login.html 的說明本來就寫了這
- *   件事），這裡先導回首頁 `/`——之後真的做出會員中心頁面時再改。
+ * - 登入後導去哪裡：舊站原本連去 `member/index.html`（會員中心首頁，
+ *   從沒真的做過，login.html 的說明本來就寫了這件事）——2026-09-10
+ *   `/member` 會員中心頁面做出來了，改導去那裡。
  * - 密碼錯誤／驗證碼錯誤，後端統一回 `400 { error: "..." }`
  *   （`AuthController.Login`），用 `getApiErrorMessage()` 取出來顯示；
  *   失敗後強制換一組新的驗證碼圖（`captchaRef.refresh()`）——圖片驗證碼
@@ -51,7 +51,7 @@ export default function MemberLoginForm() {
     try {
       const { member } = await authApi.login({ email: account, password, captcha });
       setMember(member);
-      router.push("/");
+      router.push("/member");
     } catch (err) {
       setError(getApiErrorMessage(err, "登入失敗，請確認帳號密碼是否正確"));
       captchaRef.current?.refresh();
