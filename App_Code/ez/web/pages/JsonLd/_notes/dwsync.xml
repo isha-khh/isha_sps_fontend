@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <dwsync>
-<file name="AggregateRating.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="Answer.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="Author.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="Brand.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="BreadcrumbListItem.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="ImageObject.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="Item.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="JsonLd.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="JsonLd_Article.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="JsonLd_BreadcrumbList.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="JsonLd_FAQPage.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="JsonLd_Product.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="JsonLd_QAPage.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="JsonLd_NewsArticle.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="Offers.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="Publisher.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="Question.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="ReviewRating.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="WebPage.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
-<file name="Review.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134321991600000000" Dst="0" />
+<file name="AggregateRating.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="Answer.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="Author.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="Brand.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="BreadcrumbListItem.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="ImageObject.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="Item.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="JsonLd.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="JsonLd_Article.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="JsonLd_BreadcrumbList.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="JsonLd_FAQPage.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="JsonLd_Product.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="JsonLd_QAPage.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="JsonLd_NewsArticle.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="Offers.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="Publisher.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="Question.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="ReviewRating.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="WebPage.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
+<file name="Review.cs" server="demo2.eztrust.tw//isha/" local="133622113800000000" remote="134334762600000000" Dst="0" />
 </dwsync>

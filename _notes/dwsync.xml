@@ -87,10 +87,13 @@
 <file name="favicon-16x16.png" server="demo2.eztrust.tw//isha/" local="134316784624702716" remote="134321992200000000" Dst="0" />
 <file name="favicon-32x32.png" server="demo2.eztrust.tw//isha/" local="134316784834422521" remote="134321992200000000" Dst="0" />
 <file name="favicon.ico" server="demo2.eztrust.tw//isha/" local="134316494280000000" remote="134321992200000000" Dst="0" />
-<file name="index.html" server="demo2.eztrust.tw//isha/" local="134328991394496719" remote="134328993600000000" Dst="0" />
+<file name="index.html" server="demo2.eztrust.tw//isha/" local="134334775103618146" remote="134334775200000000" Dst="0" />
 <file name="mstile-150x150.png" server="demo2.eztrust.tw//isha/" local="134316785022912802" remote="134321993400000000" Dst="0" />
 <file name="safari-pinned-tab.svg" server="demo2.eztrust.tw//isha/" local="134316785280246110" remote="134321993400000000" Dst="0" />
 <file name="site.webmanifest" server="demo2.eztrust.tw//isha/" local="133597146600000000" remote="134321993400000000" Dst="0" />
 <file name="Web.config" server="demo2.eztrust.tw//isha/" local="134314236105172673" remote="134321993400000000" Dst="0" />
-<file name="httpstatus.html" server="demo2.eztrust.tw//isha/" local="134328995548477394" remote="134328995400000000" Dst="0" />
+<file name="httpstatus.html" server="demo2.eztrust.tw//isha/" local="134329004249764262" remote="134334760800000000" Dst="0" />
+<file name=".gitignore" server="demo2.eztrust.tw//isha/" local="134333174447276616" remote="134334760800000000" Dst="0" />
+<file name="skills-lock.json" server="demo2.eztrust.tw//isha/" local="134329894036196038" remote="134334760800000000" Dst="0" />
+<file name="README.md" server="demo2.eztrust.tw//isha/" local="134328984171902811" remote="134334760800000000" Dst="0" />
 </dwsync>

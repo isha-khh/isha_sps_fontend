@@ -1019,6 +1019,7 @@ input.form-control {
     pointer-events: none;
     user-select: none;
     z-index: 1;
+    pointer-events: none;
 }
 
 .marquee-track {
@@ -1123,6 +1124,7 @@ body .main .side1 ul.wid-cont {
     /* justify-content: center;*/
     display: flex;
     margin-bottom: 10px;
+    gap: 10px 2px
 }
 
 

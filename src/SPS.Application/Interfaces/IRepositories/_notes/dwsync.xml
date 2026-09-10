@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dwsync>
+<file name="IAboutRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453287205" remote="134334762000000000" Dst="0" />
+<file name="IAlbumRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453297198" remote="134334762000000000" Dst="0" />
+<file name="IAnalyticsRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453297198" remote="134334762000000000" Dst="0" />
+<file name="IApplicationDocumentRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453297198" remote="134334762000000000" Dst="0" />
+<file name="IApplicationLogRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453307198" remote="134334762000000000" Dst="0" />
+<file name="IApplicationMemberRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453317193" remote="134334762000000000" Dst="0" />
+<file name="IApplicationRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453317193" remote="134334762000000000" Dst="0" />
+<file name="IAttributeRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453327181" remote="134334762000000000" Dst="0" />
+<file name="IBannerRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453327181" remote="134334762000000000" Dst="0" />
+<file name="ICategoryRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453337183" remote="134334762000000000" Dst="0" />
+<file name="IDemandNotificationRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453347183" remote="134334762000000000" Dst="0" />
+<file name="ICompanyRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453337183" remote="134334762000000000" Dst="0" />
+<file name="IDemandRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453357176" remote="134334762000000000" Dst="0" />
+<file name="IFidoCredentialRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453367168" remote="134334762000000000" Dst="0" />
+<file name="IFileRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453377159" remote="134334762000000000" Dst="0" />
+<file name="IMemberRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453377159" remote="134334762000000000" Dst="0" />
+<file name="IMouRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453387155" remote="134334762000000000" Dst="0" />
+<file name="IMultilingualTextRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453387155" remote="134334762000000000" Dst="0" />
+<file name="INewsRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453397143" remote="134334762000000000" Dst="0" />
+<file name="INotificationRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453397143" remote="134334762000000000" Dst="0" />
+<file name="IPictureRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453397143" remote="134334762000000000" Dst="0" />
+<file name="IPopupAnnouncementRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453407136" remote="134334762000000000" Dst="0" />
+<file name="IProductFileRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453407136" remote="134334762000000000" Dst="0" />
+<file name="IProductRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453417133" remote="134334762000000000" Dst="0" />
+<file name="IQuestionRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453417133" remote="134334762000000000" Dst="0" />
+<file name="IRegulationsRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453417133" remote="134334762000000000" Dst="0" />
+<file name="IRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453427122" remote="134334762000000000" Dst="0" />
+<file name="ISiteCounterRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453437116" remote="134334762000000000" Dst="0" />
+<file name="IRoleRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453427122" remote="134334762000000000" Dst="0" />
+<file name="ISiteStatisticsRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453437116" remote="134334762000000000" Dst="0" />
+<file name="ISuccessCaseRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453445688" remote="134334762000000000" Dst="0" />
+<file name="ISystemSettingRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453445688" remote="134334762000000000" Dst="0" />
+<file name="ITagRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453445688" remote="134334762000000000" Dst="0" />
+<file name="IUserRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453455722" remote="134334762000000000" Dst="0" />
+<file name="IVideoRepository.cs" server="demo2.eztrust.tw//isha/" local="134333174453455722" remote="134334762000000000" Dst="0" />
+</dwsync>
