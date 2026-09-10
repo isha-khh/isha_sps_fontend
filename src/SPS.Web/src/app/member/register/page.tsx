@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import StepProgress from "@/components/member/StepProgress";
+import MemberConsentGate from "@/components/member/MemberConsentGate";
 
 export const metadata: Metadata = {
   title: "會員註冊",
@@ -12,12 +12,13 @@ export const metadata: Metadata = {
  * 會員註冊 Step 1「使用條款」，對應舊站 page/member/register.html。
  *
  * 這是註冊 4 步驟流程（使用條款→帳號設定→填寫資料→完成註冊）的第一
- * 步，`StepProgress` 顯示目前進度。內容是個資蒐集告知事項＋兩個同意
- * 勾選框，兩個勾選框目前沒有做「未勾選就不能下一步」的驗證——跟其他
- * 會員頁一樣先做靜態版本，範圍確認後再補。
+ * 步，`StepProgress` 顯示目前進度。內容是個資蒐集告知事項（純靜態，
+ * 留在這支 server component）＋兩個同意勾選框＋底部按鈕
+ * （`MemberConsentGate.tsx`，client component）。
  *
- * 「不同意，回首頁」對應舊站連去首頁；「同意，下一步」連去 Step 2
- * （`/member/register/account`，對應舊站 p01.html）。
+ * 2026-09-10 使用者回報 bug 後補上驗證：兩個勾選框原本沒勾選也能
+ * 直接按「同意，下一步」跳到 Step2，這是 git 歷史那版註解已經記著
+ * 的已知缺口，這次補上，說明見 `MemberConsentGate.tsx`。
  */
 export default function MemberRegisterPage() {
   return (
@@ -82,36 +83,7 @@ export default function MemberRegisterPage() {
             </div>
           </div>
 
-          <div className="peer_box">
-            <div className="mb-3">
-              <p>
-                <i className="bi bi-exclamation-circle-fill me-1"></i>請確認您已詳閱並同意以下事項
-              </p>
-            </div>
-
-            <div className="peer d-flex mb-3">
-              <label className="relative">
-                <input type="checkbox" aria-label="同意已充分知悉告知事項" title="本人已充分知悉貴署上述告知事項" className="form-check-input peer me-1" />
-              </label>
-              <span>本人已充分知悉貴署上述告知事項。</span>
-            </div>
-
-            <div className="peer d-flex">
-              <label className="relative">
-                <input type="checkbox" aria-label="同意個人資料蒐集處理利用" title="本人同意貴署蒐集、處理、利用本人之個人資料" className="form-check-input peer me-1" />
-              </label>
-              <span>本人同意貴署蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</span>
-            </div>
-          </div>
-
-          <div className="card-footer d-flex justify-content-between">
-            <Link className="btn-outline-dark" href="/" title="不同意,回首頁">
-              <i className="bi bi-chevron-left" aria-hidden="true"></i>不同意，回首頁
-            </Link>
-            <Link className="btn-theme" href="/member/register/account" title="同意，下一步">
-              同意，下一步<i className="bi bi-chevron-right" aria-hidden="true"></i>
-            </Link>
-          </div>
+          <MemberConsentGate />
         </div>
       </InnerPageShell>
     </>
