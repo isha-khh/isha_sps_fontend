@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dwsync>
+<file name="AboutService.cs" server="demo2.eztrust.tw//isha/" local="134333174453780369" remote="134334762000000000" Dst="0" />
+<file name="AdminAuthService.cs" server="demo2.eztrust.tw//isha/" local="134333174453780369" remote="134334762000000000" Dst="0" />
+<file name="AdminRoleService.cs" server="demo2.eztrust.tw//isha/" local="134333174453790364" remote="134334762000000000" Dst="0" />
+<file name="AdminUserService.cs" server="demo2.eztrust.tw//isha/" local="134333174453790364" remote="134334762000000000" Dst="0" />
+<file name="AlbumService.cs" server="demo2.eztrust.tw//isha/" local="134333174453820358" remote="134334762000000000" Dst="0" />
+<file name="AnalyticsService.cs" server="demo2.eztrust.tw//isha/" local="134333174453830339" remote="134334762000000000" Dst="0" />
+<file name="ApplicationReviewService.cs" server="demo2.eztrust.tw//isha/" local="134333174453830339" remote="134334762000000000" Dst="0" />
+<file name="AttributeService.cs" server="demo2.eztrust.tw//isha/" local="134333174453840341" remote="134334762000000000" Dst="0" />
+<file name="ApplicationService.cs" server="demo2.eztrust.tw//isha/" local="134333174453840341" remote="134334762000000000" Dst="0" />
+<file name="AuthService.cs" server="demo2.eztrust.tw//isha/" local="134333174453850335" remote="134334762000000000" Dst="0" />
+<file name="BannerService.cs" server="demo2.eztrust.tw//isha/" local="134333174453850335" remote="134334762000000000" Dst="0" />
+<file name="CategoryService.cs" server="demo2.eztrust.tw//isha/" local="134333174453860324" remote="134334762000000000" Dst="0" />
+<file name="ChatService.cs" server="demo2.eztrust.tw//isha/" local="134333174453860324" remote="134334762000000000" Dst="0" />
+<file name="ContentIndexingService.cs" server="demo2.eztrust.tw//isha/" local="134333174453870317" remote="134334762000000000" Dst="0" />
+<file name="CompanyService.cs" server="demo2.eztrust.tw//isha/" local="134333174453870317" remote="134334762000000000" Dst="0" />
+<file name="DemandService.cs" server="demo2.eztrust.tw//isha/" local="134333174453880306" remote="134334762000000000" Dst="0" />
+<file name="Fido2Service.cs" server="demo2.eztrust.tw//isha/" local="134333174453880306" remote="134334762000000000" Dst="0" />
+<file name="FileCleanupService.cs" server="demo2.eztrust.tw//isha/" local="134333174453890298" remote="134334762000000000" Dst="0" />
+<file name="FileManagementService.cs" server="demo2.eztrust.tw//isha/" local="134333174453890298" remote="134334762000000000" Dst="0" />
+<file name="MemberService.cs" server="demo2.eztrust.tw//isha/" local="134333174453900293" remote="134334762000000000" Dst="0" />
+<file name="MemberProfileService.cs" server="demo2.eztrust.tw//isha/" local="134333174453900293" remote="134334762000000000" Dst="0" />
+<file name="MouService.cs" server="demo2.eztrust.tw//isha/" local="134333174453910294" remote="134334762000000000" Dst="0" />
+<file name="NewsService.cs" server="demo2.eztrust.tw//isha/" local="134333174453910294" remote="134334762000000000" Dst="0" />
+<file name="NotificationService.cs" server="demo2.eztrust.tw//isha/" local="134333174453920281" remote="134334762000000000" Dst="0" />
+<file name="PasswordPolicyService.cs" server="demo2.eztrust.tw//isha/" local="134333174453920281" remote="134334762000000000" Dst="0" />
+<file name="PictureService.cs" server="demo2.eztrust.tw//isha/" local="134333174453920281" remote="134334762000000000" Dst="0" />
+<file name="PopupAnnouncementService.cs" server="demo2.eztrust.tw//isha/" local="134333174453930277" remote="134334762000000000" Dst="0" />
+<file name="ProductService.cs" server="demo2.eztrust.tw//isha/" local="134333174453930277" remote="134334762000000000" Dst="0" />
+<file name="QuestionService.cs" server="demo2.eztrust.tw//isha/" local="134333174453940278" remote="134334762000000000" Dst="0" />
+<file name="RegulationsService.cs" server="demo2.eztrust.tw//isha/" local="134333174453940278" remote="134334762000000000" Dst="0" />
+<file name="SiteCounterService.cs" server="demo2.eztrust.tw//isha/" local="134333174453940278" remote="134334762000000000" Dst="0" />
+<file name="SiteStatisticsService.cs" server="demo2.eztrust.tw//isha/" local="134333174453950271" remote="134334762000000000" Dst="0" />
+<file name="SuccessCaseService.cs" server="demo2.eztrust.tw//isha/" local="134333174453960261" remote="134334762000000000" Dst="0" />
+<file name="SystemSettingService.cs" server="demo2.eztrust.tw//isha/" local="134333174453960261" remote="134334762000000000" Dst="0" />
+<file name="TagService.cs" server="demo2.eztrust.tw//isha/" local="134333174453960261" remote="134334762000000000" Dst="0" />
+<file name="VideoService.cs" server="demo2.eztrust.tw//isha/" local="134333174453970261" remote="134334762000000000" Dst="0" />
+</dwsync>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dwsync>
+<file name="AboutType.cs" server="demo2.eztrust.tw//isha/" local="134333174454280081" remote="134334762000000000" Dst="0" />
+<file name="AnalyticsDimensionType.cs" server="demo2.eztrust.tw//isha/" local="134333174454290069" remote="134334762000000000" Dst="0" />
+<file name="ApplicationStatus.cs" server="demo2.eztrust.tw//isha/" local="134333174454290069" remote="134334762000000000" Dst="0" />
+<file name="AttributeType.cs" server="demo2.eztrust.tw//isha/" local="134333174454300075" remote="134334762000000000" Dst="0" />
+<file name="CategoryType.cs" server="demo2.eztrust.tw//isha/" local="134333174454300075" remote="134334762000000000" Dst="0" />
+<file name="ChatStatus.cs" server="demo2.eztrust.tw//isha/" local="134333174454310071" remote="134334762000000000" Dst="0" />
+<file name="CompanyLevel.cs" server="demo2.eztrust.tw//isha/" local="134333174454320055" remote="134334762000000000" Dst="0" />
+<file name="CompanyType.cs" server="demo2.eztrust.tw//isha/" local="134333174454320055" remote="134334762000000000" Dst="0" />
+<file name="DataMode.cs" server="demo2.eztrust.tw//isha/" local="134333174454320055" remote="134334762000000000" Dst="0" />
+<file name="DocumentType.cs" server="demo2.eztrust.tw//isha/" local="134333174454330045" remote="134334762000000000" Dst="0" />
+<file name="EmailCampaignRecipientStatus.cs" server="demo2.eztrust.tw//isha/" local="134333174454330045" remote="134334762000000000" Dst="0" />
+<file name="EmailCampaignStatus.cs" server="demo2.eztrust.tw//isha/" local="134333174454330045" remote="134334762000000000" Dst="0" />
+<file name="EntityType.cs" server="demo2.eztrust.tw//isha/" local="134333174454340047" remote="134334762000000000" Dst="0" />
+<file name="FileStatus.cs" server="demo2.eztrust.tw//isha/" local="134333174454340047" remote="134334762000000000" Dst="0" />
+<file name="LengthUnit.cs" server="demo2.eztrust.tw//isha/" local="134333174454350034" remote="134334762000000000" Dst="0" />
+<file name="MemberPermission.cs" server="demo2.eztrust.tw//isha/" local="134333174454350034" remote="134334762000000000" Dst="0" />
+<file name="MemberPosition.cs" server="demo2.eztrust.tw//isha/" local="134333174454360028" remote="134334762000000000" Dst="0" />
+<file name="MemberRole.cs" server="demo2.eztrust.tw//isha/" local="134333174454360028" remote="134334762000000000" Dst="0" />
+<file name="PopupFrequency.cs" server="demo2.eztrust.tw//isha/" local="134333174454370027" remote="134334762000000000" Dst="0" />
+<file name="NotificationType.cs" server="demo2.eztrust.tw//isha/" local="134333174454370027" remote="134334762000000000" Dst="0" />
+<file name="MouStatus.cs" server="demo2.eztrust.tw//isha/" local="134333174454360028" remote="134334762000000000" Dst="0" />
+<file name="ScriptDirection.cs" server="demo2.eztrust.tw//isha/" local="134333174454380017" remote="134334762000000000" Dst="0" />
+<file name="Sex.cs" server="demo2.eztrust.tw//isha/" local="134333174454380017" remote="134334762000000000" Dst="0" />
+<file name="TagType.cs" server="demo2.eztrust.tw//isha/" local="134333174454390016" remote="134334762000000000" Dst="0" />
+<file name="UserPermission.cs" server="demo2.eztrust.tw//isha/" local="134333174454390016" remote="134334762000000000" Dst="0" />
+<file name="Status.cs" server="demo2.eztrust.tw//isha/" local="134333174454380017" remote="134334762000000000" Dst="0" />
+<file name="WeightUnit.cs" server="demo2.eztrust.tw//isha/" local="134333174454400008" remote="134334762000000000" Dst="0" />
+</dwsync>

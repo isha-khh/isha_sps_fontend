@@ -121,7 +121,7 @@
 
 <body class="home">
     <!--loading -->
-    <div class="loading " id="pageLoading">
+    <div class="loading" id="pageLoading">
         <div class="load-wrapper">
 
             <div class="loadIcon">
@@ -160,7 +160,7 @@
         <!--  導盲磚 -->
         <header class="header">
             <a href="#header-block" id="header-block" accesskey="U" title="上方功能區塊" class="visually-hidden-focusable">::: 上方功能區塊</a>
-            <nav class="nav" aria-label="主要導覽"></nav>
+            <nav class="nav" aria-label="主要導覽"><span class="d-none">主要導覽</span></nav>
         </header>
 
         <div class="banner_home" aria-label="輪播廣告看板"></div>
@@ -316,6 +316,10 @@
 
     <script>
         $(document).ready(function () {
+            //第一塊-關於
+            if ($(window).width() < 768) {
+                $('.home_about .more_x').insertAfter('.home_about .tit_right'); 
+            }
 
             //loading
             setTimeout(function () {

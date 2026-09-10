@@ -55,7 +55,6 @@
     <!-- bootstrap icon -->
     <link href="../../js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
 
-    <link href="../../js/datepicker-1.0.10/dist/datepicker.css" rel="stylesheet" />
 
     <!-- fancybox -->
     <link href="../../js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
@@ -125,7 +124,7 @@
         <!--  導盲磚 -->
         <header class="header">
             <a href="#header-block" id="header-block" accesskey="U" title="上方功能區塊" class="visually-hidden-focusable">::: 上方功能區塊</a>
-            <nav class="nav" aria-label="主要導覽"></nav>
+                        <nav class="nav" aria-label="主要導覽"><span class="d-none">主要導覽</span></nav>
         </header>
 
         <!--標題-->
@@ -133,7 +132,18 @@
 
             <div class="marquee-bg" aria-hidden="true">
                 <div class="marquee-track">
-                    <span>SMART SAFETY </span>
+                    <!-- 第一組 -->
+                    <div class="marquee-group">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                    <!-- 第二組-->
+                    <div class="marquee-group" aria-hidden="true">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
                 </div>
             </div>
 
@@ -267,7 +277,7 @@
                                         <img class="img-fluid d-block" src="../../images/home/arrow.svg" alt="">
                                     </div>
                                 </a>
-                                <a href="#" title="前往參考已發布的產業案例" class="contribute_more_2">
+                                <a href="#" title="前往參考已發布的產業案例" class="contribute_more_2 mt-md-0 mt-3">
                                     <i class="bi bi-file-text me-1"></i>
                                     <span>參考已發布的產業案例</span>
                                     <div class="con-arrow" aria-hidden="true">

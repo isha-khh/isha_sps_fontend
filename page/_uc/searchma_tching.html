@@ -823,7 +823,7 @@
     $(document).ready(function () {
 
         // ==========================================
-        // 1. 頂部搜尋列浮動面板控制
+        // 1. 頂部搜尋列浮動面板控制 (保持原樣或改用相對查找)
         // ==========================================
         function closeAllPanels() {
             $(".ma_sear_panel").slideUp(150);
@@ -832,13 +832,13 @@
                 .attr("aria-expanded", "false");
         }
 
-        // 點擊頂部按鈕：開啟/關閉對應浮動面板
         $(document).on("click", ".btn-filter-toggle", function (e) {
             e.preventDefault();
             e.stopPropagation();
 
             var $btn = $(this);
             var targetId = $btn.attr("aria-controls");
+            // 浮動面板若有跨層級，優先嘗試精確 ID，或同層父層尋找
             var $targetPanel = $("#" + targetId);
             var isExpanded = $btn.attr("aria-expanded") === "true";
 
@@ -852,17 +852,14 @@
             }
         });
 
-        // 阻止浮動面板內部的所有點擊事件冒泡到 document（避免點內部選項時面板被關閉）
         $(document).on("click", ".ma_sear_panel", function (e) {
             e.stopPropagation();
         });
 
-        // 點擊頁面空白處關閉浮動面板
         $(document).on("click", function () {
             closeAllPanels();
         });
 
-        // 按 ESC 鍵關閉面板
         $(document).on("keydown", function (e) {
             if (e.key === "Escape" || e.key === "Esc") {
                 var $activeBtn = $(".btn-filter-toggle.active");
@@ -875,15 +872,15 @@
 
 
         // ==========================================
-        // 2. 智慧技術：左側頁籤切換 (改用委派綁定，避免在浮動層內失效)
+        // 2. 智慧技術：左側頁籤切換 (改用索引 Index 查找，解決 ID 衝突)
         // ==========================================
         $(document).on("click", ".sm_techn_left .tab-btn", function (e) {
             e.preventDefault();
             e.stopPropagation();
 
             var $btn = $(this);
-            var targetPanelId = $btn.attr("aria-controls");
-            var $container = $btn.closest(".sm_techn"); // 鎖定當前組件範圍
+            var $container = $btn.closest(".sm_techn"); // 嚴格鎖定當前這組組件
+            var tabIndex = $btn.index(); // 取得當前點擊的是第幾個 Tab 按鈕
 
             // 切換左側按鈕高亮
             $container.find(".sm_techn_left .tab-btn")
@@ -893,9 +890,10 @@
             $btn.addClass("active")
                 .attr("aria-selected", "true");
 
-            // 切換右側面板顯示
-            $container.find(".sm_techn_right .tab-panel").addClass("d-none");
-            $container.find("#" + targetPanelId).removeClass("d-none");
+            // 切換右側面板：透過 eq(tabIndex) 鎖定同一組內的對應面板，避開重複 ID
+            var $panels = $container.find(".sm_techn_right .tab-panel");
+            $panels.addClass("d-none");
+            $panels.eq(tabIndex).removeClass("d-none");
 
             // 手機版自動平滑滾動置中
             if (window.innerWidth < 768) {
@@ -907,17 +905,16 @@
 
 
         // ==========================================
-        // 3. 右側次標題收合 / 展開 (強化狀態比對)
+        // 3. 右側次標題收合 / 展開 (改用鄰近元素 next 查找，解決 ID 衝突)
         // ==========================================
         $(document).on("click", ".btn-collapse", function (e) {
             e.preventDefault();
             e.stopPropagation();
 
             var $header = $(this);
-            var targetId = $header.attr("aria-controls");
-            var $body = $("#" + targetId);
+            // 不透過 $("#" + targetId)，直接抓同個 accordion-item 內的下一個折疊內容
+            var $body = $header.next(".collapse-body");
 
-            // 以元素當前實際是否可見為準，避免 aria-expanded 與 style 不同步
             if ($body.is(":visible")) {
                 $body.stop().slideUp(200, function () {
                     $header.attr("aria-expanded", "false");
@@ -930,4 +927,5 @@
         });
 
     });
+
 </script>

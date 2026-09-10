@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <dwsync>
-<file name=".babelrc" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name=".editorconfig" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name=".gitattributes" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name=".gitignore" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name=".travis.yml" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name="bower.json" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name="CHANGELOG.md" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name="CONTRIBUTING.md" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name="karma.conf.js" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name="LICENSE" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name="package.json" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name="postcss.config.js" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name="README.md" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
+<file name=".babelrc" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
+<file name=".editorconfig" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
+<file name=".gitattributes" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
+<file name=".gitignore" server="demo2.eztrust.tw//isha/" local="134333180888397585" remote="134334760800000000" Dst="0" />
+<file name=".travis.yml" server="demo2.eztrust.tw//isha/" local="134333180888417575" remote="134334760800000000" Dst="0" />
+<file name="bower.json" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
+<file name="CHANGELOG.md" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
+<file name="CONTRIBUTING.md" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
+<file name="karma.conf.js" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
+<file name="LICENSE" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
+<file name="package.json" server="demo2.eztrust.tw//isha/" local="134333180888612866" remote="134334760800000000" Dst="0" />
+<file name="postcss.config.js" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
+<file name="README.md" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
 <file name="package-lock.json" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
-<file name="webpack.config.js" server="demo2.eztrust.tw//isha/" local="131440332370000000" remote="134328990600000000" Dst="0" />
+<file name="webpack.config.js" server="demo2.eztrust.tw//isha/" local="134333180888682837" remote="134334760800000000" Dst="0" />
+<file name="yarn.lock" server="demo2.eztrust.tw//isha/" local="131830784540000000" remote="134334760800000000" Dst="0" />
 </dwsync>

@@ -1,0 +1,151 @@
+<!--本計畫補助BANNER-->
+
+
+<div class="banner_section">
+    <button type="button" class="custom-arrow custom-prev" aria-label="上一則影片">
+        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+    </button>
+
+    <button type="button" class="custom-arrow custom-next" aria-label="下一則影片">
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+    </button>
+
+    <div class="slider wid-banner-news">
+
+
+        <div class="item">
+            <a href="#" class="video-card" title="石化產業智慧轉型——從數據到決策(另開視窗)" target="_blank" rel="noopener noreferrer">
+                <div class="pic">
+                    <img class="img-fluid d-block" src="../../images/banner/b1.jpg" alt="" title="石化產業智慧轉型——從數據到決策"/>
+                </div>
+
+            </a>
+        </div><!--item 1組-->
+
+
+        <div class="item">
+            <a href="#" class="video-card" title="石化產業智慧轉型——從數據到決策(另開視窗)" target="_blank" rel="noopener noreferrer">
+                <div class="pic">
+                    <img class="img-fluid d-block" src="../../images/banner/b1.jpg" alt="" title="石化產業智慧轉型——從數據到決策"/>
+                </div>
+
+            </a>
+        </div><!--item 1組-->
+
+        <div class="item">
+            <a href="#" class="video-card" title="石化產業智慧轉型——從數據到決策(另開視窗)" target="_blank" rel="noopener noreferrer">
+                <div class="pic">
+                    <img class="img-fluid d-block" src="../../images/banner/b1.jpg" alt="" title="石化產業智慧轉型——從數據到決策"/>
+                </div>
+
+            </a>
+        </div><!--item 1組-->
+
+    </div><!-- /.wid-banner-news -->
+
+
+
+
+
+    <button type="button" class="slick-play-pause-btn" aria-label="暫停輪播" aria-pressed="false">
+        <i class="bi bi-pause-fill" aria-hidden="true"></i>
+        <span class="visually-hidden">暫停輪播</span>
+    </button>
+
+
+
+
+</div><!--home_video_section-->
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        const $section = $('.banner_section');
+        const $slider = $section.find('.wid-banner-news');
+        const $prev = $section.find('.custom-prev');
+        const $next = $section.find('.custom-next');
+        const $pauseBtn = $section.find('.slick-play-pause-btn');
+
+        // 1. 初始化 Slick
+        $slider.slick({
+            centerMode: true,
+            centerPadding: '180px',
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 3000,
+            infinite: true,
+            arrows: true,
+            dots: true,
+            prevArrow: $prev,
+            nextArrow: $next,
+            accessibility: true,
+            pauseOnHover: true,
+            pauseOnFocus: true,
+            responsive: [
+                {
+                    breakpoint: 992,
+                    settings: {
+
+                        centerPadding: '60px'
+                    }
+                },
+                {
+                    breakpoint: 768,
+                    settings: {
+
+                        centerPadding: '0'
+                    }
+                }
+            ]
+
+        });
+
+        // 2. 關鍵修正：將複製節點 (slick-cloned) 內的 a 與 button 移除 Tab 焦點
+        function fixSlickTabFocus() {
+            $slider.find('.slick-cloned a, .slick-cloned button').attr('tabindex', '-1').attr('aria-hidden', 'true');
+        }
+
+        // 剛載入與每次切換幻燈片後執行
+        fixSlickTabFocus();
+        $slider.on('afterChange', function () {
+            fixSlickTabFocus();
+        });
+
+        // 3. 鍵盤聚焦到當前卡片時，自動將輪播切換到該張（避免畫面不同步）
+        $slider.find('.slick-slide:not(.slick-cloned) a').on('focus', function () {
+            const slideIndex = $(this).closest('.slick-slide').data('slick-index');
+            $slider.slick('slickGoTo', slideIndex);
+        });
+
+        // 4. 暫停 / 播放按鈕切換
+        let isPaused = false;
+        $pauseBtn.on('click', function () {
+            if (!isPaused) {
+                $slider.slick('slickPause');
+                isPaused = true;
+                $(this).attr('aria-label', '播放輪播')
+                    .attr('aria-pressed', 'true')
+                    .find('i').removeClass('bi-pause-fill').addClass('bi-play-fill');
+                $(this).find('.visually-hidden').text('播放輪播');
+            } else {
+                $slider.slick('slickPlay');
+                isPaused = false;
+                $(this).attr('aria-label', '暫停輪播')
+                    .attr('aria-pressed', 'false')
+                    .find('i').removeClass('bi-play-fill').addClass('bi-pause-fill');
+                $(this).find('.visually-hidden').text('暫停輪播');
+            }
+        });
+    });
+</script>
+
+
+
+

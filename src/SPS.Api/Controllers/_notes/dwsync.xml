@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dwsync>
+<file name="AboutController.cs" server="demo2.eztrust.tw//isha/" local="134333174450800623" remote="134334762000000000" Dst="0" />
+<file name="AdminApplicationsController.cs" server="demo2.eztrust.tw//isha/" local="134333174450810620" remote="134334762000000000" Dst="0" />
+<file name="AdminAuthController.cs" server="demo2.eztrust.tw//isha/" local="134333174450820610" remote="134334762000000000" Dst="0" />
+<file name="AdminCompanyController.cs" server="demo2.eztrust.tw//isha/" local="134333174450820610" remote="134334762000000000" Dst="0" />
+<file name="AdminMemberChatController.cs" server="demo2.eztrust.tw//isha/" local="134333174450830603" remote="134334762000000000" Dst="0" />
+<file name="AdminPopupAnnouncementController.cs" server="demo2.eztrust.tw//isha/" local="134333174450830603" remote="134334762000000000" Dst="0" />
+<file name="AdminRolesController.cs" server="demo2.eztrust.tw//isha/" local="134333174450840597" remote="134334762000000000" Dst="0" />
+<file name="AdminUsersController.cs" server="demo2.eztrust.tw//isha/" local="134333174450840597" remote="134334762000000000" Dst="0" />
+<file name="AlbumController.cs" server="demo2.eztrust.tw//isha/" local="134333174450840597" remote="134334762000000000" Dst="0" />
+<file name="AnalyticsController.cs" server="demo2.eztrust.tw//isha/" local="134333174450850599" remote="134334762000000000" Dst="0" />
+<file name="ApplicationsController.cs" server="demo2.eztrust.tw//isha/" local="134333174450850599" remote="134334762000000000" Dst="0" />
+<file name="AttributeController.cs" server="demo2.eztrust.tw//isha/" local="134333174450860589" remote="134334762000000000" Dst="0" />
+<file name="AuthController.cs" server="demo2.eztrust.tw//isha/" local="134333174450870587" remote="134334762000000000" Dst="0" />
+<file name="BannerController.cs" server="demo2.eztrust.tw//isha/" local="134333174450870587" remote="134334762000000000" Dst="0" />
+<file name="CategoryController.cs" server="demo2.eztrust.tw//isha/" local="134333174450880574" remote="134334762000000000" Dst="0" />
+<file name="CaptchaController.cs" server="demo2.eztrust.tw//isha/" local="134333174450870587" remote="134334762000000000" Dst="0" />
+<file name="ChatController.cs" server="demo2.eztrust.tw//isha/" local="134333174450880574" remote="134334762000000000" Dst="0" />
+<file name="CompanyController.cs" server="demo2.eztrust.tw//isha/" local="134333174450890575" remote="134334762000000000" Dst="0" />
+<file name="DemandController.cs" server="demo2.eztrust.tw//isha/" local="134333174450890575" remote="134334762000000000" Dst="0" />
+<file name="ExportController.cs" server="demo2.eztrust.tw//isha/" local="134333174450900561" remote="134334762000000000" Dst="0" />
+<file name="FileManagementController.cs" server="demo2.eztrust.tw//isha/" local="134333174450910566" remote="134334762000000000" Dst="0" />
+<file name="LogController.cs" server="demo2.eztrust.tw//isha/" local="134333174450910566" remote="134334762000000000" Dst="0" />
+<file name="MailCampaignController.cs" server="demo2.eztrust.tw//isha/" local="134333174450920553" remote="134334762000000000" Dst="0" />
+<file name="MemberChatController.cs" server="demo2.eztrust.tw//isha/" local="134333174450930815" remote="134334762000000000" Dst="0" />
+<file name="MemberController.cs" server="demo2.eztrust.tw//isha/" local="134333174450931700" remote="134334762000000000" Dst="0" />
+<file name="MemberProfileController.cs" server="demo2.eztrust.tw//isha/" local="134333174450941695" remote="134334762000000000" Dst="0" />
+<file name="MouController.cs" server="demo2.eztrust.tw//isha/" local="134333174450941695" remote="134334762000000000" Dst="0" />
+<file name="NewsController.cs" server="demo2.eztrust.tw//isha/" local="134333174450951688" remote="134334762000000000" Dst="0" />
+<file name="NotificationController.cs" server="demo2.eztrust.tw//isha/" local="134333174450951688" remote="134334762000000000" Dst="0" />
+<file name="PopupAnnouncementController.cs" server="demo2.eztrust.tw//isha/" local="134333174450961683" remote="134334762000000000" Dst="0" />
+<file name="PictureController.cs" server="demo2.eztrust.tw//isha/" local="134333174450961683" remote="134334762000000000" Dst="0" />
+<file name="ProductController.cs" server="demo2.eztrust.tw//isha/" local="134333174450974696" remote="134334762000000000" Dst="0" />
+<file name="ProTrackController.cs" server="demo2.eztrust.tw//isha/" local="134333174450974696" remote="134334762000000000" Dst="0" />
+<file name="QuestionController.cs" server="demo2.eztrust.tw//isha/" local="134333174450984686" remote="134334762000000000" Dst="0" />
+<file name="RegulationsController.cs" server="demo2.eztrust.tw//isha/" local="134333174450984686" remote="134334762000000000" Dst="0" />
+<file name="SiteCounterController.cs" server="demo2.eztrust.tw//isha/" local="134333174450994678" remote="134334762000000000" Dst="0" />
+<file name="SiteStatisticsController.cs" server="demo2.eztrust.tw//isha/" local="134333174450994678" remote="134334762000000000" Dst="0" />
+<file name="SuccessCaseController.cs" server="demo2.eztrust.tw//isha/" local="134333174450994678" remote="134334762000000000" Dst="0" />
+<file name="SystemInfoController.cs" server="demo2.eztrust.tw//isha/" local="134333174451004680" remote="134334762000000000" Dst="0" />
+<file name="TagController.cs" server="demo2.eztrust.tw//isha/" local="134333174451014673" remote="134334762000000000" Dst="0" />
+<file name="SystemSettingController.cs" server="demo2.eztrust.tw//isha/" local="134333174451014673" remote="134334762000000000" Dst="0" />
+<file name="VideoController.cs" server="demo2.eztrust.tw//isha/" local="134333174451024662" remote="134334762000000000" Dst="0" />
+</dwsync>
