@@ -2,7 +2,7 @@ import { apiClient } from '@/lib/api-client';
 import type {
   LoginRequest,
   RegisterRequest,
-  TokenResponse,
+  LoginResponse,
   MemberInfo,
   SendVerificationCodeRequest,
   MemberChangePasswordRequest,
@@ -20,10 +20,15 @@ export const authApi = {
   /**
    * 會員登入
    * POST /api/Auth/login
+   *
+   * 回應是 `LoginResponse`（`{member, requirePasswordChange,
+   * passwordChangeReason}`），不是 `TokenResponse`——Token 只會設進
+   * HttpOnly Cookie，不會出現在這支回應的 body 裡，見 `types/auth.ts`
+   * 的 `LoginResponse` 說明。
    */
-  async login(request: LoginRequest): Promise<TokenResponse> {
+  async login(request: LoginRequest): Promise<LoginResponse> {
     try {
-      const response = await apiClient.post<TokenResponse>('/api/Auth/login', request);
+      const response = await apiClient.post<LoginResponse>('/api/Auth/login', request);
       return response.data;
     } catch (error) {
       console.error('Failed to login:', error);
@@ -34,10 +39,14 @@ export const authApi = {
   /**
    * 會員註冊
    * POST /api/Auth/register
+   *
+   * 回應直接是 `MemberInfo`（後端 `AuthController.Register` 用
+   * `CreatedAtAction(nameof(GetProfile), tokenResponse.Member)`，沒有包
+   * 一層），不是 `TokenResponse`，理由同 `login()`。
    */
-  async register(request: RegisterRequest): Promise<TokenResponse> {
+  async register(request: RegisterRequest): Promise<MemberInfo> {
     try {
-      const response = await apiClient.post<TokenResponse>('/api/Auth/register', request);
+      const response = await apiClient.post<MemberInfo>('/api/Auth/register', request);
       return response.data;
     } catch (error) {
       console.error('Failed to register:', error);
@@ -62,10 +71,13 @@ export const authApi = {
   /**
    * 刷新令牌
    * POST /api/Auth/refresh
+   *
+   * 回應直接是 `MemberInfo`（`AuthController.RefreshToken` 是
+   * `return Ok(tokenResponse.Member)`），理由同 `login()`。
    */
-  async refreshToken(): Promise<TokenResponse> {
+  async refreshToken(): Promise<MemberInfo> {
     try {
-      const response = await apiClient.post<TokenResponse>('/api/Auth/refresh');
+      const response = await apiClient.post<MemberInfo>('/api/Auth/refresh');
       return response.data;
     } catch (error) {
       console.error('Failed to refresh token:', error);
@@ -174,9 +186,9 @@ export const authApi = {
     return response.data;
   },
 
-  /** FIDO2 完成認證 */
-  async fido2AuthenticateComplete(request: Fido2AuthenticateCompleteRequest): Promise<TokenResponse> {
-    const response = await apiClient.post<TokenResponse>('/api/Auth/fido2/authenticate/complete', request);
+  /** FIDO2 完成認證——回應形狀跟 `login()` 一樣是 `LoginResponse`，理由同上 */
+  async fido2AuthenticateComplete(request: Fido2AuthenticateCompleteRequest): Promise<LoginResponse> {
+    const response = await apiClient.post<LoginResponse>('/api/Auth/fido2/authenticate/complete', request);
     return response.data;
   },
 

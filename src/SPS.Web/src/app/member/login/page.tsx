@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
-import PasswordField from "@/components/member/PasswordField";
+import MemberLoginForm from "@/components/member/MemberLoginForm";
 
 export const metadata: Metadata = {
   title: "會員登入",
@@ -11,11 +11,13 @@ export const metadata: Metadata = {
 /**
  * 會員登入，對應舊站 page/member/login.html。
  *
- * 舊站的「登入」是純靜態 `<a>`（連去一個不存在的 `member/index.html`
- * 會員中心首頁，目前整個平台都還沒有這個頁面/後端），這裡先保留原本
- * 純展示行為，沒有做成會送出的表單——跟目前其他會員頁一樣，都還是
- * 「畫面長什麼樣子」的靜態版本，等後端/會員中心範圍確認後再補真的
- * 表單驗證與登入邏輯。
+ * 2026-09-10 對接真後端 `POST /api/Auth/login`：表單本體（帳號／密碼／
+ * 驗證碼／送出）抽成 client component `MemberLoginForm`，這支檔案繼續
+ * 當 server component 只負責外層版型跟 metadata，說明見
+ * `MemberLoginForm.tsx`。
+ *
+ * 「還沒註冊會員帳號嗎？」／「查詢申請狀態」／「權益比較表」這半邊
+ * （`.melo_box_right`）維持原本純靜態連結，沒有要接的資料。
  *
  * 沒有側欄/右欄（`.side1`／`.side2` 都是 d-none），所以不給
  * `InnerPageShell` 的 `sidebar`／`aside`。
@@ -27,42 +29,7 @@ export default function MemberLoginPage() {
       <InnerPageShell title="會員登入" breadcrumb={[{ label: "會員登入" }]}>
         <div className="frame-small-box">
           <div className="melo_box d-flex">
-            <div className="melo_box_left">
-              <div className="form-group">
-                <label htmlFor="memberAccount" className="mb-2">
-                  會員帳號<span className="text-danger" aria-hidden="true">*</span>
-                </label>
-                <input type="text" id="memberAccount" className="form-control" placeholder="請輸入會員帳號" required aria-required="true" />
-              </div>
-
-              <div className="form-group g-input">
-                <div className="so_pass d-flex justify-content-between align-items-center mb-2">
-                  <label className="mb-0">
-                    會員密碼<span className="text-danger ms-1" aria-hidden="true">*</span>
-                  </label>
-                  <Link href="/member/forgot" title="前往忘記密碼頁面" className="blue">
-                    <i className="bi bi-question-circle-fill me-1" aria-hidden="true"></i>忘記密碼
-                  </Link>
-                </div>
-
-                <PasswordField />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="loginCaptcha" className="mb-2">
-                  驗證碼<span className="text-danger" aria-hidden="true">*</span>
-                </label>
-                <div className="msk_sdcv">
-                  <input type="text" id="loginCaptcha" className="form-control me-2" placeholder="請輸入驗證碼" required aria-required="true" />
-                  <img className="img-fluid d-block" src="/images/all/chksum.jpg" alt="驗證碼" />
-                </div>
-              </div>
-
-              <a href="#" title="登入" className="more_x" style={{ margin: "0 auto" }}>
-                <span>登入</span>
-                <i className="bi bi-arrow-right" aria-hidden="true"></i>
-              </a>
-            </div>
+            <MemberLoginForm />
 
             <div className="melo_box_right">
               <div className="melo_box_right_1">

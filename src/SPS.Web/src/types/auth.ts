@@ -48,6 +48,22 @@ export interface RefreshTokenResponse {
 }
 
 /**
+ * `POST /api/Auth/login`／`POST /api/Auth/fido2/authenticate/complete` 真正的
+ * 回應內容——後端 `AuthController.Login`／`Fido2AuthenticateComplete` 回的是
+ * `{ member, requirePasswordChange, passwordChangeReason }`，**不是**
+ * `TokenResponse`（那個形狀是內部 Service 層在用，`accessToken`／
+ * `refreshToken` 全部只會設進 HttpOnly Cookie，從來不會出現在回應
+ * body 裡）。原本 `lib/api/auth.ts` 把這兩支都宣告成回傳
+ * `TokenResponse`，型別上看起來有 `accessToken` 可以拿，實際上永遠是
+ * `undefined`——是還沒被用過就先寫好、沒對照後端實際回應驗證過的型別。
+ */
+export interface LoginResponse {
+  member: MemberInfo;
+  requirePasswordChange?: boolean;
+  passwordChangeReason?: string;
+}
+
+/**
  * 發送驗證碼請求
  */
 export interface SendVerificationCodeRequest {
