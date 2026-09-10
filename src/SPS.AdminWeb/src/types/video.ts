@@ -10,6 +10,8 @@ export interface VideoResponse {
   uri?: string;
   thumbnailUri?: string;
   linkUrl?: string;
+  /** 前台要不要用站內燈箱嵌入播放，關掉的話直接連到 linkUrl／uri 原始來源（開新分頁）——CSP 沒放行嵌入來源網域時可以個別關掉這支影片 */
+  playOnSite: boolean;
   published: boolean;
   startDate?: string;
   endDate?: string;
@@ -38,6 +40,7 @@ export interface CreateVideoRequest {
   uri: string;
   thumbnailUri?: string;
   linkUrl?: string;
+  playOnSite: boolean;
   published: boolean;
   startDate?: string;
   endDate?: string;
@@ -58,6 +61,7 @@ export interface UpdateVideoRequest {
   uri?: string;
   thumbnailUri?: string;
   linkUrl?: string;
+  playOnSite?: boolean;
   published?: boolean;
   startDate?: string;
   endDate?: string;

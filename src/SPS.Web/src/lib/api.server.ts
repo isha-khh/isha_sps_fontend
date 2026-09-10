@@ -7,6 +7,7 @@ import {
     PromotionCaseDetail,
     PagedResult,
     CompanyList,
+    VideoItem,
 } from "@/lib/types";
 import { apiClient } from "@/lib/api-client";
 import { resolveBackendAssetUrl } from "@/lib/content-list-utils";
@@ -266,5 +267,43 @@ async function tryBackendCompanies(): Promise<CompanyList[] | null> {
  */
 export async function fetchCompanies(): Promise<{ items: CompanyList[]; backendAvailable: boolean }> {
     const backendItems = await tryBackendCompanies();
+    return { items: backendItems ?? [], backendAvailable: backendItems !== null };
+}
+
+/**
+ * 嘗試從後端取得已發布的影片列表，回傳 null 表示後端「連不到／噴錯」
+ * （跟 `tryBackendNews` 同一套 null/空陣列語意）。對到真後端
+ * `VideoQueryParameters`（SPS.Application/DTOs/Video），`GET /api/Video`
+ * 回來的 `items` 元素形狀直接等於 `VideoItem`。
+ *
+ * 2026-09-10 第一次真的接這支 API：後端 controller／service／entity
+ * 都是完整的，但目前資料庫是 0 筆（後台 `SPS.AdminWeb` 還沒有影片
+ * 管理頁面可以新增資料，只有相簿管理），接上後畫面暫時會是空的，
+ * 等有測試資料或後台補上管理頁再實際看得到內容——這不是這支
+ * `fetchVideos()` 的問題，是資料源頭還沒有東西。
+ */
+async function tryBackendVideos(): Promise<VideoItem[] | null> {
+    try {
+        const response = await apiClient.get<PagedResult<VideoItem>>(
+            "/api/Video", { params: { page: 1, pageSize: 100, published: true } }
+        );
+        const published = response.data.items?.filter((v) => v.published) ?? [];
+        // uri／thumbnailUri 是相對於後端 API 的路徑，要轉成完整網址瀏覽器
+        // 才載得到，見 content-list-utils.ts 的 resolveBackendAssetUrl 註解
+        return published.map((v) => ({
+            ...v,
+            uri: resolveBackendAssetUrl(v.uri),
+            thumbnailUri: resolveBackendAssetUrl(v.thumbnailUri),
+        }));
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * 取得影片列表，`backendAvailable` 語意同 `fetchNews`。
+ */
+export async function fetchVideos(): Promise<{ items: VideoItem[]; backendAvailable: boolean }> {
+    const backendItems = await tryBackendVideos();
     return { items: backendItems ?? [], backendAvailable: backendItems !== null };
 }

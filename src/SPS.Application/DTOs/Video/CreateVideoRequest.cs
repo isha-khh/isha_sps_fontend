@@ -24,6 +24,9 @@ public class CreateVideoRequest
     [StringLength(500, ErrorMessage = "連結網址不能超過 500 個字元")]
     public string? LinkUrl { get; set; }
 
+    /// <summary>前台要不要用站內燈箱嵌入播放，關掉的話直接連到 <see cref="LinkUrl"/>／<see cref="Uri"/> 原始來源（開新分頁）</summary>
+    public bool PlayOnSite { get; set; } = true;
+
     public bool Published { get; set; }
 
     public DateTime? StartDate { get; set; }

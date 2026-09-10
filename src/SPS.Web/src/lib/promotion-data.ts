@@ -1,15 +1,31 @@
 import { wrapHtmlAsPuckContent } from "@/lib/puck-content";
-import type { PromotionCase, PromotionCaseDetail } from "@/lib/types";
+import type { PromotionCase, PromotionCaseDetail, VideoItem } from "@/lib/types";
 
-export type { PromotionCase, PromotionCaseDetail };
+export type { PromotionCase, PromotionCaseDetail, VideoItem };
 
-export interface PromotionVideo {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  date: string;
-  keywords?: string[];
+/**
+ * 分類清單（`albumTitle`）不是另外拉一支 API，直接從「畫面上有哪些
+ * 影片」反推——理由跟 `derivePromotionIndustries` 一樣。`Video.AlbumId`
+ * 可以是 null（沒掛任何相簿），沒有相簿的影片不計入分類清單。
+ */
+export function deriveVideoCategories(items: VideoItem[]): string[] {
+  const seen = new Set<string>();
+  for (const item of items) {
+    if (item.albumTitle) seen.add(item.albumTitle);
+  }
+  return Array.from(seen);
+}
+
+/**
+ * 「精選影音」（`/promotion/video` 跑馬燈下方那則、`HomeVideo` 輪播）
+ * 挑 `ordinal` 最小的那一支——`Video` entity 沒有「是否精選」的布林
+ * 欄位，`ordinal` 是唯一真的可以人工控制順序的欄位，挑最小值當作
+ * 「小編排在最前面」的意思，跟 SuccessCase／News 用 `viewCount` 排序
+ * 是不同機制（Video 沒有點閱數欄位，見下面 `PROMOTION_VIDEOS` 的
+ * 說明）。
+ */
+export function sortVideosByOrdinal(items: VideoItem[]): VideoItem[] {
+  return items.slice().sort((a, b) => a.ordinal - b.ordinal);
 }
 
 /**
@@ -97,34 +113,57 @@ export const INDUSTRY_CASES: PromotionCaseDetail[] = [
 ];
 
 /**
- * 影音專區假資料——`SuccessCase` 沒有「影片」概念，真後端目前沒有
- * 對應的內容類型可以接（見 docs/改版規劃.md），`/promotion/video`
- * 這次沒有跟著改版，維持原本的靜態假資料。
+ * 影音專區假資料——2026-09-10 對接真後端 `GET /api/Video`（見
+ * `api.server.ts` 的 `fetchVideos`），後端 controller／service／entity
+ * 都是完整的，只是目前資料庫是 0 筆、後台也還沒有影片管理頁面可以
+ * 新增資料（見 docs/改版規劃.md），所以這份假資料還是會用到——不是
+ * 「沒接後端」，是「接了但源頭沒有真資料前，這份假資料繼續當退回
+ * 內容」。
+ *
+ * 形狀直接對到真後端的 `VideoItem`（見 lib/types.ts），跟 News/
+ * Promotion 假資料同一套做法：不管資料是真後端來的還是這份假資料，
+ * 呼叫端（`/promotion/video`、`HomeVideo`）都是同一套處理邏輯，不用
+ * 分兩套。
+ *
+ * 真後端 `Video` entity 沒有「簡介」「關鍵字標籤」這兩個欄位（跟
+ * News/SuccessCase 不一樣），原本假資料每支影片都有一段介紹文字跟
+ * 標籤，改版後拿掉了——`FeaturedVideoCard` 的說明文字、卡片上的
+ * 關鍵字標籤，真資料時都會是空的，這是真後端目前的欄位限制，不是
+ * 忘記接。
  */
-export const PROMOTION_VIDEOS: PromotionVideo[] = [
+export const PROMOTION_VIDEOS: VideoItem[] = [
   {
-    id: "1",
-    title: "ESG 永續發展實務：石化廠的碳盤查經驗分享",
-    description: "本集探討 AI 技術如何應用於工廠安全管理，透過即時監測、風險預警與數據分析，有效提升作業安全與營運效率，打造更智能、更安全的工作環境。",
-    thumbnail: "/images/home/ser_bg2.jpg",
-    date: "2026-04-15",
-    keywords: ["產業AI", "技術文件"],
+    id: 1,
+    name: "ESG 永續發展實務：石化廠的碳盤查經驗分享",
+    thumbnailUri: "/images/home/ser_bg2.jpg",
+    linkUrl: "#",
+    playOnSite: true,
+    published: true,
+    ordinal: 1,
+    albumTitle: "分類1",
+    createdTime: "2026-04-15",
   },
   {
-    id: "2",
-    title: "AIoT 工安監控應用：降低職災風險的關鍵",
-    description: "整合物聯網與雲端技術，打造安全、穩定且可擴充的系統平台，協助企業落實智慧化管理。",
-    thumbnail: "/images/home/ser_bg2.jpg",
-    date: "2025-01-19",
-    keywords: ["AIoT", "工安監控"],
+    id: 2,
+    name: "AIoT 工安監控應用：降低職災風險的關鍵",
+    thumbnailUri: "/images/home/ser_bg2.jpg",
+    linkUrl: "#",
+    playOnSite: true,
+    published: true,
+    ordinal: 2,
+    albumTitle: "分類2",
+    createdTime: "2025-01-19",
   },
   {
-    id: "3",
-    title: "全方位人員定位追蹤應用",
-    description: "透過室內定位技術即時掌握人員位置，強化緊急應變效率與人員安全管理。",
-    thumbnail: "/images/home/ser_bg2.jpg",
-    date: "2025-01-19",
-    keywords: ["智慧監控"],
+    id: 3,
+    name: "全方位人員定位追蹤應用",
+    thumbnailUri: "/images/home/ser_bg2.jpg",
+    linkUrl: "#",
+    playOnSite: true,
+    published: true,
+    ordinal: 3,
+    albumTitle: "分類1",
+    createdTime: "2025-01-19",
   },
 ];
 

@@ -78,6 +78,7 @@ const allMenuItems: MenuItemWithPermission[] = [
       { id: 'popup-announcements', label: '彈窗公告', url: '/content/popup-announcements', permissions: [Permission.ManageNews] },
       { id: 'files', label: '系統檔案', url: '/content/files', permissions: [Permission.ManageSettings] },
       { id: 'albums', label: '相簿管理', url: '/content/albums', permissions: [Permission.ManageNews] },
+      { id: 'videos', label: '影音管理', url: '/content/videos', permissions: [Permission.ManageNews] },
     ],
   },
   {

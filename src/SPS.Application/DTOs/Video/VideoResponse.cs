@@ -11,6 +11,7 @@ public class VideoResponse
     public string? Uri { get; set; }
     public string? ThumbnailUri { get; set; }
     public string? LinkUrl { get; set; }
+    public bool PlayOnSite { get; set; }
     public bool Published { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }

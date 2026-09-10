@@ -31,7 +31,10 @@ public class VideoService : IVideoService
                 Name = v.Name,
                 Uri = v.Uri,
                 ThumbnailUri = v.ThumbnailUri,
+                LinkUrl = v.LinkUrl,
+                PlayOnSite = v.PlayOnSite,
                 Published = v.Published,
+                Ordinal = v.Ordinal,
                 AlbumId = v.AlbumId,
                 AlbumTitle = v.Album?.Title,
                 CreatedTime = v.CreatedTime
@@ -64,6 +67,7 @@ public class VideoService : IVideoService
                 Uri = request.Uri,
                 ThumbnailUri = request.ThumbnailUri,
                 LinkUrl = request.LinkUrl,
+                PlayOnSite = request.PlayOnSite,
                 Published = request.Published,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
@@ -102,6 +106,7 @@ public class VideoService : IVideoService
         if (!string.IsNullOrEmpty(request.Uri)) video.Uri = request.Uri;
         if (request.ThumbnailUri != null) video.ThumbnailUri = request.ThumbnailUri;
         if (request.LinkUrl != null) video.LinkUrl = request.LinkUrl;
+        if (request.PlayOnSite.HasValue) video.PlayOnSite = request.PlayOnSite.Value;
         if (request.Published.HasValue) video.Published = request.Published.Value;
         if (request.StartDate.HasValue) video.StartDate = request.StartDate;
         if (request.EndDate.HasValue) video.EndDate = request.EndDate;
@@ -149,6 +154,7 @@ public class VideoService : IVideoService
             Uri = video.Uri,
             ThumbnailUri = video.ThumbnailUri,
             LinkUrl = video.LinkUrl,
+            PlayOnSite = video.PlayOnSite,
             Published = video.Published,
             StartDate = video.StartDate,
             EndDate = video.EndDate,
