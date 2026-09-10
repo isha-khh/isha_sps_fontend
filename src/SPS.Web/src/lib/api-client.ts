@@ -49,11 +49,24 @@ function addBasePathToResponseData(data: unknown): unknown {
   return data;
 }
 
-// SSR 時使用完整 URL（因為 rewrites 只對客戶端有效）
-// 客戶端使用 basePath（走 Next.js rewrites）
+// SSR 時使用完整 URL（`API_URL`，server-only，正式環境可能是瀏覽器連不到
+// 的內部位址，例如 Docker 內部 hostname，只給 Next.js 伺服器自己打後端用）。
+//
+// 客戶端原本這裡是直接用 `normalizedBasePath`（空字串或站台 basePath），
+// 假設正式環境會有一層外部 reverse proxy 把同源的 `/api/*` 轉給後端——
+// 但本機開發沒有這層 proxy、`next.config.ts` 也沒有設定對應的
+// `rewrites()`，導致瀏覽器端所有 API 呼叫（例如會員登入）都會打到
+// Next.js 伺服器自己身上（沒有這個路由，404），不是打到後端。
+//
+// 優先用 `NEXT_PUBLIC_API_BASE`——跟 `content-list-utils.ts` 的
+// `resolveBackendAssetUrl()` 是同一顆環境變數、同一個理由：這是「瀏覽器
+// 連得到的後端公開位址」，`.env.local` 本機開發已經有設
+// （`http://localhost:5055`）。正式環境如果真的是靠外部 proxy 做成同源，
+// 不設這個變數，就會照原本的行為退回 `normalizedBasePath`。
+const clientBaseUrl = process.env.NEXT_PUBLIC_API_BASE?.trim().replace(/\/+$/, '');
 const API_BASE_URL = isServer
   ? (process.env.API_URL || 'http://backend:8080')
-  : normalizedBasePath;
+  : (clientBaseUrl || normalizedBasePath);
 
 let csrfToken: string | null = null;
 
@@ -141,11 +154,6 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 排除登入和刷新 API 本身，避免無限循環
-    // const isAuthEndpoint = originalRequest.url?.includes('/api/admin/AdminAuth/login') ||
-    //                       originalRequest.url?.includes('/api/admin/AdminAuth/refresh') ||
-    //                       originalRequest.url?.includes('/api/admin/AdminAuth/logout');
-
     // 如果不是 401 錯誤，直接返回
     if (error.response?.status !== 401) {
       return Promise.reject(error);
@@ -175,8 +183,13 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      // 嘗試刷新 token
-      await apiClient.post('/api/admin/AdminAuth/refresh');
+      // 嘗試刷新 token——這支檔案原本整段是直接照抄 SPS.AdminWeb 的
+      // 版本，401 refresh/logout 打的是**管理後台**的
+      // `/api/admin/AdminAuth/*`，不是這裡（公開網站，會員登入）真正
+      // 在用的 `/api/Auth/*`（見 `lib/api/auth.ts`／後端
+      // `AuthController`）。沒改過來的話，會員 Token 過期時只會一直打
+      // 錯的端點、收到 404/401，永遠刷新失敗，直接被導去登出流程。
+      await apiClient.post('/api/Auth/refresh');
 
       // 刷新成功，處理隊列中的請求
       processQueue();
@@ -188,7 +201,7 @@ apiClient.interceptors.response.use(
       processQueue(refreshError);
 
       // 調用登出 API 以清除 cookie
-      await apiClient.post('/api/admin/AdminAuth/logout').catch(() => {});
+      await apiClient.post('/api/Auth/logout').catch(() => {});
 
       // [CRITICAL] 清除 Zustand 持久化的 auth 狀態
       try {
@@ -198,8 +211,9 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('auth-storage');
       }
 
-      // 重定向到登入頁
-      window.location.href = '/login';
+      // 重定向到登入頁——公開網站的登入頁是 `/member/login`，不是
+      // 管理後台那個不存在於這個網站的 `/login`。
+      window.location.href = '/member/login';
 
       return Promise.reject(refreshError);
     } finally {

@@ -22,6 +22,8 @@ public class UpdateVideoRequest
     [StringLength(500, ErrorMessage = "連結網址不能超過 500 個字元")]
     public string? LinkUrl { get; set; }
 
+    public bool? PlayOnSite { get; set; }
+
     public bool? Published { get; set; }
 
     public DateTime? StartDate { get; set; }

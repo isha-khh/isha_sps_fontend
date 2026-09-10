@@ -49,6 +49,7 @@ import { PopupAnnouncementFormPage } from '@/pages/content/PopupAnnouncementForm
 
 import { FilesPage } from '@/pages/content/FilesPage';
 import { AlbumsPage } from '@/pages/content/AlbumsPage';
+import { VideosPage } from '@/pages/content/VideosPage';
 
 // Success Cases
 import { SuccessCasesListPage } from '@/pages/success-cases/SuccessCasesListPage';
@@ -200,6 +201,7 @@ function App() {
           <Route path="content/banners" element={<BannersPage />} />
           <Route path="content/files" element={<FilesPage />} />
           <Route path="content/albums" element={<AlbumsPage />} />
+          <Route path="content/videos" element={<VideosPage />} />
           <Route path="content/popup-announcements" element={<PopupAnnouncementsPage />} />
           <Route path="content/popup-announcements/:id/edit" element={<PopupAnnouncementFormPage />} />
 

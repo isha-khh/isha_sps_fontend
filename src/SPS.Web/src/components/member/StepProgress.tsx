@@ -9,10 +9,15 @@ const STEPS = ["使用條款", "帳號設定", "填寫資料", "完成註冊"];
  * 舊站規則是「目前步驟(含)之前」都是 `.active`（例如 p01.html 的
  * 「帳號設定」是第 2 步，這裡跟前一步「使用條款」都有 `.active`），
  * 不是只有目前這步才 active，照抄這個行為。
+ *
+ * `mb-5`：2026-09-10 使用者反映這個步驟列跟底下表單標題（例如
+ * Step2「請選擇會員類型」）貼太近——`.step-progress` 舊站 CSS本來就
+ * 沒有下邊距，四個步驟頁面都共用這支元件，這裡統一加大，四頁一起
+ * 受益，不用每頁各自加。
  */
 export default function StepProgress({ activeStep }: { activeStep: 1 | 2 | 3 | 4 }) {
   return (
-    <div className="step-progress">
+    <div className="step-progress mb-5">
       <ul className="nav nav-pills step step-round">
         {STEPS.map((label, index) => {
           const step = index + 1;

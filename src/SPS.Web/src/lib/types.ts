@@ -80,6 +80,42 @@ export type PromotionCaseDetail = PromotionCase & {
     content: string;
 };
 
+/**
+ * 對到真後端 `VideoListItemResponse`（SPS.Application/DTOs/Video）——
+ * `/promotion/video`（影音專區）、首頁 `HomeVideo` 用的內容類型。
+ *
+ * 跟 News/SuccessCase 不一樣的地方：
+ * - 沒有 `viewCount`——`Video` entity 沒有點閱數欄位，「熱門影片」
+ *   沒辦法像 News/Promotion 那樣照真實點閱率排序，只能退而求其次用
+ *   `ordinal`／`createdTime`（見 promotion-data.ts 的說明）。
+ * - 「分類」是 `albumTitle`（掛在哪個相簿），跟 SuccessCase.industry
+ *   一樣是自由文字，不是 Category 表的數字外鍵。
+ * - `ordinal` 是真的排序欄位（`linkUrl`／`ordinal` 原本只有詳情 API
+ *   有，2026-09-10 已請後端一起補進列表 API），首頁/列表頁的
+ *   「精選影音」就是挑 `ordinal` 最小的那一支。
+ * - 沒有獨立的影片詳情頁——卡片點下去是 `linkUrl`（外部影片連結，
+ *   例如 YouTube），`target="_blank"` 開新分頁，不是站內 `/video/[id]`。
+ */
+export type VideoItem = {
+    id: number;
+    name?: string;
+    uri?: string;
+    thumbnailUri?: string;
+    linkUrl?: string;
+    // 後台可以針對每支影片個別決定：`true` 在站內用燈箱嵌入播放
+    // （YouTube／Vimeo 等），`false` 直接連到 `linkUrl`／`uri` 原始
+    // 來源（開新分頁）——2026-09-10 客戶顧慮正式環境的 CSP
+    // （`frame-src`）不一定放行每個外部影片來源網域，加這個欄位讓
+    // 後台可以逐支關掉嵌入播放，不用改前端程式碼、也不影響其他支
+    // 影片。
+    playOnSite: boolean;
+    published: boolean;
+    ordinal: number;
+    albumId?: number;
+    albumTitle?: string;
+    createdTime: string;
+};
+
 export type FaqItem = {
     id: string;
     href: string;

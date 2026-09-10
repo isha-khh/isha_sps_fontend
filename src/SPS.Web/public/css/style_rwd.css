@@ -513,8 +513,13 @@
     
     }
     .wid-video .video-card h3 {
-        font-size: 1rem;
-   
+        font-size: 1.25rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: unset;
     }
     .wid-video .video-card .pic:before {
         width: 58px;
@@ -728,6 +733,35 @@
     .faq .main .content,
     .faq .main .side1 {
         width: 100%;
+    }
+    .video .sele_video > .video-card .pic:before {
+        width: 78px;
+        height: 72px;
+        background-size:cover;
+
+    }
+    .video .sele_video > .video-card .tit .vdo_Watch   .more_x {
+        width: 100%;
+        margin-top:20px;
+    }
+    .video .sele_video > .video-card .tit .vdo_Watch {
+        flex-wrap: wrap;
+    }
+
+    .video .sele_video > .video-card .tit {
+        padding-left: 0;
+        margin-top: 20px;
+    }
+    .video .sele_video > .video-card .pic {
+        width: 100%;
+
+    }
+    .video .sele_video > .video-card {
+        padding: 30px;
+        flex-wrap:wrap;
+    }
+    .video .item_video .item_box .ul-key {
+        margin-top: 20px;
     }
     body:not(.home) .s_round_3 {
         width: 25%;

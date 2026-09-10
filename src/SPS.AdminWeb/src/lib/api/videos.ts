@@ -10,11 +10,16 @@ export const videosApi = {
   /**
    * 分頁查詢影片列表
    * GET /api/Video
+   *
+   * 修正：後端 `VideoQueryParameters`（SPS.Application/DTOs/Video）實際
+   * 欄位是 `page`，不是 `pageIndex`——原本這個參數名對不上，不會報錯，
+   * 只是永遠回傳預設的第一頁（後端對不到參數名就用預設值 `Page = 1`），
+   * 跟先前在前台 `fetchFaq()` 抓到的 `pageIndex`/`page` 是同一種坑。
    */
-  async getPaged(pageIndex = 1, pageSize = 20): Promise<VideoResponse[]> {
+  async getPaged(page = 1, pageSize = 20): Promise<VideoResponse[]> {
     try {
       const response = await apiClient.get<PagedResponse<VideoResponse>>('/api/Video', {
-        params: { pageIndex, pageSize },
+        params: { page, pageSize },
       });
       return response.data.items ?? [];
     } catch (error) {

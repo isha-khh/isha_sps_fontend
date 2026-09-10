@@ -13,6 +13,13 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8080"],
       "port": 8080
+    },
+    {
+      "name": "sps.adminweb",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "src/SPS.AdminWeb"],
+      "port": 5173,
+      "autoPort": true
     }
   ]
 }
