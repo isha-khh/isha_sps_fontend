@@ -101,7 +101,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {LEGACY_SITE_STYLESHEETS.map((href) => (
           <link key={href} rel="stylesheet" href={href} precedence="legacy-site" />
         ))}
-        <SpeedInsights/>
         <BootstrapModalRouteCleanup />
 
         {children}
@@ -133,6 +132,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         */}
         <Script src="/js/bsnav-master/dist/bsnav.min.js" strategy="afterInteractive" />
         <Script src="/js/coreScript.js" strategy="afterInteractive" />
+        <SpeedInsights />
       </body>
     </html>
   );
