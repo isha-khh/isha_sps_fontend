@@ -219,25 +219,102 @@ export interface MemberTypeOption {
   icon: string;
 }
 
-export const MEMBER_TYPE_OPTIONS: MemberTypeOption[] = [
-  { id: "type_personal", value: "personal", title: "個人會員", desc: "個人專業人士", icon: "/images/member/menb_type_icon01.svg" },
-  { id: "type_personal_demand", value: "personal_demand", title: "個人會員升級－", titleAccent: "需求端", icon: "/images/member/menb_type_icon02.svg" },
-  { id: "type_personal_supply", value: "personal_supply", title: "個人會員升級－", titleAccent: "供給端", icon: "/images/member/menb_type_icon02.svg" },
-  { id: "type_company_demand", value: "company_demand", title: "企業會員－需求端", desc: "尋找技術、服務之企業", icon: "/images/member/menb_type_icon04.svg" },
+/**
+ * 2026-09-10 對照官方文件《會員申請須知》（民國115年5月版）重新設計：
+ * 原本這裡是 6 張扁平單選卡（含「個人會員升級－需求端／供給端」），
+ * 但官方文件「(四)個人會員升級企業會員」講得很清楚——「升級」的終點
+ * 是**企業會員**，不是留在個人身分掛一個需求/供給角色；「個人會員
+ * 升級－需求端／供給端」這兩個舊選項其實是誤判出來的中間狀態，會員
+ * 終態實際上只有 4 種（個人會員／企業-需求端／企業-供給端(卓越)／
+ * 企業-供給端(新興)），不是 6 種。
+ *
+ * 「升級成企業會員」這個動作本來就該是**已登入的個人會員**在會員
+ * 中心「權益升級」做的事（見 MemberUpgradePage 這個之後要蓋的頁面），
+ * 不該混在這支「還沒登入、全新申請」的註冊精靈裡——所以這裡把選項
+ * 從 6 個扁平卡片，改成一個分支流程：
+ *
+ * 1. 個人會員 / 企業會員（`APPLICANT_TYPE_OPTIONS`）
+ * 2. 選了企業會員 → 需求端 / 供給端（`COMPANY_ROLE_OPTIONS`）
+ * 3. 選了供給端 → 3 題問答自動導向卓越/新興（`SUPPLIER_TIER_QUESTIONS`），
+ *    不是讓使用者自己選「我要當卓越還是新興」——卓越/新興是審查資格
+ *    的結果，不是使用者的自我認定。
+ *
+ * 這個分支邏輯的實際 UI 在 `MemberTypeSelector.tsx`（client component，
+ * 因為要依選擇動態顯示/隱藏後面的問題），不是像原本這樣純 CSS 單選卡。
+ */
+export const APPLICANT_TYPE_OPTIONS: MemberTypeOption[] = [
+  { id: "type_individual", value: "individual", title: "個人會員", desc: "個人專業人士", icon: "/images/member/menb_type_icon01.svg" },
+  { id: "type_company", value: "company", title: "企業會員", desc: "尋找技術服務，或提供技術服務之企業", icon: "/images/member/menb_type_icon04.svg" },
+];
+
+/** 選了「企業會員」之後的需求/供給端選擇 */
+export const COMPANY_ROLE_OPTIONS: MemberTypeOption[] = [
+  { id: "type_role_demand", value: "demand", title: "需求端", desc: "尋找技術、服務之企業", icon: "/images/member/menb_type_icon04.svg" },
+  { id: "type_role_supply", value: "supply", title: "供給端", desc: "提供技術、服務之企業", icon: "/images/member/menb_type_icon05.svg" },
+];
+
+/**
+ * 供給端卓越/新興的判斷問題，對應官方文件「卓越會員申請資格：具備
+ * 技術服務能量登錄、雲市集或數位服務機構登錄資格之業者」——三選一
+ * （OR，不用三個都有）。這三題也對到既有後端 `DocumentType`：
+ * `TechnicalCapability`／`CloudMarketplace`／`DigitalServiceCapability`，
+ * 答「是」的那幾題，Step3 就要對應顯示上傳該項證明文件的欄位；三題
+ * 都答「否」則進入新興會員（改上傳「登錄申請書」`DocumentType.
+ * Application`，並會經過至少 5 位專家審查，見附件三評分規則）。
+ */
+export interface SupplierTierQuestion {
+  id: "technicalCapability" | "cloudMarketplace" | "digitalServiceCapability";
+  label: string;
+  /** 2026-09-10 使用者提供，讓還不確定自己有沒有這項資格的申請人可以先去查詢/申請 */
+  noteLabel: string;
+  noteUrl: string;
+}
+
+export const SUPPLIER_TIER_QUESTIONS: SupplierTierQuestion[] = [
   {
-    id: "type_company_super",
-    value: "company_supply_super",
+    id: "technicalCapability",
+    label: "是否具備技術服務能量登錄並且拿到資格？",
+    noteLabel: "查詢資格",
+    noteUrl: "https://assist.nat.gov.tw/wSite/sp?xdUrl=/wSite/sp/tech/enterpriseSearchList.jsp&mp=2",
+  },
+  {
+    id: "cloudMarketplace",
+    label: "是否在雲市集上架產品？",
+    noteLabel: "雲市集",
+    noteUrl: "https://tcloud.gov.tw/",
+  },
+  {
+    id: "digitalServiceCapability",
+    label: "是否具備數位服務機構登錄並且拿到資格？",
+    noteLabel: "數位服務能量登錄",
+    noteUrl: "https://moda.gov.tw/ADI/services/apply-serivces/energy/13088",
+  },
+];
+
+/**
+ * 3 題問答送出後的判定結果卡——2026-09-10 使用者要求照原本 p01.html
+ * 卡片的視覺（`.t_s1` 紫色 ribbon 徽章＋teal 圓形圖示＋標題/說明）
+ * 呈現，不要只顯示一行純文字結果，圖示直接沿用原本 6 選項卡片時期
+ * 就有的 `menb_type_icon05.svg`（星星，卓越）／`menb_type_icon06.svg`
+ * （箭頭，新興），這兩個檔案本來就在 `public/images/member/`，不用
+ * 重畫。`MemberTypeSelector.tsx` 送出後用 `MemberTypeCard`（唯讀、
+ * 恆選中）直接渲染這裡對應的選項當結果卡。
+ */
+export const SUPPLIER_TIER_RESULT_OPTIONS: Record<"excellent" | "emerging", MemberTypeOption> = {
+  excellent: {
+    id: "tier_result_excellent",
+    value: "excellent",
     title: "企業會員－供給端",
     desc: "具成熟技術與服務能力之供給端",
     badge: "卓越會員",
     icon: "/images/member/menb_type_icon05.svg",
   },
-  {
-    id: "type_company_emerging",
-    value: "company_supply_emerging",
+  emerging: {
+    id: "tier_result_emerging",
+    value: "emerging",
     title: "企業會員－供給端",
     desc: "具創新技術與成長潛力之供給端",
     badge: "新興會員",
     icon: "/images/member/menb_type_icon06.svg",
   },
-];
+};

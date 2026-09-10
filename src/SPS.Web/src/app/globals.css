@@ -170,3 +170,97 @@
 .marquee-track {
   animation: none !important;
 }
+
+/*
+ * 供給端「卓越/新興」3 題問答（MemberTypeSelector.tsx，2026-09-10
+ * 新增）——這是官方《會員申請須知》才有的全新流程，舊站沒有對應
+ * 畫面可以照抄。原本直接借用 `.btn-theme`／`.btn-outline-dark`，結果
+ * 這兩個 class 在舊站 CSS 裡**只在 `.card-footer` 底下才有樣式**
+ * （見 style.css `.card-footer a.btn-theme` 那幾條規則），在
+ * `.card-footer` 之外套用完全沒有效果，等於是沒套到樣式的裸
+ * `<button>`。這裡另外定義專屬 class，顏色/圓角/漸層照抄
+ * `.card-footer` 那組既有的視覺（藍色漸層＝選中/主要動作，藍色外框
+ * ＝未選中/次要動作），維持風格一致，但不去動、也不依賴原本那組
+ * 只在 `.card-footer` 生效的規則。
+ */
+.tier-answer-btn {
+  border-radius: 50px;
+  padding: 6px 18px;
+  border: 1px solid #0052cc;
+  background: transparent;
+  color: #0052cc;
+  font-size: 0.875rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.tier-answer-btn.active {
+  border-color: transparent;
+  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+  color: #fff;
+}
+
+.tier-submit-btn {
+  border-radius: 50px;
+  border: none;
+  padding: 10px 32px;
+  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.tier-submit-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 102, 255, 0.38);
+  opacity: 0.8;
+}
+
+.tier-submit-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.tier-reset-btn {
+  border-radius: 50px;
+  padding: 10px 24px;
+  border: 1px solid #0052cc;
+  background: transparent;
+  color: #0052cc;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.tier-reset-btn:hover {
+  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+  color: #fff;
+  border-color: transparent;
+  transform: translateY(-3px);
+}
+
+/*
+ * 3 題問答的外層容器——一開始借用 `.peer_box`（p01.html 那個「已充分
+ * 知悉告知事項」勾選框用的既有 class），結果 `.peer_box` 本身帶了
+ * `background: linear-gradient(90deg, #009688 0%, #009688 100%)`
+ * 純色綠底＋白字（那是給 Step1 同意書那段深色背景用的），套在這裡
+ * 變成一大塊突兀的綠色。2026-09-10 使用者要求拿掉底色只留外框，
+ * 改成跟 `.menb_type_card .card_inner`（白底＋淺灰外框）同一種
+ * 素色卡片視覺，不要再沿用 `.peer_box` 的顏色。
+ */
+.tier-question-panel {
+  padding: 24px;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  background-color: #ffffff;
+}
+
+/*
+ * 2026-09-10「上傳文件」新增的「技術服務能量登錄／雲市集／數位服務
+ * 機構登錄證明文件（擇一）」欄位標題比同一列的「公司/工廠登記證明
+ * 文件」長很多，換行變成 2 行——`DocumentUploadField.tsx` 的
+ * `<label>` 沒有預留固定高度，兩欄用 block flow 排版，標題行數不同
+ * 就會把比較短那欄的虛線上傳框往上擠，兩欄的上傳框對不齊（使用者
+ * 回報「沒有對齊」）。幫 `.dow-document` 底下的 label 統一保留兩行
+ * 的高度，不管實際文字是 1 行還是 2 行，上傳框都從同一個高度起排。
+ */
+.dow-document > .tit_dow > label {
+  display: block;
+  min-height: 3rem;
+}

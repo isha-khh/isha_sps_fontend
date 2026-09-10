@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import StepProgress from "@/components/member/StepProgress";
-import MemberTypeCard from "@/components/member/MemberTypeCard";
-import CompareTable from "@/components/member/CompareTable";
-import { MEMBER_TYPE_OPTIONS } from "@/lib/member-registration-data";
+import MemberTypeSelector from "@/components/member/MemberTypeSelector";
 
 export const metadata: Metadata = {
   title: "會員註冊 - 帳號設定",
@@ -18,6 +15,11 @@ export const metadata: Metadata = {
  * 實際內容是「請選擇會員類型」＋內嵌的會員權益比較表——這是舊站本身
  * 的命名跟內容對不太上（標題步驟名稱可能是預留給之後的帳號欄位，
  * 目前這步只做類型選擇），照舊站原樣呈現，不自己改標題。
+ *
+ * 2026-09-10 對照官方《會員申請須知》重新設計：原本這裡是 6 張扁平
+ * 單選卡（含兩張「個人會員升級」），改成分支選擇流程，說明見
+ * `MemberTypeSelector.tsx`——「個人會員升級成企業會員」這個動作搬去
+ * 會員中心「權益升級」（已登入才會用到，見 docs/改版規劃.md）。
  */
 export default function MemberRegisterAccountPage() {
   return (
@@ -26,27 +28,7 @@ export default function MemberRegisterAccountPage() {
       <InnerPageShell title="帳號設定" breadcrumb={[{ label: "會員註冊", href: "/member/register" }, { label: "帳號設定" }]}>
         <div className="frame-small-box">
           <StepProgress activeStep={2} />
-
-          <h3 className="mb-4 me_sho">請選擇會員類型</h3>
-          <fieldset className="menb_type_fieldset border-0 p-0 m-0">
-            <div className="d-flex flex-wrap menb_type gap-3">
-              {MEMBER_TYPE_OPTIONS.map((option, index) => (
-                <MemberTypeCard key={option.id} option={option} defaultChecked={index === 0} />
-              ))}
-            </div>
-          </fieldset>
-
-          <h3 className="mb-4 me_sho">會員權益比較表</h3>
-          <CompareTable />
-
-          <div className="card-footer d-flex justify-content-between">
-            <Link className="btn-outline-dark" href="/member/register" title="上一步">
-              <i className="bi bi-chevron-left" aria-hidden="true"></i>上一步
-            </Link>
-            <Link className="btn-theme" href="/member/register/info" title="同意，下一步">
-              同意，下一步<i className="bi bi-chevron-right" aria-hidden="true"></i>
-            </Link>
-          </div>
+          <MemberTypeSelector />
         </div>
       </InnerPageShell>
     </>
