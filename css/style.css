@@ -1301,9 +1301,12 @@ body   .main .side .nav > li + li {
 .matching.show .custom_box {
     position: absolute;
     right: 40px;
-    top: 44px;
+    top: 42px;
 }
 /*我要媒合 媒合對接 index */
+.item ul.sup_ul_s li a {
+    box-shadow: unset;
+}
 .public_box {
     padding: 20px;
     background-color: #f4f8ff;
@@ -1441,6 +1444,9 @@ body   .main .side .nav > li + li {
 
 
 /*我要媒合 企業名錄 詳細頁  matching enterprise show*/
+.matching.show .project_fx .form-check {
+    padding: 10px 40px;
+}
 .mat_cooperate_box {
     padding: 30px;
     background-color: #f4f8ff;
@@ -5715,7 +5721,7 @@ wid-video  .slick-list{
     background: #eeeeee;
     padding: 70px 0;
     position: relative;
-    z-index: 10;
+ /*   z-index: 10;*/
 }
 
 

@@ -8,6 +8,9 @@
 @media (min-width: 1680px) {
 }
 @media (max-width: 1800px) {
+    .matching.show .item_box_six .item_box_six_1 .pic {
+        width: 13%;
+    }
     /*課程*/
     .course-table-container {
         overflow-x: auto;
@@ -130,6 +133,9 @@
 }
 
 @media (max-width: 1199px) {
+    .matching.show  .modal-dialog {
+        max-width: 60%;
+    }
     .matching_sear .input-group {
         width: 60%;
     }
@@ -204,6 +210,20 @@
 
 
 @media (max-width: 991px) {
+    .matching.show .item_box_six .item_box_six_1 .pic {
+        width: 18%;
+    }
+    .matching.show .custom_box {
+        top: 33px;
+        right: 20px;
+    }
+    .matching .modal-dialog {
+        max-width: 60%;
+    }
+    .matching .more_x.me_Publish {
+        padding: 30px;
+    
+    }
     .matching_sear .input-group {
         width: 40%;
     }
@@ -659,10 +679,114 @@
     }
 }
 
+
 @media (max-width: 767px) {
+    .mat_Award_box {
+        gap: 30px 15px;
+    
+    }
+    .mat_Award_box .pic {
+        width: calc((100% - 30px) /3);
+    }
+    .item_box_two .item_box_two_1 {
+        padding: 20px;
+    }
+    .accordion-header {
+        padding: 7px 12px;
+ 
+    }
+    .matching.show .project_fx .form-check {
+        padding: 4px 25px;
+    }
+    .modal-body {
+        padding: 20px;
+    }
+    .matching.show .modal-dialog {
+        max-width: 100%;
+    }
+    .item_box_six .item_box_six_1 {
+        width: 100%;
+        padding: 10px 20px;
+    }
+    
+        .ente_box .item_box .tit ul {
+        gap: 0 7px;
+        margin-top:0;
+    }
+    .ente_box .item_box .tit ul li {
+        padding: 4px 15px;
+        font-size: 0.75rem;
+    }
+    .ente_box .item_box {
+        margin-top: 20px;
+        align-items: center;
+    }
+    .ente_box .item_box .tit {
+        padding-left: 20px;
+        margin-left: 20px;
+    }
+    .ente_box .item_box .pic {
+        width: 35%;
+    }
+    .news.show.matching .content .column_box .tit {
+        margin-top: 0;
+    }
+    .matching.show .custom_box .slick-play-pause-btn,
+    .matching.show .custom_box .custom-arrow {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    .matching.show .custom_box {
+        top: 13px;
+        left: unset;
+    }
+    .matching .modal-dialog {
+        max-width: 100%;
+    }
+    .modal .publish_s  .project_fx {
+        gap: 2px 12px !important;
+    }
+    .matching.index .modal .peer.d-flex {
+        padding: 10px;
+        font-size: 0.875rem;
+    }
+    .matching.index .modal textarea {
+        height: 100px;
+    }
+    .matching.index .modal-dialog.modal-dialog_w7 {
+        max-width: 100%;
+    }
+    .matching .more_x.me_Publish i {
+        font-size: 1.5rem;
+    }
+    .matching .more_x.me_Publish {
+        width: 100%;
+        padding: 20px;
+        border-radius: 0;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 500;
+        margin-bottom: -1px;
+    }
+
+    .matching.index  .item ul.sup_ul_s {
+        gap: 0 13px;
+        margin-top: 20px;
+    }
+    .matching.index  .item ul.sup_ul_s li i {
+        width: 16px;
+        height: 16px;
+        font-size: 0.75rem;
+    }
+    .matching.index  .item ul.sup_ul_s li a {
+        width: 132px;
+        height: 43px;
+    }
     .matching .project_fx .form-check {
         width: calc((100% - 10px) / 2);
-      
     }
     .project_fx .form-check label {
        font-size:0.875rem;
@@ -1020,7 +1144,7 @@
         font-size: 1.5rem;
     }
     .dow-name span {
-        font-size:1.5rem;
+        font-size:1.25rem;
   
     }
     .Contributor {

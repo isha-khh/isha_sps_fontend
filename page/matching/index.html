@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-tw" class="no-js" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>高雄技術處</title>
+
+    <!-- 關閉Skype工具列 -->
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- 網站圖示 favicon.ico -->
+    <!-- generics -->
+    <link rel="icon" type="image/png" href="../../favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="../../favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="57x57">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="76x76">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="128x128">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="228x228">
+    <!-- Android -->
+    <link rel="shortcut icon" href="../../favicon.png" sizes="196x196">
+    <!-- iOS -->
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="180x180">
+    <!-- Windows 8 IE 10-->
+    <meta name="msapplication-TileColor" content="#f4d44d">
+    <meta name="msapplication-TileImage" content="../../favicon.png">
+
+    <!-- <link rel="manifest" href="/site.webmanifest"> -->
+    <link rel="mask-icon" href="../../safari-pinned-tab.svg" color="#f4d44d">
+    <meta name="theme-color" content="#ffffff">
+    <!--uc:HeadMeta-->
+
+
+    <script type="text/javascript" src="../../js/jquery-4.0.0.min.js"></script>
+
+    <script type="text/javascript" src="../../js/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../js/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
+
+
+
+    <link href="../../js/bootstrap-5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- slick -->
+    <link href="../../js/slick-2.0.0/slick/slick-theme.css" rel="stylesheet" />
+    <link href="../../js/slick-2.0.0/slick/slick.css" rel="stylesheet" />
+
+    <!-- bsnav -->
+    <link href="../../js/bsnav-master/dist/bsnav.min.css" rel="stylesheet" />
+    <!-- bootstrap icon -->
+    <link href="../../js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+
+    <!-- fancybox -->
+    <link href="../../js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
+
+    <link href="../../css/coreStyle.css" rel="stylesheet" />
+
+    <link href="../../css/style.css" rel="stylesheet" />
+    <link href="../../css/style_rwd.css" rel="stylesheet" />
+
+    <!--aos --->
+    <script type="text/javascript" src="../../js/aos-master/dist/aos.js"></script>
+    <link href="../../js/aos-master/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <script>
+        $(document).ready(function () {
+            $("header nav").load("../../page/_uc/nav.html");
+            $(".breadcrumb").load("../../page/_uc/breadcrumb.html");
+            $(".searchma_tching").load("../../page/_uc/searchma_tching.html");
+            $(".publish_s").load("../../page/matching/_uc/publish_s.html");
+            $(".side2_banner").load("../../page/_uc/side2_banner.html");
+            $("footer").load("../../page/_uc/footer.html");
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.27"></script>
+
+
+    <!-- slick -->
+    <script type="text/javascript" src="../../js/slick-2.0.0/slick/slick.min.js"></script>
+
+    <!-- bsnav -->
+    <script type="text/javascript" src="../../js/bsnav-master/dist/bsnav.min.js"></script>
+
+    <!-- fancybox -->
+    <script type="text/javascript" src="../../js/fancybox-5.0.33/dist/fancybox/fancybox.umd.js"></script>
+
+    <!-- 滾動視差 -->
+    <script type="text/javascript" src="../../js/TweenLite.min.js"></script>
+    <script type="text/javascript" src="../../js/CSSPlugin.min.js"></script>
+
+
+
+    <script type="text/javascript" src="../../js/coreScript.js"></script>
+
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+
+    <!--uc:HeadPageRes-->
+
+</head>
+
+
+
+<body class="matching index">
+    <!-- 彈跳 我要刊登-->
+    <div class="modal fade" id="staticmembership2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticmembership2" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog_w7">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>我要刊登</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group ">
+                        <label for="companyName" class="mb-2">需求標題</label>
+                        <input type="text" class="form-control" title="請輸入需求標題" placeholder="請輸入需求標題" required="" aria-required="true">
+                    </div>
+
+                    <div class="form-group ">
+                        <label for="companyName" class="mb-2">需求內容</label>
+                        <textarea class="form-control" rows="5" ></textarea>
+                    </div>
+
+                    <!--多層次標籤-->
+                    <div class="publish_s"></div>
+
+                    <div class="Disclaimer">
+                        <h5>免責聲明：</h5>
+                        <p>本人／本單位於「智慧工安技術產業資訊暨媒合平台」（以下簡稱本平台）刊登需求文章前，已詳閱並同意：本平台僅提供需求資訊刊載、交流及媒合機會，不參與使用者與任何第三人間之洽談、報價、簽約、付款、交付、驗收、保固或其他合作事項，亦非任何一方之代理人、保證人或契約當事人。刊登者應確保所提供之資料真實、完整、合法，且未侵害他人權益，並對刊登內容自行負責；本平台不保證刊登資訊、媒合對象、技術、產品或服務之正確性、品質、安全性、適用性、履約能力或媒合成果，使用者於進行合作前，應自行查證、評估風險並議定相關契約。因使用者間後續接洽、交易、合作、履約或爭議所生之損害、費用及法律責任，應由相關當事人自行處理及負擔。本平台如發現刊登內容涉及違法、不實、侵權、違反平台規範或其他不宜公開之情形，得要求刊登者修正，或暫停、拒絕刊登及刪除相關內容。</p>
+                    </div>
+
+                    <div class="peer d-flex mb-3 mt-4">
+                        <label class="relative">
+                            <input type="checkbox" title="同意免責聲明及相關解方將同步信件及通知予使用者" class="form-check-input peer me-1">
+                            <span>同意免責聲明及相關解方將同步信件及通知予使用者</span>
+                        </label>
+                     
+
+                    </div>
+
+                    <div class=""> </div>
+
+                    <div class="card-footer d-flex justify-content-center">
+                        <a class="btn-outline-dark me-2" href="#" title="取消">取消</a>
+                        <a class="btn-theme mat_Send" href="#" title="刊登" aria-expanded="false" aria-controls="contactInfo">刊登</a>
+                    </div>
+
+
+
+
+
+                </div><!--modal-body-->
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 彈跳 訂閱解方-->
+    <div class="modal fade" id="staticmembership" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticmembership" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>訂閱解方</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="Disclaimer">
+                        <h5>免責聲明：</h5>
+                        <p>本人／本單位於「智慧工安技術產業資訊暨媒合平台」（以下簡稱本平台）刊登需求文章前，已詳閱並同意：本平台僅提供需求資訊刊載、交流及媒合機會，不參與使用者與任何第三人間之洽談、報價、簽約、付款、交付、驗收、保固或其他合作事項，亦非任何一方之代理人、保證人或契約當事人。刊登者應確保所提供之資料真實、完整、合法，且未侵害他人權益，並對刊登內容自行負責；本平台不保證刊登資訊、媒合對象、技術、產品或服務之正確性、品質、安全性、適用性、履約能力或媒合成果，使用者於進行合作前，應自行查證、評估風險並議定相關契約。因使用者間後續接洽、交易、合作、履約或爭議所生之損害、費用及法律責任，應由相關當事人自行處理及負擔。本平台如發現刊登內容涉及違法、不實、侵權、違反平台規範或其他不宜公開之情形，得要求刊登者修正，或暫停、拒絕刊登及刪除相關內容。</p>
+                    </div>
+
+                    <div class="peer d-flex mb-3 mt-4">
+                        <label class="relative">
+                            <input type="checkbox" aria-label="同意免責聲明及相關解方將同步信件及通知予使用者" title="同意免責聲明及相關解方將同步信件及通知予使用者" class="form-check-input peer me-1">
+                            <span class="">
+                                需勾選同意免責聲明及相關解方將同步信件及通知予使用者。
+                            </span>
+                        </label>
+                       
+                    </div>
+
+
+
+                    <div class="card-footer d-flex justify-content-center">
+                        <a class="btn-outline-dark me-2" href="#" title="取消">取消</a>
+                        <a class="btn-theme mat_Send" href="#" title="送出" aria-expanded="false" aria-controls="contactInfo">送出</a>
+                    </div>
+
+
+
+
+
+                </div><!--modal-body-->
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 主要內容區塊-->
+    <a href="#main-content" class="visually-hidden-focusable">跳至主要內容</a>
+
+    <div class="page_wrapper">
+        <!--  導盲磚 -->
+        <header class="header">
+            <a href="#header-block" id="header-block" accesskey="U" title="上方功能區塊" class="visually-hidden-focusable">::: 上方功能區塊</a>
+            <nav class="nav" aria-label="主要導覽"><span class="d-none">主要導覽</span></nav>
+        </header>
+
+        <!--標題-->
+        <div class="section-title-wrap">
+
+            <div class="marquee-bg" aria-hidden="true">
+                <div class="marquee-track">
+                    <!-- 第一組 -->
+                    <div class="marquee-group">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                    <!-- 第二組-->
+                    <div class="marquee-group" aria-hidden="true">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                </div>
+            </div>
+
+
+            <h2 class="main-title">
+                <span class="tit_tw">媒合對接</span>
+            </h2>
+
+            <div class="s_meu_lk">
+                <ul class="nav">
+                    <li><a href="../../page/matching/enterprise.html" title="企業名錄" class="">企業名錄</a></li>
+                    <li class="s_meu_sid"></li>
+                    <li><a href="../../page/matching/index.html" title="媒合對接" class="active">媒合對接</a></li>
+                </ul>
+            </div><!--s_meu_lk-->
+
+
+
+
+        </div>
+        <!--麵包屑-->
+        <div class="breadcrumb" aria-label="麵包屑導覽"></div>
+
+
+
+        <!--  主要內容區塊： -->
+        <main class="main" id="main-content" role="main">
+            <a href="#main-block" id="main-block" accesskey="C" title="中央主要內容區塊" class="visually-hidden-focusable">::: 主要內容區塊</a>
+
+            <div class="container-fluid ">
+                <div class="row gx-0 gy-4">
+
+                    <!--  side1 -->
+                    <div class="side side1 d-none" aria-label="分類選單">
+                        <a href="#left-block" id="left-block" accesskey="L" title="左側選單區塊" class="visually-hidden-focusable d-none">::: 左側選單區塊</a>
+                        <div class="function-bar text-end d-flex d-lg-none justify-content-lg-end justify-content-between">
+                            <div class="sideNavBtn d-lg-none mb-2">
+
+                                <button type="button" class="btn btn-primary collapse-side-btn" aria-expanded="false" aria-controls="sideAutoUcCollapse">
+                                    <i class="icon fas fa-list" aria-hidden="true"></i>
+                                    <span>顯示分類</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-sidebar side_auto_uc multiple-collapse accordion lg-accordion accordion-blocks d-block">
+                            <div class="navbar" role="region" aria-label="分類篩選項目">
+                                <div class="collapse navbar-collapse justify-content-lg-end d-lg-block">
+                                    <div id="sideAutoUcCollapse" class="sideAutoUcCollapse">
+                                        <!--選單-->
+                                        <div class="side1_serve"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--搜尋-->
+                    <div class="searchma_tching mb-md-5 mb-4"></div>
+
+
+                    <!-- 主要內容容器  content-->
+                    <div class="content ">
+
+                        <div class="column_box">
+                       
+                            <div class="item">
+
+
+                                <div class="tit">
+
+                                    <div class="tit_nsl">
+                                        <div class="tit_three d-flex mb-2">
+                                            <div class="tag-wrap">
+
+                                                <span class="badge-tag mb-0 ">狀態標籤</span>
+
+                                            </div>
+                                        </div><!--tit_three-->
+                                        <div class="h3_solid">
+                                            <h3>
+                                                <a href="../../page/matching/show2.html" title="114年度石化產業智慧化補助計畫正式開放申請">
+                                                    114年度石化產業智慧化補助計畫正式開放申請
+                                                </a>
+                                            </h3>
+                                        </div>
+                                        <p>提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。</p>
+                                        <div class="d-flex sup_xbox  mb-md-4 mb-2">
+                                            <ul class="nav d-block ">
+                                                <li class="mb-2"><i class="bi bi-geo-alt me-1"></i><span><b>地點 : </b>高雄市小港區</span></li>
+                                                <li class="mb-2"><i class="bi bi-calendar4-week me-1"></i><span><b>發布日期 : </b>2026-04-15</span></li>
+                                                <li class="mb-2"><i class="bi bi-card-text me-1"></i><span><b>需求編號 : </b>REO-202508-011</span></li>
+                                                <li class=""><i class="bi bi-lock me-2"></i><span class="red"><b>企業會員可見完整內容 </b></span></li>
+                                            </ul>
+
+                                            <ul class="nav d-md-block d-flex sup_ul_s">
+                                                <li class="mb-3"><a href="../../page/matching/show2.html" title="提供解方" class="more_x"><span>提供解方</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a></li>
+                                                <li>
+                                                    <a href="javascript:void(0)"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#staticmembership"
+                                                       title="訂閱解方" class="connec_s  more_x more_x_gu"><span>訂閱解方</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div><!--tit_nsl-->
+
+
+
+                                    <ul class="nav ul-key">
+                                        <li><a href="#" title="前往產業AI" tabindex="0">產業AI</a></li>
+                                        <li><a href="#" title="前往技術文件" tabindex="0">技術文件</a></li>
+                                    </ul>
+
+
+
+
+
+                                </div><!--tit-->
+
+
+
+
+                            </div><!--item 1組-->
+
+                            <div class="item">
+
+
+                                <div class="tit">
+
+                                    <div class="tit_nsl">
+                                        <div class="tit_three d-flex mb-2">
+                                            <div class="tag-wrap">
+
+                                                <span class="badge-tag mb-0 ">狀態標籤</span>
+
+                                            </div>
+                                        </div><!--tit_three-->
+                                        <div class="h3_solid">
+                                            <h3>
+                                                <a href="../../page/matching/show2.html" title="114年度石化產業智慧化補助計畫正式開放申請">
+                                                    114年度石化產業智慧化補助計畫正式開放申請
+                                                </a>
+                                            </h3>
+                                        </div>
+                                        <p>提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。</p>
+                                        <div class="d-flex sup_xbox mb-md-4 mb-2">
+                                            <ul class="nav d-block ">
+                                                <li class="mb-2"><i class="bi bi-geo-alt me-1"></i><span><b>地點 : </b>高雄市小港區</span></li>
+                                                <li class="mb-2"><i class="bi bi-calendar4-week me-1"></i><span><b>發布日期 : </b>2026-04-15</span></li>
+                                                <li class="mb-2"><i class="bi bi-card-text me-1"></i><span><b>需求編號 : </b>REO-202508-011</span></li>
+                                                <li class=""><i class="bi bi-lock me-1"></i><span class="red"><b>企業會員可見完整內容 </b></span></li>
+                                            </ul>
+
+                                            <ul class="nav d-md-block d-flex  sup_ul_s">
+                                                <li class="mb-3"><a href="../../page/matching/show2.html" title="提供解方" class="more_x"><span>提供解方</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a></li>
+                                                <li>
+                                                    <a href="javascript:void(0)"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#staticmembership"
+                                                       title="訂閱解方" class="connec_s  more_x more_x_gu"><span>訂閱解方</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div><!--tit_nsl-->
+
+
+
+                                    <ul class="nav ul-key">
+                                        <li><a href="#" title="前往產業AI" tabindex="0">產業AI</a></li>
+                                        <li><a href="#" title="前往技術文件" tabindex="0">技術文件</a></li>
+                                    </ul>
+
+
+
+
+
+                                </div><!--tit-->
+
+
+
+
+                            </div><!--item 1組-->
+                        </div><!--column_box-->
+
+
+
+
+
+                        <div class="page-box mt-md-5 mt-4">
+                            <ul class="pagination">
+                                <!-- 上一頁 -->
+                                <li class="page-item">
+                                    <a href="#" class="page-link" aria-label="前往上一頁" title="前往上一頁">
+                                        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                                    </a>
+                                </li>
+
+
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link" title="目前在第 1 頁">1</span>
+                                </li>
+
+
+                                <li class="page-item">
+                                    <a href="#" class="page-link" aria-label="前往第 2 頁" title="前往第 2 頁">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a href="#" class="page-link" aria-label="前往第 3 頁" title="前往第 3 頁">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a href="#" class="page-link" aria-label="前往第 4 頁" title="前往第 4 頁">4</a>
+                                </li>
+                                <li class="page-item">
+                                    <a href="#" class="page-link" aria-label="前往第 5 頁" title="前往第 5 頁">5</a>
+                                </li>
+
+
+                                <li class="page-item disabled" aria-hidden="true">
+                                    <span class="page-link dots">…</span>
+                                </li>
+
+
+                                <li class="page-item">
+                                    <a href="#" class="page-link" aria-label="前往第 12 頁" title="前往第 12 頁">12</a>
+                                </li>
+
+
+                                <li class="page-item">
+                                    <a href="#" class="page-link" aria-label="前往下一頁" title="前往下一頁">
+                                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div><!--page-box-->
+
+                    </div><!--content-->
+                    <!-- side2 -->
+                    <div class="side side2 " id="side2-block" aria-label="相關選單">
+                        <a href="#side2-block" id="right-block" accesskey="R" title="右側選單區塊" class="visually-hidden-focusable">::: 右側選單區塊</a>
+
+                        <a href="javascript:void(0)"
+                           data-bs-toggle="modal"
+                           data-bs-target="#staticmembership2"
+                           class="me_Publish more_x">
+
+                            <span>我要刊登</span>
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                        </a>
+
+                        <!--廣告-->
+                        <div class="side2_banner"></div>
+                        <!-- 選單內容 -->
+                    </div>
+                </div><!--row-->
+            </div>
+
+            <div class="publish_banner mt-md-5 mt-4 mb-4">
+                <a href="#" class="video-card" title="石化產業智慧轉型——從數據到決策(另開視窗)" target="_blank" rel="noopener noreferrer">
+                    <div class="pic">
+                        <img class="img-fluid d-block" src="../../images/banner/b1.jpg" alt="石化產業智慧轉型——從數據到決策"  />
+                    </div>
+
+                </a>
+            </div><!--item 1組-->
+
+            <div class="s_round_6" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_6.png" alt="">
+            </div>
+
+            <div class="s_round_3" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_3.jpg" alt="">
+            </div>
+        </main>
+
+
+        <a href="#footer-block" id="footer-block" accesskey="B" title="下方功能區塊" class="visually-hidden-focusable" tabindex="0">::: 下方功能區塊</a>
+        <!-- 頁尾區塊 -->
+        <footer class="footer" role="contentinfo">
+        </footer>
+    </div>
+
+
+
+
+    <script>
+    
+
+        $(function () {
+            if (window.innerWidth > 767) {
+                $(window).on('scroll', function () {
+                    const offsetTop = $(this).scrollTop();
+
+                    // 1. .s_round_1 視差滾動
+                    const $industry = $('.footer');
+                    if ($industry.length && offsetTop < $industry.offset().top) {
+                        TweenLite.to(".s_round_6, .s_round_3", 1, {
+                            y: -offsetTop / 15
+                        });
+                    }
+
+
+                }).trigger('scroll');
+            }
+        });
+
+    </script>
+
+
+</body>
+</html>
+

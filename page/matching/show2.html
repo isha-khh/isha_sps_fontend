@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-tw" class="no-js" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>高雄技術處</title>
+
+    <!-- 關閉Skype工具列 -->
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- 網站圖示 favicon.ico -->
+    <!-- generics -->
+    <link rel="icon" type="image/png" href="../../favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="../../favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="57x57">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="76x76">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="128x128">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="228x228">
+    <!-- Android -->
+    <link rel="shortcut icon" href="../../favicon.png" sizes="196x196">
+    <!-- iOS -->
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="180x180">
+    <!-- Windows 8 IE 10-->
+    <meta name="msapplication-TileColor" content="#f4d44d">
+    <meta name="msapplication-TileImage" content="../../favicon.png">
+
+    <!-- <link rel="manifest" href="/site.webmanifest"> -->
+    <link rel="mask-icon" href="../../safari-pinned-tab.svg" color="#f4d44d">
+    <meta name="theme-color" content="#ffffff">
+    <!--uc:HeadMeta-->
+
+
+    <script type="text/javascript" src="../../js/jquery-4.0.0.min.js"></script>
+
+    <script type="text/javascript" src="../../js/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../js/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
+
+
+
+    <link href="../../js/bootstrap-5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- slick -->
+    <link href="../../js/slick-2.0.0/slick/slick-theme.css" rel="stylesheet" />
+    <link href="../../js/slick-2.0.0/slick/slick.css" rel="stylesheet" />
+
+    <!-- bsnav -->
+    <link href="../../js/bsnav-master/dist/bsnav.min.css" rel="stylesheet" />
+    <!-- bootstrap icon -->
+    <link href="../../js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+
+
+    <!-- 上傳檔案 -->
+    <script src="../../js/dropzone.js"></script>
+
+
+    <!-- fancybox -->
+    <link href="../../js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
+
+    <link href="../../css/coreStyle.css" rel="stylesheet" />
+
+    <link href="../../css/style.css" rel="stylesheet" />
+    <link href="../../css/style_rwd.css" rel="stylesheet" />
+
+    <!--aos --->
+    <script type="text/javascript" src="../../js/aos-master/dist/aos.js"></script>
+    <link href="../../js/aos-master/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <script>
+        $(document).ready(function () {
+            $("header nav").load("../../page/_uc/nav.html");
+            $(".breadcrumb").load("../../page/_uc/breadcrumb.html");
+            $(".public_need").load("../../page/matching/_uc/public_need.html");
+            $(".side2_banner").load("../../page/_uc/side2_banner.html");
+            $(".dot").load("../../page/news/_uc/dot.html");
+            $("footer").load("../../page/_uc/footer.html");
+        });
+    </script>
+ 
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.27"></script>
+
+
+    <!-- slick -->
+    <script type="text/javascript" src="../../js/slick-2.0.0/slick/slick.min.js"></script>
+
+    <!-- bsnav -->
+    <script type="text/javascript" src="../../js/bsnav-master/dist/bsnav.min.js"></script>
+
+    <!-- fancybox -->
+    <script type="text/javascript" src="../../js/fancybox-5.0.33/dist/fancybox/fancybox.umd.js"></script>
+
+    <!-- 滾動視差 -->
+    <script type="text/javascript" src="../../js/TweenLite.min.js"></script>
+    <script type="text/javascript" src="../../js/CSSPlugin.min.js"></script>
+
+
+
+    <script type="text/javascript" src="../../js/coreScript.js"></script>
+
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+
+    <!--uc:HeadPageRes-->
+
+</head>
+
+
+
+<body class="news matching index show">
+    <!-- 彈跳 我要提案-->
+    <div class="modal fade" id="staticmembership2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticmembership2" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>我要提案</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group ">
+                        <label for="companyName" class="mb-2">公司名稱</label>
+                        <input type="text" class="form-control" title="請輸入公司名稱" placeholder="請輸入公司名稱" required="" aria-required="true">
+                    </div>
+
+                    <div class="form-group ">
+                        <label for="companyName" class="mb-2">姓名</label>
+                        <input type="text" class="form-control" title="請輸入姓名" placeholder="請輸入姓名" required="" aria-required="true">
+                    </div>
+
+                    <div class="form-group ">
+                        <label for="companyName" class="mb-2">聯絡電話</label>
+                        <input type="text" class="form-control" title="請輸入聯絡電話"  placeholder="請輸入聯絡電話" required="" aria-required="true">
+                    </div>
+
+                    <div class="form-group ">
+                        <label for="companyName" class="mb-2">信箱</label>
+                        <input type="text" class="form-control" title="請輸入信箱" placeholder="請輸入信箱" required="" aria-required="true">
+                    </div>
+
+                    <div class="form-group ">
+                        <label for="companyName" class="mb-2">附件</label>
+                        <div class="tit_dow">
+                           
+                            <div class="pass_on d-flex gap-4">
+                                <div class="uplo_cpo w-100">
+                                    <div class="actions-wrap mb-2">
+
+                                        <button type="button" class="btn fileinput-button dropzone-upload-box" title="點擊或拖曳上傳公司登記證明文件檔案" aria-label="點擊或拖曳上傳公司登記證明文件檔案">
+                                            <div class="upload-icon-box">
+                                                <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+                                            </div>
+                                            <p class="upload-main-text">
+                                                將檔案拖曳至此，或 <span class="highlight">點擊上傳</span>
+                                            </p>
+                                            <div class="dire_lex mt-2">
+                                                <p class="mb-0">
+                                                    ※ 上傳格式支援PDF、影像檔，最大上限10MB。
+                                                </p>
+                                            </div>
+                                        </button>
+                                    </div>
+
+
+                                    <div class="files" id="previews1">
+                                        <div id="template_1" class="file-row dz-image-preview">
+                                            <div class="upl_pic">
+                                                <span class="preview">
+                                                    <img data-dz-thumbnail alt="公司登記證明文件預覽圖" />
+                                                </span>
+                                            </div>
+                                            <div class="upl_tit">
+                                                <div class="fckck_vvo">
+                                                    <p class="name" data-dz-name></p>
+                                                    <strong class="error text-danger" data-dz-errormessage></strong>
+                                                    <p class="size" data-dz-size></p>
+                                                </div>
+                                                <button type="button" data-dz-remove class="btn btn-sm btn-outline-danger cancel" title="刪除已上傳的公司登記證明文件" aria-label="刪除已上傳的公司登記證明文件">
+                                                    <i class="bi bi-x-circle" aria-hidden="true"></i> 刪除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div><!---tit_dow-->
+
+                    </div>
+
+
+                        <div class="Disclaimer">
+                            <h5>免責聲明：</h5>
+                            <p>本人／本單位於「智慧工安技術產業資訊暨媒合平台」（以下簡稱本平台）刊登需求文章前，已詳閱並同意：本平台僅提供需求資訊刊載、交流及媒合機會，不參與使用者與任何第三人間之洽談、報價、簽約、付款、交付、驗收、保固或其他合作事項，亦非任何一方之代理人、保證人或契約當事人。刊登者應確保所提供之資料真實、完整、合法，且未侵害他人權益，並對刊登內容自行負責；本平台不保證刊登資訊、媒合對象、技術、產品或服務之正確性、品質、安全性、適用性、履約能力或媒合成果，使用者於進行合作前，應自行查證、評估風險並議定相關契約。因使用者間後續接洽、交易、合作、履約或爭議所生之損害、費用及法律責任，應由相關當事人自行處理及負擔。本平台如發現刊登內容涉及違法、不實、侵權、違反平台規範或其他不宜公開之情形，得要求刊登者修正，或暫停、拒絕刊登及刪除相關內容。</p>
+                        </div>
+
+                        <div class="peer d-flex mb-3 mt-4">
+                            <label class="relative">
+                                <input type="checkbox" aria-label="同意免責聲明" title="同意免責聲明及相關解方將同步信件及通知予使用者" class="form-check-input peer me-1">
+                                <span class="">
+                                    需勾選同意免責聲明
+                                </span>
+                            </label>
+                           
+                        </div>
+
+                        <div class=""> </div>
+
+                        <div class="card-footer d-flex justify-content-center">
+                            <a class="btn-outline-dark me-2" href="#" title="取消">取消</a>
+                            <a class="btn-theme mat_Send" href="#" title="送出" aria-expanded="false" aria-controls="contactInfo">送出</a>
+                        </div>
+
+
+
+
+
+                    </div><!--modal-body-->
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 主要內容區塊-->
+    <a href="#main-content" class="visually-hidden-focusable">跳至主要內容</a>
+
+    <div class="page_wrapper">
+        <!--  導盲磚 -->
+        <header class="header">
+            <a href="#header-block" id="header-block" accesskey="U" title="上方功能區塊" class="visually-hidden-focusable">::: 上方功能區塊</a>
+            <nav class="nav" aria-label="主要導覽"><span class="d-none">主要導覽</span></nav>
+        </header>
+
+        <!--麵包屑-->
+        <div class="breadcrumb" aria-label="麵包屑導覽"></div>
+
+        <!--  主要內容區塊： -->
+        <main class="main" id="main-content" role="main">
+            <a href="#main-block" id="main-block" accesskey="C" title="中央主要內容區塊" class="visually-hidden-focusable">::: 主要內容區塊</a>
+
+            <div class="container-fluid ">
+                <div class="row gx-0 gy-4">
+
+                    <!--  side1 -->
+                    <div class="side side1 d-none" aria-label="分類選單">
+                        <a href="#left-block" id="left-block" accesskey="L" title="左側選單區塊" class="visually-hidden-focusable d-none">::: 左側選單區塊</a>
+                        <div class="function-bar text-end d-flex d-lg-none justify-content-lg-end justify-content-between">
+                            <div class="sideNavBtn d-lg-none mb-2">
+
+                                <button type="button" class="btn btn-primary collapse-side-btn" aria-expanded="false" aria-controls="sideAutoUcCollapse">
+                                    <i class="icon fas fa-list" aria-hidden="true"></i>
+                                    <span>顯示分類</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-sidebar side_auto_uc multiple-collapse accordion lg-accordion accordion-blocks d-block">
+                            <div class="navbar" role="region" aria-label="分類篩選項目">
+                                <div class="collapse navbar-collapse justify-content-lg-end d-lg-block">
+                                    <div id="sideAutoUcCollapse" class="sideAutoUcCollapse">
+                                        <!--選單-->
+                                        <div class="side1_news"></div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- 主要內容容器  content-->
+                    <div class="content ">
+
+
+                        <div class="column_box">
+                            <div class="tit">
+
+                                <div class="tit_nsl">
+                                    <div class="tag-wrap">
+                                        <span class="badge-tag ">狀態標籤</span>
+                                    </div>
+
+                                    <h3>114年度石化產業智慧化補助計畫正式開放申請</h3>
+                                    <ul class="nav mb-4  ">
+                                        <li class="mb-2"><i class="bi bi-geo-alt me-1"></i><span><b>地點 : </b>高雄市小港區</span></li>
+                                        <li class="mb-2"><i class="bi bi-calendar4-week me-1"></i><span><b>發布日期 : </b>2026-04-15</span></li>
+                                        <li class=""><i class="bi bi-card-text me-1"></i><span><b>需求編號 : </b>REO-202508-011</span></li>
+                                    </ul>
+
+                                </div><!--tit_nsl-->
+
+
+
+
+
+                                <ul class="nav ul-key">
+                                    <li><a href="#" title="前往產業AI" tabindex="0">產業AI</a></li>
+                                    <li><a href="#" title="前往技術文件" tabindex="0">技術文件</a></li>
+                                </ul>
+
+                                <div class="public_box mt-3">
+                                    <div class="h4 blue"><span>公開摘要</span></div>
+                                    <div class="txt editor">
+                                        專注於提供企業數位轉型與智慧工安解決方案，協助客戶優化營運流程、降低風險並提升作業效率。
+
+
+                                    </div>
+                                </div><!--public_box-->
+
+                            </div>
+
+
+
+
+                            <!--編輯器-->
+                            <div class="txt editor mb-md-5 mb-4">
+                                <p>
+                                    設計已不只是產品外觀與美學工具，而是協助企業理解市場、整合技術、回應永續議題，建立創新策略的核心驅動力。台灣設計研究院《產業設計創新趨勢與應用方法》提出「設計驅動產業創新模式」，涵蓋三大執行階段：瞭解現況與趨勢、發展解決方案、建構產品策略與迭代。書中以自行車 AI 工具開發、工具機沉浸展示、循環石材材料研發等跨產業案例，說明設計如何在不確定時代降低創新風險、提升決策精準度，並加速技術與市場需求的連結。
+
+                                </p>
+
+                                <p>世界改變的速度大幅加快，產業不僅要回應市場，也必須面對數位轉型、環境永續與社會責任等多重挑戰。過往所仰賴的開發模式與營運策略，已難以因應變化快速的市場，因此產業需具備新的思維與方法來面對未來的不確定性與轉型挑戰（Gutsche，2021）。</p>
+
+                            </div>
+
+
+                            <div class="dk_conbo mb-md-5 mb-4">
+                                <!--附件下載-->
+                                <div class="dot mb-md-5 mb-4"> </div> <!--dot-->
+
+                            </div><!--dk_conbo-->
+
+
+
+                            <div class="dk_conbo mb-md-5 mb-4">
+                                <!--相關需求-->
+                                <div class="public_need"></div>
+                            </div><!--dk_conbo-->
+
+
+
+                            <a href="../../page/matching/index.html" title="返回" class="more_x more_x_767">
+                                <span>返回</span>
+                                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            </a>
+
+
+                        </div><!--column_box-->
+
+
+
+
+
+
+
+
+                        </div><!--content-->
+                    <!-- side2 -->
+                    <div class="side side2" id="side2-block" aria-label="相關選單">
+                        <a href="#side2-block" id="right-block" accesskey="R" title="右側選單區塊" class="visually-hidden-focusable">::: 右側選單區塊</a>
+
+                        <a href="javascript:void(0)"
+                           data-bs-toggle="modal"
+                           data-bs-target="#staticmembership2"
+                           class="me_Publish more_x">
+
+                            <span>我要提案</span>
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                        </a>
+
+
+                        <!--廣告-->
+                        <div class="side2_banner"></div>
+                        <!-- 選單內容 -->
+                    </div>
+                </div><!--row-->
+            </div>
+
+
+            <div class="s_round_6" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_6.png" alt="">
+            </div>
+
+            <div class="s_round_3" aria-hidden="true">
+                <img class="img-fluid d-block" src="../../images/home/round_3.jpg" alt="">
+            </div>
+        </main>
+
+
+        <a href="#footer-block" id="footer-block" accesskey="B" title="下方功能區塊" class="visually-hidden-focusable" tabindex="0">::: 下方功能區塊</a>
+        <!-- 頁尾區塊 -->
+        <footer class="footer" role="contentinfo">
+        </footer>
+    </div>
+
+
+
+
+    <script>
+
+        $(document).ready(function () {
+            if ($(window).width() < 768) {
+                $(' .more_x_767').insertAfter('.side2');
+            }
+
+            //上傳檔案
+            Dropzone.autoDiscover = false;
+
+            $(".uplo_cpo").each(function () {
+                var $wrap = $(this);
+                var $previewNode = $wrap.find(".dz-image-preview");
+
+                // 擷取並移除模板節點
+                var previewTemplate = $previewNode.parent().html();
+                $previewNode.remove();
+
+                var myDropzone = new Dropzone($wrap[0], {
+                    url: "/upload",
+                    maxFiles: 1,
+                    maxFilesize: 10, // 配合您的說明可改成 10MB
+                    // 加上 .pdf 與 application/pdf
+                    acceptedFiles: ".jpg,.jpeg,.png,.pdf,application/pdf",
+                    thumbnailWidth: 100,
+                    thumbnailHeight: 100,
+                    parallelUploads: 1,
+                    previewTemplate: previewTemplate,
+                    autoQueue: false,
+                    previewsContainer: $wrap.find(".files")[0],
+                    clickable: $wrap.find(".fileinput-button")[0],
+
+                    init: function () {
+                        var dz = this;
+                        var $actions = $wrap.find(".actions-wrap");
+
+
+                        dz.on("addedfile", function (file) {
+                            $actions.hide();
+
+                            // 若上傳的是 PDF，Dropzone 無法自動產生縮圖，改用預設圖示替代
+                            if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+
+                                dz.emit("thumbnail", file, "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' fill='%230052cc' viewBox='0 0 16 16'><path d='M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 1.5 13 5h-3.5V1.5zM4.5 9.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z'/></svg>");
+                            }
+                        });
+
+                        // 2. 刪除檔案時重新顯示按鈕
+                        dz.on("removedfile", function (file) {
+                            $actions.show();
+                        });
+                    }
+                });
+            });
+
+        });
+
+        $(function () {
+            if (window.innerWidth > 767) {
+                $(window).on('scroll', function () {
+                    const offsetTop = $(this).scrollTop();
+
+                    // 1. .s_round_1 視差滾動
+                    const $industry = $('.footer');
+                    if ($industry.length && offsetTop < $industry.offset().top) {
+                        TweenLite.to(".s_round_6, .s_round_3", 1, {
+                            y: -offsetTop / 15
+                        });
+                    }
+
+
+                }).trigger('scroll');
+            }
+        });
+
+    </script>
+
+</body>
+</html>
+
