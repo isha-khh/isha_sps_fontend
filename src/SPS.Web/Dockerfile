@@ -14,8 +14,11 @@ WORKDIR /app
 # 安裝 pnpm（版本對齊 package.json 的 packageManager 欄位）
 RUN npm install -g pnpm@11.24.0
 
-# 複製 package files (改為 pnpm-lock.yaml)
-COPY pnpm-lock.yaml package.json ./
+# 複製 package files（也要帶 pnpm-workspace.yaml——pnpm 11 的
+# allowBuilds 設定放在這支檔案裡，不是 package.json，沒帶到的話
+# unrs-resolver 這個原生依賴的 postinstall script 會被 pnpm 的新版
+# 供應鏈安全機制擋下來，pnpm install 直接失敗）
+COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
 
 # 安裝依賴
 RUN pnpm install --frozen-lockfile
