@@ -14,6 +14,8 @@ appsettings.*.local.json
 Uploads/
 node_modules/
 launchSettings.json
+.env
+.env.*
 
 # Adobe Dreamweaver 同步用的追蹤檔案，不是網站/程式碼本身的一部分
 # （2026-09-10 發現全repo散落 846 個，Dreamweaver 對整個專案資料夾
