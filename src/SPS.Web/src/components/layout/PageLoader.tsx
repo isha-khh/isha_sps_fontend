@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAllLoadingTasksReady, useLoadingTask } from "@/lib/loading-store";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 客戶後來補充：首次造訪要「跑完整套」，明確講了 2.5 秒
@@ -144,7 +145,7 @@ export default function PageLoader() {
         </div>
 
         <div className="loadLogo">
-          <img className="img-fluid d-block" src="/images/all/logo.svg" alt="LOGO" />
+          <img className="img-fluid d-block" src={withBasePath("/images/all/logo.svg")} alt="LOGO" />
         </div>
       </div>
     </div>

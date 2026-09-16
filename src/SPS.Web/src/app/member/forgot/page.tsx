@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
+import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "忘記密碼",
@@ -33,7 +34,7 @@ export default function MemberForgotPage() {
                 </label>
                 <div className="msk_sdcv">
                   <input type="text" id="forgotCaptcha" className="form-control me-2" placeholder="請輸入驗證碼" required aria-required="true" />
-                  <img className="img-fluid d-block" src="/images/all/chksum.jpg" alt="驗證碼" />
+                  <img className="img-fluid d-block" src={withBasePath("/images/all/chksum.jpg")} alt="驗證碼" />
                 </div>
               </div>
 

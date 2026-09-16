@@ -4,6 +4,7 @@ import ChecklistGroup from "@/components/member/ChecklistGroup";
 import SmartTechSelector from "@/components/member/SmartTechSelector";
 import DocumentUploadField from "@/components/member/DocumentUploadField";
 import { APPLICATION_SCENARIOS, APPLICATION_SCOPES } from "@/lib/member-registration-data";
+import { withBasePath } from "@/lib/api-client";
 
 const REQUIRED = (
   <span className="red me-1" aria-hidden="true">
@@ -228,7 +229,7 @@ export default function MemberDetailsForm({
               <label className="mb-2">{profileMark}LOGO圖像</label>
               {disabled ? (
                 <div className="menb_logo">
-                  <img className="img-fluid d-block" src="/images/all/menb_logo.jpg" alt="" style={{ width: 200, height: 200 }} />
+                  <img className="img-fluid d-block" src={withBasePath("/images/all/menb_logo.jpg")} alt="" style={{ width: 200, height: 200 }} />
                 </div>
               ) : (
                 <DocumentUploadField label="LOGO" mode="edit" hint="上傳格式支援影像檔，最大上限10MB。" />

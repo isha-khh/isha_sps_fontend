@@ -1,4 +1,5 @@
 import type { CompanyDetail, CompanyList } from "@/lib/types";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 企業名錄（`/matching/enterprise`）假資料，對應設計稿
@@ -21,7 +22,7 @@ import type { CompanyDetail, CompanyList } from "@/lib/types";
  * 假設的形狀，不是抄真後端型別，資料對接時這幾項要另外確認怎麼來。
  */
 
-const PLACEHOLDER_IMAGE = "/images/all/new_logo.jpg";
+const PLACEHOLDER_IMAGE = withBasePath("/images/all/new_logo.jpg");
 
 export const ENTERPRISE_LISTINGS: CompanyList[] = [
   {

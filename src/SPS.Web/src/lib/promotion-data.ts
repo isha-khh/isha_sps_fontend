@@ -1,4 +1,5 @@
 import { wrapHtmlAsPuckContent } from "@/lib/puck-content";
+import { withBasePath } from "@/lib/api-client";
 import type { PromotionCase, PromotionCaseDetail, VideoItem } from "@/lib/types";
 
 export type { PromotionCase, PromotionCaseDetail, VideoItem };
@@ -56,7 +57,7 @@ export function derivePromotionIndustries(items: PromotionCase[]): string[] {
  * 都拿掉了，見 docs/改版規劃.md。內文（`content`）跟 News/FAQ 一樣
  * 是 Puck 區塊 JSON，交給 `PuckRenderer` 顯示。
  */
-export const PROMOTION_FALLBACK_IMAGE = "/images/all/new_logo.jpg";
+export const PROMOTION_FALLBACK_IMAGE = withBasePath("/images/all/new_logo.jpg");
 
 export const INDUSTRY_CASES: PromotionCaseDetail[] = [
   {
@@ -135,7 +136,7 @@ export const PROMOTION_VIDEOS: VideoItem[] = [
   {
     id: 1,
     name: "ESG 永續發展實務：石化廠的碳盤查經驗分享",
-    thumbnailUri: "/images/home/ser_bg2.jpg",
+    thumbnailUri: withBasePath("/images/home/ser_bg2.jpg"),
     linkUrl: "#",
     playOnSite: true,
     published: true,
@@ -146,7 +147,7 @@ export const PROMOTION_VIDEOS: VideoItem[] = [
   {
     id: 2,
     name: "AIoT 工安監控應用：降低職災風險的關鍵",
-    thumbnailUri: "/images/home/ser_bg2.jpg",
+    thumbnailUri: withBasePath("/images/home/ser_bg2.jpg"),
     linkUrl: "#",
     playOnSite: true,
     published: true,
@@ -157,7 +158,7 @@ export const PROMOTION_VIDEOS: VideoItem[] = [
   {
     id: 3,
     name: "全方位人員定位追蹤應用",
-    thumbnailUri: "/images/home/ser_bg2.jpg",
+    thumbnailUri: withBasePath("/images/home/ser_bg2.jpg"),
     linkUrl: "#",
     playOnSite: true,
     published: true,

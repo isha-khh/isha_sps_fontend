@@ -1,5 +1,6 @@
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
+import { withBasePath } from "@/lib/api-client";
 
 interface NewsBannerSlide {
   href: string;
@@ -8,9 +9,9 @@ interface NewsBannerSlide {
 }
 
 const SLIDES: NewsBannerSlide[] = [
-  { href: "#", title: "石化產業智慧轉型——從數據到決策", image: "/images/banner/b1.jpg" },
-  { href: "#", title: "AI 智慧安全帽偵測系統導入石化廠", image: "/images/banner/b1.jpg" },
-  { href: "#", title: "ESG 永續發展實務：石化廠的碳盤查經驗分享", image: "/images/banner/b1.jpg" },
+  { href: "#", title: "石化產業智慧轉型——從數據到決策", image: withBasePath("/images/banner/b1.jpg") },
+  { href: "#", title: "AI 智慧安全帽偵測系統導入石化廠", image: withBasePath("/images/banner/b1.jpg") },
+  { href: "#", title: "ESG 永續發展實務：石化廠的碳盤查經驗分享", image: withBasePath("/images/banner/b1.jpg") },
 ];
 
 const CAROUSEL_ID = "news-banner";

@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/api-client";
+
 export interface ServeItem {
   id: string;
   category: string;
@@ -54,7 +56,7 @@ export const SERVE_ITEMS: ServeItem[] = [
     date: "2026-04-15",
     title: "114年度石化產業智慧化補助計畫正式開放申請",
     description: "提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。",
-    image: "/images/all/new_logo.jpg",
+    image: withBasePath("/images/all/new_logo.jpg"),
     keywords: ["產業AI", "技術文件"],
     contributor: "設計研發組研究員 郭憶璇、江宛庭",
     bodyHtml: `
@@ -68,7 +70,7 @@ export const SERVE_ITEMS: ServeItem[] = [
     date: "2026-04-10",
     title: "智慧化人才培訓課程即日起開放報名",
     description: "提供專業人才培訓方案，協助提升產業競爭力與技術能量，課程結業另有補助資格認證。",
-    image: "/images/all/new_logo.jpg",
+    image: withBasePath("/images/all/new_logo.jpg"),
     keywords: ["培訓課程"],
     bodyHtml: `<p>提供專業人才培訓方案，協助提升產業競爭力與技術能量，課程結業另有補助資格認證，詳細課綱請下載附件。</p>`,
   },
@@ -78,7 +80,7 @@ export const SERVE_ITEMS: ServeItem[] = [
     date: "2026-03-28",
     title: "跨領域專家團隊進場輔導申請說明",
     description: "安排跨領域專家團隊進場輔導，協助診斷升級瓶頸與提供解決策略。",
-    image: "/images/all/new_logo.jpg",
+    image: withBasePath("/images/all/new_logo.jpg"),
     keywords: ["專家諮詢"],
     bodyHtml: `<p>安排跨領域專家團隊進場輔導，協助診斷升級瓶頸與提供解決策略，申請流程與資格請參閱下載文件。</p>`,
   },
@@ -88,7 +90,7 @@ export const SERVE_ITEMS: ServeItem[] = [
     date: "2026-03-12",
     title: "中央與地方補助資源整合手冊",
     description: "整合中央與地方各項專案補助資源，減輕企業研發與數位轉型負擔。",
-    image: "/images/all/new_logo.jpg",
+    image: withBasePath("/images/all/new_logo.jpg"),
     keywords: ["補助申請"],
     bodyHtml: `<p>整合中央與地方各項專案補助資源，減輕企業研發與數位轉型負擔，內容每季更新，請下載最新版手冊。</p>`,
   },

@@ -6,6 +6,7 @@ import Badge from "@/components/ui/Badge";
 import ShareBox from "@/components/ui/ShareBox";
 import PromotionSubNav from "@/components/promotion/PromotionSubNav";
 import PromotionContactInfo from "@/components/promotion/PromotionContactInfo";
+import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "我要投稿",
@@ -62,7 +63,7 @@ export default function PromotionContributePage() {
           </div>
 
           <div className="ratio ratio-4x3">
-            <img className="img-fluid d-block" src="/images/all/new_logo.jpg" alt="" />
+            <img className="img-fluid d-block" src={withBasePath("/images/all/new_logo.jpg")} alt="" />
           </div>
 
           <div className="Contributor">撰稿人 / 設計研發組研究員 郭憶璇、江宛庭</div>
@@ -83,14 +84,14 @@ export default function PromotionContributePage() {
               <i className="bi bi-file-earmark-arrow-down me-1" aria-hidden="true"></i>
               <span>下載投稿格式</span>
               <div className="con-arrow" aria-hidden="true">
-                <img className="img-fluid d-block" src="/images/home/arrow.svg" alt="" />
+                <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt="" />
               </div>
             </a>
             <Link href="/promotion" title="前往參考已發布的產業案例" className="contribute_more_2">
               <i className="bi bi-file-text me-1" aria-hidden="true"></i>
               <span>參考已發布的產業案例</span>
               <div className="con-arrow" aria-hidden="true">
-                <img className="img-fluid d-block" src="/images/home/arrow.svg" alt="" />
+                <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt="" />
               </div>
             </Link>
           </div>

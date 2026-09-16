@@ -10,6 +10,7 @@
  * `mode="review"` 對應 p03.html（Step 4 完成註冊）唯讀檢視，直接顯示
  * 一張示範縮圖，不是可互動的上傳按鈕。
  */
+import { withBasePath } from "@/lib/api-client";
 export default function DocumentUploadField({
   label,
   required,
@@ -28,7 +29,7 @@ export default function DocumentUploadField({
       <div className="tit_dow">
         <label className="mb-2">{label}</label>
         <div className="pt-2">
-          <img className="img-fluid d-block" src="/images/all/menb_logo2.jpg" alt={previewAlt ?? label} />
+          <img className="img-fluid d-block" src={withBasePath("/images/all/menb_logo2.jpg")} alt={previewAlt ?? label} />
         </div>
       </div>
     );

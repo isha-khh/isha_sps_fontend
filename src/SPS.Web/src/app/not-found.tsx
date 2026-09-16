@@ -3,6 +3,7 @@ import Header from "@/components/layout/Headers";
 import Footer from "@/components/layout/Footer";
 import BodyClass from "@/components/BodyClass";
 import AutoRedirectCountdown from "@/components/ui/AutoRedirectCountdown";
+import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "找不到頁面",
@@ -56,7 +57,7 @@ export default function NotFound() {
               <div className="content" style={{ flex: "1 1 100%", width: "100%", maxWidth: "100%" }}>
                 <div className="error_wrap">
                   <div className="error_wrap_top">
-                    <img className="img-fluid d-block" src="/images/all/logo.svg" alt="智慧工安技術 產業資訊暨媒合平台" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/all/logo.svg")} alt="智慧工安技術 產業資訊暨媒合平台" />
 
                     <div className="error_content">
                       <h2 className="error_title">找不到網路資源</h2>
@@ -69,11 +70,11 @@ export default function NotFound() {
                   </div>
 
                   <div className="footer_bg4" aria-hidden="true">
-                    <img className="img-fluid d-block" src="/images/all/footer_bg4.png" alt="" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/all/footer_bg4.png")} alt="" />
                   </div>
 
                   <div className="s_round_3" aria-hidden="true">
-                    <img className="img-fluid d-block" src="/images/home/round_3.jpg" alt="" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/home/round_3.jpg")} alt="" />
                   </div>
                 </div>
               </div>

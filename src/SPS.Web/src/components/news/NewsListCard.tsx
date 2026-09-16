@@ -1,4 +1,5 @@
 import Badge from "@/components/ui/Badge";
+import { withBasePath } from "@/lib/api-client";
 
 export interface NewsListCardMeta {
   icon: "calendar" | "geo";
@@ -75,7 +76,7 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
             </div>
 
             <div className="news-arrow" aria-hidden="true">
-              <img className="img-fluid d-block" src="/images/home/arrow_black.svg" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/home/arrow_black.svg")} alt="" />
             </div>
           </a>
 

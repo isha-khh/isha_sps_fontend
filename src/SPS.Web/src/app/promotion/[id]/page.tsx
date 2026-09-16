@@ -12,6 +12,7 @@ import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import { fetchPromotionCases, fetchPromotionCaseDetail } from "@/lib/api.server";
 import { formatIsoDate, sortByViewCount } from "@/lib/content-list-utils";
 import { INDUSTRY_CASES, PROMOTION_FALLBACK_IMAGE, getIndustryCase } from "@/lib/promotion-data";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 查一筆產業案例，後端沒有（或連不到）才退回假資料用 id 查找。
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: PageProps<"/promotion/[id]">)
 }
 
 const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: "/images/all/new_logo.jpg", title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
 ];
 
 /**
@@ -96,10 +97,10 @@ export default async function PromotionShowPage({ params }: PageProps<"/promotio
         decorations={
           <>
             <div className="s_round_6" aria-hidden="true">
-              <img className="img-fluid d-block" src="/images/home/round_6.png" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/home/round_6.png")} alt="" />
             </div>
             <div className="s_round_3" aria-hidden="true">
-              <img className="img-fluid d-block" src="/images/home/round_3.jpg" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/home/round_3.jpg")} alt="" />
             </div>
           </>
         }

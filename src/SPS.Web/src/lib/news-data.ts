@@ -1,4 +1,5 @@
 import { wrapHtmlAsPuckContent } from "@/lib/puck-content";
+import { withBasePath } from "@/lib/api-client";
 import type { NewsItem, NewsDetail } from "@/lib/types";
 import { formatIsoDate, sortByViewCount } from "@/lib/content-list-utils";
 
@@ -55,7 +56,7 @@ export function deriveNewsCategories(items: NewsItem[]): NewsCategory[] {
  * `NewsResponse` 的 `ImageUrl`／`Tags`，見 docs/改版規劃.md）——`imageUrl`
  * 沒設定圖片時仍可能是 undefined，卡片圖用 `NEWS_FALLBACK_IMAGE` 佔位。
  */
-export const NEWS_FALLBACK_IMAGE = "/images/all/new_logo.jpg";
+export const NEWS_FALLBACK_IMAGE = withBasePath("/images/all/new_logo.jpg");
 
 /**
  * 「活動進行中／即將開始／已結束」這個狀態標籤不是後端另外存一個狀態

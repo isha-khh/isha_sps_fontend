@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 過渡期元件：內容照抄舊站的 page/_uc/nav.html，
@@ -465,7 +466,7 @@ export default function Headers() {
             不是 runtime clone 出來的（見檔案開頭的說明） */}
         <div className="bsnav-mobile right d-md-none" role="dialog" aria-modal="true" aria-hidden="true">
           <button type="button" className="bsnavclose close-btn border-0 bg-transparent" aria-label="關閉選單" tabIndex={-1}>
-            <img src="/images/all/close.svg" alt="" aria-hidden="true" />
+            <img src={withBasePath("/images/all/close.svg")} alt="" aria-hidden="true" />
           </button>
           <div className="bsnav-mobile-overlay"></div>
           <div className="navbar nav-big-wrapper">

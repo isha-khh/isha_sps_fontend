@@ -3,6 +3,7 @@ import Tabs from "@/components/ui/Tabs";
 import MoreLink from "@/components/ui/MoreLink";
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
+import { withBasePath } from "@/lib/api-client";
 
 interface ServiceSlideData {
   href: string;
@@ -24,19 +25,19 @@ const CATEGORIES: ServiceCategory[] = [
   {
     id: "ser-home-01",
     label: "技術工具",
-    icon: "/images/home/ser_icon01.svg",
+    icon: withBasePath("/images/home/ser_icon01.svg"),
     englishLabel: "Services 01",
     slides: [
       {
         href: "/serve/1",
-        image: "/images/home/ser_bg.jpg",
+        image: withBasePath("/images/home/ser_bg.jpg"),
         title: "技術工具",
         keywords: ["產業AI", "技術文件"],
         description: "提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。",
       },
       {
         href: "/serve/2",
-        image: "/images/home/ser_bg.jpg",
+        image: withBasePath("/images/home/ser_bg.jpg"),
         title: "技術工具",
         keywords: ["產業AI", "技術文件"],
         description: "提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。",
@@ -46,12 +47,12 @@ const CATEGORIES: ServiceCategory[] = [
   {
     id: "ser-home-02",
     label: "人才培育",
-    icon: "/images/home/ser_icon02.svg",
+    icon: withBasePath("/images/home/ser_icon02.svg"),
     englishLabel: "Services 02",
     slides: [
       {
         href: "/serve/3",
-        image: "/images/home/ser_bg.jpg",
+        image: withBasePath("/images/home/ser_bg.jpg"),
         title: "人才培育",
         keywords: ["培訓課程"],
         description: "提供專業人才培訓方案，協助提升產業競爭力與技術能量。",
@@ -61,12 +62,12 @@ const CATEGORIES: ServiceCategory[] = [
   {
     id: "ser-home-03",
     label: "產業輔導",
-    icon: "/images/home/ser_icon03.svg",
+    icon: withBasePath("/images/home/ser_icon03.svg"),
     englishLabel: "Services 03",
     slides: [
       {
         href: "/serve/4",
-        image: "/images/home/ser_bg.jpg",
+        image: withBasePath("/images/home/ser_bg.jpg"),
         title: "產業輔導",
         keywords: ["專家諮詢"],
         description: "安排跨領域專家團隊進場輔導，協助診斷升級瓶頸與提供解決策略。",
@@ -76,12 +77,12 @@ const CATEGORIES: ServiceCategory[] = [
   {
     id: "ser-home-04",
     label: "補助資源",
-    icon: "/images/home/ser_icon04.svg",
+    icon: withBasePath("/images/home/ser_icon04.svg"),
     englishLabel: "Services 04",
     slides: [
       {
         href: "/serve/5",
-        image: "/images/home/ser_bg.jpg",
+        image: withBasePath("/images/home/ser_bg.jpg"),
         title: "補助資源",
         keywords: ["補助申請"],
         description: "整合中央與地方各項專案補助資源，減輕企業研發與數位轉型負擔。",
@@ -188,10 +189,10 @@ export default function HomeService() {
       />
 
       <div className="round_3" aria-hidden="true">
-        <img className="img-fluid d-block" src="/images/home/round_3.jpg" alt="" />
+        <img className="img-fluid d-block" src={withBasePath("/images/home/round_3.jpg")} alt="" />
       </div>
       <div className="round_3_2" aria-hidden="true">
-        <img className="img-fluid d-block" src="/images/home/round_2.png" alt="" />
+        <img className="img-fluid d-block" src={withBasePath("/images/home/round_2.png")} alt="" />
       </div>
     </div>
   );

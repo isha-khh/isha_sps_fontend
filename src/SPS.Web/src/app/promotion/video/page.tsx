@@ -13,17 +13,18 @@ import { fetchVideos } from "@/lib/api.server";
 import { PROMOTION_VIDEOS, deriveVideoCategories, sortVideosByOrdinal } from "@/lib/promotion-data";
 import { formatIsoDate, getYouTubeThumbnail } from "@/lib/content-list-utils";
 import type { VideoItem } from "@/lib/types";
+import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "影音專區",
 };
 
 const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: "/images/all/new_logo.jpg", title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
 ];
 
 const VIDEO_PAGE_SIZE = 9;
-const VIDEO_FALLBACK_THUMBNAIL = "/images/home/ser_bg2.jpg";
+const VIDEO_FALLBACK_THUMBNAIL = withBasePath("/images/home/ser_bg2.jpg");
 // 精選影音＋清單卡片共用同一個 Fancybox 分組，燈箱開著時可以直接用
 // 上一部/下一部切換到頁面上其他支影片，不用先關掉燈箱再點下一張卡片
 const VIDEO_FANCYBOX_GROUP = "promotion-video";
@@ -138,10 +139,10 @@ export default async function PromotionVideoPage({ searchParams }: PageProps<"/p
         decorations={
           <>
             <div className="s_round_6" aria-hidden="true">
-              <img className="img-fluid d-block" src="/images/home/round_6.png" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/home/round_6.png")} alt="" />
             </div>
             <div className="s_round_3" aria-hidden="true">
-              <img className="img-fluid d-block" src="/images/home/round_3.jpg" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/home/round_3.jpg")} alt="" />
             </div>
           </>
         }

@@ -6,6 +6,7 @@ import MoreLink from "@/components/ui/MoreLink";
 import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
 import EnterpriseContactModal from "@/components/matching/EnterpriseContactModal";
 import { ENTERPRISE_DETAILS, TECH_ATTRIBUTE_GROUPS, getCompanyTypeLabels, getEnterpriseDetail } from "@/lib/matching-data";
+import { withBasePath } from "@/lib/api-client";
 
 export function generateStaticParams() {
   return ENTERPRISE_DETAILS.map((item) => ({ id: item.id }));
@@ -57,7 +58,7 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
           <div className="item_box d-flex mb-4">
             <div className="pic">
               <div className="ratio ratio-4x3">
-                <img className="img-fluid d-block" src={company.photo || "/images/all/new_logo.jpg"} alt={`${company.name} 公司標誌`} />
+                <img className="img-fluid d-block" src={company.photo || withBasePath("/images/all/new_logo.jpg")} alt={`${company.name} 公司標誌`} />
               </div>
             </div>
 

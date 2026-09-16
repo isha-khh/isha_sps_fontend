@@ -1,4 +1,5 @@
 import HeroImage from "@/components/ui/HeroImage";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 過渡期元件：內容照抄舊站的 page/_uc/banner_home.html。
@@ -42,18 +43,18 @@ export default function Banner() {
           <div className="pic">
             <div className="pic_box">
               <div className="Light_1" aria-hidden="true">
-                <img className="img-fluid d-block" src="/images/banner/banner_Light.png" alt="" />
+                <img className="img-fluid d-block" src={withBasePath("/images/banner/banner_Light.png")} alt="" />
               </div>
               <div className="Light_2" aria-hidden="true">
-                <img className="img-fluid d-block" src="/images/banner/banner_Light.png" alt="" />
+                <img className="img-fluid d-block" src={withBasePath("/images/banner/banner_Light.png")} alt="" />
               </div>
               <div className="Light_3" aria-hidden="true">
-                <img className="img-fluid d-block" src="/images/banner/banner_Light.png" alt="" />
+                <img className="img-fluid d-block" src={withBasePath("/images/banner/banner_Light.png")} alt="" />
               </div>
 
               <HeroImage
                 className="img-fluid d-block"
-                src="/images/banner/banner_bg.jpg"
+                src={withBasePath("/images/banner/banner_bg.jpg")}
                 alt="智慧化職安防護與產業數位轉型主視覺"
               />
             </div>

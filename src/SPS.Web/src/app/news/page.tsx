@@ -9,6 +9,7 @@ import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import NewsListCard from "@/components/news/NewsListCard";
 import { fetchNews } from "@/lib/api.server";
+import { withBasePath } from "@/lib/api-client";
 import {
   NEWS_ARTICLES,
   NEWS_FALLBACK_IMAGE,
@@ -23,8 +24,8 @@ export const metadata: Metadata = {
 };
 
 const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: "/images/all/new_logo.jpg", title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: "/images/all/new_logo.jpg", title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
 ];
 
 /**

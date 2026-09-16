@@ -5,9 +5,10 @@ import CarouselControls from "@/components/ui/CarouselControls";
 import { fetchVideos } from "@/lib/api.server";
 import { PROMOTION_VIDEOS, sortVideosByOrdinal } from "@/lib/promotion-data";
 import { formatIsoDate, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/content-list-utils";
+import { withBasePath } from "@/lib/api-client";
 
 const CAROUSEL_ID = "home-video";
-const VIDEO_FALLBACK_THUMBNAIL = "/images/home/ser_bg2.jpg";
+const VIDEO_FALLBACK_THUMBNAIL = withBasePath("/images/home/ser_bg2.jpg");
 const HOME_VIDEO_COUNT = 4;
 
 /**

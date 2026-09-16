@@ -5,6 +5,7 @@ import NewsItemCard, { type NewsItemCardData } from "@/components/news/NewsItemC
 import { fetchNews } from "@/lib/api.server";
 import { NEWS_ARTICLES, deriveNewsCategories } from "@/lib/news-data";
 import type { NewsItem } from "@/lib/types";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 卡片左側「日 + 年.月」的圓角小方塊要拆成兩段文字，真後端沒有另外
@@ -115,7 +116,7 @@ export default async function HomeNews() {
       <Tabs id="pills-tab" ariaLabel="最新消息分類頁籤" items={tabs} />
 
       <div className="round_2" aria-hidden="true">
-        <img className="img-fluid d-block" src="/images/home/round_2.png" alt="" />
+        <img className="img-fluid d-block" src={withBasePath("/images/home/round_2.png")} alt="" />
       </div>
     </div>
   );

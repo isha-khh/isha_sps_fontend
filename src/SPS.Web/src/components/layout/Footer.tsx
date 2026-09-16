@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 過渡期元件：內容照抄舊站的 page/_uc/footer.html，樣式繼續吃舊站 CSS。
@@ -18,7 +19,7 @@ export default function Footer() {
         <div className="d-flex">
           <div className="footer_left">
             <div className="pic">
-              <img className="img-fluid d-block" src="/images/all/footer_bg2.png" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/all/footer_bg2.png")} alt="" />
             </div>
             <div className="tit">
               <div className="h3">訂閱電子報，掌握第一手動態</div>
@@ -50,16 +51,16 @@ export default function Footer() {
         </div>
 
         <div className="footer_bg3" aria-hidden="true">
-          <img className="img-fluid d-block" src="/images/all/footer_bg3.png" alt="" />
+          <img className="img-fluid d-block" src={withBasePath("/images/all/footer_bg3.png")} alt="" />
         </div>
 
         <div className="footer_bg4" aria-hidden="true">
-          <img className="img-fluid d-block" src="/images/all/footer_bg4.png" alt="" />
+          <img className="img-fluid d-block" src={withBasePath("/images/all/footer_bg4.png")} alt="" />
         </div>
       </div>
 
       <div className="round_7" aria-hidden="true">
-        <img className="img-fluid d-block" src="/images/home/round_7.jpg" alt="" />
+        <img className="img-fluid d-block" src={withBasePath("/images/home/round_7.jpg")} alt="" />
       </div>
 
       <div className="footer_content">
@@ -67,7 +68,7 @@ export default function Footer() {
           <div className="footer-main">
             <div className="footer-col footer-brand">
               <div className="footer_log">
-                <img className="img-fluid d-block" src="/images/all/logo.svg" alt="智慧工安技術 產業資訊暨媒合平台" />
+                <img className="img-fluid d-block" src={withBasePath("/images/all/logo.svg")} alt="智慧工安技術 產業資訊暨媒合平台" />
               </div>
             </div>
 
@@ -152,42 +153,42 @@ export default function Footer() {
               <li>
                 <a href="#" target="_blank" rel="noopener noreferrer" title="LINE 官方帳號(另開新視窗)">
                   <span className="bi_line" aria-hidden="true">
-                    <img className="img-fluid d-block" src="/images/all/fot_line.svg" alt="LINE 官方帳號" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_line.svg")} alt="LINE 官方帳號" />
                   </span>
                 </a>
               </li>
               <li>
                 <a href="#" target="_blank" rel="noopener noreferrer" title="Facebook 粉絲專頁(另開新視窗)">
                   <span className="bi_fb" aria-hidden="true">
-                    <img className="img-fluid d-block" src="/images/all/fot_fb.svg" alt="Facebook 粉絲專頁" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_fb.svg")} alt="Facebook 粉絲專頁" />
                   </span>
                 </a>
               </li>
               <li>
                 <a href="#" target="_blank" rel="noopener noreferrer" title="Instagram(另開新視窗)">
                   <span className="bi_ig" aria-hidden="true">
-                    <img className="img-fluid d-block" src="/images/all/fot_ig.svg" alt="Instagram" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_ig.svg")} alt="Instagram" />
                   </span>
                 </a>
               </li>
               <li>
                 <a href="#" target="_blank" rel="noopener noreferrer" title="YouTube(另開新視窗)">
                   <span className="bi_yt" aria-hidden="true">
-                    <img className="img-fluid d-block" src="/images/all/fot_yt.svg" alt="YouTube" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_yt.svg")} alt="YouTube" />
                   </span>
                 </a>
               </li>
               <li>
                 <a href="#" target="_blank" rel="noopener noreferrer" title="Threads(另開新視窗)">
                   <span className="bi_ts" aria-hidden="true">
-                    <img className="img-fluid d-block" src="/images/all/fot_th.svg" alt="Threads" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_th.svg")} alt="Threads" />
                   </span>
                 </a>
               </li>
               <li>
                 <a href="#" target="_blank" rel="noopener noreferrer" title="Podcast(另開新視窗)">
                   <span className="bi_pod" aria-hidden="true">
-                    <img className="img-fluid d-block" src="/images/all/fot_pod.svg" alt="Podcast" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_pod.svg")} alt="Podcast" />
                   </span>
                 </a>
               </li>
@@ -205,13 +206,13 @@ export default function Footer() {
           <div className="footer-bottom">
             <div className="badges-group">
               <a href="#" target="_blank" rel="noopener noreferrer" title="無障礙網頁標章2.0（另開新視窗）">
-                <img className="img-fluid" src="/images/all/footer_1.jpg" alt="無障礙網頁標章2.0" />
+                <img className="img-fluid" src={withBasePath("/images/all/footer_1.jpg")} alt="無障礙網頁標章2.0" />
               </a>
               <a href="https://www.ida.gov.tw/" target="_blank" rel="noopener noreferrer" title="經濟部產業發展署（另開新視窗）">
-                <img className="img-fluid" src="/images/all/footer_2.svg" alt="經濟部產業發展署" />
+                <img className="img-fluid" src={withBasePath("/images/all/footer_2.svg")} alt="經濟部產業發展署" />
               </a>
               <a href="#" target="_blank" rel="noopener noreferrer" title="工業安全衛生協會（另開新視窗）">
-                <img className="img-fluid" src="/images/all/footer_3.svg" alt="工業安全衛生協會" />
+                <img className="img-fluid" src={withBasePath("/images/all/footer_3.svg")} alt="工業安全衛生協會" />
               </a>
             </div>
 

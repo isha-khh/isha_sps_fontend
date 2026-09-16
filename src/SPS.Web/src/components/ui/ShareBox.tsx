@@ -1,4 +1,5 @@
 "use client";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 積木元件：文章分享列，對應舊站 page/_uc/Sharebox.html。
@@ -42,7 +43,7 @@ export default function ShareBox() {
               shareToFB();
             }}
           >
-            <img className="img-fluid d-block" src="/images/all/share_fb.svg" alt="Facebook" />
+            <img className="img-fluid d-block" src={withBasePath("/images/all/share_fb.svg")} alt="Facebook" />
           </a>
         </li>
 
@@ -55,7 +56,7 @@ export default function ShareBox() {
               shareToLine();
             }}
           >
-            <img className="img-fluid d-block" src="/images/all/share_line.svg" alt="LINE" />
+            <img className="img-fluid d-block" src={withBasePath("/images/all/share_line.svg")} alt="LINE" />
           </a>
         </li>
 
@@ -68,7 +69,7 @@ export default function ShareBox() {
               shareToThreads();
             }}
           >
-            <img className="img-fluid d-block" src="/images/all/share_th.svg" alt="Threads" />
+            <img className="img-fluid d-block" src={withBasePath("/images/all/share_th.svg")} alt="Threads" />
           </a>
         </li>
       </ul>

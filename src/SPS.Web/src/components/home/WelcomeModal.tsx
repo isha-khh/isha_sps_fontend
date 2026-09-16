@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Lightbox from "@/components/ui/Lightbox";
+import { withBasePath } from "@/lib/api-client";
 
 /** localStorage 的 key，記錄「今天不再顯示」勾選當下的日期 */
 const STORAGE_KEY = "sps-welcome-modal-dismissed-date";
@@ -79,7 +80,7 @@ export default function WelcomeModal() {
       <div style={{ width: "100%", position: "relative" }}>
         <img
           className="img-fluid d-block"
-          src="/images/home/ser_bg.jpg"
+          src={withBasePath("/images/home/ser_bg.jpg")}
           alt="活動公告"
           style={{ objectFit: "cover", width: "100%", height: "100%" }}
         />

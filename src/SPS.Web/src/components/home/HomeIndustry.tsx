@@ -6,6 +6,7 @@ import { fetchPromotionCases } from "@/lib/api.server";
 import { sortByViewCount } from "@/lib/content-list-utils";
 import type { PromotionCase } from "@/lib/types";
 import { PROMOTION_FALLBACK_IMAGE } from "@/lib/promotion-data";
+import { withBasePath } from "@/lib/api-client";
 
 interface IndustryCaseData {
   href: string;
@@ -19,13 +20,13 @@ const CASES: IndustryCaseData[] = [
     href: "/serve/case-1",
     title: "AI 智慧安全帽偵測系統導入石化廠",
     description: "透過電腦視覺即時偵測人員安全裝備佩戴情況，顯著降低工安事故發生率，有效提升工地安全管理效率。",
-    image: "/images/home/ser_bg.jpg",
+    image: withBasePath("/images/home/ser_bg.jpg"),
   },
   {
     href: "/serve/case-2",
     title: "AI 智慧安全帽偵測系統導入石化廠",
     description: "透過電腦視覺即時偵測人員安全裝備佩戴情況，顯著降低工安事故發生率，有效提升工地安全管理效率。",
-    image: "/images/home/ser_bg.jpg",
+    image: withBasePath("/images/home/ser_bg.jpg"),
   },
 ];
 
@@ -66,10 +67,10 @@ export default async function HomeIndustry() {
       </div>
 
       <div className="round_5" aria-hidden="true">
-        <img className="img-fluid d-block" src="/images/home/round_5.jpg" alt="" />
+        <img className="img-fluid d-block" src={withBasePath("/images/home/round_5.jpg")} alt="" />
       </div>
       <div className="round_6" aria-hidden="true">
-        <img className="img-fluid d-block" src="/images/home/round_6.png" alt="" />
+        <img className="img-fluid d-block" src={withBasePath("/images/home/round_6.png")} alt="" />
       </div>
 
       <div className="home_industry_box">

@@ -3,6 +3,7 @@ import MoreLink from "@/components/ui/MoreLink";
 import Badge from "@/components/ui/Badge";
 import { fetchCompanies } from "@/lib/api.server";
 import type { CompanyList } from "@/lib/types";
+import { withBasePath } from "@/lib/api-client";
 
 interface EnterpriseListingData {
   href: string;
@@ -118,7 +119,7 @@ export default async function HomeEnterprise() {
               <p>{listing.description}</p>
 
               <a href={listing.href} className="news-arrow" title={listing.name}>
-                <img className="img-fluid d-block" src="/images/home/arrow.svg" alt="" />
+                <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt="" />
               </a>
             </div>
           ))}

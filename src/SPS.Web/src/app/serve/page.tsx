@@ -8,14 +8,15 @@ import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import ServeItemCard from "@/components/serve/ServeItemCard";
 import { SERVE_ITEMS, getServeSiblingCategories } from "@/lib/serve-data";
+import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "服務專區",
 };
 
 const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: "/images/all/new_logo.jpg", title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: "/images/all/new_logo.jpg", title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
 ];
 
 /**

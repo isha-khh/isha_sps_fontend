@@ -11,6 +11,7 @@ import HomeIndustry from "@/components/home/HomeIndustry";
 import HomeEnterprise from "@/components/home/HomeEnterprise";
 import HomeVideo from "@/components/home/HomeVideo";
 import WelcomeModal from "@/components/home/WelcomeModal";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 首頁——所有區塊都已經轉成 React 元件：載入動畫、進站彈跳公告、
@@ -50,7 +51,7 @@ export default function HomePage() {
               <div className="content">
                 <div className="home_City">
                   <div className="City_bg01" aria-hidden="true" data-aos="fade-up">
-                    <img className="img-fluid d-block" src="/images/home/City_bg01.jpg" alt="" />
+                    <img className="img-fluid d-block" src={withBasePath("/images/home/City_bg01.jpg")} alt="" />
                   </div>
                 </div>
 

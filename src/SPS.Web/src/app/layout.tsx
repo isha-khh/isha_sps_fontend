@@ -4,6 +4,7 @@ import BootstrapModalRouteCleanup from "@/components/BootstrapModalRouteCleanup"
 import { notoSansTC } from "@/lib/fonts";
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { withBasePath } from "@/lib/api-client";
 // ------------------------------------------------------------------
 // 過渡期資源載入策略
 //
@@ -54,10 +55,10 @@ import "../../public/js/slick-1.8.1/slick/slick.css";
 import "../../public/js/slick-1.8.1/slick/slick-theme.css";
 
 const LEGACY_SITE_STYLESHEETS = [
-  "/css/coreStyle.css",
-  "/css/style.css",
-  "/css/style_rwd.css",
-] as const;
+  withBasePath("/css/coreStyle.css"),
+  withBasePath("/css/style.css"),
+  withBasePath("/css/style_rwd.css"),
+];
 
 export const metadata: Metadata = {
   // 每個頁面用 `export const metadata = { title: "頁面名稱" }` 就好，
@@ -82,16 +83,16 @@ export const metadata: Metadata = {
   // `public/` 裡本來就有、但一直沒有接進 `<head>` 的既有素材，一併補上：
   icons: {
     icon: [
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/android-chrome-256x256.png", sizes: "256x256", type: "image/png" },
-      { url: "/favicon.ico" },
+      { url: withBasePath("/favicon-16x16.png"), sizes: "16x16", type: "image/png" },
+      { url: withBasePath("/favicon-32x32.png"), sizes: "32x32", type: "image/png" },
+      { url: withBasePath("/android-chrome-192x192.png"), sizes: "192x192", type: "image/png" },
+      { url: withBasePath("/android-chrome-256x256.png"), sizes: "256x256", type: "image/png" },
+      { url: withBasePath("/favicon.ico") },
     ],
-    apple: "/apple-touch-icon.png",
-    other: [{ rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#f4d44d" }],
+    apple: withBasePath("/apple-touch-icon.png"),
+    other: [{ rel: "mask-icon", url: withBasePath("/safari-pinned-tab.svg"), color: "#f4d44d" }],
   },
-  manifest: "/site.webmanifest",
+  manifest: withBasePath("/site.webmanifest"),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -107,19 +108,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
 
         {/* 舊站第三方套件，依照原本的載入順序保留，元件轉換完成後再逐步移除 */}
-        <Script src="/js/jquery-3.7.1.min.js" strategy="beforeInteractive" />
+        <Script src={withBasePath("/js/jquery-3.7.1.min.js")} strategy="beforeInteractive" />
         <Script
-          src="/js/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"
+          src={withBasePath("/js/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js")}
           strategy="beforeInteractive"
         />
-        <Script src="/js/aos-master/dist/aos.js" strategy="beforeInteractive" />
-        <Script src="/js/slick-1.8.1/slick/slick.min.js" strategy="beforeInteractive" />
+        <Script src={withBasePath("/js/aos-master/dist/aos.js")} strategy="beforeInteractive" />
+        <Script src={withBasePath("/js/slick-1.8.1/slick/slick.min.js")} strategy="beforeInteractive" />
         <Script
-          src="/js/fancybox-5.0.33/dist/fancybox/fancybox.umd.js"
+          src={withBasePath("/js/fancybox-5.0.33/dist/fancybox/fancybox.umd.js")}
           strategy="beforeInteractive"
         />
-        <Script src="/js/TweenLite.min.js" strategy="beforeInteractive" />
-        <Script src="/js/CSSPlugin.min.js" strategy="beforeInteractive" />
+        <Script src={withBasePath("/js/TweenLite.min.js")} strategy="beforeInteractive" />
+        <Script src={withBasePath("/js/CSSPlugin.min.js")} strategy="beforeInteractive" />
 
         {/*
           這兩支排在 afterInteractive（hydrate 完成後才執行），跟其他套件不同：
@@ -131,8 +132,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           server 端算出來的 HTML 對不上，變成 hydration mismatch（實測過，
           拿掉其中任一支、或改回 beforeInteractive 都會重現）。
         */}
-        <Script src="/js/bsnav-master/dist/bsnav.min.js" strategy="afterInteractive" />
-        <Script src="/js/coreScript.js" strategy="afterInteractive" />
+        <Script src={withBasePath("/js/bsnav-master/dist/bsnav.min.js")} strategy="afterInteractive" />
+        <Script src={withBasePath("/js/coreScript.js")} strategy="afterInteractive" />
       </body>
     </html>
   );

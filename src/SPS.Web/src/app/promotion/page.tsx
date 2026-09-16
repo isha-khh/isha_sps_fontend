@@ -11,13 +11,14 @@ import Pagination from "@/components/ui/Pagination";
 import { fetchPromotionCases } from "@/lib/api.server";
 import { formatIsoDate, sortByViewCount } from "@/lib/content-list-utils";
 import { INDUSTRY_CASES, PROMOTION_FALLBACK_IMAGE, derivePromotionIndustries } from "@/lib/promotion-data";
+import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "產業案例",
 };
 
 const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: "/images/all/new_logo.jpg", title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
 ];
 
 /**
@@ -132,10 +133,10 @@ export default async function PromotionIndexPage({ searchParams }: PageProps<"/p
         decorations={
           <>
             <div className="s_round_6" aria-hidden="true">
-              <img className="img-fluid d-block" src="/images/home/round_6.png" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/home/round_6.png")} alt="" />
             </div>
             <div className="s_round_3" aria-hidden="true">
-              <img className="img-fluid d-block" src="/images/home/round_3.jpg" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/home/round_3.jpg")} alt="" />
             </div>
           </>
         }

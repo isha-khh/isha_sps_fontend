@@ -6,6 +6,7 @@ import FaqAccordion from "@/components/faq/FaqAccordion";
 import SearchBar from "@/components/ui/SearchBar";
 import { fetchFaq } from "@/lib/api.server";
 import { FAQ_ITEMS, deriveFaqCategories } from "@/lib/faq-data";
+import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "常見問題",
@@ -65,10 +66,10 @@ export default async function FaqPage({ searchParams }: PageProps<"/faq">) {
         decorations={
           <>
             <div className="s_round_6" aria-hidden="true">
-              <img className="img-fluid d-block" src="/images/home/round_6.png" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/home/round_6.png")} alt="" />
             </div>
             <div className="s_round_3" aria-hidden="true">
-              <img className="img-fluid d-block" src="/images/home/round_3.jpg" alt="" />
+              <img className="img-fluid d-block" src={withBasePath("/images/home/round_3.jpg")} alt="" />
             </div>
           </>
         }

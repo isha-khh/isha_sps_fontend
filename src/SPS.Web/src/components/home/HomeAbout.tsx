@@ -1,5 +1,6 @@
 import SectionTitle from "@/components/ui/SectionTitle";
 import MoreLink from "@/components/ui/MoreLink";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 過渡期元件：內容照抄 index.html 裡首頁「智慧工安技術 產業資訊暨媒合平台」
@@ -46,7 +47,7 @@ export default function HomeAbout() {
       </div>
 
       <div className="round_1">
-        <img className="img-fluid d-block" src="/images/home/round_1.jpg" alt="" />
+        <img className="img-fluid d-block" src={withBasePath("/images/home/round_1.jpg")} alt="" />
       </div>
     </div>
   );

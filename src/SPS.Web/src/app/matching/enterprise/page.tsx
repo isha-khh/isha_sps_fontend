@@ -6,6 +6,7 @@ import MatchingSearchBar from "@/components/matching/MatchingSearchBar";
 import EnterpriseCard from "@/components/matching/EnterpriseCard";
 import Pagination from "@/components/ui/Pagination";
 import { ENTERPRISE_LISTINGS } from "@/lib/matching-data";
+import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "企業名錄",
@@ -63,7 +64,7 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
               key={company.id}
               data={{
                 href: `/matching/enterprise/${company.id}`,
-                image: company.photo || "/images/all/new_logo.jpg",
+                image: company.photo || withBasePath("/images/all/new_logo.jpg"),
                 title: company.name,
                 description: company.introduction ?? "",
                 keywords: company.tagNames,

@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/api-client";
+
 export interface ChecklistOption {
   value: string;
   /** 對應舊站寫死在 HTML 裡的示範預設勾選狀態（demo 假資料本來就長這樣，照抄） */
@@ -243,14 +245,14 @@ export interface MemberTypeOption {
  * 因為要依選擇動態顯示/隱藏後面的問題），不是像原本這樣純 CSS 單選卡。
  */
 export const APPLICANT_TYPE_OPTIONS: MemberTypeOption[] = [
-  { id: "type_individual", value: "individual", title: "個人會員", desc: "個人專業人士", icon: "/images/member/menb_type_icon01.svg" },
-  { id: "type_company", value: "company", title: "企業會員", desc: "尋找技術服務，或提供技術服務之企業", icon: "/images/member/menb_type_icon04.svg" },
+  { id: "type_individual", value: "individual", title: "個人會員", desc: "個人專業人士", icon: withBasePath("/images/member/menb_type_icon01.svg") },
+  { id: "type_company", value: "company", title: "企業會員", desc: "尋找技術服務，或提供技術服務之企業", icon: withBasePath("/images/member/menb_type_icon04.svg") },
 ];
 
 /** 選了「企業會員」之後的需求/供給端選擇 */
 export const COMPANY_ROLE_OPTIONS: MemberTypeOption[] = [
-  { id: "type_role_demand", value: "demand", title: "需求端", desc: "尋找技術、服務之企業", icon: "/images/member/menb_type_icon04.svg" },
-  { id: "type_role_supply", value: "supply", title: "供給端", desc: "提供技術、服務之企業", icon: "/images/member/menb_type_icon05.svg" },
+  { id: "type_role_demand", value: "demand", title: "需求端", desc: "尋找技術、服務之企業", icon: withBasePath("/images/member/menb_type_icon04.svg") },
+  { id: "type_role_supply", value: "supply", title: "供給端", desc: "提供技術、服務之企業", icon: withBasePath("/images/member/menb_type_icon05.svg") },
 ];
 
 /**
@@ -307,7 +309,7 @@ export const SUPPLIER_TIER_RESULT_OPTIONS: Record<"excellent" | "emerging", Memb
     title: "企業會員－供給端",
     desc: "具成熟技術與服務能力之供給端",
     badge: "卓越會員",
-    icon: "/images/member/menb_type_icon05.svg",
+    icon: withBasePath("/images/member/menb_type_icon05.svg"),
   },
   emerging: {
     id: "tier_result_emerging",
@@ -315,6 +317,6 @@ export const SUPPLIER_TIER_RESULT_OPTIONS: Record<"excellent" | "emerging", Memb
     title: "企業會員－供給端",
     desc: "具創新技術與成長潛力之供給端",
     badge: "新興會員",
-    icon: "/images/member/menb_type_icon06.svg",
+    icon: withBasePath("/images/member/menb_type_icon06.svg"),
   },
 };
