@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import PromoBanner from "@/components/ui/PromoBanner";
 import { SUPPORT_INFO_BLOCKS, SUPPORT_QUICK_LINKS, SUPPORT_ANNOUNCEMENTS } from "@/lib/support-data";
 import { withBasePath } from "@/lib/api-client";
 
@@ -35,6 +36,7 @@ export default function SupportPage() {
       <InnerPageShell
         title="本計畫補助"
         breadcrumb={[{ label: "輔助資源" }, { label: "本計畫補助" }]}
+        banner={<PromoBanner id="support-banner" />}
         aside={
           <>
             <SidebarBanner items={TUTORING_CROSS_PROMO_BANNERS} heading="產業輔導" />

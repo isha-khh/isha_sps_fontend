@@ -4,6 +4,7 @@ import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import ShareBox from "@/components/ui/ShareBox";
 import MoreLink from "@/components/ui/MoreLink";
+import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
 import PopularCourses from "@/components/talent/PopularCourses";
 import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
 import { TALENT_COURSES, getTalentCourse } from "@/lib/talent-data";
@@ -125,6 +126,10 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
           </div>
 
           <div className="txt editor mb-md-5 mb-4" dangerouslySetInnerHTML={{ __html: course.bodyHtml }} />
+
+          <div className="dk_conbo mb-md-5 mb-4">
+            <AttachmentsPanel attachments={course.attachments} relatedLinks={course.relatedLinks} contact={course.contact} />
+          </div>
 
           <div className="d-flex sign_ta">
             <MoreLink href="/talent" label="返回" title="返回" />

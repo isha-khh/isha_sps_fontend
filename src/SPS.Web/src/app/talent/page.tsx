@@ -5,6 +5,7 @@ import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import CourseTable from "@/components/talent/CourseTable";
 import PopularCourses from "@/components/talent/PopularCourses";
+import PromoBanner from "@/components/ui/PromoBanner";
 import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
 import { TALENT_COURSES } from "@/lib/talent-data";
 import { withBasePath } from "@/lib/api-client";
@@ -33,6 +34,7 @@ export default function TalentIndexPage() {
       <InnerPageShell
         title="人才培訓"
         breadcrumb={[{ label: "人才培育" }, { label: "人才培訓" }]}
+        banner={<PromoBanner id="talent-banner" />}
         aside={
           <>
             <PopularCourses courses={TALENT_COURSES} />

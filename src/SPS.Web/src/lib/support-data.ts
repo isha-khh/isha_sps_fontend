@@ -91,7 +91,11 @@ export interface SupportResource {
   organizer: string;
   period: string;
   keywords: string[];
+  /** 左側欄分類，對應設計稿 page/_uc/side/side1_support.html（數位轉型／設備升級／工安改善） */
+  category: string;
 }
+
+export const SUPPORT_RESOURCE_CATEGORIES = ["數位轉型", "設備升級", "工安改善"];
 
 export const SUPPORT_RESOURCES: SupportResource[] = [
   {
@@ -104,6 +108,7 @@ export const SUPPORT_RESOURCES: SupportResource[] = [
     organizer: "經濟部產業發展署",
     period: "2026/01/15 – 2026/03/31",
     keywords: ["數位轉型", "工安改善"],
+    category: "數位轉型",
   },
   {
     id: "2",
@@ -115,5 +120,6 @@ export const SUPPORT_RESOURCES: SupportResource[] = [
     organizer: "經濟部產業發展署",
     period: "2026/01/15 – 2026/03/31",
     keywords: ["數位轉型", "工安改善"],
+    category: "設備升級",
   },
 ];

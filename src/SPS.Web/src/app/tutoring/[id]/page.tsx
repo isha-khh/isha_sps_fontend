@@ -5,6 +5,7 @@ import BodyClass from "@/components/BodyClass";
 import Badge from "@/components/ui/Badge";
 import MoreLink from "@/components/ui/MoreLink";
 import ShareBox from "@/components/ui/ShareBox";
+import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
 import { TUTORING_ITEMS, getTutoringItem } from "@/lib/tutoring-data";
@@ -100,6 +101,10 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
           {item.contributor && <div className="Contributor">撰稿人 / {item.contributor}</div>}
 
           <div className="txt editor mb-md-5 mb-4" dangerouslySetInnerHTML={{ __html: item.bodyHtml }} />
+
+          <div className="dk_conbo mb-md-5 mb-4">
+            <AttachmentsPanel attachments={item.attachments} relatedLinks={item.relatedLinks} contact={item.contact} />
+          </div>
 
           <MoreLink href="/tutoring" label="返回" title="返回" />
         </div>
