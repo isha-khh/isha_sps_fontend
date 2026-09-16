@@ -19,7 +19,14 @@ const nextConfig: NextConfig = {
   // 假設這件事成立（瀏覽器端 API 呼叫、圖片/下載連結都會自動補上
   // `NEXT_PUBLIC_BASE_PATH` 前綴）——但沒開這個設定，Next.js 自己的頁面
   // 路由跟 `_next/*` 靜態資源還是長在網站根目錄，跟前面那層各自為政。
-  basePath: "/sps",
+  //
+  // 2026-09-17：Vercel 上的部署是給設計端純看畫面確認用的預覽連結，
+  // 不是掛在內部伺服器那個共用網域底下，不需要 `/sps` 前綴（沒有這個
+  // 前綴反而更單純，網址直接根目錄就能看）。跟 `output` 一樣用
+  // `VERCEL` 環境變數判斷——Vercel 上不設，本機/Docker build 才設。
+  // `withBasePath()`（api-client.ts）讀的 `NEXT_PUBLIC_BASE_PATH` 在
+  // Vercel 上本來就不會被設定，兩邊天然一致，不用額外處理。
+  basePath: process.env.VERCEL ? undefined : "/sps",
 };
 
 export default nextConfig;
