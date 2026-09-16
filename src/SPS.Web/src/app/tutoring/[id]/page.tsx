@@ -5,7 +5,16 @@ import BodyClass from "@/components/BodyClass";
 import Badge from "@/components/ui/Badge";
 import MoreLink from "@/components/ui/MoreLink";
 import ShareBox from "@/components/ui/ShareBox";
+import PopularPosts from "@/components/layout/PopularPosts";
+import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
 import { TUTORING_ITEMS, getTutoringItem } from "@/lib/tutoring-data";
+import { withBasePath } from "@/lib/api-client";
+
+// 說明見 tutoring/page.tsx 同一份假資料的註解
+const SIDEBAR_BANNERS: SidebarBannerItem[] = [
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+];
 
 export function generateStaticParams() {
   return TUTORING_ITEMS.map((item) => ({ id: item.id }));
@@ -34,10 +43,25 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
     notFound();
   }
 
+  const popularItems = TUTORING_ITEMS.map((popular) => ({
+    href: `/tutoring/${popular.id}`,
+    title: popular.title,
+    date: popular.date,
+    image: popular.image,
+  }));
+
   return (
     <>
       <BodyClass className="tutoring show" />
-      <InnerPageShell breadcrumb={[{ label: "產業輔導", href: "/tutoring" }, { label: item.title }]}>
+      <InnerPageShell
+        breadcrumb={[{ label: "產業輔導", href: "/tutoring" }, { label: item.title }]}
+        aside={
+          <>
+            <PopularPosts items={popularItems} heading="熱門輔導" />
+            <SidebarBanner items={SIDEBAR_BANNERS} />
+          </>
+        }
+      >
         <div className="column_box">
           <div className="tit">
             <div className="tit_nsl">

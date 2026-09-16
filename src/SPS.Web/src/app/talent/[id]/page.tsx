@@ -4,7 +4,16 @@ import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import ShareBox from "@/components/ui/ShareBox";
 import MoreLink from "@/components/ui/MoreLink";
+import PopularCourses from "@/components/talent/PopularCourses";
+import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
 import { TALENT_COURSES, getTalentCourse } from "@/lib/talent-data";
+import { withBasePath } from "@/lib/api-client";
+
+// 說明見 talent/page.tsx 同一份假資料的註解
+const SIDEBAR_BANNERS: SidebarBannerItem[] = [
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+];
 
 export function generateStaticParams() {
   return TALENT_COURSES.map((course) => ({ id: course.id }));
@@ -50,7 +59,15 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
   return (
     <>
       <BodyClass className="talent show" />
-      <InnerPageShell breadcrumb={[{ label: "人才培育" }, { label: "人才培訓", href: "/talent" }, { label: course.title }]}>
+      <InnerPageShell
+        breadcrumb={[{ label: "人才培育" }, { label: "人才培訓", href: "/talent" }, { label: course.title }]}
+        aside={
+          <>
+            <PopularCourses courses={TALENT_COURSES} />
+            <SidebarBanner items={SIDEBAR_BANNERS} />
+          </>
+        }
+      >
         <div className="column_box">
           <div className="tit">
             <div className="tit_nsl">

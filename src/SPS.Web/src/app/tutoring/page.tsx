@@ -4,12 +4,20 @@ import BodyClass from "@/components/BodyClass";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import TutoringItemCard from "@/components/tutoring/TutoringItemCard";
+import PopularPosts from "@/components/layout/PopularPosts";
+import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
 import { TUTORING_ITEMS } from "@/lib/tutoring-data";
 import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "產業輔導",
 };
+
+// 對應設計稿 page/_uc/side2_banner.html
+const SIDEBAR_BANNERS: SidebarBannerItem[] = [
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+];
 
 /**
  * 產業輔導列表，對應設計稿 page/tutoring/index.html。目前後端沒有
@@ -18,12 +26,29 @@ export const metadata: Metadata = {
  * 照實際筆數切頁。
  */
 export default function TutoringIndexPage() {
+  // 對應設計稿 page/_uc/side2_industry.html——原始檔案標題寫
+  // 「熱門產業案例」、連去 /promotion，明顯是共用範本複製時忘記改，
+  // 這裡照這頁實際的內容類型換成「熱門輔導」，卡片版型（排名＋縮圖＋
+  // 標題＋日期）沿用同一顆通用的 PopularPosts。
+  const popularItems = TUTORING_ITEMS.map((item) => ({
+    href: `/tutoring/${item.id}`,
+    title: item.title,
+    date: item.date,
+    image: item.image,
+  }));
+
   return (
     <>
       <BodyClass className="tutoring" />
       <InnerPageShell
         title="輔導"
         breadcrumb={[{ label: "產業輔導" }, { label: "輔導" }]}
+        aside={
+          <>
+            <PopularPosts items={popularItems} heading="熱門輔導" />
+            <SidebarBanner items={SIDEBAR_BANNERS} />
+          </>
+        }
         decorations={
           <>
             <div className="s_round_6" aria-hidden="true">

@@ -1,12 +1,24 @@
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
+import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
 import { SUPPORT_INFO_BLOCKS, SUPPORT_QUICK_LINKS, SUPPORT_ANNOUNCEMENTS } from "@/lib/support-data";
 import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
   title: "本計畫補助",
 };
+
+// 對應設計稿 page/_uc/side2_banner2.html（標題「產業輔導」，疑似
+// 跨單元互相導流的廣告位）＋ page/_uc/side2_banner.html（一般廣告）。
+const TUTORING_CROSS_PROMO_BANNERS: SidebarBannerItem[] = [
+  { href: "/tutoring", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "/tutoring", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+];
+const SIDEBAR_BANNERS: SidebarBannerItem[] = [
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
+];
 
 /**
  * 「本計畫補助」，對應設計稿 page/support/index.html——「輔助資源」
@@ -23,6 +35,12 @@ export default function SupportPage() {
       <InnerPageShell
         title="本計畫補助"
         breadcrumb={[{ label: "輔助資源" }, { label: "本計畫補助" }]}
+        aside={
+          <>
+            <SidebarBanner items={TUTORING_CROSS_PROMO_BANNERS} heading="產業輔導" />
+            <SidebarBanner items={SIDEBAR_BANNERS} />
+          </>
+        }
         decorations={
           <>
             <div className="s_round_6" aria-hidden="true">
