@@ -101,7 +101,7 @@ export default async function HomeEnterprise() {
               </div>
 
               <h3>
-                <a href={listing.href} title={listing.name}>
+                <a href={withBasePath(listing.href)} title={listing.name}>
                   {listing.name}
                 </a>
               </h3>
@@ -118,7 +118,7 @@ export default async function HomeEnterprise() {
 
               <p>{listing.description}</p>
 
-              <a href={listing.href} className="news-arrow" title={listing.name}>
+              <a href={withBasePath(listing.href)} className="news-arrow" title={listing.name}>
                 <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt="" />
               </a>
             </div>

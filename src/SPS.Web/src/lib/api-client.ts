@@ -8,16 +8,22 @@ const _bp = process.env.NEXT_PUBLIC_BASE_PATH || '';
 const normalizedBasePath = _bp.startsWith('/') ? _bp : (_bp ? `/${_bp}` : '');
 
 /**
- * 為路徑加上 basePath 前綴，用於直接拼接的 URL（圖片 src、下載連結等）
- * 例如 withBasePath('/api/FileManagement/xxx/download') → '/sps/api/FileManagement/xxx/download'
- * 絕對 URL（http/https 開頭）不處理
+ * 為路徑加上 basePath 前綴，用於直接拼接的 URL（圖片 src、下載連結、
+ * 站內導覽連結等）。例如 withBasePath('/api/FileManagement/xxx/download')
+ * → '/sps/api/FileManagement/xxx/download'
+ *
+ * 只處理「本來就是 root-relative path」（`/` 開頭）的字串——2026-09-16
+ * 之前這裡對非 `/` 開頭的字串會自動補一個 `/` 再接前綴，站內一堆
+ * `<a href="#">`（純裝飾、不用真的導頁）、`tel:`／`mailto:` 連結、外部
+ * 網址如果不小心也傳進來，會被錯誤地改成 `/sps#`、`/sps/tel:...`，
+ * 把原本「什麼都不做」的錨點/撥號連結弄壞。現在不是 `/` 開頭的字串
+ * 一律原樣傳回，呼叫端不用自己再判斷一次是不是內部路徑。
  */
 export function withBasePath(path: string): string {
   if (!path || !normalizedBasePath) return path;
-  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  if (!path.startsWith('/')) return path;
   if (path.startsWith(normalizedBasePath + '/') || path === normalizedBasePath) return path;
-  const p = path.startsWith('/') ? path : `/${path}`;
-  return `${normalizedBasePath}${p}`;
+  return `${normalizedBasePath}${path}`;
 }
 
 /**

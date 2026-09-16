@@ -35,14 +35,14 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
   return (
     <div className="item">
       <div className="d-flex">
-        <a href={data.href} className="pic" title={data.title}>
+        <a href={withBasePath(data.href)} className="pic" title={data.title}>
           <div className="ratio ratio-4x3">
             <img className="img-fluid d-block" src={data.image} alt="" />
           </div>
         </a>
 
         <div className="tit">
-          <a href={data.href} title={data.title}>
+          <a href={withBasePath(data.href)} title={data.title}>
             <div className="tit_nsl">
               <div className="tit_three d-flex mb-2">
                 <div className="tag-wrap">

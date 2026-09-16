@@ -91,7 +91,7 @@ export default async function HomeIndustry() {
               <div className="d-flex" key={item.href}>
                 <div className="tit">
                   <div className="tit_1">
-                    <a href={item.href} title="查看更多產業案例">
+                    <a href={withBasePath(item.href)} title="查看更多產業案例">
                       <div className="d-flex">
                         <h3>{item.title}</h3>
                         <div className="i_number">{String(index + 1).padStart(2, "0")}</div>
@@ -106,7 +106,7 @@ export default async function HomeIndustry() {
                   </div>
                 </div>
 
-                <a href={item.href} className="pic" title="查看更多產業案例內容">
+                <a href={withBasePath(item.href)} className="pic" title="查看更多產業案例內容">
                   <div className="ratio ratio-4x3">
                     <img className="img-fluid d-block" src={item.image} alt="" />
                   </div>

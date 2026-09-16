@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/api-client";
+
 export interface CategoryTabStripItem {
   label: string;
   href: string;
@@ -41,7 +43,7 @@ export default function CategoryTabStrip({ items, activeHref }: { items: Categor
           const isActive = item.href === activeHref;
           return (
             <li key={item.href}>
-              <a href={item.href} title={item.label} aria-current={isActive ? "page" : undefined}>
+              <a href={withBasePath(item.href)} title={item.label} aria-current={isActive ? "page" : undefined}>
                 {item.label}
               </a>
             </li>

@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/api-client";
+
 export interface SidebarBannerItem {
   href: string;
   image: string;
@@ -12,7 +14,7 @@ export default function SidebarBanner({ items }: { items: SidebarBannerItem[] })
   return (
     <div className="column_box">
       {items.map((item, index) => (
-        <a href={item.href} className="mb-4" title={item.title} key={`${item.href}-${index}`}>
+        <a href={withBasePath(item.href)} className="mb-4" title={item.title} key={`${item.href}-${index}`}>
           <div className="ratio ratio-4x3 mb-4">
             <img className="img-fluid d-block" src={item.image} alt="" />
           </div>

@@ -50,7 +50,7 @@ export default function NewsBanner() {
           ],
         }}
         slides={SLIDES.map((slide) => (
-          <a href={slide.href} className="video-card" title={`${slide.title}（另開視窗）`} target="_blank" rel="noopener noreferrer" key={slide.title}>
+          <a href={withBasePath(slide.href)} className="video-card" title={`${slide.title}（另開視窗）`} target="_blank" rel="noopener noreferrer" key={slide.title}>
             {/*
               寬高比先卡住（圖片實際尺寸 1400x500），不要等圖片真的載入完成
               才決定 .pic 的高度：banner 圖用一般 <img> 沒有另外設定

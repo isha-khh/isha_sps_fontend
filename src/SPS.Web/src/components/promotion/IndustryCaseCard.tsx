@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/api-client";
+
 export interface IndustryCaseCardData {
   href: string;
   image: string;
@@ -22,14 +24,14 @@ export default function IndustryCaseCard({ data }: { data: IndustryCaseCardData 
   return (
     <div className="col-lg-4 col-md-6 col-12 item mb-md-4 mb-4">
       <div className="item_box">
-        <a href={data.href} className="pic" title={data.title}>
+        <a href={withBasePath(data.href)} className="pic" title={data.title}>
           <div className="ratio ratio-4x3">
             <img className="img-fluid d-block" src={data.image} alt="" />
           </div>
         </a>
 
         <div className="tit mt-4">
-          <a href={data.href} title={data.title}>
+          <a href={withBasePath(data.href)} title={data.title}>
             <div className="tit_nsl">
               <div className="h3_solid">
                 <h3>{data.title}</h3>

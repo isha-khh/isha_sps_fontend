@@ -119,7 +119,7 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
         }}
         slides={category.slides.map((slide) => (
           <div className="d-flex" key={slide.href}>
-            <a href={slide.href} className="pic" title={`查看更多${slide.title}內容`}>
+            <a href={withBasePath(slide.href)} className="pic" title={`查看更多${slide.title}內容`}>
               <div className="ratio ratio-4x3">
                 <img className="img-fluid d-block" src={slide.image} alt="" />
               </div>

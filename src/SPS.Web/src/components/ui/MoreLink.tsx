@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/api-client";
+
 /**
  * 積木元件：站上到處都有的「查看更多 →」箭頭連結，對應舊站的 `.more_x`。
  *
@@ -14,7 +16,7 @@ export default function MoreLink({
   title?: string;
 }) {
   return (
-    <a href={href} title={title ?? label} className="more_x">
+    <a href={withBasePath(href)} title={title ?? label} className="more_x">
       <span>{label}</span>
       <i className="bi bi-arrow-right" aria-hidden="true"></i>
     </a>

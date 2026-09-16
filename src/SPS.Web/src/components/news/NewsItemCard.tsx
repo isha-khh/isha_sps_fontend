@@ -19,7 +19,7 @@ export interface NewsItemCardData {
  */
 export default function NewsItemCard({ data }: { data: NewsItemCardData }) {
   return (
-    <a href={data.href} className="news-item" title={`前往閱讀：${data.title}`}>
+    <a href={withBasePath(data.href)} className="news-item" title={`前往閱讀：${data.title}`}>
       <div className="news-date">
         <span className="day">{data.day}</span>
         <span className="year-month">{data.yearMonth}</span>

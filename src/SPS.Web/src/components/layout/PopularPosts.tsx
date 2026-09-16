@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/api-client";
+
 export interface PopularPostData {
   href: string;
   title: string;
@@ -47,7 +49,7 @@ export default function PopularPosts({
         {items.map((item, index) => (
           <div className="item" key={index}>
             <div className="d-flex">
-              <a href={item.href} className="pic" title={item.title}>
+              <a href={withBasePath(item.href)} className="pic" title={item.title}>
                 <div className="ranking">{String(index + 1).padStart(2, "0")}</div>
                 <div className={`ratio ${imageRatio}`}>
                   <img className="img-fluid d-block" src={item.image} alt="" />
@@ -55,7 +57,7 @@ export default function PopularPosts({
               </a>
 
               <div className="tit">
-                <a href={item.href} title={item.title}>
+                <a href={withBasePath(item.href)} title={item.title}>
                   <div className="tit_nsl">
                     <h3>{item.title}</h3>
                     <div className="date">{item.date}</div>
