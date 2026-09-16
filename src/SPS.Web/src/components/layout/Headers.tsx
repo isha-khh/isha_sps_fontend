@@ -37,15 +37,15 @@ function NavLinks() {
   return (
     <>
       <li className="nav-item">
-        <a className="nav-link" href="#">
+        <Link className="nav-link" href="/sitemap">
           <span className="title-main">網站導覽</span>
-        </a>
+        </Link>
       </li>
 
       <li className="nav-item">
-        <a className="nav-link" href="/page/about/index.html">
+        <Link className="nav-link" href="/about">
           <span className="title-main">關於我們</span>
-        </a>
+        </Link>
       </li>
 
       {/* 公告事項：/news 已經做出來了，這裡改成真的路由（其他還沒蓋的頁面暫時維持舊站路徑字串） */}
@@ -74,12 +74,15 @@ function NavLinks() {
 
       {/* 服務專區：分類其實是兩層（盤點細節見 serve-data.ts 開頭的說明），
           這裡「技術工具」/「人才培育」是分組標籤，disabled、本來就點不了
-          （見下面 dropdown-toggle disabled 那則註解），真正可以點的是底下
-          的葉節點——都改成 `/serve?category=<葉節點>`，對應 /serve 頁面
-          現在讀的 `?category=` 就是葉節點名稱，不是分組名稱。
-          「產業輔導」這一組只有一個葉節點「輔導」，組本身的連結跟葉節點
-          連去同一個地方；「輔助資源」有兩個葉節點，組本身沒有單一對應的
-          分類，連去 /serve 總覽。 */}
+          （見下面 dropdown-toggle disabled 那則註解）。
+          2026-09-16：「人才培育」「產業輔導」「輔助資源」原本葉節點都是
+          連去 `/serve?category=<葉節點>`（用泛用的 ServeItemCard 假資料
+          代打，那時候還沒有專屬設計稿）——這次設計稿交來了各自專屬的
+          頁面（`/talent`、`/talent/xr`、`/tutoring`、`/support`、
+          `/support/resources`，版面/欄位都跟 `/serve` 的泛用卡片不一樣），
+          改連去這些真頁面。serve-data.ts 裡對應的舊假資料項目
+          （知識加值／輔導／本計畫補助）目前變成沒有連結指過去的孤兒
+          資料，還沒清掉，記在 docs/改版規劃.md。 */}
       <li className="nav-item dropdown dropdown-left fadeup">
         <Link href="/serve" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
           <span className="title-main">服務專區</span>
@@ -104,46 +107,46 @@ function NavLinks() {
             </ul>
           </li>
           <li className="hover_r_sider dropdown-submenu">
-            <Link className="dropdown-item dropdown-toggle disabled" href="/serve" title="人才培育">
+            <Link className="dropdown-item dropdown-toggle disabled" href="/talent" title="人才培育">
               人才培育
             </Link>
             <ul className="dropdown-menu">
               <li>
-                <Link className="dropdown-item" href="/serve?category=知識加值" title="知識加值">
+                <Link className="dropdown-item" href="/talent" title="知識加值">
                   知識加值
                 </Link>
               </li>
               <li>
-                <Link className="dropdown-item" href="/serve?category=XR" title="XR">
+                <Link className="dropdown-item" href="/talent/xr" title="XR">
                   XR
                 </Link>
               </li>
             </ul>
           </li>
           <li className="hover_r_sider dropdown-submenu">
-            <Link className="dropdown-item" href="/serve?category=輔導" title="產業輔導">
+            <Link className="dropdown-item" href="/tutoring" title="產業輔導">
               產業輔導
             </Link>
             <ul className="dropdown-menu">
               <li>
-                <Link className="dropdown-item" href="/serve?category=輔導" title="輔導">
+                <Link className="dropdown-item" href="/tutoring" title="輔導">
                   輔導
                 </Link>
               </li>
             </ul>
           </li>
           <li className="hover_r_sider dropdown-submenu">
-            <Link className="dropdown-item" href="/serve" title="輔助資源">
+            <Link className="dropdown-item" href="/support" title="輔助資源">
               輔助資源
             </Link>
             <ul className="dropdown-menu">
               <li>
-                <Link className="dropdown-item" href="/serve?category=本計畫補助" title="本計畫補助">
+                <Link className="dropdown-item" href="/support" title="本計畫補助">
                   本計畫補助
                 </Link>
               </li>
               <li>
-                <Link className="dropdown-item" href="/serve?category=政府補助資源" title="政府補助資源">
+                <Link className="dropdown-item" href="/support/resources" title="政府補助資源">
                   政府補助資源
                 </Link>
               </li>

@@ -277,7 +277,13 @@
  * 改 public/css/style.css：那支檔案是跟著舊站同步過來的，下次同步
  * 舊站 CSS 更新時手動改的東西會被整份覆蓋掉，所以在這裡補一條範圍
  * 一樣精準的規則，跟 style.css 原本那組規則用同一個 margin-top 值。
+ *
+ * 2026-09-16 補充：這次新做的 `/talent/[id]`（"talent show"）、
+ * `/tutoring/[id]`（"tutoring show"）兩個新版設計稿的詳情頁，同樣是
+ * 沒有跑馬燈標題的版型，一起補上，理由跟 `.serve.show` 完全一樣。
  */
-.serve.show .breadcrumb {
+.serve.show .breadcrumb,
+.talent.show .breadcrumb,
+.tutoring.show .breadcrumb {
   margin-top: 110px;
 }
