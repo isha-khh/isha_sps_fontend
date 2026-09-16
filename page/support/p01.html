@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-tw" class="no-js" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>高雄技術處</title>
+
+    <!-- 關閉Skype工具列 -->
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- 網站圖示 favicon.ico -->
+    <!-- generics -->
+    <link rel="icon" type="image/png" href="../../favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="../../favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="57x57">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="76x76">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="128x128">
+    <link rel="icon" type="image/png" href="../../favicon.png" sizes="228x228">
+    <!-- Android -->
+    <link rel="shortcut icon" href="../../favicon.png" sizes="196x196">
+    <!-- iOS -->
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png" sizes="180x180">
+    <!-- Windows 8 IE 10-->
+    <meta name="msapplication-TileColor" content="#f4d44d">
+    <meta name="msapplication-TileImage" content="../../favicon.png">
+
+    <!-- <link rel="manifest" href="/site.webmanifest"> -->
+    <link rel="mask-icon" href="../../safari-pinned-tab.svg" color="#f4d44d">
+    <meta name="theme-color" content="#ffffff">
+    <!--uc:HeadMeta-->
+
+
+    <script type="text/javascript" src="../../js/jquery-4.0.0.min.js"></script>
+
+    <script type="text/javascript" src="../../js/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../js/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
+
+
+
+    <link href="../../js/bootstrap-5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- slick -->
+    <link href="../../js/slick-2.0.0/slick/slick-theme.css" rel="stylesheet" />
+    <link href="../../js/slick-2.0.0/slick/slick.css" rel="stylesheet" />
+
+    <!-- bsnav -->
+    <link href="../../js/bsnav-master/dist/bsnav.min.css" rel="stylesheet" />
+    <!-- bootstrap icon -->
+    <link href="../../js/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+
+    <!-- fancybox -->
+    <link href="../../js/fancybox-5.0.33/dist/fancybox/fancybox.css" rel="stylesheet" />
+
+    <link href="../../css/coreStyle.css" rel="stylesheet" />
+
+    <link href="../../css/style.css" rel="stylesheet" />
+    <link href="../../css/style_rwd.css" rel="stylesheet" />
+
+    <!--aos --->
+    <script type="text/javascript" src="../../js/aos-master/dist/aos.js"></script>
+    <link href="../../js/aos-master/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <script>
+        $(document).ready(function () {
+            $("header nav").load("../../page/_uc/nav.html");
+            $(".breadcrumb").load("../../page/_uc/breadcrumb.html");
+            $(".side1_serve").load("../../page/_uc/side/side1_support.html");
+            $(".search").load("../../page/_uc/search6.html");
+            $("footer").load("../../page/_uc/footer.html");
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.27"></script>
+
+
+    <!-- slick -->
+    <script type="text/javascript" src="../../js/slick-2.0.0/slick/slick.min.js"></script>
+
+    <!-- bsnav -->
+    <script type="text/javascript" src="../../js/bsnav-master/dist/bsnav.min.js"></script>
+
+    <!-- fancybox -->
+    <script type="text/javascript" src="../../js/fancybox-5.0.33/dist/fancybox/fancybox.umd.js"></script>
+
+    <!-- 滾動視差 -->
+    <script type="text/javascript" src="../../js/TweenLite.min.js"></script>
+    <script type="text/javascript" src="../../js/CSSPlugin.min.js"></script>
+
+
+
+
+    <script type="text/javascript" src="../../js/coreScript.js"></script>
+
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+
+    <!--uc:HeadPageRes-->
+
+</head>
+
+
+
+<body class="support p01">
+    <!-- 彈跳 -->
+    <div class="modal fade" id="staticmembership" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticmembership" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>專人聯繫視窗</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                </div>
+                <div class="modal-body">
+                    <p>請留下您的資料，送出後將由專人儘速與您聯繫，提供詳細諮詢服務。</p>
+
+                    <div class=" form-group">
+                        <label class="mb-2">姓名</label>
+                        <input type="text" class="form-control" title="請輸入姓名" placeholder="請輸入姓名">
+                    </div>
+
+                    <div class=" form-group">
+                        <label class="mb-2">公司名稱</label>
+                        <input type="text" class="form-control" title="請輸入公司名稱"  placeholder="請輸入公司名稱">
+                    </div>
+                    <div class=" form-group">
+                        <label class="mb-2">電話</label>
+                        <input type="text" class="form-control" title="請輸入電話"  placeholder="請輸入電話">
+                    </div>
+                    <div class=" form-group">
+                        <label class="mb-2">信箱</label>
+                        <input type="text" class="form-control" title="請輸入信箱"  placeholder="請輸入信箱">
+                    </div>
+
+
+
+
+                    <div class="card-footer d-flex justify-content-center">
+                        <a class="btn-outline-dark me-2" href="#" title="取消">取消</a>
+                        <a class="btn-theme mat_Send" href="#" title="送出" aria-expanded="false" aria-controls="contactInfo">送出</a>
+                    </div>
+
+
+
+
+
+                </div><!--modal-body-->
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 主要內容區塊-->
+    <a href="#main-content" class="visually-hidden-focusable">跳至主要內容</a>
+
+    <div class="page_wrapper">
+        <!--  導盲磚 -->
+        <header class="header">
+            <a href="#header-block" id="header-block" accesskey="U" title="上方功能區塊" class="visually-hidden-focusable">::: 上方功能區塊</a>
+                        <nav class="nav" aria-label="主要導覽"><span class="d-none">主要導覽</span></nav>
+        </header>
+
+        <!--標題-->
+        <div class="section-title-wrap">
+
+            <div class="marquee-bg" aria-hidden="true">
+                <div class="marquee-track">
+                    <!-- 第一組 -->
+                    <div class="marquee-group">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                    <!-- 第二組-->
+                    <div class="marquee-group" aria-hidden="true">
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                        <span>SMART SAFETY </span>
+                    </div>
+                </div>
+            </div>
+
+
+            <h2 class="main-title">
+                <span class="tit_tw">政府補助資源</span>
+            </h2>
+
+
+            <div class="s_meu_lk">
+                <ul class="nav">
+                    <li><a href="../../page/support/index.html" title="本計畫補助" class="">本計畫補助</a></li>
+                    <li class="s_meu_sid"></li>
+                    <li><a href="../../page/support/p01.html" title="政府補助資源" class="active">政府補助資源</a></li>
+                </ul>
+            </div><!--s_meu_lk-->
+        </div>
+
+
+        <!--麵包屑-->
+        <div class="breadcrumb" aria-label="麵包屑導覽"></div>
+
+        <!--  主要內容區塊： -->
+        <main class="main" id="main-content" role="main">
+            <a href="#main-block" id="main-block" accesskey="C" title="中央主要內容區塊" class="visually-hidden-focusable">::: 主要內容區塊</a>
+
+            <div class="container-fluid ">
+                <div class="row gx-0 gy-4">
+
+                    <!--  side1 -->
+                    <div class="side side1" aria-label="分類選單">
+                        <a href="#left-block" id="left-block" accesskey="L" title="左側選單區塊" class="visually-hidden-focusable d-none">::: 左側選單區塊</a>
+                        <div class="function-bar text-end d-flex d-md-none justify-content-lg-end justify-content-between">
+                            <div class="sideNavBtn d-lg-none mb-2">
+
+                                <button type="button" class="btn btn-primary collapse-side-btn" aria-expanded="false" aria-controls="sideAutoUcCollapse">
+                                    <i class="icon fas fa-list" aria-hidden="true"></i>
+                                    <span>顯示分類</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-sidebar side_auto_uc multiple-collapse accordion lg-accordion accordion-blocks d-block">
+                            <div class="navbar" role="region" aria-label="分類篩選項目">
+                                <div class="collapse navbar-collapse justify-content-lg-end d-md-block">
+                                    <div id="sideAutoUcCollapse" class="sideAutoUcCollapse">
+                                        <!--選單-->
+                                        <div class="side1_serve"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- 主要內容容器  content-->
+                    <div class="content ">
+                        <!--搜尋-->
+                        <div class="search  mb-4"></div>
+
+                        <div class="row">
+
+                            <div class="col-lg-4 col-md-6  col-12 item  mb-md-4 mb-4">
+                                <div class="item_box">
+
+                                    <div class="pic">
+                                        <div class="ratio ratio-4x3">
+                                            <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="114年度石化產業智慧化補助計畫正式開放申請">
+                                        </div>
+                                    </div>
+                                    <div class="tit mt-4">
+                                        <div>
+                                            <div class="tit_nsl">
+
+                                                <div class="h3_solid">
+                                                    <h3>114年度石化產業智慧化補助計畫正式開放申請</h3>
+                                                </div>
+                                                <p>提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。</p>
+                                                <ul class="nav d-block mb-3 ">
+                                                    <li class="mb-2">
+                                                        <i class="bi bi-person"></i>
+                                                        <span><b>適用對象 : </b>製造業（依法登記之公司）</span>
+
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        <i class="bi bi-currency-dollar"></i>
+                                                        <span><b>補助金額 : </b>最高補助新臺幣 300 萬元</span>
+
+                                                    </li>
+
+                                                    <li class="mb-2">
+                                                        <i class="bi bi-briefcase"></i>
+                                                        <span><b>主辦單位 : </b>經濟部產業發展署</span>
+
+                                                    </li>
+
+                                                    <li class="">
+                                                        <i class="bi bi-calendar4-week"></i>
+                                                        <span><b>申請期間 : </b>2026/01/15 – 2026/03/31</span>
+
+                                                    </li>
+
+                                                </ul>
+
+                                            </div><!--tit_nsl-->
+                                        </div>
+
+                                        <ul class="nav ul-key">
+                                            <li><a href="#" title="數位轉型" tabindex="0">數位轉型</a></li>
+                                            <li><a href="#" title="工安改善" tabindex="0">工安改善</a></li>
+
+                                        </ul>
+
+                                        <a href="javascript:void(0)"
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#staticmembership"
+                                           class="det_more"title="索取資料協助評估" >索取資料協助評估</a>
+                                    
+                                    </div><!--tit-->
+                                </div><!--item_box-->
+                            </div><!--item 1組-->
+
+
+                            <div class="col-lg-4 col-md-6  col-12 item  mb-md-4 mb-4">
+                                <div class="item_box">
+
+                                    <div class="pic">
+                                        <div class="ratio ratio-4x3">
+                                            <img class="img-fluid d-block" src="../..//images/all/new_logo.jpg" alt="114年度石化產業智慧化補助計畫正式開放申請">
+                                        </div>
+                                    </div>
+                                    <div class="tit mt-4">
+                                        <div>
+                                            <div class="tit_nsl">
+
+                                                <div class="h3_solid">
+                                                    <h3>114年度石化產業智慧化補助計畫正式開放申請</h3>
+                                                </div>
+                                                <p>提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。</p>
+                                                <ul class="nav d-block mb-3 ">
+                                                    <li class="mb-2">
+                                                        <i class="bi bi-person"></i>
+                                                        <span><b>適用對象 : </b>製造業（依法登記之公司）</span>
+
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        <i class="bi bi-currency-dollar"></i>
+                                                        <span><b>補助金額 : </b>最高補助新臺幣 300 萬元</span>
+
+                                                    </li>
+
+                                                    <li class="mb-2">
+                                                        <i class="bi bi-briefcase"></i>
+                                                        <span><b>主辦單位 : </b>經濟部產業發展署</span>
+
+                                                    </li>
+
+                                                    <li class="">
+                                                        <i class="bi bi-calendar4-week"></i>
+                                                        <span><b>申請期間 : </b>2026/01/15 – 2026/03/31</span>
+
+                                                    </li>
+
+                                                </ul>
+
+                                            </div><!--tit_nsl-->
+                                        </div>
+
+                                        <ul class="nav ul-key">
+                                            <li><a href="#" title="數位轉型" tabindex="0">數位轉型</a></li>
+                                            <li><a href="#" title="工安改善" tabindex="0">工安改善</a></li>
+
+                                        </ul>
+
+                                        <a href="javascript:void(0)"
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#staticmembership"
+                                           class="det_more"title="索取資料協助評估" >索取資料協助評估</a>
+                                    
+                                    </div><!--tit-->
+                                </div><!--item_box-->
+                            </div><!--item 1組-->
+
+
+
+
+                        </div><!--column_box-->
+
+
+
+
+                    </div><!--content-->
+                    <!-- side2 -->
+                    <div class="side side2 d-none" id="side2-block" aria-label="相關選單">
+                        <a href="#side2-block" id="right-block" accesskey="R" title="右側選單區塊" class="visually-hidden-focusable">::: 右側選單區塊</a>
+
+                        <!-- 選單內容 -->
+                    </div>
+                </div><!--row-->
+            </div>
+
+
+
+            <div class="s_round_6" aria-hidden="true">
+                <img class="img-fluid d-block" src="../..//images/home/round_6.png" alt="">
+            </div>
+
+            <div class="s_round_3" aria-hidden="true">
+                <img class="img-fluid d-block" src="../..//images/home/round_3.jpg" alt="">
+            </div>
+        </main>
+
+
+        <a href="#footer-block" id="footer-block" accesskey="B" title="下方功能區塊" class="visually-hidden-focusable" tabindex="0">::: 下方功能區塊</a>
+        <!-- 頁尾區塊 -->
+        <footer class="footer" role="contentinfo">
+        </footer>
+    </div>
+
+
+
+
+    <script>
+    
+
+        $(function () {
+            if (window.innerWidth > 767) {
+                $(window).on('scroll', function () {
+                    const offsetTop = $(this).scrollTop();
+
+                    // 1. .s_round_1 視差滾動
+                    const $industry = $('.footer');
+                    if ($industry.length && offsetTop < $industry.offset().top) {
+                        TweenLite.to(".s_round_6, .s_round_3", 1, {
+                            y: -offsetTop / 15
+                        });
+                    }
+
+
+                }).trigger('scroll');
+            }
+        });
+
+    </script>
+
+
+</body>
+</html>
+
