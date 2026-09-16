@@ -4,7 +4,7 @@ import BodyClass from "@/components/BodyClass";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import CourseTable from "@/components/talent/CourseTable";
-import PopularPosts from "@/components/layout/PopularPosts";
+import PopularCourses from "@/components/talent/PopularCourses";
 import { TALENT_COURSES } from "@/lib/talent-data";
 import { withBasePath } from "@/lib/api-client";
 
@@ -18,20 +18,13 @@ export const metadata: Metadata = {
  * /serve、/tutoring 一樣先用寫死的佔位。
  */
 export default function TalentIndexPage() {
-  const popularCourses = TALENT_COURSES.map((course) => ({
-    href: `/talent/${course.id}`,
-    title: course.title,
-    date: course.dateRange,
-    image: withBasePath("/images/all/new_logo.jpg"),
-  }));
-
   return (
     <>
       <BodyClass className="talent" />
       <InnerPageShell
         title="人才培訓"
         breadcrumb={[{ label: "人才培育" }, { label: "人才培訓" }]}
-        aside={<PopularPosts items={popularCourses} heading="熱門課程" />}
+        aside={<PopularCourses courses={TALENT_COURSES} />}
         decorations={
           <>
             <div className="s_round_6" aria-hidden="true">

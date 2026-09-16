@@ -52,7 +52,8 @@ export default function CourseTable({ courses }: { courses: TalentCourse[] }) {
                   {course.organizer}
                 </td>
                 <td data-label="課程日期" className="td-date">
-                  {course.dateRange}
+                  {course.dateStart}
+                  <br />~ {course.dateEnd}
                 </td>
                 <td data-label="縣市" className="td-city">
                   {course.city}
