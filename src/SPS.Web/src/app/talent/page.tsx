@@ -44,7 +44,7 @@ export default function TalentIndexPage() {
         }
       >
         <div className="search mb-4">
-          <SearchBar keywordPlaceholder="請輸入關鍵字" />
+          <SearchBar years={[]} typeOptions={[]} keywordPlaceholder="請輸入關鍵字" />
         </div>
 
         <CourseTable courses={TALENT_COURSES} />

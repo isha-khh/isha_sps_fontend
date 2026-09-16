@@ -25,28 +25,44 @@
  * 沿用這顆元件但頁面本身沒有讀 `searchParams` 做篩選——送出後網址會
  * 帶上 `?q=...`，但畫面不會變化，這是已知、待後續一併處理的缺口，
  * 不是這次改動漏掉。
+ *
+ * `typeOptions` 對應設計稿 page/_uc/search5.html（`/talent` 用的搜尋
+ * 列變體，多一個「類型」下拉）——設計稿本身這個下拉也是空的（只有
+ * 「類型」這個 placeholder label，沒有真的選項），跟 `years` 目前
+ * 沒有真的資料來源是同一個狀況，先讓畫面長得一樣，篩選邏輯之後
+ * 才接。
  */
 export default function SearchBar({
   years,
   yearLabel = "全部年份",
+  typeOptions,
+  typeLabel = "類型",
   keywordPlaceholder = "請輸入關鍵字",
   keywordParamName = "q",
   yearParamName = "year",
+  typeParamName = "type",
   defaultKeyword = "",
   defaultYear = "",
+  defaultType = "",
   hiddenFields,
 }: {
   years?: string[];
   yearLabel?: string;
+  typeOptions?: string[];
+  typeLabel?: string;
   keywordPlaceholder?: string;
   /** URL query string 裡關鍵字欄位的參數名稱 */
   keywordParamName?: string;
   /** URL query string 裡年份欄位的參數名稱 */
   yearParamName?: string;
+  /** URL query string 裡類型欄位的參數名稱 */
+  typeParamName?: string;
   /** 目前網址上已經有的關鍵字，讓輸入框保留使用者上次搜尋的字 */
   defaultKeyword?: string;
   /** 目前網址上已經有的年份 */
   defaultYear?: string;
+  /** 目前網址上已經有的類型 */
+  defaultType?: string;
   /** 送出這個表單時要一併保留的其他 query string 參數（例如分類篩選） */
   hiddenFields?: Record<string, string>;
 }) {
@@ -62,6 +78,19 @@ export default function SearchBar({
             {years.map((year) => (
               <option value={year} key={year}>
                 {year}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {typeOptions && (
+        <div className="form-group mb-md-0">
+          <select className="form-select" aria-label={typeLabel} name={typeParamName} defaultValue={defaultType}>
+            <option value="">{typeLabel}</option>
+            {typeOptions.map((type) => (
+              <option value={type} key={type}>
+                {type}
               </option>
             ))}
           </select>
