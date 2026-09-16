@@ -179,9 +179,7 @@ function NavLinks() {
         </ul>
       </li>
 
-      {/* 我要媒合：企業名錄已經做出來了，改成真的路由，媒合對接還沒蓋，
-          維持舊站路徑字串（跟上面公告事項那則註解同一個做法）。組本身
-          （dropdown-toggle）連去企業名錄——目前底下唯一真的存在的頁面。 */}
+      {/* 我要媒合：企業名錄／媒合對接都已經做出來了，兩個子項都改成真的路由。 */}
       <li className="nav-item dropdown dropdown-left fadeup">
         <Link href="/matching/enterprise" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
           <span className="title-main">我要媒合</span>
@@ -193,9 +191,9 @@ function NavLinks() {
             </Link>
           </li>
           <li className="hover_r_sider dropdown-submenu">
-            <a className="dropdown-item dropdown-toggle" href="/page/matching/index.html" title="媒合對接">
+            <Link className="dropdown-item dropdown-toggle" href="/matching" title="媒合對接">
               媒合對接
-            </a>
+            </Link>
           </li>
         </ul>
       </li>

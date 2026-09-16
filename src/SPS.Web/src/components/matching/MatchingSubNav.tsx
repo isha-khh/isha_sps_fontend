@@ -3,10 +3,6 @@ import { withBasePath } from "@/lib/api-client";
 
 const LINKS = [
   { label: "企業名錄", href: "/matching/enterprise" },
-  // 「媒合對接」設計稿只給了連結位置（`page/matching/index.html`），
-  // 頁面本身還沒出現，先照設計稿原樣連過去，之後那頁蓋出來就會生效，
-  // 現在點了會是 404——跟 HomeEnterprise 卡片連去這裡的道理一樣，先把
-  // 連結格式定下來。
   { label: "媒合對接", href: "/matching" },
 ];
 
