@@ -3,7 +3,6 @@ import Script from "next/script";
 import BootstrapModalRouteCleanup from "@/components/BootstrapModalRouteCleanup";
 import { notoSansTC } from "@/lib/fonts";
 import "./globals.css";
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import { withBasePath } from "@/lib/api-client";
 // ------------------------------------------------------------------
 // 過渡期資源載入策略
@@ -102,7 +101,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {LEGACY_SITE_STYLESHEETS.map((href) => (
           <link key={href} rel="stylesheet" href={href} precedence="legacy-site" />
         ))}
-        <SpeedInsights/>
         <BootstrapModalRouteCleanup />
 
         {children}
