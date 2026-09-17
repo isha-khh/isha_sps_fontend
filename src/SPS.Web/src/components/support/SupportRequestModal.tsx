@@ -11,6 +11,13 @@ import Modal from "@/components/ui/Modal";
  * 跟 `EnterpriseContactModal` 同一種「先把畫面做出來」階段的做法：
  * 送出只顯示畫面上的完成訊息，沒有真的打 API，之後接真後端時再決定
  * 要送去哪支端點。
+ *
+ * 「送出」維持 `<button type="submit">`（不像其他同類彈窗改成
+ * `<a>`）：這裡是真的 `<form onSubmit>` 搭配 HTML5 `required` 驗證，
+ * 換成 `<a>` 會讓原生表單驗證/submit 事件完全不會觸發。`.btn-theme`
+ * 這個 class 本來只綁 `<a>` 標籤（`css/style.css` 的
+ * `.card-footer a.btn-theme`），`globals.css` 額外補了
+ * `.card-footer button.btn-theme` 讓 button 也吃得到同一組漸層樣式。
  */
 export default function SupportRequestModal({ id, resourceTitle }: { id: string; resourceTitle: string }) {
   const [submitted, setSubmitted] = useState(false);

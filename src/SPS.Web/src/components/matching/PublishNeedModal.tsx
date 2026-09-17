@@ -23,6 +23,11 @@ import { APPLICATION_SCENARIOS, APPLICATION_SCOPES, TECH_ATTRIBUTE_GROUPS } from
  * padding:0`），沒有這層外殼，`.form-check` 會吃到別處預設的卡片/格線
  * 樣式（背景色、邊框、3 欄網格），跟設計稿 `publish_s.html` 原本的
  * 平鋪版面對不起來。
+ *
+ * 「刊登」用 `<a>` 不是 `<button>`：`.btn-theme` 這個 class 在
+ * `css/style.css` 只定義在 `.card-footer a.btn-theme`（綁 `<a>` 標籤
+ * 的選擇器），`<button class="btn-theme">` 完全吃不到，會變成瀏覽器
+ * 預設的裸按鈕樣式，見 `EnterpriseContactModal.tsx` 同一段說明。
  */
 export default function PublishNeedModal({ id }: { id: string }) {
   const [checkedScenarios, setCheckedScenarios] = useState<Record<string, boolean>>({});
@@ -131,9 +136,9 @@ export default function PublishNeedModal({ id }: { id: string }) {
         <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
           取消
         </a>
-        <button type="button" className="btn-theme mat_Send" onClick={() => setSubmitted(true)}>
+        <a href="javascript:void(0)" className="btn-theme mat_Send" onClick={() => setSubmitted(true)}>
           刊登
-        </button>
+        </a>
       </div>
     </Modal>
   );

@@ -19,6 +19,13 @@ const SCOPE_OPTIONS = ["感測端點", "系統部署", "通訊方式", "作業�
  * 目前「送出」只是顯示畫面上寫死的聯絡人資訊，沒有真的送出勾選結果
  * 到任何地方——這頁本來就還在「先把畫面做出來」的階段，之後接資料時
  * 才需要決定這裡要送去哪支 API。
+ *
+ * 「送出」用 `<a>` 不是 `<button>`：`.btn-theme`（漸層底色）這個 class
+ * 在 `css/style.css` 裡只定義在 `.card-footer a.btn-theme`，是綁
+ * `<a>` 標籤的選擇器，`<button class="btn-theme">` 完全吃不到、只會
+ * 是瀏覽器預設的裸按鈕樣式（實測 computed style 背景色是瀏覽器預設的
+ * 灰色，不是設計稿的藍色漸層）。跟旁邊「取消」（本來就是 `<a>`）維持
+ * 同樣的標籤，兩顆按鈕才會有一致的圓角/漸層樣式。
  */
 export default function EnterpriseContactModal({ id, contactName, contactPhone }: { id: string; contactName: string; contactPhone: string }) {
   const [checked, setChecked] = useState<Record<string, boolean>>({ 感測端點: true });
@@ -56,15 +63,15 @@ export default function EnterpriseContactModal({ id, contactName, contactPhone }
         <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
           取消
         </a>
-        <button
-          type="button"
+        <a
+          href="javascript:void(0)"
           className="btn-theme mat_Send"
           aria-expanded={revealed}
           aria-controls={`${id}-contact-info`}
           onClick={() => setRevealed(true)}
         >
           送出
-        </button>
+        </a>
       </div>
 
       <div className="co_m_botom" id={`${id}-contact-info`} style={revealed ? undefined : { display: "none" }}>

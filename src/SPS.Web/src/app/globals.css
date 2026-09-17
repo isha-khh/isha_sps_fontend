@@ -312,3 +312,62 @@
   height: auto !important;
   min-height: 50px;
 }
+
+/*
+ * `.card-footer a.btn-theme`／`.card-footer a.btn-outline-dark`
+ * （css/style.css）是綁死 `<a>` 標籤的選擇器——`<button class=
+ * "btn-theme">` 放進 `.card-footer` 完全吃不到這組漸層/圓角樣式，
+ * 會變成瀏覽器預設的裸按鈕（devtools 量過，背景色是瀏覽器預設灰、
+ * padding 只有 1px 6px）。大部分「先求畫面一致、還沒真的送出」的
+ * 彈窗（`EnterpriseContactModal`／`PublishNeedModal`／
+ * `SubscribeSolutionModal`／`ProposeSolutionModal`）已經直接把
+ * `<button>` 改成 `<a>` 解決；但 `SupportRequestModal` 這顆是真的
+ * `<form onSubmit>` 搭配 HTML5 `required` 驗證，`type="submit"`
+ * 的 `<button>` 不能換成 `<a>`（`<a>` 不會觸發 form 的原生驗證/submit
+ * 事件），只能用 CSS 把同一組樣式也套到 button 上。
+ *
+ * `!important` 的理由跟上面 `.matching_sear_mid ul` 那條一樣：這支
+ * globals.css 在 `<head>`，比 `LEGACY_SITE_STYLESHEETS` 那些
+ * `<body>` 開頭的舊站 `<link>` 早載入，選擇器優先權打平時「後載入的
+ * 贏」，沒加會被 style.css 蓋掉。
+ */
+.card-footer button.btn-theme {
+  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%) !important;
+  color: #fff !important;
+  border-radius: 50px !important;
+  padding: 10px 20px !important;
+  border: none;
+}
+
+.card-footer button.btn-theme:focus-within,
+.card-footer button.btn-theme:hover {
+  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%) !important;
+  color: #fff !important;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 102, 255, 0.38);
+  opacity: 0.8;
+}
+
+/*
+ * 「我要刊登」（`.matching .more_x.me_Publish`，`/matching`、
+ * `/matching/[id]` 側欄的固定按鈕）拿掉 hover 動畫——`.more_x` 是
+ * 全站到處共用的按鈕基底 class（`css/style.css`），base 規則本身就有
+ * `:hover{ transform:translateY(-3px); box-shadow:...; opacity:0.8 }`
+ * ＋圖示 `:hover i{ transform:translateX(4px) }`。設計稿自己也只覆蓋
+ * 掉圖示那半段（`.matching .more_x.me_Publish:hover i{
+ * transform:translateX(0) }`），按鈕本身的上浮/陰影/透明度沒有一起蓋
+ * 掉。這裡直接把 hover 狀態完全重設回跟平常一樣，讓這顆按鈕維持靜止
+ * 不動——不動全站共用的 `.more_x` base 規則，只鎖定這顆按鈕。
+ */
+.matching .more_x.me_Publish:hover,
+.matching .more_x.me_Publish:focus {
+  transform: none !important;
+  box-shadow: 0 8px 20px rgba(0, 102, 255, 0.25) !important;
+  opacity: 1 !important;
+  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%) !important;
+}
+
+.matching .more_x.me_Publish:hover i,
+.matching .more_x.me_Publish:focus i {
+  transform: none !important;
+}
