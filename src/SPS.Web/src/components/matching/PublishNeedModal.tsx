@@ -16,6 +16,13 @@ import { APPLICATION_SCENARIOS, APPLICATION_SCOPES, TECH_ATTRIBUTE_GROUPS } from
  * 那份會員註冊表單的版本另外接——雖然選項文字剛好大致對得上，但這裡
  * 是「媒合對接」模組自己的資料來源，跟企業/會員註冊資料模型無關，混用
  * 兩邊會讓之後其中一邊改分類時忘記同步更新另一邊。
+ *
+ * 這三組 checkbox 外面包一層 `.publish_s`：CSS 裡
+ * `.matching .publish_s .project_fx .form-check` 專門把每個選項
+ * 恢復成單純「checkbox+文字」（`background-color:unset; border-radius:0;
+ * padding:0`），沒有這層外殼，`.form-check` 會吃到別處預設的卡片/格線
+ * 樣式（背景色、邊框、3 欄網格），跟設計稿 `publish_s.html` 原本的
+ * 平鋪版面對不起來。
  */
 export default function PublishNeedModal({ id }: { id: string }) {
   const [checkedScenarios, setCheckedScenarios] = useState<Record<string, boolean>>({});
@@ -39,61 +46,63 @@ export default function PublishNeedModal({ id }: { id: string }) {
         <textarea className="form-control" rows={5} />
       </div>
 
-      <div className="menb_inp_tit form-group w-100">
-        <label className="mb-2">
-          <span className="red me-1">*</span>應用情境(可多選)
-        </label>
-        <div className="project_fx project_three d-flex flex-wrap">
-          {APPLICATION_SCENARIOS.map((scenario) => {
-            const checkboxId = `${id}-scenario-${scenario}`;
-            return (
-              <div className="form-check" key={scenario}>
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id={checkboxId}
-                  checked={Boolean(checkedScenarios[scenario])}
-                  onChange={() => toggle(setCheckedScenarios, scenario)}
-                />
-                <label className="form-check-label" htmlFor={checkboxId}>
-                  {scenario}
-                </label>
-              </div>
-            );
-          })}
+      <div className="publish_s">
+        <div className="menb_inp_tit form-group w-100">
+          <label className="mb-2">
+            <span className="red me-1">*</span>應用情境(可多選)
+          </label>
+          <div className="project_fx project_three d-flex flex-wrap">
+            {APPLICATION_SCENARIOS.map((scenario) => {
+              const checkboxId = `${id}-scenario-${scenario}`;
+              return (
+                <div className="form-check" key={scenario}>
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id={checkboxId}
+                    checked={Boolean(checkedScenarios[scenario])}
+                    onChange={() => toggle(setCheckedScenarios, scenario)}
+                  />
+                  <label className="form-check-label" htmlFor={checkboxId}>
+                    {scenario}
+                  </label>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      <div className="menb_inp_tit form-group w-100">
-        <label className="mb-2">
-          <span className="red me-1">*</span>應用範疇(可多選)
-        </label>
-        <div className="project_fx d-flex flex-wrap">
-          {APPLICATION_SCOPES.map((scope) => {
-            const checkboxId = `${id}-scope-${scope}`;
-            return (
-              <div className="form-check" key={scope}>
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id={checkboxId}
-                  checked={Boolean(checkedScopes[scope])}
-                  onChange={() => toggle(setCheckedScopes, scope)}
-                />
-                <label className="form-check-label" htmlFor={checkboxId}>
-                  {scope}
-                </label>
-              </div>
-            );
-          })}
+        <div className="menb_inp_tit form-group w-100">
+          <label className="mb-2">
+            <span className="red me-1">*</span>應用範疇(可多選)
+          </label>
+          <div className="project_fx d-flex flex-wrap">
+            {APPLICATION_SCOPES.map((scope) => {
+              const checkboxId = `${id}-scope-${scope}`;
+              return (
+                <div className="form-check" key={scope}>
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id={checkboxId}
+                    checked={Boolean(checkedScopes[scope])}
+                    onChange={() => toggle(setCheckedScopes, scope)}
+                  />
+                  <label className="form-check-label" htmlFor={checkboxId}>
+                    {scope}
+                  </label>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      <div className="menb_inp_tit form-group w-100">
-        <label className="mb-2">
-          <span className="red me-1">*</span>智慧技術(可多選)
-        </label>
-        <TechAttributeSelector groups={TECH_ATTRIBUTE_GROUPS} name={`${id}-tech`} variant="checkboxes" />
+        <div className="menb_inp_tit form-group w-100">
+          <label className="mb-2">
+            <span className="red me-1">*</span>智慧技術(可多選)
+          </label>
+          <TechAttributeSelector groups={TECH_ATTRIBUTE_GROUPS} name={`${id}-tech`} variant="checkboxes" />
+        </div>
       </div>
 
       <div className="Disclaimer">
