@@ -107,7 +107,7 @@ export default function MemberTypeSelector() {
 
       {isSupplier && !submitted && (
         <>
-          <h3 className="mb-4 me_sho mt-4">請確認以下資格（符合任一項即可）</h3>
+          <h3 className="mb-4 me_sho mt-4">請確認以下資格</h3>
           <div className="tier-question-panel">
             {SUPPLIER_TIER_QUESTIONS.map((question, index) => {
               const answer = answers[question.id];
