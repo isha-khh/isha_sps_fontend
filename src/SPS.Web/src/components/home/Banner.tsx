@@ -1,3 +1,4 @@
+import Link from "next/link";
 import HeroImage from "@/components/ui/HeroImage";
 import { withBasePath } from "@/lib/api-client";
 
@@ -6,6 +7,10 @@ import { withBasePath } from "@/lib/api-client";
  *
  * 主視覺圖（下面的 HeroImage）會登記一項 loading 任務，PageLoader
  * 要等它真的載入完成才會收起載入畫面，見 lib/loading-store.ts。
+ *
+ * 「申請會員」／「我要媒合」設計稿原本連去 `/isha/page/member/
+ * register.html`／`/isha/page/matching/index.html`，對應真頁面
+ * （`/member/register`、`/matching`）都已經做出來了，改成真的路由。
  */
 export default function Banner() {
   return (
@@ -25,16 +30,16 @@ export default function Banner() {
 
               <ul className="nav" role="list" aria-label="行動按鈕選單">
                 <li className="b1">
-                  <a href="#" title="前往申請會員頁面">
+                  <Link href="/member/register" title="前往申請會員頁面">
                     <span>申請會員</span>
                     <i className="bi bi-arrow-right" aria-hidden="true"></i>
-                  </a>
+                  </Link>
                 </li>
                 <li className="b2">
-                  <a href="#" title="前往我要媒合頁面">
+                  <Link href="/matching" title="前往我要媒合頁面">
                     <span>我要媒合</span>
                     <i className="bi bi-arrow-right" aria-hidden="true"></i>
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

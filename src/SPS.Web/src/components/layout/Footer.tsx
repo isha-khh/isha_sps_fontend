@@ -6,11 +6,12 @@ import { withBasePath } from "@/lib/api-client";
  * 沒有自己的互動邏輯——「訂閱電子報」按鈕的捲動行為是掛在 Header 上
  * （原本就是 nav.html 的 script 在控制），這裡純粹是內容。
  *
- * 「公告事項」／「產業案例」／「會員中心」／「常見問題」連到真的
- * 存在的路由，用 next/link（ESLint 的 no-html-link-for-pages 規則對
- * 已存在的路由會直接噴錯）；其餘（我要媒合、關於我們、網站導覽、
- * 功能專區）對應頁面還沒蓋出來，維持原本的 `<a href="#">`／舊站
- * 靜態頁字串，等頁面做出來再一起換。
+ * 「公告事項」／「產業案例」／「會員中心」／「常見問題」／「關於
+ * 我們」／「網站導覽」／「我要媒合」連到真的存在的路由，用 next/link
+ * （ESLint 的 no-html-link-for-pages 規則對已存在的路由會直接噴錯）；
+ * 「功能專區」設計稿 `page/_uc/footer.html` 本身也只給 `#`，沒有對應
+ * 頁面/明確目標，維持原本的 `<a href="#">`，等之後確認這塊實際上該
+ * 連去哪裡再換。
  */
 export default function Footer() {
   return (
@@ -76,9 +77,9 @@ export default function Footer() {
               <div className="footer-title">Links</div>
               <ul className="nav-links">
                 <li>
-                  <a href="/page/about/index.html" title="前往 關於我們">
+                  <Link href="/about" title="前往 關於我們">
                     關於我們
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <Link href="/news" title="前往 公告事項">
@@ -91,9 +92,9 @@ export default function Footer() {
                   </a>
                 </li>
                 <li>
-                  <a href="#" title="前往 我要媒合">
+                  <Link href="/matching/enterprise" title="前往 我要媒合">
                     我要媒合
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <Link href="/promotion" title="前往 產業案例">
@@ -111,9 +112,9 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" title="前往 網站導覽">
+                  <Link href="/sitemap" title="前往 網站導覽">
                     網站導覽
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
