@@ -32,8 +32,23 @@ const SCROLL_RUNWAY_PER_ITEM = 400;
  *
  * 桌機/手機分界（992px）跟設計稿 `ScrollTrigger.matchMedia` 的斷點
  * 一致——手機版設計稿本來就是整塊變回正常文件流（`style_rwd.css`
- * 那段 `!important` 覆蓋掉 sticky/位移/透明度），這裡對應不额外撐出
+ * 那段 `!important` 覆蓋掉 sticky/位移/透明度），這裡對應不額外撐出
  * 捲動空間、也不套 sticky，直接讓內容自然往下排。
+ *
+ * `.elevator-box`（logo）原始 CSS 是 `position: fixed`，`.indicator-
+ * pointer`（藍點）是 `position: absolute`。桌機版把 `.milestone-
+ * section` 設成 `position: sticky` 之後，`position: fixed` 的元素完全
+ * 不認這個祖先（fixed 只認會建立新 containing block 的
+ * transform/filter/will-change 那幾種，單純 overflow+sticky 不算）
+ * ——會一路對齊到瀏覽器視窗本身，不受 `.milestone-section` 的
+ * `overflow: hidden` 裁切，導致還沒捲到這個區塊時，logo 已經穿模疊在
+ * 最上面的跑馬燈標題上。一度想過用 JS 手動判斷「區塊是否進入視窗」來
+ * 切換 `visibility` 補救，但那是繞遠路——真正的做法是讓它們跟藍點一樣
+ * 改成 `position: absolute`，相對 `.milestone-section` 自己定位。這樣
+ * 區塊還在正常文件流、還沒被捲到眼前時，它們自然就跟著區塊本身被
+ * `overflow: hidden` 裁切在外，不用任何額外 JS 判斷；一旦區塊
+ * sticky 貼住，看起來就等同原本 `position: fixed` 的效果（因為區塊
+ * 本身這時候就是釘在 `top:0` 不動）。
  */
 export default function MilestoneTimeline({ milestones }: { milestones: Milestone[] }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -93,7 +108,7 @@ export default function MilestoneTimeline({ milestones }: { milestones: Mileston
 
         <div className="axis-line" />
         <div className="indicator-pointer" />
-        <div className="elevator-box">
+        <div className="elevator-box" style={isDesktop ? { position: "absolute" } : undefined}>
           <img className="img-fluid d-block" src={withBasePath("/images/all/ab_logo.svg")} aria-hidden="true" alt="" />
         </div>
 
