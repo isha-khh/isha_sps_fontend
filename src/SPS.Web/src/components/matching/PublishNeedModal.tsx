@@ -35,7 +35,7 @@ export default function PublishNeedModal({ id }: { id: string }) {
   }
 
   return (
-    <Modal id={id} title="我要刊登">
+    <Modal id={id} title="我要刊登" dialogClassName="modal-dialog_w7">
       <div className="form-group">
         <label className="mb-2">需求標題</label>
         <input type="text" className="form-control" title="請輸入需求標題" placeholder="請輸入需求標題" required aria-required="true" />

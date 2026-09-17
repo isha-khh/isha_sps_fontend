@@ -12,11 +12,26 @@ import type { ReactNode } from "react";
  *
  * 這是通用的對話框外殼，之後其他地方要彈條款/提示視窗都可以重複用，
  * 不用每次重寫一次 modal 的骨架。
+ *
+ * `dialogClassName` 是選填的額外 class，加在 `.modal-dialog` 上——
+ * 設計稿有些對話框（例如媒合對接「我要刊登」）額外掛
+ * `modal-dialog_w7`（`css/style.css` 定義 `max-width:70%`，比
+ * bootstrap 預設寬），沒給就維持原本的寬度。
  */
-export default function Modal({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+export default function Modal({
+  id,
+  title,
+  children,
+  dialogClassName,
+}: {
+  id: string;
+  title: string;
+  children: ReactNode;
+  dialogClassName?: string;
+}) {
   return (
     <div className="modal fade" id={id} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={`${id}Label`} aria-hidden="true">
-      <div className="modal-dialog modal-dialog-centered">
+      <div className={`modal-dialog modal-dialog-centered${dialogClassName ? ` ${dialogClassName}` : ""}`}>
         <div className="modal-content">
           <div className="modal-header">
             <h4 className="modal-title" id={`${id}Label`}>
