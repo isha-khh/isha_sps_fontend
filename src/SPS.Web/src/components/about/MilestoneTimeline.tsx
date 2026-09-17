@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { motion, useMotionValueEvent, useScroll, useTransform } from "motion/react";
+import { useMotionValueEvent, useScroll } from "motion/react";
 import { withBasePath } from "@/lib/api-client";
 
 export interface Milestone {
@@ -49,9 +49,30 @@ const SCROLL_RUNWAY_PER_ITEM = 400;
  * `overflow: hidden` 裁切在外，不用任何額外 JS 判斷；一旦區塊
  * sticky 貼住，看起來就等同原本 `position: fixed` 的效果（因為區塊
  * 本身這時候就是釘在 `top:0` 不動）。
+ *
+ * `.history-list` 的位移一開始用 `useTransform(scrollYProgress, ...)`
+ * 連續跟著捲動像素跑，捲動一旦停在兩個年份中間，畫面就會卡在「兩者
+ * 之間」，年份文字對不齊固定在旁邊的藍點/橫線。設計稿原本
+ * `goTo()`／CSS 的 `transition: transform 0.5s ease` 其實是「離散
+ * 跳格＋補間動畫」，不是連續跟手——每次都是直接設成『目前最近那個
+ * 年份』的精確位移，讓 CSS transition 補一段動畫，最終一定會精準
+ * 停在對齊的位置。這裡照這個邏輯改：位移只吃 `activeIndex`（離散），
+ * 不再連續綁 `scrollYProgress`，靠既有 CSS 的 `transition:transform`
+ * 補間，捲動放開後一定會精準對齊到某一個年份，不會停在中間。
+ *
+ * 量測每個年份 `offsetTop` 的 `useLayoutEffect` 原本只在掛載時跑一次
+ * （加上 resize 才重量），但這時網頁字型（Noto Sans TC，Google Fonts
+ * 非同步載入）可能還沒真的套上，量到的是瀏覽器預設字體的行高——等
+ * 字型真的換上去，實際版面變高，量到的舊 offset 就對不準了，而且
+ * 越後面的年份誤差越疊越大（每一項的高度誤差會累加到後面所有項目的
+ * offset 上），剛好對應「2024 準、2025/2026/2027 依序越差越多」這個
+ * 現象。改用 `ResizeObserver` 盯著整個 `.history-list`，只要它的
+ * 實際高度因為任何原因（字型切換、內容變動、視窗寬度改變）變動，就
+ * 重新量一次，不再只靠掛載時那一次性的量測。
  */
 export default function MilestoneTimeline({ milestones }: { milestones: Milestone[] }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [offsets, setOffsets] = useState<number[]>(() => milestones.map(() => 0));
   const [isDesktop, setIsDesktop] = useState(false);
@@ -73,7 +94,15 @@ export default function MilestoneTimeline({ milestones }: { milestones: Mileston
     }
     measure();
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+
+    const list = listRef.current;
+    const resizeObserver = list ? new ResizeObserver(measure) : null;
+    if (list && resizeObserver) resizeObserver.observe(list);
+
+    return () => {
+      window.removeEventListener("resize", measure);
+      resizeObserver?.disconnect();
+    };
   }, [milestones]);
 
   const { scrollYProgress } = useScroll({
@@ -82,7 +111,6 @@ export default function MilestoneTimeline({ milestones }: { milestones: Mileston
   });
 
   const maxOffset = offsets[offsets.length - 1] ?? 0;
-  const y = useTransform(scrollYProgress, [0, 1], [0, -maxOffset]);
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     if (!isDesktop || offsets.length === 0) return;
@@ -123,7 +151,12 @@ export default function MilestoneTimeline({ milestones }: { milestones: Mileston
         </div>
 
         <div className="right-viewport">
-          <motion.div className="history-list" id="historyList" style={{ y: isDesktop ? y : 0 }}>
+          <div
+            ref={listRef}
+            className="history-list"
+            id="historyList"
+            style={isDesktop ? { transform: `translateY(-${offsets[activeIndex] ?? 0}px)` } : undefined}
+          >
             {milestones.map((milestone, index) => (
               <div
                 className={`history-item${index === activeIndex ? " active" : ""}`}
@@ -143,7 +176,7 @@ export default function MilestoneTimeline({ milestones }: { milestones: Mileston
                 </ul>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
 
         <div className="s_round_6" aria-hidden="true">

@@ -13,7 +13,11 @@ using SPS.Application;
 using SPS.Infrastructure;
 using SPS.Infrastructure.Data;
 using SPS.Infrastructure.Interceptors;
+using DotNetEnv;
 
+// 從 SPS.Api 往上兩層找到 src/.env
+var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+Env.Load(envPath);
 var builder = WebApplication.CreateBuilder(args);
 
 // 設定 Kestrel 最大請求 Body 大小 (100MB，對應 Nginx client_max_body_size)

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MilestoneTimeline from "@/components/about/MilestoneTimeline";
+import VisionMap from "@/components/about/VisionMap";
 import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
@@ -26,11 +27,9 @@ const MILESTONES = [
  * `motion` 讀取捲動進度，取代設計稿原本 GSAP ScrollTrigger 攔截滑鼠
  * 滾輪的做法，說明見該檔案開頭註解）。
  *
- * 「願景」區塊的台灣地圖是一張很大的內嵌 SVG（超過 500 行路徑資料），
- * 抽成 public/images/about/taiwan-map.svg 用 <img> 引入，不塞進這支
- * 元件檔——`data-aos="animate-svg"` 這個值目前也沒有對應的 CSS/JS
- * （只有標準的 fade-up 這類 AOS 內建動畫有效），先原樣保留屬性，
- * 之後真的要做進場動畫再補。
+ * 「願景」區塊的台灣地圖抽成 `VisionMap.tsx`——地標掉落進場、箭頭
+ * 往外擴散的動畫（`data-aos="animate-svg"` 原本沒有對應的 CSS/JS，
+ * 只有標準 fade-up 這類 AOS 內建動畫有效），說明見該檔案開頭註解。
  */
 export default function AboutPage() {
   return (
@@ -66,9 +65,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="pic" data-aos="animate-svg">
-            <img className="img-fluid" src={withBasePath("/images/about/taiwan-map.svg")} alt="台灣地圖" />
-          </div>
+          <VisionMap />
         </div>
       </InnerPageShell>
     </>
