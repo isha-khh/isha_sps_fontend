@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
+import MilestoneTimeline from "@/components/about/MilestoneTimeline";
 import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
@@ -21,11 +22,9 @@ const MILESTONES = [
  * 地圖」這種結構化版面，先照畫面做成固定內容，後端缺口記在
  * 改版規劃.md。
  *
- * 設計稿的「計畫歷程」時間軸（`#bigYear` 隨捲動變化、`.axis-line`／
- * `.indicator-pointer`）沒有附帶對應的 JS（`coreScript.js` 裡沒有
- * 任何 milestone/bigYear 相關邏輯），先照原始 HTML 預設狀態（第一項
- * 2024 是 active）呈現靜態版面，捲動互動之後如果客戶真的要，需要
- * 另外請設計端補這段行為的規格再做。
+ * 「計畫歷程」時間軸的捲動互動抽成 `MilestoneTimeline.tsx`（用
+ * `motion` 讀取捲動進度，取代設計稿原本 GSAP ScrollTrigger 攔截滑鼠
+ * 滾輪的做法，說明見該檔案開頭註解）。
  *
  * 「願景」區塊的台灣地圖是一張很大的內嵌 SVG（超過 500 行路徑資料），
  * 抽成 public/images/about/taiwan-map.svg 用 <img> 引入，不塞進這支
@@ -54,51 +53,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="ab_list2 milestone-section" id="milestoneSection">
-          <div className="title-wrap title-wrap_md d-lg-none d-block">
-            <div className="h3_tit">計畫歷程</div>
-          </div>
-
-          <div className="axis-line" />
-          <div className="indicator-pointer" />
-          <div className="elevator-box">
-            <img className="img-fluid d-block" src={withBasePath("/images/all/ab_logo.svg")} aria-hidden="true" alt="" />
-          </div>
-
-          <div className="fixed-left">
-            <div className="title-wrap">
-              <div className="h3_tit">計畫歷程</div>
-            </div>
-
-            <div className="year-fixed-display" id="bigYear">
-              {MILESTONES[0].year}s
-            </div>
-          </div>
-
-          <div className="right-viewport">
-            <div className="history-list" id="historyList">
-              {MILESTONES.map((milestone, index) => (
-                <div className={`history-item${index === 0 ? " active" : ""}`} data-year={milestone.year} key={milestone.year}>
-                  <h3 className="card-title">
-                    {milestone.year} - <span>{milestone.title}</span>
-                  </h3>
-                  <ul className="card-list">
-                    {milestone.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="s_round_6" aria-hidden="true">
-            <img className="img-fluid d-block" src={withBasePath("/images/home/round_6.png")} alt="" />
-          </div>
-          <div className="s_round_3" aria-hidden="true">
-            <img className="img-fluid d-block" src={withBasePath("/images/home/round_3.jpg")} alt="" />
-          </div>
-        </div>
+        <MilestoneTimeline milestones={MILESTONES} />
 
         <div className="ab_list3">
           <div className="tit">
