@@ -287,3 +287,28 @@
 .tutoring.show .breadcrumb {
   margin-top: 110px;
 }
+
+/*
+ * `/matching`、`/matching/enterprise` 共用的 MatchingSearchBar，中間
+ * 應用情境／應用範疇／智慧技術三顆篩選按鈕的 `<ul>`（css/style.css
+ * 的 `.matching_sear .matching_sear_mid ul`）是寫死 `height: 50px`——
+ * 桌機版三顆按鈕塞得下一行沒問題，`style_rwd.css` 767px 以下真手機版
+ * 也有另外覆蓋成 `height: auto`，但中間這段（大概 768~991px，視窗
+ * 剛好窄到讓三顆按鈕擠不進 `.matching_sear_mid` 的 60% 寬度、被迫換行，
+ * 但還沒窄到真手機版全部堆疊）完全沒有覆蓋——換行後的按鈕高度超出這
+ * 固定 50px，直接溢出蓋到下面的卡片內容上。改成 `min-height`，行數
+ * 不管幾行都會自然撐開，同時不影響桌機版原本剛好一行、高度正好
+ * 50px 的樣子。
+ *
+ * 這裡的 `!important` 是必要的，不是隨手加的：Next.js 這支
+ * globals.css 編譯出來的 `<link>` 在 `<head>`，比 `layout.tsx`
+ * 裡 `LEGACY_SITE_STYLESHEETS` 那些放在 `<body>` 開頭的舊站
+ * `<link>` 還早載入——選擇器完全相同、優先權（specificity）打平的
+ * 情況下，「後載入的贏」，所以沒加 `!important` 這條規則實測完全
+ * 沒有生效（改完進 devtools 量 computed height 還是 50px），只加
+ * `min-height` 沒用，一定要蓋過去。
+ */
+.matching_sear .matching_sear_mid ul {
+  height: auto !important;
+  min-height: 50px;
+}
