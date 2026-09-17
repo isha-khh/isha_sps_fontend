@@ -51,11 +51,12 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
         title="企業名錄"
         titleAside={<MatchingSubNav activeHref="/matching/enterprise" />}
         breadcrumb={[{ label: "企業名錄" }]}
+        topBar={
+          <div className="searchma_tching mb-5">
+            <MatchingSearchBar />
+          </div>
+        }
       >
-        <div className="searchma_tching mb-md-5 mb-4">
-          <MatchingSearchBar />
-        </div>
-
         <div className="row">
           {pagedListings.length === 0 && <p>目前沒有符合的企業。</p>}
 

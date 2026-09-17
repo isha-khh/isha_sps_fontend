@@ -73,7 +73,7 @@ export default function ProposeSolutionModal({ id }: { id: string }) {
         <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
           取消
         </a>
-        <button type="button" className="btn-theme mat_Send" disabled={!agreed} onClick={() => setSubmitted(true)}>
+        <button type="button" className="btn-theme mat_Send" onClick={() => setSubmitted(true)}>
           送出
         </button>
       </div>

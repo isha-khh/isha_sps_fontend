@@ -31,6 +31,13 @@ const SIDEBAR_BANNERS: SidebarBannerItem[] = [
  *
  * 目前純畫面（假資料），分頁邏輯照抄 `/matching/enterprise` 的純前端
  * 假分頁做法，等接上真後端再一起處理。
+ *
+ * `.searchma_tching` 搜尋列放在 `topBar`，不是 `children`——對照設計稿
+ * 原始 HTML，這塊跟 `.side1`／`.content`／`.side2` 是同一層的手足
+ * （在側欄/內容分兩欄的 `.row` 裡自己佔滿一整行，把下面的內容/側欄
+ * 擠到下一行），不是塞在 `.content` 欄位「裡面」。放進 `children`
+ * 會被 `.content` 的欄寬限制住，跟旁邊 `aside`（我要刊登按鈕）擠成
+ * 同一行、還會變窄到裡面的篩選按鈕擠不下換行。
  */
 export default async function MatchingPage({ searchParams }: PageProps<"/matching">) {
   const { page: rawPage } = await searchParams;
@@ -50,6 +57,11 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
         title="媒合對接"
         titleAside={<MatchingSubNav activeHref="/matching" />}
         breadcrumb={[{ label: "媒合對接" }]}
+        topBar={
+          <div className="searchma_tching mb-5">
+            <MatchingSearchBar />
+          </div>
+        }
         aside={
           <>
             <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#staticmembership2" className="me_Publish more_x">
@@ -79,10 +91,6 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
           </>
         }
       >
-        <div className="searchma_tching mb-md-5 mb-4">
-          <MatchingSearchBar />
-        </div>
-
         <div className="column_box">
           {pagedNeeds.length === 0 && <p>目前沒有符合的需求。</p>}
           {pagedNeeds.map((need) => (
