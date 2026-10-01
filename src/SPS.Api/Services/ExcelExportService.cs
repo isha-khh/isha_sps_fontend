@@ -86,10 +86,9 @@ public class ExcelExportService : IExcelExportService
             };
             ws.Cell(row, 5).Value = c.Level switch
             {
-                CompanyLevel.Basic => "普通",
-                CompanyLevel.Standard => "銀牌",
-                CompanyLevel.Premium => "金牌",
-                CompanyLevel.VIP => "鑽石",
+                CompanyLevel.Standard => "一般",
+                CompanyLevel.Excellent => "卓越",
+                CompanyLevel.Emerging => "新興",
                 _ => string.Empty
             };
             ws.Cell(row, 6).Value = c.Employees.HasValue ? c.Employees.Value.ToString() : string.Empty;

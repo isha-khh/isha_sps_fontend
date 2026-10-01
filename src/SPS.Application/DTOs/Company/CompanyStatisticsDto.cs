@@ -62,22 +62,17 @@ public class CompanyStatisticsDto
 public class CompanyLevelBreakdown
 {
     /// <summary>
-    /// 基礎級別
-    /// </summary>
-    public int Basic { get; set; }
-
-    /// <summary>
-    /// 標準級別
+    /// 一般
     /// </summary>
     public int Standard { get; set; }
 
     /// <summary>
-    /// 高級級別
+    /// 卓越會員
     /// </summary>
-    public int Premium { get; set; }
+    public int Excellent { get; set; }
 
     /// <summary>
-    /// VIP 級別
+    /// 新興會員
     /// </summary>
-    public int VIP { get; set; }
+    public int Emerging { get; set; }
 }

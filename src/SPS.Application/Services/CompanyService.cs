@@ -620,10 +620,9 @@ public class CompanyService : ICompanyService
 
             var byLevel = new CompanyLevelBreakdown
             {
-                Basic = await query.CountAsync(c => c.Level == CompanyLevel.Basic, cancellationToken),
                 Standard = await query.CountAsync(c => c.Level == CompanyLevel.Standard, cancellationToken),
-                Premium = await query.CountAsync(c => c.Level == CompanyLevel.Premium, cancellationToken),
-                VIP = await query.CountAsync(c => c.Level == CompanyLevel.VIP, cancellationToken)
+                Excellent = await query.CountAsync(c => c.Level == CompanyLevel.Excellent, cancellationToken),
+                Emerging = await query.CountAsync(c => c.Level == CompanyLevel.Emerging, cancellationToken)
             };
 
             var statistics = new CompanyStatisticsDto
