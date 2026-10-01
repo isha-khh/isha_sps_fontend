@@ -84,9 +84,15 @@ public class MemberApplication : BaseEntity<Guid>
     public string UnifiedSocialCreditCode { get; set; } = string.Empty;
 
     /// <summary>
-    /// 企業名稱（API獲取或手動填寫）
+    /// 企業名稱（API獲取或手動填寫）；個人會員申請時借用這個欄位存
+    /// 「所屬公司名稱」自由文字，審核通過後寫入 Member.CompanyName
     /// </summary>
     public string? CompanyName { get; set; }
+
+    /// <summary>
+    /// 產業別 - 個人會員申請專用，自由文字，審核通過後寫入 Member.Industry
+    /// </summary>
+    public string? Industry { get; set; }
 
     /// <summary>
     /// 負責人姓名（必填）

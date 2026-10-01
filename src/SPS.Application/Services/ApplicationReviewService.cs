@@ -374,76 +374,83 @@ public class ApplicationReviewService : IApplicationReviewService
     {
         try
         {
-            // 1. 檢查或創建企業
-            var company = await _unitOfWork.Companies
-                .GetByUnifiedSocialCreditCodeAsync(application.UnifiedSocialCreditCode, cancellationToken);
+            // 1. 個人會員沒有企業，略過整段企業查找/建立；企業會員（含升級
+            // 到企業的申請）才需要查找或建立 Company
+            Company? company = null;
 
-            if (company == null)
+            if (application.ApplicantType != ApplicantType.Individual)
             {
-                company = new Company
+                company = await _unitOfWork.Companies
+                    .GetByUnifiedSocialCreditCodeAsync(application.UnifiedSocialCreditCode, cancellationToken);
+
+                if (company == null)
                 {
-                    Id = Guid.NewGuid(),
-                    Number = GenerateCompanyNumber(),
-                    Name = application.CompanyName ?? "未命名企業",
-                    UnifiedSocialCreditCode = application.UnifiedSocialCreditCode,
-                    ContactPerson = application.ContactPerson,
-                    MemberRole = application.MemberRole,
-                    Type = application.MemberRole switch
+                    company = new Company
                     {
-                        MemberRole.Supplier => CompanyType.Supplier,
-                        MemberRole.Buyer => CompanyType.Buyer,
-                        _ => CompanyType.Supplier
-                    },
-                    IsVerified = !application.IsManualInput,
-                    VerifiedAt = application.IsManualInput ? null : DateTime.UtcNow,
-                    Status = Domain.Enums.Status.Active,
-                    CreatedTime = DateTime.UtcNow
-                };
-
-                await _unitOfWork.Companies.AddAsync(company, cancellationToken);
-            }
-            else
-            {
-                var needUpdate = false;
-
-                // 更新 Company 的負責人和會員類別（如果尚未設置）
-                if (company.ContactPerson == null || company.MemberRole == null)
-                {
-                    company.ContactPerson = application.ContactPerson;
-                    company.MemberRole = application.MemberRole;
-                    needUpdate = true;
-                }
-
-                // 根據新申請的 MemberRole 更新公司類型
-                // 如果公司現有類型與新申請角色不同，升級為 Both
-                if (company.Type != CompanyType.Both)
-                {
-                    var newType = application.MemberRole switch
-                    {
-                        MemberRole.Supplier => CompanyType.Supplier,
-                        MemberRole.Buyer => CompanyType.Buyer,
-                        _ => company.Type
+                        Id = Guid.NewGuid(),
+                        Number = GenerateCompanyNumber(),
+                        Name = application.CompanyName ?? "未命名企業",
+                        UnifiedSocialCreditCode = application.UnifiedSocialCreditCode,
+                        ContactPerson = application.ContactPerson,
+                        MemberRole = application.MemberRole,
+                        Level = application.SupplierTier ?? CompanyLevel.Standard,
+                        Type = application.MemberRole switch
+                        {
+                            MemberRole.Supplier => CompanyType.Supplier,
+                            MemberRole.Buyer => CompanyType.Buyer,
+                            _ => CompanyType.Supplier
+                        },
+                        IsVerified = !application.IsManualInput,
+                        VerifiedAt = application.IsManualInput ? null : DateTime.UtcNow,
+                        Status = Domain.Enums.Status.Active,
+                        CreatedTime = DateTime.UtcNow
                     };
 
-                    if (company.Type != newType && company.Type != CompanyType.Both)
-                    {
-                        company.Type = CompanyType.Both;
-                        needUpdate = true;
-                    }
-                    else if (company.Type == 0) // 舊資料未設定
-                    {
-                        company.Type = newType;
-                        needUpdate = true;
-                    }
+                    await _unitOfWork.Companies.AddAsync(company, cancellationToken);
                 }
-
-                if (needUpdate)
+                else
                 {
-                    await _unitOfWork.Companies.UpdateAsync(company, cancellationToken);
-                }
-            }
+                    var needUpdate = false;
 
-            application.CompanyId = company.Id;
+                    // 更新 Company 的負責人和會員類別（如果尚未設置）
+                    if (company.ContactPerson == null || company.MemberRole == null)
+                    {
+                        company.ContactPerson = application.ContactPerson;
+                        company.MemberRole = application.MemberRole;
+                        needUpdate = true;
+                    }
+
+                    // 根據新申請的 MemberRole 更新公司類型
+                    // 如果公司現有類型與新申請角色不同，升級為 Both
+                    if (company.Type != CompanyType.Both)
+                    {
+                        var newType = application.MemberRole switch
+                        {
+                            MemberRole.Supplier => CompanyType.Supplier,
+                            MemberRole.Buyer => CompanyType.Buyer,
+                            _ => company.Type
+                        };
+
+                        if (company.Type != newType && company.Type != CompanyType.Both)
+                        {
+                            company.Type = CompanyType.Both;
+                            needUpdate = true;
+                        }
+                        else if (company.Type == 0) // 舊資料未設定
+                        {
+                            company.Type = newType;
+                            needUpdate = true;
+                        }
+                    }
+
+                    if (needUpdate)
+                    {
+                        await _unitOfWork.Companies.UpdateAsync(company, cancellationToken);
+                    }
+                }
+
+                application.CompanyId = company.Id;
+            }
 
             // 2. 獲取所有申請成員
             var applicationMembers = await _unitOfWork.ApplicationMembers
@@ -454,53 +461,122 @@ public class ApplicationReviewService : IApplicationReviewService
                 return Result<bool>.Failure("申請中沒有會員信息");
             }
 
-            _logger.LogInformation("Creating {MemberCount} members for application {ApplicationNumber}",
+            _logger.LogInformation("Processing {MemberCount} members for application {ApplicationNumber}",
                 applicationMembers.Count, application.ApplicationNumber);
 
-            // 3. 為每個成員創建 Member 帳號
-            foreach (var appMember in applicationMembers)
+            if (application.ExistingMemberId.HasValue)
             {
-                // 計算權限
-                var permissions = CalculatePermissions(
-                    application.MemberRole,
-                    appMember.MemberPosition
-                );
+                // 升級申請：更新既有會員，不新建帳號（姓名/Email 沿用既有
+                // 資料，電話允許用這次申請填寫的值更新）
+                var existingMember = await _unitOfWork.Members
+                    .GetByIdAsync(application.ExistingMemberId.Value, cancellationToken);
 
-                var member = new Member
+                if (existingMember == null)
                 {
-                    Id = Guid.NewGuid(),
-                    Number = await GenerateMemberNumberAsync(cancellationToken),
-                    Email = appMember.Email,
-                    Phone = appMember.Phone,
-                    Extension = appMember.Extension,
-                    MobilePhone = appMember.MobilePhone,
-                    Password = appMember.PasswordHash, // 已哈希
-                    Nickname = appMember.ContactName,
-                    Position = appMember.Position,
-                    CompanyId = company.Id,
-                    Role = application.MemberRole,
-                    MemberPosition = appMember.MemberPosition,
-                    Permissions = permissions,
-                    ApplicationId = application.Id,
-                    IsApproved = true,
-                    Status = Domain.Enums.Status.Active,
-                    FirstChanged = false,
-                    PasswordChanged = false,
-                    LoginFailure = 0,
-                    CreatedTime = DateTime.UtcNow
-                };
+                    return Result<bool>.Failure("找不到既有會員資料，無法完成升級");
+                }
 
-                await _unitOfWork.Members.AddAsync(member, cancellationToken);
+                var primaryAppMember = applicationMembers.First();
+                var permissions = CalculatePermissions(application.MemberRole, primaryAppMember.MemberPosition);
 
-                // 更新 ApplicationMember 的 CreatedMemberId
-                appMember.CreatedMemberId = member.Id;
-                await _unitOfWork.ApplicationMembers.UpdateAsync(appMember, cancellationToken);
+                existingMember.CompanyId = company?.Id;
+                existingMember.Role = application.MemberRole;
+                existingMember.MemberPosition = primaryAppMember.MemberPosition;
+                existingMember.Permissions = permissions;
+                existingMember.ApplicationId = application.Id;
+                existingMember.IsApproved = true;
+                if (!string.IsNullOrEmpty(primaryAppMember.Phone))
+                {
+                    existingMember.Phone = primaryAppMember.Phone;
+                }
+                if (!string.IsNullOrEmpty(primaryAppMember.MobilePhone))
+                {
+                    existingMember.MobilePhone = primaryAppMember.MobilePhone;
+                }
+                existingMember.UpdatedTime = DateTime.UtcNow;
 
-                _logger.LogInformation("Created member {MemberNumber} for {Email}", member.Number, appMember.Email);
+                await _unitOfWork.Members.UpdateAsync(existingMember, cancellationToken);
+
+                primaryAppMember.CreatedMemberId = existingMember.Id;
+                await _unitOfWork.ApplicationMembers.UpdateAsync(primaryAppMember, cancellationToken);
+
+                _logger.LogInformation("Upgraded existing member {MemberId} via application {ApplicationNumber}",
+                    existingMember.Id, application.ApplicationNumber);
+            }
+            else
+            {
+                // 全新申請：每個成員先用 email 查有沒有既有帳號才決定新建或
+                // 更新，避免同一個 email 產生第二筆 Member（舊系統本來就有
+                // 的資料完整性漏洞，這次升級流程提高觸發機率一併修掉）
+                foreach (var appMember in applicationMembers)
+                {
+                    var permissions = CalculatePermissions(application.MemberRole, appMember.MemberPosition);
+                    var existingByEmail = await _unitOfWork.Members
+                        .GetByEmailAsync(appMember.Email, cancellationToken);
+
+                    if (existingByEmail != null)
+                    {
+                        existingByEmail.CompanyId = company?.Id;
+                        existingByEmail.Role = application.MemberRole;
+                        existingByEmail.MemberPosition = appMember.MemberPosition;
+                        existingByEmail.Permissions = permissions;
+                        existingByEmail.ApplicationId = application.Id;
+                        existingByEmail.IsApproved = true;
+                        if (application.ApplicantType == ApplicantType.Individual)
+                        {
+                            existingByEmail.CompanyName = application.CompanyName;
+                            existingByEmail.Industry = application.Industry;
+                        }
+                        existingByEmail.UpdatedTime = DateTime.UtcNow;
+
+                        await _unitOfWork.Members.UpdateAsync(existingByEmail, cancellationToken);
+
+                        appMember.CreatedMemberId = existingByEmail.Id;
+                        await _unitOfWork.ApplicationMembers.UpdateAsync(appMember, cancellationToken);
+
+                        _logger.LogInformation("Merged application member {Email} into existing member {MemberId}",
+                            appMember.Email, existingByEmail.Id);
+                        continue;
+                    }
+
+                    var member = new Member
+                    {
+                        Id = Guid.NewGuid(),
+                        Number = await GenerateMemberNumberAsync(cancellationToken),
+                        Email = appMember.Email,
+                        Phone = appMember.Phone,
+                        Extension = appMember.Extension,
+                        MobilePhone = appMember.MobilePhone,
+                        Password = appMember.PasswordHash, // 已哈希
+                        Nickname = appMember.ContactName,
+                        Position = appMember.Position,
+                        CompanyId = company?.Id,
+                        CompanyName = application.ApplicantType == ApplicantType.Individual ? application.CompanyName : null,
+                        Industry = application.ApplicantType == ApplicantType.Individual ? application.Industry : null,
+                        Role = application.MemberRole,
+                        MemberPosition = appMember.MemberPosition,
+                        Permissions = permissions,
+                        ApplicationId = application.Id,
+                        IsApproved = true,
+                        Status = Domain.Enums.Status.Active,
+                        FirstChanged = false,
+                        PasswordChanged = false,
+                        LoginFailure = 0,
+                        CreatedTime = DateTime.UtcNow
+                    };
+
+                    await _unitOfWork.Members.AddAsync(member, cancellationToken);
+
+                    // 更新 ApplicationMember 的 CreatedMemberId
+                    appMember.CreatedMemberId = member.Id;
+                    await _unitOfWork.ApplicationMembers.UpdateAsync(appMember, cancellationToken);
+
+                    _logger.LogInformation("Created member {MemberNumber} for {Email}", member.Number, appMember.Email);
+                }
             }
 
-            _logger.LogInformation("Created {MemberCount} members and company {CompanyNumber} for application {ApplicationNumber}",
-                applicationMembers.Count, company.Number, application.ApplicationNumber);
+            _logger.LogInformation("Finished processing members for application {ApplicationNumber} (company: {CompanyNumber})",
+                application.ApplicationNumber, company?.Number ?? "(個人會員)");
 
             return Result<bool>.Success(true);
         }
