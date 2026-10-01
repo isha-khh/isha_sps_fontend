@@ -2,6 +2,7 @@ using System.IO.Compression;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.Application;
+using SPS.Application.DTOs.Scoring;
 using SPS.Application.Interfaces.IServices;
 using System.Security.Claims;
 using Swashbuckle.AspNetCore.Annotations;
@@ -19,15 +20,18 @@ public class AdminApplicationsController : ControllerBase
 {
     private readonly IApplicationReviewService _reviewService;
     private readonly IApplicationService _applicationService;
+    private readonly IScoringService _scoringService;
     private readonly ILogger<AdminApplicationsController> _logger;
 
     public AdminApplicationsController(
         IApplicationReviewService reviewService,
         IApplicationService applicationService,
+        IScoringService scoringService,
         ILogger<AdminApplicationsController> logger)
     {
         _reviewService = reviewService;
         _applicationService = applicationService;
+        _scoringService = scoringService;
         _logger = logger;
     }
 
@@ -342,6 +346,64 @@ public class AdminApplicationsController : ControllerBase
         }
 
         return Ok(new { success = true });
+    }
+
+    /// <summary>
+    /// 新增一筆專家評分（新興會員委員審查用，一位專家一筆，由內部帳號代為輸入）
+    /// </summary>
+    /// <param name="id">申請ID</param>
+    /// <param name="request">專家評分請求</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <response code="200">成功新增評分</response>
+    /// <response code="400">請求參數錯誤或申請不存在</response>
+    /// <response code="401">未授權或權限不足</response>
+    [HttpPost("{id}/scores")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> AddExpertScore(
+        Guid id,
+        [FromBody] AddExpertScoreRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue)
+        {
+            return Unauthorized(new { error = "無法獲取當前用戶ID" });
+        }
+
+        var result = await _scoringService.AddExpertScoreAsync(id, request, userId.Value, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { error = result.Error });
+        }
+
+        return Ok(new { success = true });
+    }
+
+    /// <summary>
+    /// 取得一張申請的委員評分彙總結果
+    /// </summary>
+    /// <param name="id">申請ID</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <response code="200">成功返回評分彙總</response>
+    /// <response code="400">請求失敗</response>
+    /// <response code="401">未授權或權限不足</response>
+    [HttpGet("{id}/scores")]
+    [ProducesResponseType(typeof(ScoringSummaryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetScoringSummary(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _scoringService.GetScoringSummaryAsync(id, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { error = result.Error });
+        }
+
+        return Ok(result.Data);
     }
 
     private Guid? GetCurrentUserId()

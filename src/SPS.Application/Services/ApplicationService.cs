@@ -746,7 +746,10 @@ public class ApplicationService : IApplicationService
         {
             Id = application.Id,
             ApplicationNumber = application.ApplicationNumber,
+            ApplicantType = application.ApplicantType,
+            ExistingMemberId = application.ExistingMemberId,
             MemberRole = application.MemberRole,
+            SupplierTier = application.SupplierTier,
             Status = application.Status,
             Email = firstMember?.Email ?? string.Empty,
             ContactName = firstMember?.ContactName ?? string.Empty,
@@ -757,6 +760,7 @@ public class ApplicationService : IApplicationService
             CompanyId = application.CompanyId,
             UnifiedSocialCreditCode = application.UnifiedSocialCreditCode,
             CompanyName = application.CompanyName,
+            Industry = application.Industry,
             ContactPerson = application.ContactPerson,
             IsManualInput = application.IsManualInput,
             BusinessScope = application.BusinessScope,
@@ -829,7 +833,9 @@ public class ApplicationService : IApplicationService
         {
             Id = application.Id,
             ApplicationNumber = application.ApplicationNumber,
+            ApplicantType = application.ApplicantType,
             MemberRole = application.MemberRole,
+            SupplierTier = application.SupplierTier,
             Status = application.Status,
             Email = application.Email,
             ContactName = application.ContactName,

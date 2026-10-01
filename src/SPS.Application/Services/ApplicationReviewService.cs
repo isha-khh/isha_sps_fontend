@@ -20,6 +20,7 @@ public class ApplicationReviewService : IApplicationReviewService
     private readonly IPasswordHasher _passwordHasher;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
+    private readonly IScoringService _scoringService;
     private readonly ILogger<ApplicationReviewService> _logger;
 
     public ApplicationReviewService(
@@ -27,12 +28,14 @@ public class ApplicationReviewService : IApplicationReviewService
         IPasswordHasher passwordHasher,
         IEmailService emailService,
         IConfiguration configuration,
+        IScoringService scoringService,
         ILogger<ApplicationReviewService> logger)
     {
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
         _emailService = emailService;
         _configuration = configuration;
+        _scoringService = scoringService;
         _logger = logger;
     }
 
@@ -628,7 +631,9 @@ public class ApplicationReviewService : IApplicationReviewService
         {
             Id = application.Id,
             ApplicationNumber = application.ApplicationNumber,
+            ApplicantType = application.ApplicantType,
             MemberRole = application.MemberRole,
+            SupplierTier = application.SupplierTier,
             Status = application.Status,
             Email = firstMember?.Email ?? application.Email,
             ContactName = firstMember?.ContactName ?? application.ContactName,
@@ -661,7 +666,10 @@ public class ApplicationReviewService : IApplicationReviewService
         {
             Id = application.Id,
             ApplicationNumber = application.ApplicationNumber,
+            ApplicantType = application.ApplicantType,
+            ExistingMemberId = application.ExistingMemberId,
             MemberRole = application.MemberRole,
+            SupplierTier = application.SupplierTier,
             Status = application.Status,
             Email = firstMember?.Email ?? string.Empty,
             ContactName = firstMember?.ContactName ?? string.Empty,
@@ -672,6 +680,7 @@ public class ApplicationReviewService : IApplicationReviewService
             CompanyId = application.CompanyId,
             UnifiedSocialCreditCode = application.UnifiedSocialCreditCode,
             CompanyName = application.CompanyName,
+            Industry = application.Industry,
             ContactPerson = application.ContactPerson,
             IsManualInput = application.IsManualInput,
             BusinessScope = application.BusinessScope,
@@ -705,6 +714,25 @@ public class ApplicationReviewService : IApplicationReviewService
                 CreatedTime = m.CreatedTime
             }).ToList()
         };
+
+        // 新興會員委員評分警示（非阻斷性）——審核員仍可自行決定是否核准
+        if (application.SupplierTier == CompanyLevel.Emerging)
+        {
+            var summaryResult = await _scoringService.GetScoringSummaryAsync(application.Id, cancellationToken);
+            if (summaryResult.IsSuccess && summaryResult.Data != null)
+            {
+                var summary = summaryResult.Data;
+                if (summary.TotalCount == 0)
+                {
+                    response.ScoringWarning = "尚未輸入任何委員評分";
+                }
+                else if (!summary.IsPassed)
+                {
+                    response.ScoringWarning =
+                        $"委員評分未達合格門檻（{summary.QualifiedCount}/{summary.TotalCount} 位合格，需半數（含）以上）";
+                }
+            }
+        }
 
         if (application.Documents != null)
         {
