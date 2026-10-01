@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios';
 import { apiClient } from '@/lib/api-client';
 import type {
   ApplicationResponse,
@@ -139,12 +140,20 @@ export const applicationsApi = {
   /**
    * 驗證申請是否可提交
    * GET /api/Applications/{id}/validate
+   *
+   * 後端驗證失敗時是用 HTTP 400 回傳 `{valid:false, error}`（不是
+   * 200 包一個 valid:false），axios 預設會把 400 當成 rejected
+   * promise——這裡接住 400 把它當成正常的驗證結果回傳，只有真的
+   * 意外錯誤（網路斷線、其他狀態碼）才繼續往外丟。
    */
   async validate(id: string): Promise<ValidationResult> {
     try {
       const response = await apiClient.get<ValidationResult>(`/api/Applications/${id}/validate`);
       return response.data;
     } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 400 && error.response.data) {
+        return error.response.data as ValidationResult;
+      }
       console.error('Failed to validate application:', error);
       throw error;
     }

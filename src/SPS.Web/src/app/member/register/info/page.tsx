@@ -21,6 +21,11 @@ export const metadata: Metadata = {
  * 帶到「下一步」連去的 Step4（`/member/register/complete`），這樣
  * Step4 唯讀檢視才會顯示跟 Step3 同一組欄位，不會 Step3 藏起來的
  * 欄位 Step4 又冒出來。
+ *
+ * 2026-10-01：「下一步」不再是單純的 `<Link>`——`MemberDetailsForm`
+ * 送出成功（建立申請＋上傳文件）後才會導去 Step4，並在網址後面多帶
+ * 一個 `applicationId`，所以這裡傳的是 `nextHrefBase`（不含
+ * `applicationId`），由表單元件自己補上。
  */
 export default async function MemberRegisterInfoPage({ searchParams }: PageProps<"/member/register/info">) {
   const { applicantType: rawApplicantType, role: rawRole, tier: rawTier } = await searchParams;
@@ -32,7 +37,7 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
   qs.set("applicantType", applicantType);
   if (applicantType === "company") qs.set("role", role);
   if (applicantType === "company" && role === "supply") qs.set("tier", tier);
-  const nextHref = `/member/register/complete?${qs.toString()}`;
+  const nextHrefBase = `/member/register/complete?${qs.toString()}`;
 
   return (
     <>
@@ -60,7 +65,7 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
           <StepProgress activeStep={3} />
           <MemberDetailsForm
             mode="edit"
-            onSubmitHref={nextHref}
+            nextHrefBase={nextHrefBase}
             onSubmitLabel="同意，下一步"
             applicantType={applicantType}
             companyRole={role}

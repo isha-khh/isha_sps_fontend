@@ -33,5 +33,10 @@ public enum DocumentType
     /// <summary>
     /// 一般申請書（供給端專用 - 四選一）
     /// </summary>
-    Application = 6
+    Application = 6,
+
+    /// <summary>
+    /// 其他佐證文件（所有申請類型共用 - 選填）
+    /// </summary>
+    Other = 7
 }
