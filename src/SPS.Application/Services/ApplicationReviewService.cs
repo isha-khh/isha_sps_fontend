@@ -488,6 +488,17 @@ public class ApplicationReviewService : IApplicationReviewService
                 existingMember.Permissions = permissions;
                 existingMember.ApplicationId = application.Id;
                 existingMember.IsApproved = true;
+                // 產業別所有申請類型都必填（含升級），所屬公司名稱只有
+                // 個人會員才寫回 Member（企業會員的公司名稱已經由真正的
+                // Company 記錄承接，不重複存一份）
+                if (!string.IsNullOrEmpty(application.Industry))
+                {
+                    existingMember.Industry = application.Industry;
+                }
+                if (application.ApplicantType == ApplicantType.Individual && !string.IsNullOrEmpty(application.CompanyName))
+                {
+                    existingMember.CompanyName = application.CompanyName;
+                }
                 if (!string.IsNullOrEmpty(primaryAppMember.Phone))
                 {
                     existingMember.Phone = primaryAppMember.Phone;
@@ -525,10 +536,13 @@ public class ApplicationReviewService : IApplicationReviewService
                         existingByEmail.Permissions = permissions;
                         existingByEmail.ApplicationId = application.Id;
                         existingByEmail.IsApproved = true;
-                        if (application.ApplicantType == ApplicantType.Individual)
+                        if (!string.IsNullOrEmpty(application.Industry))
+                        {
+                            existingByEmail.Industry = application.Industry;
+                        }
+                        if (application.ApplicantType == ApplicantType.Individual && !string.IsNullOrEmpty(application.CompanyName))
                         {
                             existingByEmail.CompanyName = application.CompanyName;
-                            existingByEmail.Industry = application.Industry;
                         }
                         existingByEmail.UpdatedTime = DateTime.UtcNow;
 
@@ -555,7 +569,7 @@ public class ApplicationReviewService : IApplicationReviewService
                         Position = appMember.Position,
                         CompanyId = company?.Id,
                         CompanyName = application.ApplicantType == ApplicantType.Individual ? application.CompanyName : null,
-                        Industry = application.ApplicantType == ApplicantType.Individual ? application.Industry : null,
+                        Industry = application.Industry,
                         Role = application.MemberRole,
                         MemberPosition = appMember.MemberPosition,
                         Permissions = permissions,

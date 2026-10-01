@@ -598,9 +598,11 @@ public class ApplicationService : IApplicationService
                 return Result<bool>.Success(true);
             }
 
-            // 企業會員才需要統一編號/負責人等企業欄位
+            // 企業會員才需要統一編號/負責人等企業欄位；產業別所有申請
+            // 類型都必填（對應改版規劃.md 欄位總表）
             if (string.IsNullOrEmpty(application.UnifiedSocialCreditCode) ||
-                string.IsNullOrEmpty(application.ContactPerson))
+                string.IsNullOrEmpty(application.ContactPerson) ||
+                string.IsNullOrEmpty(application.Industry))
             {
                 return Result<bool>.Failure("請填寫完整的公司信息");
             }
