@@ -143,6 +143,8 @@ export const DocumentType = {
   CloudMarketplace: 4,
   DigitalServiceCapability: 5,
   Application: 6,
+  /** 其他佐證文件（所有申請類型共用 - 選填） */
+  Other: 7,
 } as const;
 
 export type DocumentType = typeof DocumentType[keyof typeof DocumentType];

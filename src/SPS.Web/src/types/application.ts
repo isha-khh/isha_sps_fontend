@@ -9,14 +9,23 @@ export interface ApplicationMemberDto {
   phone: string;
   extension?: string;
   mobilePhone?: string;
+  password: string;
+  confirmPassword: string;
   memberPosition: number;
   orderIndex: number;
 }
 
 export interface CreateApplicationRequest {
-  memberRole: number;
-  unifiedSocialCreditCode: string;
-  contactPerson: string;
+  applicantType: ApplicantType;
+  existingMemberId?: string;
+  memberRole: MemberRole;
+  supplierTier?: CompanyLevel;
+  unifiedSocialCreditCode?: string;
+  contactPerson?: string;
+  companyName?: string;
+  industry?: string;
+  companyAddress?: string;
+  businessScope?: string;
   reason?: string;
   members: ApplicationMemberDto[];
 }
@@ -52,20 +61,44 @@ export interface ApplicationMemberResponse {
   createdTime: string;
 }
 
-/// <summary>
-/// 會員角色（前台系統）
-/// </summary>
+/**
+ * 會員角色。數值要跟後端 `SPS.Domain.Enums.MemberRole` 對齊
+ * （`None=0,Supplier=1,Buyer=2`）——後端沒有啟用
+ * `JsonStringEnumConverter`，送出的是數字，對不上後端送出去會被
+ * 判定成錯的角色且不會報錯（這裡原本是 `{Supplier:0,Buyer:1}`，
+ * 送出去的 0/1 會被後端解讀成 None/Supplier，不是預期的
+ * Supplier/Buyer——2026-10-01 接真的註冊 API 時發現並修正）。
+ */
 export const MemberRole = {
-  /// <summary>
-  /// 供給端 - 提供產品/服務的企業
-  /// </summary>
-  Supplier: 0,
-  /// <summary>
-  /// 需求端 - 采購產品/服務的企業
-  /// </summary>
-  Buyer: 1,
+  /** 個人會員 - 不隸屬需求/供給任一端 */
+  None: 0,
+  /** 供給端 - 提供產品/服務的企業 */
+  Supplier: 1,
+  /** 需求端 - 采購產品/服務的企業 */
+  Buyer: 2,
 } as const;
 export type MemberRole = (typeof MemberRole)[keyof typeof MemberRole];
+
+/**
+ * 申請人類型（個人會員/企業會員），對齊後端
+ * `SPS.Domain.Enums.ApplicantType`。
+ */
+export const ApplicantType = {
+  Individual: 1,
+  Company: 2,
+} as const;
+export type ApplicantType = (typeof ApplicantType)[keyof typeof ApplicantType];
+
+/**
+ * 企業會員分級，對齊後端 `SPS.Domain.Enums.CompanyLevel`——只是審查
+ * 路徑紀錄（卓越＝已有政府資格驗證，新興＝委員審查），不是分級高低。
+ */
+export const CompanyLevel = {
+  Standard: 0,
+  Excellent: 1,
+  Emerging: 2,
+} as const;
+export type CompanyLevel = (typeof CompanyLevel)[keyof typeof CompanyLevel];
 
 
 /// <summary>
@@ -128,8 +161,13 @@ export interface ApplicationLogResponse {
 export interface ApplicationResponse {
   id: string;
   applicationNumber: string;
-  memberRole: number;
+  applicantType: ApplicantType;
+  existingMemberId?: string;
+  memberRole: MemberRole;
+  supplierTier?: CompanyLevel;
   status: number;
+  /** 新興會員委員評分警示（非阻斷性），只有新興會員申請才可能有值 */
+  scoringWarning?: string;
   email: string;
   contactName: string;
   phone: string;
@@ -139,6 +177,7 @@ export interface ApplicationResponse {
   companyId?: string;
   unifiedSocialCreditCode: string;
   companyName?: string;
+  industry?: string;
   contactPerson?: string;
   isManualInput: boolean;
   businessScope?: string;
@@ -159,7 +198,13 @@ export interface ApplicationResponse {
   logs?: ApplicationLogResponse[];
 }
 
+/**
+ * 對應後端 `GET /api/Applications/{id}/validate` 真正回傳的格式
+ * （`{valid, error}`，驗證失敗時用 HTTP 400 回傳同一個形狀，不是
+ * `{isValid, errors}`——這支型別原本寫錯，從沒被接上去過所以沒人
+ * 發現，2026-10-01 接真的註冊流程時才對照後端程式碼修正）。
+ */
 export interface ValidationResult {
-  isValid: boolean;
-  errors?: string[];
+  valid: boolean;
+  error?: string;
 }

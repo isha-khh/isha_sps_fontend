@@ -9,7 +9,9 @@ public class ApplicationListItemResponse
 {
     public Guid Id { get; set; }
     public string ApplicationNumber { get; set; } = string.Empty;
+    public ApplicantType ApplicantType { get; set; }
     public MemberRole MemberRole { get; set; }
+    public CompanyLevel? SupplierTier { get; set; }
     public ApplicationStatus Status { get; set; }
 
     // 申請人信息

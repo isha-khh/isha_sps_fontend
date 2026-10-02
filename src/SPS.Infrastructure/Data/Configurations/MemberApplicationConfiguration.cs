@@ -96,5 +96,15 @@ public class MemberApplicationConfiguration : IEntityTypeConfiguration<MemberApp
             .WithOne(l => l.Application)
             .HasForeignKey(l => l.ApplicationId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(a => a.ExistingMember)
+            .WithMany()
+            .HasForeignKey(a => a.ExistingMemberId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasMany(a => a.Scorings)
+            .WithOne(s => s.Application)
+            .HasForeignKey(s => s.ApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

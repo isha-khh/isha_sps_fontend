@@ -83,10 +83,14 @@ public class ApplicationService : IApplicationService
             {
                 Id = Guid.NewGuid(),
                 ApplicationNumber = GenerateApplicationNumber(),
+                ApplicantType = request.ApplicantType,
+                ExistingMemberId = request.ExistingMemberId,
                 MemberRole = request.MemberRole,
+                SupplierTier = request.SupplierTier,
                 Status = ApplicationStatus.Draft,
                 UnifiedSocialCreditCode = request.UnifiedSocialCreditCode,
                 CompanyName = request.CompanyName,
+                Industry = request.Industry,
                 ContactPerson = request.ContactPerson,
                 IsManualInput = string.IsNullOrEmpty(request.CompanyName),
                 BusinessScope = request.BusinessScope,
@@ -567,13 +571,6 @@ public class ApplicationService : IApplicationService
                 return Result<bool>.Failure("申請不存在");
             }
 
-            // 驗證必填字段
-            if (string.IsNullOrEmpty(application.UnifiedSocialCreditCode) ||
-                string.IsNullOrEmpty(application.ContactPerson))
-            {
-                return Result<bool>.Failure("請填寫完整的公司信息");
-            }
-
             // 驗證成員
             var members = await _unitOfWork.ApplicationMembers
                 .GetByApplicationIdAsync(applicationId, cancellationToken);
@@ -588,6 +585,28 @@ public class ApplicationService : IApplicationService
                 return Result<bool>.Failure("第一個成員必須是經理");
             }
 
+            // 個人會員只需要基本資料檢核，不需要企業欄位、不需要文件審查
+            // （對應改版規劃.md 欄位總表「審查方式：基本資料檢核」）
+            if (application.ApplicantType == ApplicantType.Individual)
+            {
+                if (string.IsNullOrEmpty(application.CompanyName) ||
+                    string.IsNullOrEmpty(application.Industry))
+                {
+                    return Result<bool>.Failure("請填寫完整的所屬公司名稱與產業別");
+                }
+
+                return Result<bool>.Success(true);
+            }
+
+            // 企業會員才需要統一編號/負責人等企業欄位；產業別所有申請
+            // 類型都必填（對應改版規劃.md 欄位總表）
+            if (string.IsNullOrEmpty(application.UnifiedSocialCreditCode) ||
+                string.IsNullOrEmpty(application.ContactPerson) ||
+                string.IsNullOrEmpty(application.Industry))
+            {
+                return Result<bool>.Failure("請填寫完整的公司信息");
+            }
+
             // 驗證文件上傳
             var documents = application.Documents.ToList();
 
@@ -597,7 +616,7 @@ public class ApplicationService : IApplicationService
 
             if (!hasCompanyRegistration)
             {
-                return Result<bool>.Failure("請上傳公司登記證明文件");
+                return Result<bool>.Failure("請上傳公司/工廠登記證明文件");
             }
 
             if (!hasPersonalDataConsent)
@@ -729,7 +748,10 @@ public class ApplicationService : IApplicationService
         {
             Id = application.Id,
             ApplicationNumber = application.ApplicationNumber,
+            ApplicantType = application.ApplicantType,
+            ExistingMemberId = application.ExistingMemberId,
             MemberRole = application.MemberRole,
+            SupplierTier = application.SupplierTier,
             Status = application.Status,
             Email = firstMember?.Email ?? string.Empty,
             ContactName = firstMember?.ContactName ?? string.Empty,
@@ -740,6 +762,7 @@ public class ApplicationService : IApplicationService
             CompanyId = application.CompanyId,
             UnifiedSocialCreditCode = application.UnifiedSocialCreditCode,
             CompanyName = application.CompanyName,
+            Industry = application.Industry,
             ContactPerson = application.ContactPerson,
             IsManualInput = application.IsManualInput,
             BusinessScope = application.BusinessScope,
@@ -812,7 +835,9 @@ public class ApplicationService : IApplicationService
         {
             Id = application.Id,
             ApplicationNumber = application.ApplicationNumber,
+            ApplicantType = application.ApplicantType,
             MemberRole = application.MemberRole,
+            SupplierTier = application.SupplierTier,
             Status = application.Status,
             Email = application.Email,
             ContactName = application.ContactName,

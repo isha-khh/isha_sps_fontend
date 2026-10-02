@@ -9,8 +9,17 @@ public class ApplicationResponse
 {
     public Guid Id { get; set; }
     public string ApplicationNumber { get; set; } = string.Empty;
+    public ApplicantType ApplicantType { get; set; }
+    public Guid? ExistingMemberId { get; set; }
     public MemberRole MemberRole { get; set; }
+    public CompanyLevel? SupplierTier { get; set; }
     public ApplicationStatus Status { get; set; }
+
+    /// <summary>
+    /// 新興會員委員評分警示（非阻斷性）——只有新興會員申請、評分未達門檻
+    /// 時才會有值，審核員仍可自行決定是否核准
+    /// </summary>
+    public string? ScoringWarning { get; set; }
 
     // 申請人信息
     public string Email { get; set; } = string.Empty;
@@ -24,6 +33,7 @@ public class ApplicationResponse
     public Guid? CompanyId { get; set; }
     public string UnifiedSocialCreditCode { get; set; } = string.Empty;
     public string? CompanyName { get; set; }
+    public string? Industry { get; set; }
     public string? ContactPerson { get; set; }
     public bool IsManualInput { get; set; }
     public string? BusinessScope { get; set; }

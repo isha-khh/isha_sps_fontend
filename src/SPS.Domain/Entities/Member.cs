@@ -28,6 +28,17 @@ public class Member : BaseEntity<Guid>
     public Guid? CompanyId { get; set; }
     public string? Position { get; set; }
     public string? MemberJobTitle { get; set; }
+
+    /// <summary>
+    /// 所屬公司名稱（自由文字）- 給沒有掛 CompanyId 的個人會員存這項資料，
+    /// 個人會員不會建立真正的 Company 記錄
+    /// </summary>
+    public string? CompanyName { get; set; }
+
+    /// <summary>
+    /// 產業別（自由文字）- 同上，個人會員專用
+    /// </summary>
+    public string? Industry { get; set; }
     public DateTime? ExpiryTime { get; set; }
     public bool FirstChanged { get; set; }
     public DateTime? LockedTime { get; set; }

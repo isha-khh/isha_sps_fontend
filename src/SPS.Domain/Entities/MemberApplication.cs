@@ -19,6 +19,17 @@ public class MemberApplication : BaseEntity<Guid>
     public MemberRole MemberRole { get; set; }
 
     /// <summary>
+    /// 申請人類型（個人會員/企業會員）- 決定企業相關欄位是否必填
+    /// </summary>
+    public ApplicantType ApplicantType { get; set; }
+
+    /// <summary>
+    /// 既有會員 ID（有填代表這是既有會員送出的升級申請，審核通過後更新
+    /// 這個既有 Member，不是新建帳號；沒填才是全新註冊）
+    /// </summary>
+    public Guid? ExistingMemberId { get; set; }
+
+    /// <summary>
     /// 申請狀態
     /// </summary>
     public ApplicationStatus Status { get; set; }
@@ -73,9 +84,15 @@ public class MemberApplication : BaseEntity<Guid>
     public string UnifiedSocialCreditCode { get; set; } = string.Empty;
 
     /// <summary>
-    /// 企業名稱（API獲取或手動填寫）
+    /// 企業名稱（API獲取或手動填寫）；個人會員申請時借用這個欄位存
+    /// 「所屬公司名稱」自由文字，審核通過後寫入 Member.CompanyName
     /// </summary>
     public string? CompanyName { get; set; }
+
+    /// <summary>
+    /// 產業別 - 個人會員申請專用，自由文字，審核通過後寫入 Member.Industry
+    /// </summary>
+    public string? Industry { get; set; }
 
     /// <summary>
     /// 負責人姓名（必填）
@@ -143,6 +160,13 @@ public class MemberApplication : BaseEntity<Guid>
     /// </summary>
     public DateTime? SubmittedAt { get; set; }
 
+    /// <summary>
+    /// 供給端申請分流（卓越/新興）- 沿用 CompanyLevel 列舉，只有
+    /// MemberRole == Supplier 時有意義；新興會員走委員評分審查
+    /// （見 Scorings），卓越會員只需文件審查
+    /// </summary>
+    public CompanyLevel? SupplierTier { get; set; }
+
     // ==================== 導航屬性 ====================
 
     /// <summary>
@@ -154,6 +178,11 @@ public class MemberApplication : BaseEntity<Guid>
     /// 關聯企業
     /// </summary>
     public Company? Company { get; set; }
+
+    /// <summary>
+    /// 既有會員（升級申請才有值）
+    /// </summary>
+    public Member? ExistingMember { get; set; }
 
     /// <summary>
     /// 申請的多個成員
@@ -169,4 +198,9 @@ public class MemberApplication : BaseEntity<Guid>
     /// 申請日志
     /// </summary>
     public ICollection<ApplicationLog> Logs { get; set; } = new List<ApplicationLog>();
+
+    /// <summary>
+    /// 委員評分紀錄（新興會員審查用，一位專家一筆）
+    /// </summary>
+    public ICollection<Scoring> Scorings { get; set; } = new List<Scoring>();
 }
