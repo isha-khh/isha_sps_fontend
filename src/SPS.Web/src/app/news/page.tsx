@@ -8,7 +8,7 @@ import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/Sideb
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import NewsListCard from "@/components/news/NewsListCard";
-import { fetchNews } from "@/lib/api.server";
+import { fetchBanners, fetchNews } from "@/lib/api.server";
 import { withBasePath } from "@/lib/api-client";
 import {
   NEWS_ARTICLES,
@@ -98,6 +98,9 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
   const requestedTagId = typeof rawTag === "string" ? Number(rawTag) : NaN;
   const tagId = Number.isInteger(requestedTagId) && requestedTagId > 0 ? requestedTagId : undefined;
 
+  // 頂部輪播吃後台「公告頂部輪播」版位的上架中 Banner；一張都沒有就整塊不顯示（不再用假資料頂替）
+  const newsBanners = (await fetchBanners("news-top")).filter((b) => b.uri);
+
   const { items: backendItems, backendAvailable } = await fetchNews({ search: query || undefined, tagId });
   // 只有後端真的連不到/噴錯才退回假資料——搜尋剛好 0 筆是正常結果，
   // 不能也退回假資料（見上面的說明跟 fetchNews 的註解）
@@ -154,7 +157,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
       <InnerPageShell
         title="最新消息"
         breadcrumb={activeCategory ? [{ label: "公告事項", href: "/news" }, { label: activeCategory.name }] : [{ label: "公告事項" }]}
-        banner={<NewsBanner />}
+        banner={newsBanners.length > 0 ? <NewsBanner banners={newsBanners} /> : undefined}
         topBar={
           <CategoryTabStrip
             activeHref={activeHref}

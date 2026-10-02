@@ -1,11 +1,16 @@
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
+import TrackedLink from "@/components/ui/TrackedLink";
 import { withBasePath } from "@/lib/api-client";
 
-interface PromoBannerSlide {
-  href: string;
+export interface PromoBannerSlide {
   title: string;
   image: string;
+  /** 沒有連結就只顯示圖片，不包 `<a>` */
+  href?: string;
+  target?: "_blank" | "_self";
+  /** 後台 Banner 的 id，有的話點擊會記錄次數（`TrackedLink`）；內建假資料沒有 */
+  bannerId?: number;
 }
 
 const SLIDES: PromoBannerSlide[] = [
@@ -27,8 +32,11 @@ const SLIDES: PromoBannerSlide[] = [
  * 其他輪播要避免撞名——雖然目前每個用到這顆元件的頁面都只有一個
  * banner，不會真的撞到，但比照 `Carousel` 元件本來的介面設計還是
  * 讓呼叫端自己指定。
+ *
+ * `slides` 沒給就用上面寫死的 `SLIDES`（`/talent`、`/support` 目前還是這份）；`/news` 改傳後台
+ * 「橫幅管理」設定在「公告頂部輪播」版位的真資料，見 `NewsBanner.tsx`。
  */
-export default function PromoBanner({ id }: { id: string }) {
+export default function PromoBanner({ id, slides = SLIDES }: { id: string; slides?: PromoBannerSlide[] }) {
   return (
     <div className="banner_section">
       <Carousel
@@ -51,14 +59,42 @@ export default function PromoBanner({ id }: { id: string }) {
             { breakpoint: 768, settings: { centerPadding: "0" } },
           ],
         }}
-        slides={SLIDES.map((slide) => (
-          <a href={withBasePath(slide.href)} className="video-card" title={`${slide.title}（另開視窗）`} target="_blank" rel="noopener noreferrer" key={slide.title}>
-            {/* 說明見原本 NewsBanner.tsx 同一段註解：寬高比先卡住，避免圖片載入前容器塌陷造成按鈕位置跳動 */}
+        slides={slides.map((slide, index) => {
+          // 說明見原本 NewsBanner.tsx 同一段註解：寬高比先卡住，避免圖片載入前容器塌陷造成按鈕位置跳動
+          const picture = (
             <div className="pic" style={{ aspectRatio: "1400 / 500" }}>
               <img className="img-fluid d-block" src={slide.image} alt={slide.title} />
             </div>
-          </a>
-        ))}
+          );
+          const key = `${slide.bannerId ?? "static"}-${index}`;
+
+          if (!slide.href) {
+            return (
+              <div className="video-card" key={key}>
+                {picture}
+              </div>
+            );
+          }
+          if (slide.bannerId !== undefined) {
+            return (
+              <TrackedLink
+                bannerId={slide.bannerId}
+                href={slide.href}
+                target={slide.target}
+                className="video-card"
+                title={slide.target === "_blank" ? `${slide.title}（另開視窗）` : slide.title}
+                key={key}
+              >
+                {picture}
+              </TrackedLink>
+            );
+          }
+          return (
+            <a href={withBasePath(slide.href)} className="video-card" title={`${slide.title}（另開視窗）`} target="_blank" rel="noopener noreferrer" key={key}>
+              {picture}
+            </a>
+          );
+        })}
       />
 
       <CarouselControls carouselId={id} prevLabel="上一則" nextLabel="下一則" />

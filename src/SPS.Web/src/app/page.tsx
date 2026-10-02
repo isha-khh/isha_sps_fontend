@@ -12,6 +12,7 @@ import HomeEnterprise from "@/components/home/HomeEnterprise";
 import HomeVideo from "@/components/home/HomeVideo";
 import WelcomeModal from "@/components/home/WelcomeModal";
 import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 /**
  * 首頁——所有區塊都已經轉成 React 元件：載入動畫、進站彈跳公告、
@@ -19,10 +20,13 @@ import { withBasePath } from "@/lib/api-client";
  * （home_news）、服務專區（home_service）、產業案例（home_industry）、
  * 企業刊登（home_enterprise）、影音專區（home_video）、Footer。
  *
- * 假資料之後會換成真的 API／CMS 資料，各元件的資料形狀（interface）
- * 就是預留的欄位規格。
+ * 首頁主視覺（`Banner`）2026-10-02 起讀後台橫幅管理的設定；其他區塊的資料來源
+ * 見各自元件的說明。
  */
-export default function HomePage() {
+export default async function HomePage() {
+  // 首頁主視覺：取後台設定在「首頁主視覺」版位、排序第一筆的上架中 Banner，沒有就用元件內建內容
+  const [heroBanner] = await fetchBanners("home-hero");
+
   return (
     <>
       <BodyClass className="home" />
@@ -36,7 +40,7 @@ export default function HomePage() {
       <div className="page_wrapper">
         <Headers />
 
-        <Banner />
+        <Banner banner={heroBanner} />
 
         <main className="main" id="main-content" role="main">
           <a href="#main-block" id="main-block" accessKey="C" title="中央主要內容區塊" className="visually-hidden-focusable">

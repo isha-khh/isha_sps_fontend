@@ -25,22 +25,7 @@ public class BannerService : IBannerService
         var pagedResult = await _unitOfWork.Banners.GetPagedAsync(parameters, cancellationToken);
         var response = new PagedResult<BannerListItemResponse>
         {
-            Items = pagedResult.Items.Select(b => new BannerListItemResponse
-            {
-                Id = b.Id,
-                Name = b.Name,
-                ContentType = b.ContentType,
-                Uri = b.Uri,
-                LinkUrl = b.LinkUrl,
-                LinkTarget = b.LinkTarget,
-                Remark = b.Remark,
-                ClickCount = b.ClickCount,
-                ViewCount = b.ViewCount,
-                PositionId = b.PositionId,
-                PositionName = b.Position?.Name,
-                CreatedTime = b.CreatedTime,
-                UpdatedTime = b.UpdatedTime
-            }).ToList(),
+            Items = pagedResult.Items.Select(ToListItem).ToList(),
             TotalCount = pagedResult.TotalCount,
             Page = pagedResult.Page,
             PageSize = pagedResult.PageSize
@@ -54,22 +39,7 @@ public class BannerService : IBannerService
         if (banner == null)
             return Result<BannerResponse>.Failure("Banner 不存在");
 
-        return Result<BannerResponse>.Success(new BannerResponse
-        {
-            Id = banner.Id,
-            Name = banner.Name,
-            ContentType = banner.ContentType,
-            Uri = banner.Uri,
-            LinkUrl = banner.LinkUrl,
-            LinkTarget = banner.LinkTarget,
-            ClickCount = banner.ClickCount,
-            ViewCount = banner.ViewCount,
-            Remark = banner.Remark,
-            PositionId = banner.PositionId,
-            PositionName = banner.Position?.Name,
-            CreatedTime = banner.CreatedTime,
-            UpdatedTime = banner.UpdatedTime
-        });
+        return Result<BannerResponse>.Success(ToResponse(banner));
     }
 
     public async Task<Result<BannerResponse>> CreateAsync(
@@ -88,6 +58,16 @@ public class BannerService : IBannerService
                 LinkTarget = request.LinkTarget ?? "_self",
                 Remark = request.Remark,
                 PositionId = request.PositionId,
+                Title = request.Title,
+                Subtitle = request.Subtitle,
+                Description = request.Description,
+                ButtonText = request.ButtonText,
+                SecondaryButtonText = request.SecondaryButtonText,
+                SecondaryLinkUrl = request.SecondaryLinkUrl,
+                Ordinal = request.Ordinal ?? 0,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                Published = request.Published ?? true,
                 ClickCount = 0,
                 ViewCount = 0,
                 CreatedTime = DateTime.UtcNow,
@@ -100,22 +80,7 @@ public class BannerService : IBannerService
             // 重新載入以獲取關聯數據
             var createdBanner = await _unitOfWork.Banners.GetByIdWithIncludesAsync(banner.Id, cancellationToken);
 
-            return Result<BannerResponse>.Success(new BannerResponse
-            {
-                Id = banner.Id,
-                Name = banner.Name,
-                ContentType = banner.ContentType,
-                Uri = banner.Uri,
-                LinkUrl = banner.LinkUrl,
-                LinkTarget = banner.LinkTarget,
-                ClickCount = banner.ClickCount,
-                ViewCount = banner.ViewCount,
-                Remark = banner.Remark,
-                PositionId = banner.PositionId,
-                PositionName = createdBanner?.Position?.Name,
-                CreatedTime = banner.CreatedTime,
-                UpdatedTime = banner.UpdatedTime
-            });
+            return Result<BannerResponse>.Success(ToResponse(createdBanner ?? banner));
         }
         catch (Exception ex)
         {
@@ -138,7 +103,20 @@ public class BannerService : IBannerService
         if (request.LinkUrl != null) banner.LinkUrl = request.LinkUrl;
         if (request.LinkTarget != null) banner.LinkTarget = request.LinkTarget;
         if (request.Remark != null) banner.Remark = request.Remark;
-        if (request.PositionId.HasValue) banner.PositionId = request.PositionId;
+        // 文字欄位帶空字串代表清空，沒帶（null）代表不動
+        if (request.Title != null) banner.Title = request.Title;
+        if (request.Subtitle != null) banner.Subtitle = request.Subtitle;
+        if (request.Description != null) banner.Description = request.Description;
+        if (request.ButtonText != null) banner.ButtonText = request.ButtonText;
+        if (request.SecondaryButtonText != null) banner.SecondaryButtonText = request.SecondaryButtonText;
+        if (request.SecondaryLinkUrl != null) banner.SecondaryLinkUrl = request.SecondaryLinkUrl;
+        if (request.Ordinal.HasValue) banner.Ordinal = request.Ordinal.Value;
+        // 版位與上下架時間以請求為準（null＝清除）：這三項「沒填」本身就是有意義的狀態
+        // （不指定版位／立即上架／不下架），如果也用 HasValue 才寫入，一旦設定過就沒辦法再清掉
+        banner.PositionId = request.PositionId;
+        banner.StartDate = request.StartDate;
+        banner.EndDate = request.EndDate;
+        if (request.Published.HasValue) banner.Published = request.Published.Value;
         banner.UpdatedTime = DateTime.UtcNow;
 
         await _unitOfWork.Banners.UpdateAsync(banner, cancellationToken);
@@ -147,22 +125,7 @@ public class BannerService : IBannerService
         // 重新載入以獲取關聯數據
         var updatedBanner = await _unitOfWork.Banners.GetByIdWithIncludesAsync(id, cancellationToken);
 
-        return Result<BannerResponse>.Success(new BannerResponse
-        {
-            Id = banner.Id,
-            Name = banner.Name,
-            ContentType = banner.ContentType,
-            Uri = banner.Uri,
-            LinkUrl = banner.LinkUrl,
-            LinkTarget = banner.LinkTarget,
-            ClickCount = banner.ClickCount,
-            ViewCount = banner.ViewCount,
-            Remark = banner.Remark,
-            PositionId = banner.PositionId,
-            PositionName = updatedBanner?.Position?.Name,
-            CreatedTime = banner.CreatedTime,
-            UpdatedTime = banner.UpdatedTime
-        });
+        return Result<BannerResponse>.Success(ToResponse(updatedBanner ?? banner));
     }
 
     public async Task<Result<bool>> DeleteAsync(long id, CancellationToken cancellationToken = default)
@@ -180,25 +143,85 @@ public class BannerService : IBannerService
         int positionId, CancellationToken cancellationToken = default)
     {
         var banners = await _unitOfWork.Banners.GetByPositionIdAsync(positionId, cancellationToken);
-        var response = banners.Select(b => new BannerResponse
-        {
-            Id = b.Id,
-            Name = b.Name,
-            ContentType = b.ContentType,
-            Uri = b.Uri,
-            LinkUrl = b.LinkUrl,
-            LinkTarget = b.LinkTarget,
-            ClickCount = b.ClickCount,
-            ViewCount = b.ViewCount,
-            Remark = b.Remark,
-            PositionId = b.PositionId,
-            PositionName = b.Position?.Name,
-            CreatedTime = b.CreatedTime,
-            UpdatedTime = b.UpdatedTime
-        }).ToList();
+        var response = banners.Select(ToResponse).ToList();
 
         return Result<List<BannerResponse>>.Success(response);
     }
+
+    public async Task<Result<List<BannerResponse>>> GetActiveByPositionCodeAsync(
+        string code, CancellationToken cancellationToken = default)
+    {
+        var banners = await _unitOfWork.Banners.GetActiveByPositionCodeAsync(code, DateTime.UtcNow, cancellationToken);
+        return Result<List<BannerResponse>>.Success(banners.Select(ToResponse).ToList());
+    }
+
+    public async Task<Result<List<BannerPositionResponse>>> GetPositionsAsync(CancellationToken cancellationToken = default)
+    {
+        var positions = await _unitOfWork.Banners.GetPositionsAsync(cancellationToken);
+        return Result<List<BannerPositionResponse>>.Success(positions.Select(p => new BannerPositionResponse
+        {
+            Id = p.Id,
+            Code = p.Code,
+            Name = p.Name,
+            Width = p.Width,
+            Height = p.Height,
+            Remark = p.Remark
+        }).ToList());
+    }
+
+    private static BannerResponse ToResponse(Banner b) => new()
+    {
+        Id = b.Id,
+        Name = b.Name,
+        ContentType = b.ContentType,
+        Uri = b.Uri,
+        LinkUrl = b.LinkUrl,
+        LinkTarget = b.LinkTarget,
+        ClickCount = b.ClickCount,
+        ViewCount = b.ViewCount,
+        Remark = b.Remark,
+        PositionId = b.PositionId,
+        PositionName = b.Position?.Name,
+        Title = b.Title,
+        Subtitle = b.Subtitle,
+        Description = b.Description,
+        ButtonText = b.ButtonText,
+        SecondaryButtonText = b.SecondaryButtonText,
+        SecondaryLinkUrl = b.SecondaryLinkUrl,
+        Ordinal = b.Ordinal,
+        StartDate = b.StartDate,
+        EndDate = b.EndDate,
+        Published = b.Published,
+        CreatedTime = b.CreatedTime,
+        UpdatedTime = b.UpdatedTime
+    };
+
+    private static BannerListItemResponse ToListItem(Banner b) => new()
+    {
+        Id = b.Id,
+        Name = b.Name,
+        ContentType = b.ContentType,
+        Uri = b.Uri,
+        LinkUrl = b.LinkUrl,
+        LinkTarget = b.LinkTarget,
+        Remark = b.Remark,
+        ClickCount = b.ClickCount,
+        ViewCount = b.ViewCount,
+        PositionId = b.PositionId,
+        PositionName = b.Position?.Name,
+        Title = b.Title,
+        Subtitle = b.Subtitle,
+        Description = b.Description,
+        ButtonText = b.ButtonText,
+        SecondaryButtonText = b.SecondaryButtonText,
+        SecondaryLinkUrl = b.SecondaryLinkUrl,
+        Ordinal = b.Ordinal,
+        StartDate = b.StartDate,
+        EndDate = b.EndDate,
+        Published = b.Published,
+        CreatedTime = b.CreatedTime,
+        UpdatedTime = b.UpdatedTime
+    };
 
     public async Task<Result<bool>> IncrementViewCountAsync(long id, CancellationToken cancellationToken = default)
     {

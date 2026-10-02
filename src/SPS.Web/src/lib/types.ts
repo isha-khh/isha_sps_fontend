@@ -125,6 +125,27 @@ export type FaqItem = {
     categoryName?: string;
 }
 
+/**
+ * 對到真後端 `BannerResponse`（`GET /api/Banner/by-code/{code}`，只含上架中的）。
+ * 一般輪播圖只用 `uri`／`linkUrl`／`linkTarget`；`title`～`secondaryLinkUrl` 是首頁主視覺
+ * （版位代碼 `home-hero`）的文案欄位。
+ */
+export type BannerItem = {
+    id: number;
+    name?: string;
+    uri?: string;
+    linkUrl?: string;
+    linkTarget?: "_blank" | "_self";
+    title?: string;
+    subtitle?: string;
+    /** 換行代表分成多行 */
+    description?: string;
+    buttonText?: string;
+    secondaryButtonText?: string;
+    secondaryLinkUrl?: string;
+    ordinal: number;
+};
+
 export type NewsTagItem = {
     id: number;
     name: string;

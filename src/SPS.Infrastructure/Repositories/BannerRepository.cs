@@ -82,11 +82,32 @@ public class BannerRepository : Repository<Banner, long>, IBannerRepository
 
     public async Task<List<Banner>> GetByPositionIdAsync(int positionId, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
-            .Include(b => b.Position)
+        return await ActiveBanners(DateTime.UtcNow)
             .Where(b => b.PositionId == positionId)
-            .OrderBy(b => b.CreatedTime)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Banner>> GetActiveByPositionCodeAsync(string code, DateTime nowUtc, CancellationToken cancellationToken = default)
+    {
+        return await ActiveBanners(nowUtc)
+            .Where(b => b.Position != null && b.Position.Code == code)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<BannerPosition>> GetPositionsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<BannerPosition>().OrderBy(p => p.Id).ToListAsync(cancellationToken);
+    }
+
+    private IQueryable<Banner> ActiveBanners(DateTime nowUtc)
+    {
+        return _dbSet
+            .Include(b => b.Position)
+            .Where(b => b.Published
+                && (b.StartDate == null || b.StartDate <= nowUtc)
+                && (b.EndDate == null || b.EndDate >= nowUtc))
+            .OrderBy(b => b.Ordinal)
+            .ThenBy(b => b.CreatedTime);
     }
 
     private IQueryable<Banner> ApplySorting(

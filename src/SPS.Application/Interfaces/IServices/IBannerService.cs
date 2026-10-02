@@ -53,6 +53,19 @@ public interface IBannerService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 依版位代碼取得目前上架中的 Banner（前台用，不含草稿與已過期）
+    /// </summary>
+    Task<Result<List<BannerResponse>>> GetActiveByPositionCodeAsync(
+        string code,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 取得所有 Banner 版位（後台下拉選單用）
+    /// </summary>
+    Task<Result<List<BannerPositionResponse>>> GetPositionsAsync(
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 增加 Banner 檢視次數
     /// </summary>
     Task<Result<bool>> IncrementViewCountAsync(

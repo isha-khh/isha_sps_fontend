@@ -213,6 +213,45 @@ public class BannerController : ControllerBase
     }
 
     /// <summary>
+    /// 依版位代碼取得目前上架中的 Banner（前台用）
+    /// </summary>
+    /// <param name="code">版位代碼，例如 home-hero、news-top</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>已上架、在上下架時間內的 Banner，依排序</returns>
+    [HttpGet("by-code/{code}")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<BannerResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetActiveByPositionCode(
+        string code,
+        CancellationToken cancellationToken)
+    {
+        var result = await _bannerService.GetActiveByPositionCodeAsync(code, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { error = result.Error });
+        }
+
+        return Ok(result.Data);
+    }
+
+    /// <summary>
+    /// 取得所有 Banner 版位（後台新增/編輯 Banner 的下拉選單）
+    /// </summary>
+    [HttpGet("positions")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<BannerPositionResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPositions(CancellationToken cancellationToken)
+    {
+        var result = await _bannerService.GetPositionsAsync(cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { error = result.Error });
+        }
+
+        return Ok(result.Data);
+    }
+
+    /// <summary>
     /// 增加 Banner 檢視次數
     /// </summary>
     /// <param name="id">Banner ID</param>

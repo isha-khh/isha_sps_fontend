@@ -4,7 +4,13 @@ import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
 import { useConfirm } from '@/hooks/useConfirm';
 
-import type { BannerResponse, CreateBannerRequest, UpdateBannerRequest } from '@/types/banner';
+import {
+  BannerPositionCode,
+  type BannerPositionResponse,
+  type BannerResponse,
+  type CreateBannerRequest,
+  type UpdateBannerRequest,
+} from '@/types/banner';
 import { bannerApi } from '@/lib/api/banner';
 import { useNotify } from '@/hooks/useNotify';
 
@@ -19,6 +25,44 @@ const getContentTypeFromUri = (uri: string): string => {
   return '';
 };
 
+// <input type="date"> 用本地日期；後端存 UTC。結束日要含當天整天，所以存成當天 23:59:59（本地時間）
+const toDateInput = (iso?: string | null): string => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+const fromDateInput = (value: string, endOfDay: boolean): string | null =>
+  value ? new Date(`${value}T${endOfDay ? '23:59:59' : '00:00:00'}`).toISOString() : null;
+
+type BannerStatus = { label: string; className: string };
+const getBannerStatus = (b: BannerResponse): BannerStatus => {
+  const now = Date.now();
+  if (!b.published) return { label: '未上架', className: 'badge-ghost' };
+  if (b.startDate && new Date(b.startDate).getTime() > now) return { label: '排程中', className: 'badge-warning' };
+  if (b.endDate && new Date(b.endDate).getTime() < now) return { label: '已過期', className: 'badge-error' };
+  return { label: '顯示中', className: 'badge-success' };
+};
+
+const emptyForm = (): CreateBannerRequest => ({
+  name: '',
+  uri: '',
+  linkUrl: '',
+  linkTarget: '_self',
+  remark: '',
+  contentType: '',
+  title: '',
+  subtitle: '',
+  description: '',
+  buttonText: '',
+  secondaryButtonText: '',
+  secondaryLinkUrl: '',
+  ordinal: 0,
+  published: true,
+  startDate: null,
+  endDate: null,
+});
+
 export const BannersPage = () => {
   const notify = useNotify();
   const [banners, setBanners] = useState<BannerResponse[]>([]);
@@ -32,24 +76,30 @@ export const BannersPage = () => {
 
   const { confirmDialog, ConfirmComponent } = useConfirm();
 
-  const [formData, setFormData] = useState<CreateBannerRequest>({
-    name: '',
-    uri: '',
-    linkUrl: '',
-    linkTarget: '_self',
-    remark: '',
-    contentType: '',
-  });
+  const [positions, setPositions] = useState<BannerPositionResponse[]>([]);
+  const [formData, setFormData] = useState<CreateBannerRequest>(emptyForm);
 
   useEffect(() => {
     fetchBanners();
+    bannerApi.getPositions().then(setPositions).catch((error) => console.error('Failed to fetch banner positions:', error));
   }, []);
+
+  const selectedPosition = positions.find((p) => p.id === formData.positionId);
+  const isHeroPosition = selectedPosition?.code === BannerPositionCode.HomeHero;
 
   const fetchBanners = async () => {
     setIsLoading(true);
     try {
       const data = await bannerApi.getPaged();
-      setBanners(data);
+      // 依版位、排序呈現，跟前台輪播順序一致（沒指定版位的排最後）
+      setBanners(
+        [...data].sort(
+          (a, b) =>
+            (a.positionId ?? Number.MAX_SAFE_INTEGER) - (b.positionId ?? Number.MAX_SAFE_INTEGER) ||
+            a.ordinal - b.ordinal ||
+            a.id - b.id
+        )
+      );
     } catch (error) {
       console.error('Failed to fetch banners:', error);
     } finally {
@@ -67,18 +117,21 @@ export const BannersPage = () => {
         linkTarget: banner.linkTarget || '_self',
         remark: banner.remark || '',
         positionId: banner.positionId,
-        contentType: banner.contentType || ''
+        contentType: banner.contentType || '',
+        title: banner.title || '',
+        subtitle: banner.subtitle || '',
+        description: banner.description || '',
+        buttonText: banner.buttonText || '',
+        secondaryButtonText: banner.secondaryButtonText || '',
+        secondaryLinkUrl: banner.secondaryLinkUrl || '',
+        ordinal: banner.ordinal,
+        published: banner.published,
+        startDate: banner.startDate ?? null,
+        endDate: banner.endDate ?? null,
       });
     } else {
       setEditingBanner(null);
-      setFormData({
-        name: '',
-        uri: '',
-        linkUrl: '',
-        linkTarget: '_self',
-        remark: '',
-        contentType: '',
-      });
+      setFormData(emptyForm());
     }
     setIsModalOpen(true);
   };
@@ -226,11 +279,21 @@ export const BannersPage = () => {
                         {renderMediaPreview(banner.uri, banner.contentType)}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold mb-2">{banner.name}</h3>
+                        <h3 className="text-lg font-semibold mb-2">
+                          {banner.name}
+                          <span className={`badge ml-2 ${getBannerStatus(banner).className}`}>{getBannerStatus(banner).label}</span>
+                        </h3>
                         {banner.remark && (
                           <p className="text-sm text-base-content/70 mb-2">{banner.remark}</p>
                         )}
                         <div className="flex flex-wrap gap-2 text-sm text-base-content/60">
+                          <span className="badge badge-info badge-outline">{banner.positionName || '未指定版位'}</span>
+                          <span className="badge badge-outline">排序 {banner.ordinal}</span>
+                          {(banner.startDate || banner.endDate) && (
+                            <span className="badge badge-outline">
+                              {banner.startDate ? toDateInput(banner.startDate) : '即日起'} ～ {banner.endDate ? toDateInput(banner.endDate) : '無期限'}
+                            </span>
+                          )}
                           {/* 內容類型標籤 */}
                           <span className="badge badge-outline">
                             {isVideoContentType(banner.contentType) ? (
@@ -314,6 +377,148 @@ export const BannersPage = () => {
                   />
                 </div>
 
+                {/* 版位、排序、上下架 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">顯示位置</span>
+                    </label>
+                    <select
+                      className="select select-bordered"
+                      value={formData.positionId ?? ''}
+                      onChange={(e) =>
+                        setFormData({ ...formData, positionId: e.target.value === '' ? undefined : Number(e.target.value) })
+                      }
+                    >
+                      <option value="">未指定（前台不會顯示）</option>
+                      {positions.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}（建議 {p.width}×{p.height}）
+                        </option>
+                      ))}
+                    </select>
+                    {selectedPosition?.remark && (
+                      <p className="text-xs text-base-content/50 mt-1">{selectedPosition.remark}</p>
+                    )}
+                  </div>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">排序</span>
+                    </label>
+                    <input
+                      type="number"
+                      className="input input-bordered"
+                      value={formData.ordinal ?? 0}
+                      onChange={(e) => setFormData({ ...formData, ordinal: parseInt(e.target.value) || 0 })}
+                    />
+                    <p className="text-xs text-base-content/50 mt-1">同一位置內數字小的排前面</p>
+                  </div>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">上架開始日</span>
+                    </label>
+                    <input
+                      type="date"
+                      className="input input-bordered"
+                      value={toDateInput(formData.startDate)}
+                      onChange={(e) => setFormData({ ...formData, startDate: fromDateInput(e.target.value, false) })}
+                    />
+                    <p className="text-xs text-base-content/50 mt-1">不填＝立即上架</p>
+                  </div>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">上架結束日</span>
+                    </label>
+                    <input
+                      type="date"
+                      className="input input-bordered"
+                      value={toDateInput(formData.endDate)}
+                      onChange={(e) => setFormData({ ...formData, endDate: fromDateInput(e.target.value, true) })}
+                    />
+                    <p className="text-xs text-base-content/50 mt-1">含當天；不填＝不下架</p>
+                  </div>
+                </div>
+                <div className="form-control">
+                  <label className="label cursor-pointer">
+                    <span className="label-text font-medium">上架</span>
+                    <input
+                      type="checkbox"
+                      className="toggle toggle-success"
+                      checked={formData.published ?? true}
+                      onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
+                    />
+                  </label>
+                </div>
+
+                {/* 首頁主視覺文案：只有「首頁主視覺」版位才會用到這幾個欄位 */}
+                {isHeroPosition && (
+                  <div className="rounded-box border border-base-300 p-4 space-y-3">
+                    <h4 className="font-medium">首頁主視覺文案</h4>
+                    <div className="form-control">
+                      <label className="label"><span className="label-text">主標題</span></label>
+                      <input
+                        type="text"
+                        className="input input-bordered"
+                        placeholder="數位賦能 轉型落地"
+                        value={formData.title ?? ''}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-control">
+                      <label className="label"><span className="label-text">副標題</span></label>
+                      <input
+                        type="text"
+                        className="input input-bordered"
+                        placeholder="打造產業工安新標竿"
+                        value={formData.subtitle ?? ''}
+                        onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-control">
+                      <label className="label"><span className="label-text">說明文字</span></label>
+                      <textarea
+                        className="textarea textarea-bordered h-24"
+                        placeholder={'第一行說明\n第二行說明（換行會分成兩行顯示）'}
+                        value={formData.description ?? ''}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="form-control">
+                        <label className="label"><span className="label-text">主按鈕文字</span></label>
+                        <input
+                          type="text"
+                          className="input input-bordered"
+                          placeholder="申請會員"
+                          value={formData.buttonText ?? ''}
+                          onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
+                        />
+                        <p className="text-xs text-base-content/50 mt-1">連結用下方「連結設定」的網址</p>
+                      </div>
+                      <div className="form-control">
+                        <label className="label"><span className="label-text">第二顆按鈕文字</span></label>
+                        <input
+                          type="text"
+                          className="input input-bordered"
+                          placeholder="我要媒合"
+                          value={formData.secondaryButtonText ?? ''}
+                          onChange={(e) => setFormData({ ...formData, secondaryButtonText: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-control md:col-span-2">
+                        <label className="label"><span className="label-text">第二顆按鈕連結</span></label>
+                        <input
+                          type="text"
+                          className="input input-bordered"
+                          placeholder="/matching"
+                          value={formData.secondaryLinkUrl ?? ''}
+                          onChange={(e) => setFormData({ ...formData, secondaryLinkUrl: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* 圖片/影片選擇 */}
                 <div className="form-control">
                   <label className="label">
@@ -376,8 +581,8 @@ export const BannersPage = () => {
                         <span className="label-text text-sm">連結網址</span>
                       </label>
                       <input
-                        type="url"
-                        placeholder="https://example.com/page"
+                        type="text"
+                        placeholder="https://example.com/page 或站內路徑 /member/register"
                         className="input input-bordered w-full"
                         value={formData.linkUrl}
                         onChange={(e) => setFormData({ ...formData, linkUrl: e.target.value })}

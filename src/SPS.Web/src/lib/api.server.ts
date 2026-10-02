@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import {
+    BannerItem,
     FaqItem,
     NewsItem,
     NewsDetail,
@@ -137,6 +138,39 @@ export async function fetchFaqDetail(id: string): Promise<FaqItem | null> {
         };
     } catch {
         return null;
+    }
+}
+
+/**
+ * `apiClient` 的 response interceptor 會把回應裡「欄位名稱以 url 結尾、值以 `/` 開頭」的欄位
+ * 自動補上 basePath（為了圖片／下載網址設計的，見 api-client.ts 的 `addBasePathToResponseData`），
+ * `linkUrl`／`secondaryLinkUrl` 剛好也中招：後台填 `/news` 回來變成 `/sps/news`，再交給
+ * `next/link` 又會補一次 basePath，變成 `/sps/sps/news`。連結欄位要的是「站內原始路徑」，
+ * 這裡把攔截器補的前綴拿掉。
+ */
+function stripBasePath(path?: string): string | undefined {
+    if (!path) return path;
+    const raw = process.env.NEXT_PUBLIC_BASE_PATH?.trim() ?? "";
+    const base = raw ? (raw.startsWith("/") ? raw : `/${raw}`) : "";
+    return base && path.startsWith(`${base}/`) ? path.slice(base.length) : path;
+}
+
+/**
+ * 取得指定版位目前上架中的 Banner（後端已依上下架時間過濾、依排序排好）。連不到後端或沒有
+ * 任何 Banner 都回傳空陣列——呼叫端自己決定怎麼處理：首頁主視覺退回內建文案，公告頂部輪播
+ * 整塊不顯示。圖片網址是相對於後端 API 的路徑，要轉成完整網址瀏覽器才載得到。
+ */
+export async function fetchBanners(positionCode: string): Promise<BannerItem[]> {
+    try {
+        const response = await apiClient.get<BannerItem[]>(`/api/Banner/by-code/${encodeURIComponent(positionCode)}`);
+        return (response.data ?? []).map((b) => ({
+            ...b,
+            uri: resolveBackendAssetUrl(b.uri),
+            linkUrl: stripBasePath(b.linkUrl),
+            secondaryLinkUrl: stripBasePath(b.secondaryLinkUrl),
+        }));
+    } catch {
+        return [];
     }
 }
 

@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import type {
+  BannerPositionResponse,
   BannerResponse,
   CreateBannerRequest,
   UpdateBannerRequest,
@@ -11,10 +12,12 @@ export const bannerApi = {
    * 分頁查詢 Banner 列表
    * GET /api/Banner
    */
-  async getPaged(pageIndex = 1, pageSize = 20): Promise<BannerResponse[]> {
+  async getPaged(page = 1, pageSize = 100): Promise<BannerResponse[]> {
     try {
+      // 後端查詢參數是 `Page`/`PageSize`（QueryParameters），原本這裡送的 `pageIndex` 後端不認得，
+      // 一律退回預設每頁 20 筆，第 21 筆之後的 Banner 在後台完全看不到
       const response = await apiClient.get<PagedResponse<BannerResponse>>('/api/Banner', {
-        params: { pageIndex, pageSize },
+        params: { page, pageSize },
       });
       return response.data.items ?? [];
     } catch (error) {
@@ -84,12 +87,22 @@ export const bannerApi = {
    */
   async getByPositionId(positionId: number): Promise<BannerResponse[]> {
     try {
-      const response = await apiClient.get<PagedResponse<BannerResponse>>(`/api/Banner/position/${positionId}`);
-      return response.data.items ?? [];
+      // 後端回的是純陣列（只含上架中的），不是分頁包裝，原本讀 `.items` 會永遠拿到空陣列
+      const response = await apiClient.get<BannerResponse[]>(`/api/Banner/position/${positionId}`);
+      return response.data ?? [];
     } catch (error) {
       console.error('Failed to fetch banners by position:', error);
       throw error;
     }
+  },
+
+  /**
+   * 取得所有固定版位（新增/編輯 Banner 的版位下拉）
+   * GET /api/Banner/positions
+   */
+  async getPositions(): Promise<BannerPositionResponse[]> {
+    const response = await apiClient.get<BannerPositionResponse[]>('/api/Banner/positions');
+    return response.data ?? [];
   },
 
   /**
