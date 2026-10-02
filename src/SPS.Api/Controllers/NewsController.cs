@@ -49,6 +49,14 @@ public class NewsController : ControllerBase
     {
         _logger.LogInformation("Getting paged news");
 
+        // 這支是匿名可呼叫的公開列表，同時也是後台公告列表在用。草稿（未發布）只有後台使用者
+        // （Admin 角色）看得到；其他人（含前台會員）一律只回已發布，不能靠帶 `published=false`
+        // 或不帶這個參數看到草稿
+        if (!User.IsInRole("Admin"))
+        {
+            parameters.Published = true;
+        }
+
         var result = await _newsService.GetPagedAsync(parameters, cancellationToken);
 
         if (!result.IsSuccess)
@@ -79,9 +87,10 @@ public class NewsController : ControllerBase
 
         var result = await _newsService.GetByIdAsync(id, cancellationToken);
 
-        if (!result.IsSuccess)
+        // 未發布的公告對非後台使用者視同不存在（回 404，不洩漏草稿存在與否）
+        if (!result.IsSuccess || (!result.Data!.Published && !User.IsInRole("Admin")))
         {
-            return NotFound(new { error = result.Error });
+            return NotFound(new { error = result.Error ?? "新聞不存在" });
         }
 
         return Ok(result.Data);
@@ -97,7 +106,7 @@ public class NewsController : ControllerBase
     /// <response code="400">請求參數錯誤</response>
     /// <response code="401">未授權</response>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(NewsResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -132,7 +141,7 @@ public class NewsController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">找不到指定的新聞</response>
     [HttpPut("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(NewsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -166,7 +175,7 @@ public class NewsController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">找不到指定的新聞</response>
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

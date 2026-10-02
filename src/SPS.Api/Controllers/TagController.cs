@@ -77,7 +77,7 @@ public class TagController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>新創建的標籤詳情</returns>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(TagResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [SwaggerOperation(Summary = "創建標籤", Description = "創建一個新的標籤")]
@@ -98,7 +98,7 @@ public class TagController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>更新後的標籤詳情</returns>
     [HttpPut("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(TagResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -123,7 +123,7 @@ public class TagController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>無內容</returns>
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

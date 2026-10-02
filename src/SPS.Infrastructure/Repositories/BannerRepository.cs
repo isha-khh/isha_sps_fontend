@@ -51,6 +51,11 @@ public class BannerRepository : Repository<Banner, long>, IBannerRepository
             query = query.Where(b => b.PositionId == parameters.PositionId.Value);
         }
 
+        if (parameters.Published.HasValue)
+        {
+            query = query.Where(b => b.Published == parameters.Published.Value);
+        }
+
         // 一般搜索
         if (!string.IsNullOrWhiteSpace(parameters.Search))
         {

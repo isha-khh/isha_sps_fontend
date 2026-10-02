@@ -16,4 +16,9 @@ public class BannerQueryParameters : QueryParameters
     /// 位置 ID
     /// </summary>
     public int? PositionId { get; set; }
+
+    /// <summary>
+    /// 上架狀態過濾（前台匿名呼叫時 controller 會強制為 true）
+    /// </summary>
+    public bool? Published { get; set; }
 }

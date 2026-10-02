@@ -49,6 +49,12 @@ public class BannerController : ControllerBase
     {
         _logger.LogInformation("Getting paged banners");
 
+        // 同 NewsController.GetPaged：這支匿名可呼叫，草稿（未上架）只有後台使用者看得到
+        if (!User.IsInRole("Admin"))
+        {
+            parameters.Published = true;
+        }
+
         var result = await _bannerService.GetPagedAsync(parameters, cancellationToken);
 
         if (!result.IsSuccess)
@@ -79,9 +85,9 @@ public class BannerController : ControllerBase
 
         var result = await _bannerService.GetByIdAsync(id, cancellationToken);
 
-        if (!result.IsSuccess)
+        if (!result.IsSuccess || (!result.Data!.Published && !User.IsInRole("Admin")))
         {
-            return NotFound(new { error = result.Error });
+            return NotFound(new { error = result.Error ?? "Banner 不存在" });
         }
 
         return Ok(result.Data);
@@ -97,7 +103,7 @@ public class BannerController : ControllerBase
     /// <response code="400">請求參數錯誤</response>
     /// <response code="401">未授權</response>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BannerResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -132,7 +138,7 @@ public class BannerController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">找不到指定的 Banner</response>
     [HttpPut("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BannerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -166,7 +172,7 @@ public class BannerController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">找不到指定的 Banner</response>
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -238,7 +244,7 @@ public class BannerController : ControllerBase
     /// 取得所有 Banner 版位（後台新增/編輯 Banner 的下拉選單）
     /// </summary>
     [HttpGet("positions")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(List<BannerPositionResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPositions(CancellationToken cancellationToken)
     {
