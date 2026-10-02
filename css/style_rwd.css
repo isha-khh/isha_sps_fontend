@@ -8,6 +8,9 @@
 @media (min-width: 1680px) {
 }
 @media (max-width: 1800px) {
+    .support .support_box .d-flex .support_er {
+        height: 485px;
+    }
     .elevator-box {
         left: 28%;
    
@@ -214,6 +217,9 @@
 
 
 @media (max-width: 991px) {
+    .support_box .d-flex .support_er {
+        padding: 15px;
+    }
     .matching.show .item_box_six .item_box_six_1 .pic {
         width: 18%;
     }
@@ -686,6 +692,9 @@
 
 
 @media (max-width: 767px) {
+    .support .support_box .d-flex .support_er {
+        height: 455px;
+    }
     .mat_Award_box {
         gap: 30px 15px;
     
