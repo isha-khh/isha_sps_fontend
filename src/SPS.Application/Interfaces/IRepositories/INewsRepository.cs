@@ -29,12 +29,12 @@ public interface INewsRepository : IRepository<News, int>
     /// <summary>
     /// 獲取新聞的標簽列表
     /// </summary>
-    Task<List<string>> GetNewsTagsAsync(int newsId, CancellationToken cancellationToken = default);
+    Task<List<NewsTagItem>> GetNewsTagsAsync(int newsId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 批次獲取多筆新聞的標簽列表（分頁列表用，避免逐筆查詢的 N+1 問題）
     /// </summary>
-    /// <returns>以新聞 Id 為鍵、標簽名稱列表為值的字典；沒有標簽的新聞不會出現在字典裡</returns>
-    Task<Dictionary<int, List<string>>> GetNewsTagsBatchAsync(
+    /// <returns>以新聞 Id 為鍵、標籤（id+名稱）列表為值的字典；沒有標簽的新聞不會出現在字典裡</returns>
+    Task<Dictionary<int, List<NewsTagItem>>> GetNewsTagsBatchAsync(
         List<int> newsIds, CancellationToken cancellationToken = default);
 }

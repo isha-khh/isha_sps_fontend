@@ -61,6 +61,7 @@ import { ChatPage } from '@/pages/chat/ChatPage';
 
 // Announcements
 import { AnnouncementCategoriesPage } from '@/pages/announcements/CategoriesPage';
+import { AnnouncementTagsPage } from '@/pages/announcements/TagsPage';
 
 // Knowledge
 import { RegulationCategoriesPage } from '@/pages/knowledge/RegulationCategoriesPage';
@@ -207,6 +208,7 @@ function App() {
 
           {/* 公告管理 */}
           <Route path="announcements/categories" element={<AnnouncementCategoriesPage />} />
+          <Route path="announcements/tags" element={<AnnouncementTagsPage />} />
           <Route path="announcements" element={<NewsListPage />} />
           <Route path="announcements/:id" element={<NewsDetailPage />} />
           <Route path="announcements/:id/edit" element={<NewsFormPage />} />

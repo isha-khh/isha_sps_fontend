@@ -14,6 +14,8 @@ export interface News {
   type: number;
   viewCount: number;
   tags?: string[];
+  /** 標籤（id + 名稱），編輯表單預選用 */
+  tagItems?: { id: number; name: string }[];
   createdTime: string;
   updatedTime?: string;
 }
@@ -28,7 +30,8 @@ export interface CreateNewsRequest {
   ordinal?: number;
   categoryId?: number;
   type: number;
-  tags?: string[];
+  /** 標籤 ID 清單（公告標籤管理頁維護） */
+  tagIds?: number[];
 }
 
 export interface UpdateNewsRequest {
@@ -41,7 +44,8 @@ export interface UpdateNewsRequest {
   ordinal?: number;
   categoryId?: number;
   type?: number;
-  tags?: string[];
+  /** 沒帶＝不動標籤；帶空陣列＝清空標籤 */
+  tagIds?: number[];
 }
 
 export interface NewsSearchParams {

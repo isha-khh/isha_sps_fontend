@@ -17,8 +17,8 @@ export interface NewsListCardData {
   description: string;
   /** 活動時間／地點這類條列資訊，沒有就不顯示 */
   meta?: NewsListCardMeta[];
-  /** 標題下方的關鍵字連結，沒有就不顯示；跟詳情頁 `ul-key` 是同一組資料 */
-  keywords?: string[];
+  /** 標題下方的關鍵字連結，沒有就不顯示；跟詳情頁 `ul-key` 是同一組資料。`href` 沒給就維持不可點的 `#` */
+  keywords?: { label: string; href?: string }[];
 }
 
 const META_ICON_CLASS: Record<NewsListCardMeta["icon"], string> = {
@@ -83,9 +83,9 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
           {data.keywords && data.keywords.length > 0 && (
             <ul className="nav ul-key">
               {data.keywords.map((keyword) => (
-                <li key={keyword}>
-                  <a href="#" title={`前往${keyword}`} tabIndex={0}>
-                    {keyword}
+                <li key={keyword.label}>
+                  <a href={keyword.href ? withBasePath(keyword.href) : "#"} title={`查看標籤「${keyword.label}」的公告`} tabIndex={0}>
+                    {keyword.label}
                   </a>
                 </li>
               ))}

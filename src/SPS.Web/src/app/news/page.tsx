@@ -92,10 +92,13 @@ const NEWS_PAGE_SIZE = 5;
  * news/show.html（文章內頁）在用的，不是列表頁。
  */
 export default async function NewsIndexPage({ searchParams }: PageProps<"/news">) {
-  const { category: rawCategory, q: rawQuery, page: rawPage } = await searchParams;
+  const { category: rawCategory, q: rawQuery, page: rawPage, tag: rawTag } = await searchParams;
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
+  // `?tag=<標籤 id>` 對到後端 NewsQueryParameters.TagId，點公告上的標籤會帶進來
+  const requestedTagId = typeof rawTag === "string" ? Number(rawTag) : NaN;
+  const tagId = Number.isInteger(requestedTagId) && requestedTagId > 0 ? requestedTagId : undefined;
 
-  const { items: backendItems, backendAvailable } = await fetchNews({ search: query || undefined });
+  const { items: backendItems, backendAvailable } = await fetchNews({ search: query || undefined, tagId });
   // 只有後端真的連不到/噴錯才退回假資料——搜尋剛好 0 筆是正常結果，
   // 不能也退回假資料（見上面的說明跟 fetchNews 的註解）
   const items = backendAvailable ? backendItems : NEWS_ARTICLES;
@@ -105,6 +108,10 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
   const activeCategory = categories.find((c) => c.id === requestedId);
   const activeHref = activeCategory ? `/news?category=${activeCategory.id}` : "/news";
   const articles = activeCategory ? items.filter((item) => item.categoryId === activeCategory.id) : items;
+  // 標籤名稱從結果裡的 tagItems 找；篩選結果剛好 0 筆時找不到名稱，退回通用說法
+  const activeTagName = tagId
+    ? items.flatMap((item) => item.tagItems ?? []).find((t) => t.id === tagId)?.name ?? "此標籤"
+    : undefined;
 
   // 分頁：`totalPages`／`currentPage` 之前是寫死的佔位數字（`1`／`5`），
   // 不管實際文章筆數是多少都顯示同樣的「5 頁」、而且下面的清單完全
@@ -121,6 +128,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
     const params = new URLSearchParams();
     if (activeCategory) params.set("category", String(activeCategory.id));
     if (query) params.set("q", query);
+    if (tagId) params.set("tag", String(tagId));
     if (page > 1) params.set("page", String(page));
     const qs = params.toString();
     return qs ? `/news?${qs}` : "/news";
@@ -129,7 +137,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
   // 熱門文章要看全站排名，不能被目前的搜尋字串限縮——有搜尋字串時
   // 才需要額外抓一次不帶搜尋條件的清單；沒有搜尋字串時 `items` 本來
   // 就是全站清單，直接重用，不用多打一次 API。
-  const popularSourceResult = query ? await fetchNews() : { items: backendItems, backendAvailable };
+  const popularSourceResult = query || tagId ? await fetchNews() : { items: backendItems, backendAvailable };
   const popularSource = popularSourceResult.backendAvailable ? popularSourceResult.items : NEWS_ARTICLES;
   const popularPosts = sortNewsByViewCount(popularSource)
     .slice(0, 5)
@@ -164,13 +172,31 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
           <SearchBar
             years={[]}
             defaultKeyword={query}
-            hiddenFields={activeCategory ? { category: String(activeCategory.id) } : undefined}
+            hiddenFields={{
+              ...(activeCategory ? { category: String(activeCategory.id) } : {}),
+              ...(tagId ? { tag: String(tagId) } : {}),
+            }}
           />
         </div>
 
+        {activeTagName && (
+          <p className="mb-4">
+            標籤：<strong>{activeTagName}</strong>
+            <a href={withBasePath(activeHref)} className="ms-3 blue text-decoration-underline" title="清除標籤篩選">
+              清除
+            </a>
+          </p>
+        )}
+
         <div className="column_box">
           {articles.length === 0 && (
-            <p>{query ? `找不到符合「${query}」的公告。` : "目前沒有符合這個分類的消息。"}</p>
+            <p>
+              {query
+                ? `找不到符合「${query}」的公告。`
+                : activeTagName
+                  ? `目前沒有標籤為「${activeTagName}」的公告。`
+                  : "目前沒有符合這個分類的消息。"}
+            </p>
           )}
 
           {pagedArticles.map((article) => (
@@ -184,7 +210,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
                 status: getNewsActivityStatus(article.startDate, article.endDate),
                 title: article.title,
                 description: article.introduction,
-                keywords: article.tags,
+                keywords: article.tagItems?.map((t) => ({ label: t.name, href: `/news?tag=${t.id}` })) ?? article.tags?.map((label) => ({ label })),
               }}
             />
           ))}

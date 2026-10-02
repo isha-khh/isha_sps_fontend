@@ -159,16 +159,16 @@ public class NewsRepository : Repository<News, int>, INewsRepository
         };
     }
 
-    public async Task<List<string>> GetNewsTagsAsync(int newsId, CancellationToken cancellationToken = default)
+    public async Task<List<NewsTagItem>> GetNewsTagsAsync(int newsId, CancellationToken cancellationToken = default)
     {
         return await _context.Set<EntityTag>()
             .Where(et => et.EntityType == EntityType.News && et.EntityId == newsId.ToString())
-            .Include(et => et.Tag)
-            .Select(et => et.Tag.Name)
+            .OrderBy(et => et.Tag.Ordinal).ThenBy(et => et.Tag.Id)
+            .Select(et => new NewsTagItem { Id = et.Tag.Id, Name = et.Tag.Name })
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Dictionary<int, List<string>>> GetNewsTagsBatchAsync(
+    public async Task<Dictionary<int, List<NewsTagItem>>> GetNewsTagsBatchAsync(
         List<int> newsIds, CancellationToken cancellationToken = default)
     {
         // 列表頁一次要顯示一整頁的標簽，逐筆呼叫 GetNewsTagsAsync 會是
@@ -177,12 +177,12 @@ public class NewsRepository : Repository<News, int>, INewsRepository
         var idStrings = newsIds.Select(id => id.ToString()).ToList();
         var rows = await _context.Set<EntityTag>()
             .Where(et => et.EntityType == EntityType.News && idStrings.Contains(et.EntityId))
-            .Include(et => et.Tag)
-            .Select(et => new { et.EntityId, TagName = et.Tag.Name })
+            .OrderBy(et => et.Tag.Ordinal).ThenBy(et => et.Tag.Id)
+            .Select(et => new { et.EntityId, TagId = et.Tag.Id, TagName = et.Tag.Name })
             .ToListAsync(cancellationToken);
 
         return rows
             .GroupBy(r => int.Parse(r.EntityId))
-            .ToDictionary(g => g.Key, g => g.Select(r => r.TagName).ToList());
+            .ToDictionary(g => g.Key, g => g.Select(r => new NewsTagItem { Id = r.TagId, Name = r.TagName }).ToList());
     }
 }

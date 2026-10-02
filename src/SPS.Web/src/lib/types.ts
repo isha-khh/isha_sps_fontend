@@ -125,6 +125,11 @@ export type FaqItem = {
     categoryName?: string;
 }
 
+export type NewsTagItem = {
+    id: number;
+    name: string;
+};
+
 export type NewsItem = {
     id: number;
     title: string;
@@ -144,6 +149,9 @@ export type NewsItem = {
     // 對到真後端 NewsListItemResponse.Tags，原本列表 API 沒有這個
     // 欄位、只有詳情有，2026-09-08 已請後端一起補上
     tags?: string[];
+    // 對到真後端 NewsListItemResponse.TagItems（id + 名稱）：標籤要能點了篩選公告
+    // （`/news?tag=<id>`，對到 NewsQueryParameters.TagId），只有名稱的 `tags` 做不到
+    tagItems?: NewsTagItem[];
     // 對到真後端 NewsListItemResponse.ImageUrl（News.Picture.DefaultImageUri），
     // 2026-09-08 已請後端補上，沒設定圖片時仍可能是 undefined/null，
     // 畫面上要有 fallback（見 news-data.ts 的 NEWS_FALLBACK_IMAGE）
@@ -177,6 +185,8 @@ export type NewsDetail = {
     createdTime: string;
     // 對到真後端 NewsResponse.Tags，拿來當詳情頁「關鍵字」區塊用
     tags?: string[];
+    // 對到真後端 NewsResponse.TagItems，見 NewsItem 的註解
+    tagItems?: NewsTagItem[];
     // 對到真後端 NewsResponse.ImageUrl，見 NewsItem 的註解
     imageUrl?: string;
     // 對到真後端 NewsResponse.ViewCount，見 NewsItem 的註解

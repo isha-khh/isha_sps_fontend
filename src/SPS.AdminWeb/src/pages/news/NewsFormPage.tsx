@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/PageTitle';
 import { newsApi } from '@/lib/api/news';
 import { categoriesApi } from '@/lib/api/category';
+import { tagsApi } from '@/lib/api/tags';
+import { TagType, type Tag } from '@/types/taxonomy';
 import type { CreateNewsRequest, UpdateNewsRequest } from '@/types/news';
 import type { CategoryResponse } from '@/types/category';
 import { PuckEditor } from '@/components/puck/PuckEditor';
@@ -27,6 +29,8 @@ export const NewsFormPage = () => {
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
 
   // 使用 ref 保存最新的 Puck 內容
   const puckContentRef = useRef<string>('');
@@ -42,6 +46,19 @@ export const NewsFormPage = () => {
       }
     };
     fetchCategories();
+  }, []);
+
+  // 載入可選的公告標籤（到「公告標籤」頁維護）
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const result = await tagsApi.getPaged({ type: TagType.News, page: 1, pageSize: 100 });
+        setAvailableTags(result.items);
+      } catch (error) {
+        console.error('Failed to fetch tags:', error);
+      }
+    };
+    void fetchTags();
   }, []);
 
   useEffect(() => {
@@ -63,6 +80,7 @@ export const NewsFormPage = () => {
           type: data.type,
         };
         setFormData(newsData);
+        setSelectedTagIds((data.tagItems ?? []).map((t) => t.id));
         // 初始化 ref
         puckContentRef.current = data.content || '';
         console.log('[NewsFormPage] Loaded existing content, length:', data.content?.length || 0);
@@ -104,6 +122,7 @@ export const NewsFormPage = () => {
           ordinal: formData.ordinal,
           categoryId: formData.categoryId,
           type: formData.type,
+          tagIds: selectedTagIds,
         };
         console.log('[NewsFormPage] Updating news with ID:', id);
         await newsApi.updateNews(Number(id), updateData);
@@ -119,6 +138,7 @@ export const NewsFormPage = () => {
           ordinal: formData.ordinal,
           categoryId: formData.categoryId,
           type: formData.type,
+          tagIds: selectedTagIds,
         };
         console.log('[NewsFormPage] Creating new news');
         await newsApi.createNews(createData);
@@ -300,6 +320,40 @@ export const NewsFormPage = () => {
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  {/* 公告標籤（多選）：前台公告卡片上的藍色關鍵字 */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">公告標籤</span>
+                      <a href="/announcements/tags" target="_blank" rel="noreferrer" className="label-text-alt link link-primary">
+                        管理標籤
+                      </a>
+                    </label>
+                    {availableTags.length === 0 ? (
+                      <p className="text-sm text-base-content/50">尚未建立任何標籤，請先到「公告標籤」新增</p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {availableTags.map((tag) => {
+                          const selected = selectedTagIds.includes(tag.id);
+                          return (
+                            <button
+                              key={tag.id}
+                              type="button"
+                              aria-pressed={selected}
+                              className={`badge badge-lg cursor-pointer ${selected ? 'badge-info' : 'badge-outline'}`}
+                              onClick={() =>
+                                setSelectedTagIds((prev) =>
+                                  selected ? prev.filter((id) => id !== tag.id) : [...prev, tag.id]
+                                )
+                              }
+                            >
+                              {tag.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

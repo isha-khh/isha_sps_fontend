@@ -18,6 +18,11 @@ public class NewsResponse
     public short Type { get; set; }
     public int ViewCount { get; set; }
     public List<string> Tags { get; set; } = new();
+
+    /// <summary>
+    /// 標籤（id + 名稱）：前台點標籤篩選、後台編輯表單預選用
+    /// </summary>
+    public List<NewsTagItem> TagItems { get; set; } = new();
     public DateTime CreatedTime { get; set; }
     public DateTime? UpdatedTime { get; set; }
 
@@ -55,6 +60,11 @@ public class NewsListItemResponse
     /// 顯示關鍵字標籤，一併補上
     /// </summary>
     public List<string> Tags { get; set; } = new();
+
+    /// <summary>
+    /// 標籤（id + 名稱）：前台卡片上的標籤要能點了篩選
+    /// </summary>
+    public List<NewsTagItem> TagItems { get; set; } = new();
 
     /// <summary>
     /// 封面圖網址（來自 News.Picture.DefaultImageUri），沒有設定圖片時為 null

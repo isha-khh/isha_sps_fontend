@@ -134,13 +134,20 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
 
             {article.tags && article.tags.length > 0 && (
               <ul className="nav ul-key">
-                {article.tags.map((keyword) => (
-                  <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`} tabIndex={0}>
-                      {keyword}
-                    </a>
-                  </li>
-                ))}
+                {article.tags.map((keyword, index) => {
+                  const tagItem = article.tagItems?.[index];
+                  return (
+                    <li key={keyword}>
+                      <a
+                        href={tagItem ? withBasePath(`/news?tag=${tagItem.id}`) : "#"}
+                        title={`查看標籤「${keyword}」的公告`}
+                        tabIndex={0}
+                      >
+                        {keyword}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>

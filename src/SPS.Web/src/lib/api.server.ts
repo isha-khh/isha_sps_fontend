@@ -153,10 +153,10 @@ export async function fetchFaqDetail(id: string): Promise<FaqItem | null> {
  * 搜尋一個沒有結果的關鍵字」跟「後端掛了」如果都退回假資料，畫面會
  * 誤導使用者以為假資料就是搜尋結果。
  */
-async function tryBackendNews(search?: string): Promise<NewsItem[] | null> {
+async function tryBackendNews(search?: string, tagId?: number): Promise<NewsItem[] | null> {
     try {
         const response = await apiClient.get<PagedResult<NewsItem>>(
-            "/api/News", { params: { page: 1, pageSize: 100, search: search || undefined } }
+            "/api/News", { params: { page: 1, pageSize: 100, search: search || undefined, tagId: tagId || undefined } }
         );
         const published = response.data.items?.filter((n) => n.published) ?? [];
         // imageUrl 是相對於後端 API 的路徑，要轉成完整網址瀏覽器才載得到，
@@ -174,8 +174,8 @@ async function tryBackendNews(search?: string): Promise<NewsItem[] | null> {
  * 代表後端有正常回應、只是這次查詢（例如關鍵字搜尋）剛好沒有符合的
  * 結果，這時候要照實顯示「查無資料」，不能退回假資料掩蓋掉。
  */
-export async function fetchNews(options?: { search?: string }): Promise<{ items: NewsItem[]; backendAvailable: boolean }> {
-    const backendItems = await tryBackendNews(options?.search);
+export async function fetchNews(options?: { search?: string; tagId?: number }): Promise<{ items: NewsItem[]; backendAvailable: boolean }> {
+    const backendItems = await tryBackendNews(options?.search, options?.tagId);
     return { items: backendItems ?? [], backendAvailable: backendItems !== null };
 }
 

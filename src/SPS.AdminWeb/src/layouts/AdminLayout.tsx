@@ -88,6 +88,7 @@ const allMenuItems: MenuItemWithPermission[] = [
     permissions: [Permission.ManageNews],
     children: [
       { id: 'announcement-categories', label: '公告類別', url: '/announcements/categories', permissions: [Permission.ManageCategories] },
+      { id: 'announcement-tags', label: '公告標籤', url: '/announcements/tags', permissions: [Permission.ManageNews] },
       { id: 'announcement-list', label: '公告內容', url: '/announcements', permissions: [Permission.ManageNews] },
     ],
   },

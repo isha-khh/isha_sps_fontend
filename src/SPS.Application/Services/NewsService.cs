@@ -6,6 +6,7 @@ using SPS.Application.DTOs.News;
 using SPS.Application.Interfaces;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Entities;
+using SPS.Domain.Enums;
 
 namespace SPS.Application.Services;
 
@@ -43,7 +44,8 @@ public class NewsService : INewsService
                 CategoryName = n.Category?.Name,
                 ViewCount = n.ViewCount,
                 CreatedTime = n.CreatedTime,
-                Tags = tagsByNewsId.GetValueOrDefault(n.Id, new List<string>()),
+                Tags = tagsByNewsId.GetValueOrDefault(n.Id, new List<NewsTagItem>()).Select(t => t.Name).ToList(),
+                TagItems = tagsByNewsId.GetValueOrDefault(n.Id, new List<NewsTagItem>()),
                 ImageUrl = n.Picture?.DefaultImageUri
             }).ToList(),
             TotalCount = pagedResult.TotalCount,
@@ -76,7 +78,8 @@ public class NewsService : INewsService
             CategoryName = news.Category?.Name,
             Type = news.Type,
             ViewCount = news.ViewCount,
-            Tags = tags,
+            Tags = tags.Select(t => t.Name).ToList(),
+            TagItems = tags,
             CreatedTime = news.CreatedTime,
             UpdatedTime = news.UpdatedTime,
             ImageUrl = news.Picture?.DefaultImageUri
@@ -97,6 +100,11 @@ public class NewsService : INewsService
                 if (categoryExists == null)
                     return Result<NewsResponse>.Failure($"分類 ID {request.CategoryId.Value} 不存在，請選擇有效的分類");
             }
+
+            // 標籤只能綁「公告類型」且實際存在的標籤，先驗證再寫入，避免綁到不存在的 ID 才炸 FK
+            var (tagIds, tagError) = await ResolveNewsTagIdsAsync(request.TagIds, cancellationToken);
+            if (tagError != null)
+                return Result<NewsResponse>.Failure(tagError);
 
             // 創建多語言文本
             var title = await _unitOfWork.MultilingualTexts.CreateTextAsync(request.Title, cancellationToken);
@@ -129,8 +137,15 @@ public class NewsService : INewsService
             await _unitOfWork.News.AddAsync(news, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            if (tagIds.Count > 0)
+            {
+                await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), tagIds, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+
             // 提交事務
             await transaction.CommitAsync(cancellationToken);
+            var createdTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
 
             return Result<NewsResponse>.Success(new NewsResponse
             {
@@ -145,7 +160,8 @@ public class NewsService : INewsService
                 CategoryId = news.CategoryId,
                 Type = news.Type,
                 ViewCount = news.ViewCount,
-                Tags = new List<string>(),
+                Tags = createdTags.Select(t => t.Name).ToList(),
+                TagItems = createdTags,
                 CreatedTime = news.CreatedTime,
                 UpdatedTime = news.UpdatedTime
             });
@@ -172,6 +188,16 @@ public class NewsService : INewsService
             var categoryExists = await _unitOfWork.Categories.GetByIdAsync(request.CategoryId.Value, cancellationToken);
             if (categoryExists == null)
                 return Result<NewsResponse>.Failure($"分類 ID {request.CategoryId.Value} 不存在，請選擇有效的分類");
+        }
+
+        // TagIds 沒帶（null）= 不動標籤；帶空陣列 = 清空標籤
+        List<int>? newTagIds = null;
+        if (request.TagIds != null)
+        {
+            var (resolved, tagError) = await ResolveNewsTagIdsAsync(request.TagIds, cancellationToken);
+            if (tagError != null)
+                return Result<NewsResponse>.Failure(tagError);
+            newTagIds = resolved;
         }
 
         // 更新 Title (MultilingualText)
@@ -243,7 +269,12 @@ public class NewsService : INewsService
         news.UpdatedTime = DateTime.UtcNow;
 
         await _unitOfWork.News.UpdateAsync(news, cancellationToken);
+        if (newTagIds != null)
+        {
+            await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), newTagIds, cancellationToken);
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        var updatedTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
 
         return Result<NewsResponse>.Success(new NewsResponse
         {
@@ -259,10 +290,28 @@ public class NewsService : INewsService
             CategoryName = news.Category?.Name,
             Type = news.Type,
             ViewCount = news.ViewCount,
-            Tags = new List<string>(),
+            Tags = updatedTags.Select(t => t.Name).ToList(),
+            TagItems = updatedTags,
             CreatedTime = news.CreatedTime,
             UpdatedTime = news.UpdatedTime
         });
+    }
+
+    /// <summary>
+    /// 驗證公告要綁的標籤：去重後必須全部是「公告類型」且實際存在的標籤。
+    /// </summary>
+    private async Task<(List<int> Ids, string? Error)> ResolveNewsTagIdsAsync(
+        IEnumerable<int>? tagIds, CancellationToken cancellationToken)
+    {
+        var requested = (tagIds ?? Enumerable.Empty<int>()).Distinct().ToList();
+        if (requested.Count == 0)
+            return (requested, null);
+
+        var existing = await _unitOfWork.Tags.GetExistingTagIdsAsync(requested, TagType.News, cancellationToken);
+        var missing = requested.Except(existing).ToList();
+        return missing.Count > 0
+            ? (requested, $"標籤 ID {string.Join(", ", missing)} 不存在或不是公告標籤")
+            : (requested, null);
     }
 
     public async Task<Result<bool>> DeleteAsync(int id, CancellationToken cancellationToken = default)
@@ -271,6 +320,9 @@ public class NewsService : INewsService
         if (news == null)
             return Result<bool>.Failure("新聞不存在");
 
+        // EntityTag 是多型關聯（EntityId 是字串、沒有 FK 連動刪除），不手動清掉會留下孤兒綁定，
+        // 標籤的「使用中數量」也會一直算到已經刪掉的公告
+        await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), Array.Empty<int>(), cancellationToken);
         await _unitOfWork.News.DeleteAsync(news, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result<bool>.Success(true);
