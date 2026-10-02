@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { withBasePath } from "@/lib/api-client";
+import HeaderSearch from "@/components/layout/HeaderSearch";
 
 /**
  * 過渡期元件：內容照抄舊站的 page/_uc/nav.html，
@@ -443,6 +444,8 @@ export default function Headers() {
             </div>
 
             <div className="small-btn-box nav-3 d-flex align-items-center">
+              <HeaderSearch />
+
               <a href="javascript:void(0);" className="btn btn-light rounded-pill btn-scroll-newsletter" title="訂閱電子報">
                 <span>訂閱電子報</span>
               </a>
@@ -471,6 +474,7 @@ export default function Headers() {
           </button>
           <div className="bsnav-mobile-overlay"></div>
           <div className="navbar nav-big-wrapper">
+            <HeaderSearch variant="panel" />
             <ul className="navbar-nav nav-1">
               <NavLinks />
             </ul>

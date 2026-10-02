@@ -125,6 +125,33 @@ export type FaqItem = {
     categoryName?: string;
 }
 
+/** 對到真後端 `SearchResponse`（`GET /api/Search`） */
+export type SearchResultItem = {
+    id: string;
+    title: string;
+    summary?: string | null;
+    date?: string | null;
+    imageUrl?: string | null;
+    /** 站內路徑（不含站台 basePath） */
+    url: string;
+};
+
+export type SearchGroup = {
+    /** news / case / faq / video */
+    type: string;
+    label: string;
+    totalCount: number;
+    items: SearchResultItem[];
+    /** 該類型自己的列表頁（已帶關鍵字） */
+    moreUrl: string;
+};
+
+export type SearchResult = {
+    keyword: string;
+    totalCount: number;
+    groups: SearchGroup[];
+};
+
 /**
  * 對到真後端 `BannerResponse`（`GET /api/Banner/by-code/{code}`，只含上架中的）。
  * 一般輪播圖只用 `uri`／`linkUrl`／`linkTarget`；`title`～`secondaryLinkUrl` 是首頁主視覺

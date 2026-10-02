@@ -36,15 +36,19 @@ export const metadata: Metadata = {
  * 跟 news 用的 search.html（有年份）是同一個元件、不同用法。
  */
 export default async function FaqPage({ searchParams }: PageProps<"/faq">) {
-  const { category: rawCategory } = await searchParams;
+  const { category: rawCategory, q: rawQuery } = await searchParams;
+  const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
 
-  const { items: backendItems } = await fetchFaq();
-  // 後端沒資料（或不可用）時退回假資料，見 FAQ_ITEMS 註解
-  const items = backendItems.length > 0 ? backendItems : FAQ_ITEMS;
+  const { items: backendItems } = await fetchFaq({ search: query || undefined });
+  // 沒搜尋時：後端沒資料（或不可用）退回假資料，見 FAQ_ITEMS 註解。有搜尋關鍵字時不退回——
+  // 0 筆就是「查無符合的問題」，不能拿假資料頂替讓使用者以為那是搜尋結果。
+  const items = query ? backendItems : backendItems.length > 0 ? backendItems : FAQ_ITEMS;
   const categories = deriveFaqCategories(items);
 
   const requestedId = rawCategory ? Number(rawCategory) : NaN;
-  const activeCategory = categories.find((c) => c.id === requestedId) ?? categories[0];
+  const explicitCategory = categories.find((c) => c.id === requestedId);
+  // 沒搜尋時 FAQ 一次只顯示一個分類（預設第一個）；搜尋時要跨分類找，沒指定分類就全部顯示
+  const activeCategory = explicitCategory ?? (query ? undefined : categories[0]);
   const activeHref = `/faq?category=${activeCategory?.id ?? ""}`;
   const filteredItems = activeCategory ? items.filter((item) => item.categoryId === activeCategory.id) : items;
 
@@ -75,11 +79,11 @@ export default async function FaqPage({ searchParams }: PageProps<"/faq">) {
         }
       >
         <div className="search2 mb-4">
-          <SearchBar />
+          <SearchBar defaultKeyword={query} hiddenFields={explicitCategory ? { category: String(explicitCategory.id) } : undefined} />
         </div>
 
         {filteredItems.length === 0 ? (
-          <p>目前這個分類還沒有常見問題。</p>
+          <p>{query ? `找不到符合「${query}」的常見問題。` : "目前這個分類還沒有常見問題。"}</p>
         ) : (
           <FaqAccordion items={filteredItems.map((item) => ({ question: item.question, answer: item.answer ?? "" }))} />
         )}

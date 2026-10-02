@@ -76,11 +76,13 @@ function toGridCardData(video: VideoItem) {
  * 接篩選邏輯，先不為了一頁多做一個下拉變體。
  */
 export default async function PromotionVideoPage({ searchParams }: PageProps<"/promotion/video">) {
-  const { category: rawCategory, page: rawPage } = await searchParams;
+  const { category: rawCategory, page: rawPage, q: rawQuery } = await searchParams;
   const category = typeof rawCategory === "string" ? rawCategory : undefined;
+  const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
   const activeHref = category ? `/promotion/video?category=${category}` : "/promotion/video";
 
-  const { items: backendItems, backendAvailable } = await fetchVideos();
+  const { items: backendItems, backendAvailable } = await fetchVideos({ search: query || undefined });
+  // 搜尋時只有後端真的連不到才退回假資料；後端有回應但 0 筆是正常的搜尋結果（理由同 /news）
   const items = backendAvailable ? backendItems : PROMOTION_VIDEOS;
   const categories = deriveVideoCategories(items);
 
@@ -95,6 +97,7 @@ export default async function PromotionVideoPage({ searchParams }: PageProps<"/p
   const getPageHref = (page: number) => {
     const params = new URLSearchParams();
     if (category) params.set("category", category);
+    if (query) params.set("q", query);
     if (page > 1) params.set("page", String(page));
     const qs = params.toString();
     return qs ? `/promotion/video?${qs}` : "/promotion/video";
@@ -148,11 +151,11 @@ export default async function PromotionVideoPage({ searchParams }: PageProps<"/p
         }
       >
         <div className="search mb-md-5 mb-4">
-          <SearchBar years={[]} />
+          <SearchBar years={[]} defaultKeyword={query} hiddenFields={category ? { category } : undefined} />
         </div>
 
         <div className="row">
-          {pagedVideos.length === 0 && <p>目前沒有符合這個分類的影片。</p>}
+          {pagedVideos.length === 0 && <p>{query ? `找不到符合「${query}」的影片。` : "目前沒有符合這個分類的影片。"}</p>}
 
           {pagedVideos.map((video) => (
             <VideoGridCard key={video.id} data={toGridCardData(video)} group={VIDEO_FANCYBOX_GROUP} />

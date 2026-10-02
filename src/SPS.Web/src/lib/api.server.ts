@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import {
     BannerItem,
+    SearchResult,
     FaqItem,
     NewsItem,
     NewsDetail,
@@ -91,7 +92,7 @@ type QuestionDetail = {
 /**
  * 嘗試從後端取得已發布的 FAQ 列表，回傳 null 表示後端無資料或不可用
  */
-async function tryBackendQuestions(): Promise<FaqItem[] | null> {
+async function tryBackendQuestions(search?: string): Promise<FaqItem[] | null> {
     try {
         // 查詢參數要對到真後端 QuestionQueryParameters 的欄位名稱
         // （SPS.Application/DTOs/Question/QuestionQueryParameters.cs）：
@@ -99,7 +100,7 @@ async function tryBackendQuestions(): Promise<FaqItem[] | null> {
         // 只是完全沒有作用（ASP.NET 對不上名字就直接用預設值 `Page = 1`），
         // 目前恰好都抓第一頁才沒被發現，之後真的要分頁時會是個地雷。
         const response = await apiClient.get<QuestionPagedResult>(
-            "/api/Question", { params: { page: 1, pageSize: 100 } }
+            "/api/Question", { params: { page: 1, pageSize: 100, search: search || undefined } }
         );
         const published = response.data.items?.filter((q) => q.published) ?? [];
         if (published.length > 0) {
@@ -115,8 +116,8 @@ async function tryBackendQuestions(): Promise<FaqItem[] | null> {
  * 取得 FAQ 列表
  * 優先使用後端 questionsApi.getPaged，無資料時 fallback 到 mock
  */
-export async function fetchFaq(): Promise<{ items: FaqItem[] }> {
-    const backendItems = await tryBackendQuestions();
+export async function fetchFaq(options?: { search?: string }): Promise<{ items: FaqItem[] }> {
+    const backendItems = await tryBackendQuestions(options?.search);
     return { items: backendItems ?? [] };
 }
 
@@ -153,6 +154,28 @@ function stripBasePath(path?: string): string | undefined {
     const raw = process.env.NEXT_PUBLIC_BASE_PATH?.trim() ?? "";
     const base = raw ? (raw.startsWith("/") ? raw : `/${raw}`) : "";
     return base && path.startsWith(`${base}/`) ? path.slice(base.length) : path;
+}
+
+/**
+ * 全站搜尋（`GET /api/Search`）。回傳 `null` 代表後端連不到／噴錯，跟「搜尋了但 0 筆」
+ * （`totalCount` 為 0）刻意分開，理由同 `tryBackendNews`。`url`／`moreUrl` 同樣會被
+ * `apiClient` 攔截器補上 basePath，要拿掉才不會被 `next/link` 再補一次（見 `stripBasePath`）。
+ */
+export async function fetchSearch(keyword: string, limit = 5): Promise<SearchResult | null> {
+    try {
+        const response = await apiClient.get<SearchResult>("/api/Search", { params: { q: keyword, limit } });
+        const data = response.data;
+        return {
+            ...data,
+            groups: data.groups.map((g) => ({
+                ...g,
+                moreUrl: stripBasePath(g.moreUrl) ?? g.moreUrl,
+                items: g.items.map((item) => ({ ...item, url: stripBasePath(item.url) ?? item.url })),
+            })),
+        };
+    } catch {
+        return null;
+    }
 }
 
 /**
@@ -316,10 +339,10 @@ export async function fetchCompanies(): Promise<{ items: CompanyList[]; backendA
  * 等有測試資料或後台補上管理頁再實際看得到內容——這不是這支
  * `fetchVideos()` 的問題，是資料源頭還沒有東西。
  */
-async function tryBackendVideos(): Promise<VideoItem[] | null> {
+async function tryBackendVideos(search?: string): Promise<VideoItem[] | null> {
     try {
         const response = await apiClient.get<PagedResult<VideoItem>>(
-            "/api/Video", { params: { page: 1, pageSize: 100, published: true } }
+            "/api/Video", { params: { page: 1, pageSize: 100, published: true, search: search || undefined } }
         );
         const published = response.data.items?.filter((v) => v.published) ?? [];
         // uri／thumbnailUri 是相對於後端 API 的路徑，要轉成完整網址瀏覽器
@@ -337,7 +360,7 @@ async function tryBackendVideos(): Promise<VideoItem[] | null> {
 /**
  * 取得影片列表，`backendAvailable` 語意同 `fetchNews`。
  */
-export async function fetchVideos(): Promise<{ items: VideoItem[]; backendAvailable: boolean }> {
-    const backendItems = await tryBackendVideos();
+export async function fetchVideos(options?: { search?: string }): Promise<{ items: VideoItem[]; backendAvailable: boolean }> {
+    const backendItems = await tryBackendVideos(options?.search);
     return { items: backendItems ?? [], backendAvailable: backendItems !== null };
 }
