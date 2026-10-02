@@ -88,7 +88,7 @@ export const ReviewModal = ({ application, isOpen, onClose, onSubmit }: ReviewMo
                 <label className="label">
                   <span className="label-text">申請編號</span>
                 </label>
-                <p className="text-sm font-medium">{application.id}</p>
+                <p className="text-sm font-medium">{application.applicationNumber}</p>
               </div>
               <div>
                 <label className="label">
@@ -100,7 +100,7 @@ export const ReviewModal = ({ application, isOpen, onClose, onSubmit }: ReviewMo
                 <label className="label">
                   <span className="label-text">聯絡人</span>
                 </label>
-                <p className="text-sm font-medium">{application.contactPerson}</p>
+                <p className="text-sm font-medium">{application.contactName || application.contactPerson}</p>
               </div>
               <div>
                 <label className="label">
