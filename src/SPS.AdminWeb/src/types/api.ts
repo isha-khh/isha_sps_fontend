@@ -30,6 +30,8 @@ export interface Member {
 
 // 會員角色
 export const MemberRole = {
+  /** 個人會員——不隸屬需求/供給任一端（對應後端 MemberRole.None） */
+  None: 0,
   Supplier: 1,
   Buyer: 2,
   SuperAdmin: 10,
@@ -77,10 +79,26 @@ export interface ApplicationMember {
 }
 
 // 申請
+/** 申請人類型，對應後端 ApplicantType */
+export const ApplicantType = {
+  Individual: 1,
+  Company: 2,
+} as const;
+
+export type ApplicantType = typeof ApplicantType[keyof typeof ApplicantType];
+
 export interface Application {
   id: string;
   applicationNumber: string;
+  /** 個人會員／企業會員；改版前的舊申請後端已回填為 Company */
+  applicantType?: ApplicantType;
+  /** 有值代表這是既有個人會員送出的升級申請 */
+  existingMemberId?: string;
   memberRole: MemberRole;
+  /** 供給端申請分流：1 卓越（文件審查）／2 新興（需專家委員評分），沿用 CompanyLevel 數值 */
+  supplierTier?: number;
+  /** 新興會員評分未達門檻或尚未輸入評分時的非阻斷性警示（只有審核詳情回應才會帶） */
+  scoringWarning?: string;
   status: ApplicationStatus;
 
   // 申請人信息（第一個成員的信息，保留向後兼容）
@@ -95,6 +113,7 @@ export interface Application {
   companyId?: string;
   unifiedSocialCreditCode: string;
   companyName?: string;
+  industry?: string;
   contactPerson?: string;
   isManualInput: boolean;
   businessScope?: string;
@@ -146,6 +165,8 @@ export const DocumentType = {
   CloudMarketplace: 4,
   DigitalServiceCapability: 5,
   Application: 6,
+  /** 其他佐證文件（選填） */
+  Other: 7,
 } as const;
 
 export type DocumentType = typeof DocumentType[keyof typeof DocumentType];

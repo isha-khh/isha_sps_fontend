@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/PageTitle';
 import { ApplicationStatusBadge } from '@/components/applications/ApplicationStatusBadge';
 import { adminApplicationsApi } from '@/lib/api/admin-applications.ts';
+import { ExpertScoringSection } from '@/components/applications/ExpertScoringSection';
+import { ApplicantType } from '@/types/api';
 
 import type {
   DocumentType as ApiDocType ,
@@ -18,11 +20,24 @@ const DocumentTypeLabels: Record<number, string> = {
   4: '雲市集',
   5: '數位服務機構證明',
   6: '一般申請書',
+  7: '其他佐證文件',
 };
 
 const MemberRoleLabels: Record<number, string> = {
+  0: '無（個人會員）',
   1: '供給端',
   2: '需求端',
+};
+
+const ApplicantTypeLabels: Record<number, string> = {
+  1: '個人會員',
+  2: '企業會員',
+};
+
+// 卓越/新興只是審查路徑紀錄，不是等級高低（見 types/company.ts 的 CompanyLevel 說明）
+const SupplierTierLabels: Record<number, string> = {
+  1: '卓越會員（文件審查）',
+  2: '新興會員（文件審查＋專家委員評分）',
 };
 
 const MemberPositionLabels: Record<number, string> = {
@@ -90,6 +105,11 @@ export const ApplicationDetailPage = () => {
   };
 
   const isUnderReview = application?.status === ApplicationStatusEnum.UnderReview;
+  const isIndividual = application?.applicantType === ApplicantType.Individual;
+  const isEmerging = application?.supplierTier === 2;
+  // 決議（核准/退回）之後評分只能檢視，不能再新增或刪除
+  const canEditScores =
+    application?.status === ApplicationStatusEnum.PendingReview || application?.status === ApplicationStatusEnum.UnderReview;
 
 
   const handleDownload = async (documentId: string) => {
@@ -196,9 +216,24 @@ export const ApplicationDetailPage = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="form-control">
-                <label className="label"><span className="label-text font-medium">會員角色</span></label>
-                <p className="text-base-content">{MemberRoleLabels[application.memberRole] || '-'}</p>
+                <label className="label"><span className="label-text font-medium">申請類型</span></label>
+                <p className="text-base-content">
+                  {ApplicantTypeLabels[application.applicantType ?? 0] || '-'}
+                  {application.existingMemberId && (
+                    <span className="badge badge-info ml-2">既有會員升級</span>
+                  )}
+                </p>
               </div>
+              <div className="form-control">
+                <label className="label"><span className="label-text font-medium">會員角色</span></label>
+                <p className="text-base-content">{MemberRoleLabels[application.memberRole] ?? '-'}</p>
+              </div>
+              {application.supplierTier ? (
+                <div className="form-control">
+                  <label className="label"><span className="label-text font-medium">供給端分類</span></label>
+                  <p className="text-base-content">{SupplierTierLabels[application.supplierTier] || '-'}</p>
+                </div>
+              ) : null}
               <div className="form-control">
                 <label className="label"><span className="label-text font-medium">申請理由</span></label>
                 <p className="text-base-content">{application.reason || '-'}</p>
@@ -224,29 +259,39 @@ export const ApplicationDetailPage = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <span className="iconify lucide--building-2 size-5" />
-              企業資訊
+              {isIndividual ? '任職資訊' : '企業資訊'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="form-control">
-                <label className="label"><span className="label-text font-medium">公司名稱</span></label>
+                <label className="label">
+                  <span className="label-text font-medium">{isIndividual ? '所屬公司名稱' : '公司名稱'}</span>
+                </label>
                 <p className="text-base-content">{application.companyName || '-'}</p>
               </div>
               <div className="form-control">
-                <label className="label"><span className="label-text font-medium">統一編號</span></label>
-                <p className="text-base-content">{application.unifiedSocialCreditCode || '-'}</p>
+                <label className="label"><span className="label-text font-medium">產業別</span></label>
+                <p className="text-base-content">{application.industry || '-'}</p>
               </div>
-              <div className="form-control">
-                <label className="label"><span className="label-text font-medium">公司地址</span></label>
-                <p className="text-base-content">{application.companyAddress || '-'}</p>
-              </div>
-              <div className="form-control">
-                <label className="label"><span className="label-text font-medium">營業範圍</span></label>
-                <p className="text-base-content">{application.businessScope || '-'}</p>
-              </div>
-              <div className="form-control">
-                <label className="label"><span className="label-text font-medium">聯絡人</span></label>
-                <p className="text-base-content">{application.contactPerson || '-'}</p>
-              </div>
+              {!isIndividual && (
+                <>
+                  <div className="form-control">
+                    <label className="label"><span className="label-text font-medium">統一編號</span></label>
+                    <p className="text-base-content">{application.unifiedSocialCreditCode || '-'}</p>
+                  </div>
+                  <div className="form-control">
+                    <label className="label"><span className="label-text font-medium">公司地址</span></label>
+                    <p className="text-base-content">{application.companyAddress || '-'}</p>
+                  </div>
+                  <div className="form-control">
+                    <label className="label"><span className="label-text font-medium">營業範圍</span></label>
+                    <p className="text-base-content">{application.businessScope || '-'}</p>
+                  </div>
+                  <div className="form-control">
+                    <label className="label"><span className="label-text font-medium">聯絡人</span></label>
+                    <p className="text-base-content">{application.contactPerson || '-'}</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -284,6 +329,11 @@ export const ApplicationDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* 委員評分（只有新興會員申請需要） */}
+      {isEmerging && id && (
+        <ExpertScoringSection applicationId={id} editable={canEditScores} />
+      )}
 
       {/* 成員列表 */}
       {application.members && application.members.length > 0 && (

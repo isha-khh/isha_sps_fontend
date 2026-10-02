@@ -18,6 +18,14 @@ public interface IScoringService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 刪除一筆專家評分（輸入錯誤時更正用）
+    /// </summary>
+    Task<Result<bool>> DeleteExpertScoreAsync(
+        Guid applicationId,
+        long scoringId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 取得一張申請的委員評分彙總結果
     /// </summary>
     Task<Result<ScoringSummaryResponse>> GetScoringSummaryAsync(

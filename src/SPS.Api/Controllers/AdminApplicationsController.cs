@@ -382,6 +382,30 @@ public class AdminApplicationsController : ControllerBase
     }
 
     /// <summary>
+    /// 刪除一筆專家評分（輸入錯誤時更正用）
+    /// </summary>
+    /// <param name="id">申請ID</param>
+    /// <param name="scoringId">評分紀錄ID</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    [HttpDelete("{id}/scores/{scoringId:long}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> DeleteExpertScore(
+        Guid id,
+        long scoringId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _scoringService.DeleteExpertScoreAsync(id, scoringId, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { error = result.Error });
+        }
+
+        return Ok(new { success = true });
+    }
+
+    /// <summary>
     /// 取得一張申請的委員評分彙總結果
     /// </summary>
     /// <param name="id">申請ID</param>

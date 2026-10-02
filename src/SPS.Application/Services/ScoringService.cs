@@ -5,6 +5,7 @@ using SPS.Application.DTOs.Scoring;
 using SPS.Application.Interfaces;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Entities;
+using SPS.Domain.Enums;
 
 namespace SPS.Application.Services;
 
@@ -48,6 +49,12 @@ public class ScoringService : IScoringService
                 return Result<bool>.Failure("申請不存在");
             }
 
+            var guardError = ValidateScoringAllowed(application);
+            if (guardError != null)
+            {
+                return Result<bool>.Failure(guardError);
+            }
+
             var scoring = new Scoring
             {
                 ApplicationId = applicationId,
@@ -77,6 +84,65 @@ public class ScoringService : IScoringService
             _logger.LogError(ex, "Error adding expert score for application {ApplicationId}", applicationId);
             return Result<bool>.Failure($"新增評分失敗: {ex.Message}");
         }
+    }
+
+    public async Task<Result<bool>> DeleteExpertScoreAsync(
+        Guid applicationId,
+        long scoringId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var application = await _unitOfWork.Applications.GetByIdAsync(applicationId, cancellationToken);
+            if (application == null)
+            {
+                return Result<bool>.Failure("申請不存在");
+            }
+
+            var guardError = ValidateScoringAllowed(application);
+            if (guardError != null)
+            {
+                return Result<bool>.Failure(guardError);
+            }
+
+            var db = _unitOfWork.GetDbContext();
+            var scoring = await db.Set<Scoring>()
+                .FirstOrDefaultAsync(s => s.Id == scoringId && s.ApplicationId == applicationId, cancellationToken);
+            if (scoring == null)
+            {
+                return Result<bool>.Failure("找不到這筆評分紀錄");
+            }
+
+            db.Set<Scoring>().Remove(scoring);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Deleted expert score {ScoringId} of application {ApplicationId}", scoringId, applicationId);
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting expert score {ScoringId}", scoringId);
+            return Result<bool>.Failure($"刪除評分失敗: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 委員評分只適用新興會員（SupplierTier == Emerging）的申請，而且只能在
+    /// 核准/退回之前新增或刪除——決議後評分紀錄是審查依據，不能再動。
+    /// </summary>
+    private static string? ValidateScoringAllowed(MemberApplication application)
+    {
+        if (application.SupplierTier != CompanyLevel.Emerging)
+        {
+            return "只有新興會員的申請需要委員評分";
+        }
+
+        if (application.Status != ApplicationStatus.PendingReview && application.Status != ApplicationStatus.UnderReview)
+        {
+            return "申請已有審核結果或尚未送出，無法再異動評分";
+        }
+
+        return null;
     }
 
     public async Task<Result<ScoringSummaryResponse>> GetScoringSummaryAsync(

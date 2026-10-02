@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { companiesApi } from '@/lib/api/companies';
 import { mailCampaignsApi } from '@/lib/api/mailCampaigns';
 import type { Company } from '@/types/company';
-import { Status, CompanyType, CompanyLevel } from '@/types/company';
+import { Status, CompanyType, COMPANY_LEVEL_LABELS } from '@/types/company';
 import type { CampaignRecipientFilter } from '@/types/mailCampaign';
 
 const COMPANY_TYPE_LABEL: Record<number, string> = {
@@ -10,12 +10,7 @@ const COMPANY_TYPE_LABEL: Record<number, string> = {
   [CompanyType.Buyer]: '需求方',
   [CompanyType.Both]: '雙向',
 };
-const COMPANY_LEVEL_LABEL: Record<number, string> = {
-  [CompanyLevel.Regular]: '一般',
-  [CompanyLevel.Silver]: '銀',
-  [CompanyLevel.Gold]: '金',
-  [CompanyLevel.Diamond]: '鑽石',
-};
+const COMPANY_LEVEL_LABEL: Record<number, string> = COMPANY_LEVEL_LABELS;
 
 type Mode = 'companies' | 'broadcast';
 

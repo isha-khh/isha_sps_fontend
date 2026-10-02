@@ -1,5 +1,5 @@
 import type { MemberPosition } from "@/types/api.ts";
-import type {AddressDto, PictureResponse, Status} from "@/types/company.ts";
+import type {AddressDto, CompanyLevel, PictureResponse, Status} from "@/types/company.ts";
 
 //================== UpdateMemberProfileRequest.cs ==================//
 
@@ -313,7 +313,7 @@ export interface CompanyResponse {
     type: CompanyType;
 
     /** * 公司等級
-     * @see CompanyLevel (0:Basic, 1:Standard, 2:Premium, 3:VIP)
+     * @see CompanyLevel (0:Standard 一般, 1:Excellent 卓越, 2:Emerging 新興)
      */
     level: CompanyLevel;
 
@@ -517,33 +517,6 @@ export const CompanyType = {
 export type CompanyType = typeof CompanyType[keyof typeof CompanyType];
 
 
-/**
- * 公司等級定義 (對應後端 CompanyLevel Enum)
- * 數值類型為 short (0-3)，通常用於區分會員訂閱級別或服務層級
- */
-export const CompanyLevel = {
-    /** * 基本等級 (Basic)
-     * @description 入門方案，通常對應免費或試用版功能
-     */
-    Basic: 0,
-
-    /** * 標準等級 (Standard)
-     * @description 標準方案，包含核心功能
-     */
-    Standard: 1,
-
-    /** * 進階等級 (Premium)
-     * @description 進階方案，包含進階功能或更高配額
-     */
-    Premium: 2,
-
-    /** * 尊榮等級 (VIP)
-     * @description 最高等級，包含完整權限、專屬客服或客製化服務
-     */
-    VIP: 3
-} as const;
-
-/** * 公司等級類型聯集
- * @typedef {0 | 1 | 2 | 3} CompanyLevel
- */
-export type CompanyLevel = typeof CompanyLevel[keyof typeof CompanyLevel];
+// CompanyLevel 的定義統一放在 '@/types/company'（原本這裡有一份 Basic/Standard/Premium/VIP
+// 的重複定義，跟後端改名後的值對不上，2026-10-02 移除）。
+export { CompanyLevel } from "@/types/company.ts";

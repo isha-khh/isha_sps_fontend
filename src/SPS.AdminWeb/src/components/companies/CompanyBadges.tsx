@@ -1,4 +1,4 @@
-import type { CompanyType, CompanyLevel, Status } from '@/types/company';
+import { COMPANY_LEVEL_LABELS, type CompanyType, type CompanyLevel, type Status } from '@/types/company';
 
 interface CompanyTypeBadgeProps {
   type: CompanyType;
@@ -20,20 +20,16 @@ interface CompanyLevelBadgeProps {
 }
 
 export const CompanyLevelBadge = ({ level }: CompanyLevelBadgeProps) => {
-  const levelConfig: Record<CompanyLevel, { label: string; className: string; icon: string }> = {
-    0: { label: '普通', className: 'badge-ghost', icon: '' },
-    1: { label: '銀牌', className: 'badge-neutral', icon: '🥈' },
-    2: { label: '金牌', className: 'badge-warning', icon: '🥇' },
-    3: { label: '鑽石', className: 'badge-primary', icon: '💎' },
+  // 卓越/新興只是審查路徑紀錄（見 types/company.ts 的 CompanyLevel 說明），
+  // 不是等級高低，所以兩個用中性的同色徽章、不放獎牌類 icon，避免暗示誰比較高級。
+  const levelConfig: Record<CompanyLevel, { label: string; className: string }> = {
+    0: { label: COMPANY_LEVEL_LABELS[0], className: 'badge-ghost' },
+    1: { label: COMPANY_LEVEL_LABELS[1], className: 'badge-info' },
+    2: { label: COMPANY_LEVEL_LABELS[2], className: 'badge-info' },
   };
 
-  const config = levelConfig[level];
-  return (
-    <span className={`badge ${config.className}`}>
-      {config.icon && <span className="mr-1">{config.icon}</span>}
-      {config.label}
-    </span>
-  );
+  const config = levelConfig[level] ?? { label: '未設定', className: 'badge-ghost' };
+  return <span className={`badge ${config.className}`}>{config.label}</span>;
 };
 
 interface CompanyStatusBadgeProps {

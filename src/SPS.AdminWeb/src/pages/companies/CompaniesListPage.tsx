@@ -305,10 +305,9 @@ export const CompaniesListPage = () => {
                   }
                 >
                   <option value="">全部級別</option>
-                  <option value="0">普通</option>
-                  <option value="1">銀牌</option>
-                  <option value="2">金牌</option>
-                  <option value="3">鑽石</option>
+                  <option value="0">一般</option>
+                  <option value="1">卓越</option>
+                  <option value="2">新興</option>
                 </select>
 
                 <select

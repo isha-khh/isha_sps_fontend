@@ -82,12 +82,24 @@ export const CompanyType = {
 
 export type CompanyType = typeof CompanyType[keyof typeof CompanyType];
 
+/**
+ * 對應後端 `SPS.Domain.Enums.CompanyLevel`（2026-10-01 由
+ * Basic/Standard/Premium/VIP 改名）。這是**審查路徑紀錄**，不是等級
+ * 高低：Excellent（卓越）＝申請時已具備政府資格驗證、只需文件審查；
+ * Emerging（新興）＝需經專家委員評分審查。兩者功能完全相同，UI 顯示
+ * 不可暗示誰比較高級（不要用金/銀/鑽石這類字眼）。
+ */
 export const CompanyLevel = {
-  Regular: 0,
-  Silver: 1,
-  Gold: 2,
-  Diamond: 3,
+  Standard: 0,
+  Excellent: 1,
+  Emerging: 2,
 } as const;
+
+export const COMPANY_LEVEL_LABELS: Record<CompanyLevel, string> = {
+  [CompanyLevel.Standard]: '一般',
+  [CompanyLevel.Excellent]: '卓越',
+  [CompanyLevel.Emerging]: '新興',
+};
 
 export type CompanyLevel = typeof CompanyLevel[keyof typeof CompanyLevel];
 

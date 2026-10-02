@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Application } from '@/types/api';
+import { scoringApi } from '@/lib/api/scoring';
+import type { ScoringSummary } from '@/types/scoring';
 
 interface ReviewModalProps {
   application: Application | null;
@@ -12,6 +14,36 @@ interface ReviewModalProps {
 export const ReviewModal = ({ application, isOpen, onClose, onSubmit }: ReviewModalProps) => {
   const [comment, setComment] = useState(''); // 共用同一個輸入狀態
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [scoring, setScoring] = useState<ScoringSummary | null>(null);
+
+  const isEmerging = application?.supplierTier === 2;
+  const applicationId = application?.id;
+
+  // 新興會員要看委員評分結果；只是提醒，不擋核准（是否核准由審核員人工決定）
+  useEffect(() => {
+    setScoring(null);
+    if (!isOpen || !isEmerging || !applicationId) return;
+    let cancelled = false;
+    scoringApi
+      .getSummary(applicationId)
+      .then((s) => {
+        if (!cancelled) setScoring(s);
+      })
+      .catch(() => {
+        // 評分摘要載入失敗不影響審核操作，維持不顯示警示
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, isEmerging, applicationId]);
+
+  const scoringWarning = !scoring
+    ? null
+    : scoring.totalCount === 0
+      ? '尚未輸入任何委員評分'
+      : !scoring.isPassed
+        ? `委員評分未達合格門檻（${scoring.qualifiedCount}/${scoring.totalCount} 位合格，需半數（含）以上）`
+        : null;
 
   const handleSubmit = async (approved: boolean) => {
     if (!application) return;
@@ -77,6 +109,15 @@ export const ReviewModal = ({ application, isOpen, onClose, onSubmit }: ReviewMo
                 <p className="text-sm font-medium">{application.phone}</p>
               </div>
             </div>
+
+            {scoringWarning && (
+              <div className="alert alert-warning">
+                <span className="iconify lucide--triangle-alert size-5" />
+                <span>
+                  新興會員申請：{scoringWarning}。可至申請詳情頁輸入或確認評分；此提醒不會阻擋審核，是否通過由您決定。
+                </span>
+              </div>
+            )}
 
             <div className="divider" />
 

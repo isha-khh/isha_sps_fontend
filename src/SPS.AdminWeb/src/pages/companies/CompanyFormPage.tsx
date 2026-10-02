@@ -29,7 +29,7 @@ export const CompanyFormPage = () => {
     phone: '',
     fax: '',
     type: CompanyType.Supplier,
-    level: CompanyLevel.Regular,
+    level: CompanyLevel.Standard,
     revenue: 0,
     employees: 0,
     subject: '',
@@ -621,10 +621,9 @@ export const CompanyFormPage = () => {
                       value={formData.level}
                       onChange={(e) => setFormData({ ...formData, level: Number(e.target.value) as CompanyLevel })}
                     >
-                      <option value={CompanyLevel.Regular}>普通</option>
-                      <option value={CompanyLevel.Silver}>銀牌</option>
-                      <option value={CompanyLevel.Gold}>金牌</option>
-                      <option value={CompanyLevel.Diamond}>鑽石</option>
+                      <option value={CompanyLevel.Standard}>一般</option>
+                      <option value={CompanyLevel.Excellent}>卓越</option>
+                      <option value={CompanyLevel.Emerging}>新興</option>
                     </select>
                   </div>
 
