@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { authApi } from "@/lib/api/auth";
 import MemberCenterNav, { MEMBER_CENTER_NAV_GROUPS, type MemberCenterSection } from "@/components/member/MemberCenterNav";
 import ProfilePanel from "@/components/member/panels/ProfilePanel";
+import UpgradePanel from "@/components/member/panels/UpgradePanel";
 
 /**
  * 積木元件：會員中心（`/member`）主要內容——這是全新頁面，舊站
@@ -87,6 +88,8 @@ export default function MemberCenterContent() {
           <h3 className="mb-4 me_sho">{activeLabel}</h3>
           {active === "profile" ? (
             <ProfilePanel />
+          ) : active === "upgrade" ? (
+            <UpgradePanel />
           ) : (
             <p className="text-muted">
               <i className="bi bi-info-circle-fill me-1" aria-hidden="true"></i>

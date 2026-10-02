@@ -67,9 +67,32 @@ public class ApplicationService : IApplicationService
                 return Result<ApplicationResponse>.Failure($"Email 重複: {string.Join(", ", duplicates)}");
             }
 
-            // 4. 驗證 Email 未被註冊（與現有會員和其他申請成員）
+            // 4. 升級申請（ExistingMemberId 有值）要先確認這個既有會員真的
+            // 存在——email 唯一性檢查下面會用到，順便擋掉有人亂帶一個不是
+            // 自己的 ExistingMemberId 的情況
+            Member? existingMemberForUpgrade = null;
+            if (request.ExistingMemberId.HasValue)
+            {
+                existingMemberForUpgrade = await _unitOfWork.Members
+                    .GetByIdAsync(request.ExistingMemberId.Value, cancellationToken);
+                if (existingMemberForUpgrade == null)
+                {
+                    return Result<ApplicationResponse>.Failure("找不到既有會員資料，無法升級");
+                }
+            }
+
+            // 5. 驗證 Email 未被註冊（與現有會員和其他申請成員）——升級申請
+            // 例外：既有會員本來就是沿用自己的 email，不能因為「這個 email
+            // 已經是會員」就擋下來（那是升級的前提，不是衝突）
             foreach (var member in request.Members)
             {
+                var isUpgradingOwnEmail = existingMemberForUpgrade != null &&
+                    string.Equals(existingMemberForUpgrade.Email, member.Email, StringComparison.OrdinalIgnoreCase);
+                if (isUpgradingOwnEmail)
+                {
+                    continue;
+                }
+
                 var emailExists = await _unitOfWork.ApplicationMembers
                     .ExistsByEmailAsync(member.Email, cancellationToken);
                 if (emailExists)

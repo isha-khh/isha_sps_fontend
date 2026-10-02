@@ -259,6 +259,9 @@ public class AuthController : ControllerBase
         var name = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
         var companyId = User.FindFirst("CompanyId")?.Value;
         var companyName = User.FindFirst("CompanyName")?.Value;
+        var phone = User.FindFirst("Phone")?.Value;
+        var extension = User.FindFirst("Extension")?.Value;
+        var mobilePhone = User.FindFirst("MobilePhone")?.Value;
 
         if (string.IsNullOrEmpty(memberId))
         {
@@ -270,6 +273,9 @@ public class AuthController : ControllerBase
             Id = Guid.Parse(memberId),
             Email = email ?? string.Empty,
             Name = name ?? string.Empty,
+            Phone = phone ?? string.Empty,
+            Extension = extension,
+            MobilePhone = mobilePhone,
             CompanyId = !string.IsNullOrEmpty(companyId) ? Guid.Parse(companyId) : null,
             CompanyName = companyName
         };

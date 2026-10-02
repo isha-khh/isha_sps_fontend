@@ -54,6 +54,25 @@ public class TokenService : ITokenService
             claims.Add(new Claim("CompanyName", member.Company.Name));
         }
 
+        // 電話/分機/手機（選填）——跟 CompanyId/CompanyName 一樣放進
+        // claims，GetProfile() 才讀得到；之前這三個欄位只有登入當下
+        // 回應（這裡下面 TokenResponse.Member）有帶，GetProfile() 完全
+        // 沒加進 memberInfo，導致畫面重新整理或其他頁面呼叫
+        // GetProfile() 拿到的這三個欄位永遠是空字串/null（2026-10-02
+        // 接會員中心「權益升級」面板要帶入既有電話時發現）。
+        if (!string.IsNullOrEmpty(member.Phone))
+        {
+            claims.Add(new Claim("Phone", member.Phone));
+        }
+        if (!string.IsNullOrEmpty(member.Extension))
+        {
+            claims.Add(new Claim("Extension", member.Extension));
+        }
+        if (!string.IsNullOrEmpty(member.MobilePhone))
+        {
+            claims.Add(new Claim("MobilePhone", member.MobilePhone));
+        }
+
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_configuration["JWT_Setting:Key"]
                 ?? throw new InvalidOperationException("JWT Key not configured")));
