@@ -12,7 +12,7 @@ namespace SPS.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/admin/members")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Produces("application/json")]
 [SwaggerTag("會員管理控制器")]
 public class MemberController : ControllerBase

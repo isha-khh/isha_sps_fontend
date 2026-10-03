@@ -12,7 +12,7 @@ namespace SPS.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/admin/popup-announcements")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Produces("application/json")]
 [SwaggerTag("彈窗公告管理控制器（後台）")]
 public class AdminPopupAnnouncementController : ControllerBase

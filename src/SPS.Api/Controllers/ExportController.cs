@@ -41,7 +41,7 @@ public class ExportMembersRequest
 /// </summary>
 [ApiController]
 [Route("api/export")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 [SwaggerTag("匯出功能")]
 public class ExportController : ControllerBase
 {

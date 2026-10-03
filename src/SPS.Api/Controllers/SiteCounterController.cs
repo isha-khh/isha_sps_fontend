@@ -58,7 +58,7 @@ public class SiteCounterController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/admin/site-counter")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Produces("application/json")]
 [SwaggerTag("網站計數器管理")]
 public class AdminSiteCounterController : ControllerBase

@@ -10,7 +10,7 @@ namespace SPS.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 [SwaggerTag("聊天管理 API")]
 public class ChatController : ControllerBase
 {

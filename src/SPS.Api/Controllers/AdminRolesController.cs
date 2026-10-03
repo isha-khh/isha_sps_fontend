@@ -14,7 +14,7 @@ namespace SPS.Api.Controllers;
 [Route("api/admin/roles")]
 [Produces("application/json")]
 [SwaggerTag("後台角色管理控制器")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class AdminRolesController : ControllerBase
 {
     private readonly IAdminRoleService _adminRoleService;

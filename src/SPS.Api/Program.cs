@@ -72,8 +72,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             {
                 string? token = null;
 
-                // 根據路徑決定 Token 優先級
-                if (context.Request.Path.StartsWithSegments("/api/admin"))
+                // 根據路徑決定 Token 優先級。
+                // 後台前端（AdminWeb）會對 /api/News、/api/Banner 這類「前後台共用路徑」寫入資料，
+                // 同一個瀏覽器若同時登入前台會員，accessToken（會員）會排在 adminAccessToken 前面，
+                // 後台操作就會被當成會員而 403；所以 AdminWeb 的請求帶 X-Admin-Client 標頭，
+                // 讓共用路徑也優先取 adminAccessToken。這只是「先取哪個 cookie」的提示，
+                // token 本身仍會完整驗簽，角色/權限檢查也照常，帶這個標頭不會得到任何額外權限
+                var preferAdminToken = context.Request.Path.StartsWithSegments("/api/admin")
+                    || context.Request.Headers["X-Admin-Client"] == "1";
+                if (preferAdminToken)
                 {
                     // Admin 路由優先嘗試 adminAccessToken
                     if (!context.Request.Cookies.TryGetValue("adminAccessToken", out token))

@@ -32,7 +32,7 @@ public class NotificationController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>分頁結果</returns>
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "分頁查詢通知", Description = "取得通知列表，支援分頁和篩選")]
     [ProducesResponseType(typeof(PagedResult<NotificationResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -52,7 +52,7 @@ public class NotificationController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>通知詳情</returns>
     [HttpGet("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "取得單一通知", Description = "根據 ID 取得通知詳細資訊")]
     [ProducesResponseType(typeof(NotificationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -72,7 +72,7 @@ public class NotificationController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>新增的通知</returns>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "新增通知", Description = "建立新的通知")]
     [ProducesResponseType(typeof(NotificationResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -92,7 +92,7 @@ public class NotificationController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>操作結果</returns>
     [HttpPut("{id}/read")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "標記通知為已讀", Description = "將指定通知標記為已讀狀態")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -112,7 +112,7 @@ public class NotificationController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>無內容</returns>
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "刪除通知", Description = "刪除指定的通知")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -132,7 +132,7 @@ public class NotificationController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>通知列表</returns>
     [HttpGet("recipient/{recipient}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "取得指定收件人的通知", Description = "取得指定收件人的所有通知")]
     [ProducesResponseType(typeof(List<NotificationResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -152,7 +152,7 @@ public class NotificationController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>未讀數量</returns>
     [HttpGet("recipient/{recipient}/unread-count")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "取得未讀通知數量", Description = "取得指定收件人的未讀通知數量")]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

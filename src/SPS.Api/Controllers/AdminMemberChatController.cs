@@ -9,7 +9,7 @@ namespace SPS.Api.Controllers;
 
 [ApiController]
 [Route("api/admin/member-chat")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Produces("application/json")]
 [SwaggerTag("管理員聊天控制器")]
 public class AdminMemberChatController : ControllerBase

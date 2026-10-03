@@ -18,7 +18,7 @@ namespace SPS.Api.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [SwaggerTag("系統日誌查詢控制器")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class LogController : ControllerBase
 {
     private readonly ApplicationDbContext _context;

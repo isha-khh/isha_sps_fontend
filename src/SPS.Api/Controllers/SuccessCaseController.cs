@@ -67,7 +67,7 @@ public class SuccessCaseController : ControllerBase
     /// <param name="request">創建成功案例的請求數據</param>
     /// <returns>新創建的成功案例詳情</returns>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [SwaggerOperation(Summary = "創建成功案例", Description = "創建一個新的成功案例")]
@@ -89,7 +89,7 @@ public class SuccessCaseController : ControllerBase
     /// <param name="request">更新成功案例的請求數據</param>
     /// <returns>更新後的成功案例詳情</returns>
     [HttpPut("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [SwaggerOperation(Summary = "更新成功案例", Description = "更新指定 ID 的成功案例資訊")]
@@ -108,7 +108,7 @@ public class SuccessCaseController : ControllerBase
     /// <param name="id">要刪除的成功案例 ID</param>
     /// <returns>無內容</returns>
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [SwaggerOperation(Summary = "刪除成功案例", Description = "刪除指定 ID 的成功案例")]
@@ -125,7 +125,7 @@ public class SuccessCaseController : ControllerBase
     /// <param name="isPublished">是否發布</param>
     /// <returns>更新後的成功案例</returns>
     [HttpPatch("{id}/publish")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [SwaggerOperation(Summary = "更新發布狀態", Description = "更新指定成功案例的發布狀態")]

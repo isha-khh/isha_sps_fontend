@@ -78,7 +78,7 @@ public class AttributeController : ControllerBase
     /// <param name="request">創建屬性請求</param>
     /// <returns>創建的屬性</returns>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -100,7 +100,7 @@ public class AttributeController : ControllerBase
     /// <param name="request">更新屬性請求</param>
     /// <returns>更新後的屬性</returns>
     [HttpPut("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -120,7 +120,7 @@ public class AttributeController : ControllerBase
     /// <param name="id">屬性 ID</param>
     /// <returns>無內容</returns>
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

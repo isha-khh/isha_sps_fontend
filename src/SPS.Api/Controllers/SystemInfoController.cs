@@ -17,7 +17,7 @@ namespace SPS.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class SystemInfoController : ControllerBase
 {
     private readonly ApplicationDbContext _dbContext;

@@ -23,6 +23,8 @@ export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    // 讓後端在前後台共用路徑（/api/News 等）也優先採用後台 token，見 Program.cs OnMessageReceived
+    'X-Admin-Client': '1',
   },
 
   withCredentials: true,

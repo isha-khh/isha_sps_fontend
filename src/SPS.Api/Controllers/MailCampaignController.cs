@@ -15,7 +15,7 @@ namespace SPS.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 [SwaggerTag("郵件中心 - 群發郵件")]
 public class MailCampaignController : ControllerBase
 {

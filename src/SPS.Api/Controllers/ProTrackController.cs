@@ -9,7 +9,7 @@ namespace SPS.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Produces("application/json")]
 public class ProTrackController : ControllerBase
 {

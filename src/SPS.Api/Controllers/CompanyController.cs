@@ -111,7 +111,7 @@ public class CompanyController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>創建的企業</returns>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CompanyResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -142,7 +142,7 @@ public class CompanyController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>更新後的企業</returns>
     [HttpPut("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CompanyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -199,7 +199,7 @@ public class CompanyController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>更新後的企業標籤綁定</returns>
     [HttpPut("{id}/tags")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CompanyTagsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -231,7 +231,7 @@ public class CompanyController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>刪除結果</returns>
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -258,7 +258,7 @@ public class CompanyController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>批次操作結果</returns>
     [HttpPut("batch/status")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(Application.DTOs.Member.BatchOperationResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

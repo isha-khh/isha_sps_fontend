@@ -142,25 +142,33 @@ public class ApplicationsController : ControllerBase
     /// <summary>
     /// 獲取我的申請列表
     /// </summary>
-    /// <param name="email">會員電子郵件</param>
+    /// <param name="email">（選填，僅相容舊呼叫；一律以登入 token 的信箱查詢，與 token 不符回 403）</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>申請列表</returns>
     /// <response code="200">成功返回申請列表</response>
     /// <response code="400">郵箱參數錯誤</response>
     [HttpGet("my")]
-    [AllowAnonymous]
+    [Authorize]
     [ProducesResponseType(typeof(IEnumerable<ApplicationResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetMyApplications(
-        [FromQuery] string email,
+        [FromQuery] string? email,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(email))
+        // 原本匿名、拿 query 的 email 就回該信箱所有申請（含聯絡人/統編等個資），任何人猜信箱就能撈。
+        // 改成必須登入，且一律用 token 裡的信箱查；query 帶別人的信箱直接 403
+        var tokenEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(tokenEmail))
         {
-            return BadRequest(new { error = "郵箱不能為空" });
+            return Forbid();
         }
 
-        var result = await _applicationService.GetMyApplicationsAsync(email, cancellationToken);
+        if (!string.IsNullOrEmpty(email) && !string.Equals(email, tokenEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            return Forbid();
+        }
+
+        var result = await _applicationService.GetMyApplicationsAsync(tokenEmail, cancellationToken);
 
         if (!result.IsSuccess)
         {

@@ -40,7 +40,7 @@ public class SiteStatisticsController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/admin/site-statistics")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Produces("application/json")]
 [SwaggerTag("網站統計數據管理")]
 public class AdminSiteStatisticsController : ControllerBase
