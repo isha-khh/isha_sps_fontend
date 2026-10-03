@@ -83,7 +83,12 @@ UserPermission 旗標原本只有 AdminWeb 選單在用，後端大多只看「�
 | `SystemInfo`（`health` 匿名） | ManageSettings |
 | `admin/users` | ManageUsers（取代原本「SuperAdmin 或 Reviewer 角色」＋ 內部檢查，只有 ManageUsers 的帳號之前進不來） |
 | `admin/roles` 列表 | ManageRoles 或 ManageUsers（指派角色時要列出角色）；其餘 ManageRoles |
-| `settings/*`、`analytics`、`admin/company` | 維持原本的虛擬角色（SettingsAdmin／AnalyticsViewer／SuperAdmin，等同 ManageSettings／ViewAnalytics／全權限） |
+| `settings/*`：`email-templates*`、`email-layout` | ManageEmailTemplates **或** ManageSettings（只有信件範本權限的角色現在進得去範本頁） |
+| `settings/*`：`bounce-mail/process` | ManageSettings 或 ManageMailLogs |
+| `settings/*`：`protrack*` | ManageSettings 或 ManageDemands（需求頁的 ProTrack 訂閱設定要用） |
+| `settings/*` 其餘（SMTP、GA、檔案儲存、安全、密碼原則、驗證碼、FIDO2、HTTP 安全／nginx、退信信箱、內容、會員須知、embedding） | ManageSettings；`content/public`、`membership-guide/public` 維持匿名 |
+| `analytics` | ViewAnalytics |
+| `admin/company`（刪除公司全部資料） | 維持 SuperAdmin 角色（破壞性操作，要同時擁有用戶、角色、設定三項核心權限） |
 | `Notification` | 後台帳號即可（每個管理員的鈴鐺通知，不分權限） |
 
 ## 預設角色（migration `UpgradeAdminPermissionsToRbac` 種入，同名已存在就不動）
@@ -109,10 +114,9 @@ UserPermission 旗標原本只有 AdminWeb 選單在用，後端大多只看「�
 
 ## 驗證
 
-用角色對應的 token 打 29 個代表端點 × 9 種身分（無權限、內容編輯、客服、舊客服人員、審核員、行銷人員、超級管理員、僅 ManageRoles、僅 ManageUsers）共 261 筆，另外每個端點再用帶 SupplierManager 位元的會員 token 打一次（29 筆，全部 403），全部符合預期；授權上限測試：ManageRoles 建全權限角色 403、含未定義位元 400、建自己有的權限 201 後改成全權限 403；ManageUsers 指派超級管理員角色 403。
+用角色對應的 token 打 39 個代表端點 × 12 種身分（無權限、內容編輯、客服、舊客服人員、審核員、行銷人員、超級管理員、僅 ManageRoles／ManageUsers／ManageEmailTemplates／ViewAnalytics／ManageSettings），另外每個端點再用帶 SupplierManager 位元的會員 token 打一次（全部 403），全部符合預期；授權上限測試：ManageRoles 建全權限角色 403、含未定義位元 400、建自己有的權限 201 後改成全權限 403；ManageUsers 指派超級管理員角色 403。
 
 ## 仍待決定
 
-- `settings/*` 還是整支 `SettingsAdmin`：只有 ManageEmailTemplates 的角色進不了信件範本頁（選單上顯示得到，打 API 會 403）。要拆需要把 50 個 action 逐一標權限。
 - 角色權限被修改後，已登入的後台使用者要重新登入才生效（token 內嵌權限）。若要即時生效，要改成每次請求查 DB 或縮短 access token 壽命。
 - 新增旗標時 bit 不可超過 52（JSON number 精度）。

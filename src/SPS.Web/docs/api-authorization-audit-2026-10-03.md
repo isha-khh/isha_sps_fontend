@@ -55,8 +55,8 @@ About、Album、Attribute、Company、Demand、Mou、Picture、Product、Regulat
 |---|---|---|
 | 申請審核 | `admin/applications` | `SuperAdmin,Reviewer` |
 | 用戶／角色 | `admin/users`、`admin/roles` | `admin/users` 類別 `SuperAdmin,Reviewer` ＋ in-action `ManageUsers`；`admin/roles` 類別 `Admin` ＋ in-action `ManageRoles` |
-| 系統設定 | `settings/*`（`content/public`、`membership-guide/public` 匿名） | `SuperAdmin,SettingsAdmin` |
-| 分析 | `analytics` | `SuperAdmin,AnalyticsViewer` |
+| 系統設定 | `settings/*`（`content/public`、`membership-guide/public` 匿名） | 逐 action 的 RBAC 權限，見 rbac 文件 |
+| 分析 | `analytics` | ViewAnalytics |
 | 公司資料刪除 | `admin/company` | `SuperAdmin` |
 | 內容寫入 | News、Banner、Tag、Category、About、Album、Attribute、Picture、Video、Question、Regulations、SuccessCase、Mou | `Admin` |
 | 會員／企業／產品／需求維運 | `admin/members`、Company、Product、Demand、Export | `Admin` |

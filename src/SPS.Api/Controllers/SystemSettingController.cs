@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.SystemSettings;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -11,7 +13,7 @@ namespace SPS.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/settings")]
-[Authorize(Roles = "SuperAdmin,SettingsAdmin")]
+[Authorize(Roles = "Admin")]
 [Produces("application/json")]
 [SwaggerTag("系統設定控制器")]
 public class SystemSettingController : ControllerBase
@@ -46,6 +48,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取 Email 設定
     /// </summary>
     [HttpGet("email")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取 Email 設定")]
     public async Task<IActionResult> GetEmailSettings()
     {
@@ -57,6 +60,7 @@ public class SystemSettingController : ControllerBase
     /// 更新 Email 設定
     /// </summary>
     [HttpPut("email")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新 Email 設定")]
     public async Task<IActionResult> UpdateEmailSettings([FromBody] EmailSettingsDto settings)
     {
@@ -68,6 +72,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取 Google Analytics 設定
     /// </summary>
     [HttpGet("google-analytics")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取 Google Analytics 設定")]
     public async Task<IActionResult> GetGoogleAnalyticsSettings()
     {
@@ -79,6 +84,7 @@ public class SystemSettingController : ControllerBase
     /// 更新 Google Analytics 設定
     /// </summary>
     [HttpPut("google-analytics")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新 Google Analytics 設定")]
     public async Task<IActionResult> UpdateGoogleAnalyticsSettings([FromBody] GoogleAnalyticsSettingsDto settings)
     {
@@ -90,6 +96,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取檔案存儲設定
     /// </summary>
     [HttpGet("file-storage")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取檔案存儲設定")]
     public async Task<IActionResult> GetFileStorageSettings()
     {
@@ -101,6 +108,7 @@ public class SystemSettingController : ControllerBase
     /// 更新檔案存儲設定
     /// </summary>
     [HttpPut("file-storage")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新檔案存儲設定")]
     public async Task<IActionResult> UpdateFileStorageSettings([FromBody] FileStorageSettingsDto settings)
     {
@@ -114,6 +122,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取安全性設定
     /// </summary>
     [HttpGet("security")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取安全性設定")]
     public async Task<IActionResult> GetSecuritySettings()
     {
@@ -125,6 +134,7 @@ public class SystemSettingController : ControllerBase
     /// 更新安全性設定
     /// </summary>
     [HttpPut("security")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新安全性設定")]
     public async Task<IActionResult> UpdateSecuritySettings([FromBody] SecuritySettingsDto settings)
     {
@@ -138,6 +148,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取內容設定（管理員）
     /// </summary>
     [HttpGet("content")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取內容設定")]
     public async Task<IActionResult> GetContentSettings()
     {
@@ -149,6 +160,7 @@ public class SystemSettingController : ControllerBase
     /// 更新內容設定
     /// </summary>
     [HttpPut("content")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新內容設定")]
     public async Task<IActionResult> UpdateContentSettings([FromBody] ContentSettingsDto settings)
     {
@@ -174,6 +186,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取會員申請須知設定（管理員）
     /// </summary>
     [HttpGet("membership-guide")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取會員申請須知設定")]
     public async Task<IActionResult> GetMembershipGuideSettings()
     {
@@ -185,6 +198,7 @@ public class SystemSettingController : ControllerBase
     /// 更新會員申請須知設定
     /// </summary>
     [HttpPut("membership-guide")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新會員申請須知設定")]
     public async Task<IActionResult> UpdateMembershipGuideSettings([FromBody] MembershipGuideSettingsDto settings)
     {
@@ -210,6 +224,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取 CAPTCHA 設定
     /// </summary>
     [HttpGet("captcha")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取 CAPTCHA 設定")]
     public async Task<IActionResult> GetCaptchaSettings()
     {
@@ -221,6 +236,7 @@ public class SystemSettingController : ControllerBase
     /// 更新 CAPTCHA 設定
     /// </summary>
     [HttpPut("captcha")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新 CAPTCHA 設定")]
     public async Task<IActionResult> UpdateCaptchaSettings([FromBody] CaptchaSettingsDto settings)
     {
@@ -234,6 +250,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取密碼策略設定
     /// </summary>
     [HttpGet("password-policy")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取密碼策略設定")]
     public async Task<IActionResult> GetPasswordPolicySettings()
     {
@@ -245,6 +262,7 @@ public class SystemSettingController : ControllerBase
     /// 更新密碼策略設定
     /// </summary>
     [HttpPut("password-policy")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新密碼策略設定")]
     public async Task<IActionResult> UpdatePasswordPolicySettings([FromBody] PasswordPolicyDto settings)
     {
@@ -258,6 +276,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取郵件版面配置
     /// </summary>
     [HttpGet("email-layout")]
+    [RequirePermission(UserPermission.ManageEmailTemplates, UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取郵件版面配置（Logo、顏色、頁尾等）")]
     public async Task<IActionResult> GetEmailLayoutSettings()
     {
@@ -269,6 +288,7 @@ public class SystemSettingController : ControllerBase
     /// 更新郵件版面配置
     /// </summary>
     [HttpPut("email-layout")]
+    [RequirePermission(UserPermission.ManageEmailTemplates, UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新郵件版面配置（Logo、顏色、頁尾等）")]
     public async Task<IActionResult> UpdateEmailLayoutSettings([FromBody] EmailLayoutSettingsDto settings)
     {
@@ -282,6 +302,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取所有信件範本
     /// </summary>
     [HttpGet("email-templates")]
+    [RequirePermission(UserPermission.ManageEmailTemplates, UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取所有信件範本")]
     public async Task<IActionResult> GetEmailTemplates()
     {
@@ -302,6 +323,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取單一信件範本
     /// </summary>
     [HttpGet("email-templates/{key}")]
+    [RequirePermission(UserPermission.ManageEmailTemplates, UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取單一信件範本")]
     public async Task<IActionResult> GetEmailTemplate(string key)
     {
@@ -327,6 +349,7 @@ public class SystemSettingController : ControllerBase
     /// 更新單一信件範本
     /// </summary>
     [HttpPut("email-templates/{key}")]
+    [RequirePermission(UserPermission.ManageEmailTemplates, UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新單一信件範本")]
     public async Task<IActionResult> UpdateEmailTemplate(string key, [FromBody] EmailTemplate template)
     {
@@ -360,6 +383,7 @@ public class SystemSettingController : ControllerBase
     /// 預覽信件範本
     /// </summary>
     [HttpPost("email-templates/{key}/preview")]
+    [RequirePermission(UserPermission.ManageEmailTemplates, UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "預覽信件範本")]
     public async Task<IActionResult> PreviewEmailTemplate(string key, [FromBody] EmailTemplatePreviewRequest request)
     {
@@ -402,6 +426,7 @@ public class SystemSettingController : ControllerBase
     /// 發送測試郵件
     /// </summary>
     [HttpPost("email-templates/{key}/test")]
+    [RequirePermission(UserPermission.ManageEmailTemplates, UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "發送測試郵件")]
     public async Task<IActionResult> TestEmailTemplate(string key, [FromBody] EmailTemplateTestRequest request)
     {
@@ -460,6 +485,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取 FIDO2 Passkey 設定
     /// </summary>
     [HttpGet("fido2")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取 FIDO2 Passkey 開關設定")]
     public async Task<IActionResult> GetFido2Settings()
     {
@@ -471,6 +497,7 @@ public class SystemSettingController : ControllerBase
     /// 更新 FIDO2 Passkey 設定
     /// </summary>
     [HttpPut("fido2")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新 FIDO2 Passkey 設定（含伺服器配置）")]
     public async Task<IActionResult> UpdateFido2Settings([FromBody] Fido2SettingsDto settings)
     {
@@ -490,6 +517,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取 HTTP 安全性設定
     /// </summary>
     [HttpGet("http-security")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取 HTTP 安全性設定 (Cookie, Headers, CSP, CORS)")]
     public async Task<IActionResult> GetHttpSecuritySettings()
     {
@@ -506,6 +534,7 @@ public class SystemSettingController : ControllerBase
     /// 更新 HTTP 安全性設定
     /// </summary>
     [HttpPut("http-security")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新 HTTP 安全性設定")]
     public async Task<IActionResult> UpdateHttpSecuritySettings([FromBody] HttpSecuritySettingsDto settings)
     {
@@ -539,6 +568,7 @@ public class SystemSettingController : ControllerBase
     /// 套用安全性模板
     /// </summary>
     [HttpPost("http-security/apply-template/{templateName}")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "套用安全性模板 (strict/standard/relaxed)")]
     public async Task<IActionResult> ApplySecurityTemplate(string templateName)
     {
@@ -578,6 +608,7 @@ public class SystemSettingController : ControllerBase
     /// 強制重新產生 Nginx 設定並觸發 Nginx 重新載入
     /// </summary>
     [HttpPost("http-security/reload-nginx")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "強制重新產生 Nginx 設定", Description = "從資料庫讀取目前設定，重新產生 Nginx config 檔案，並透過 Docker 命令觸發 Nginx reload。")]
     public async Task<IActionResult> ReloadNginxConfig()
     {
@@ -631,6 +662,7 @@ public class SystemSettingController : ControllerBase
     /// 匯出 Nginx 設定
     /// </summary>
     [HttpGet("http-security/export/nginx")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "匯出 Nginx Security Headers 設定")]
     public async Task<IActionResult> ExportNginxConfig()
     {
@@ -651,6 +683,7 @@ public class SystemSettingController : ControllerBase
     /// 下載 Nginx 設定檔
     /// </summary>
     [HttpGet("http-security/export/nginx/download")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "下載 Nginx Security Headers 設定檔")]
     public async Task<IActionResult> DownloadNginxConfig()
     {
@@ -909,6 +942,7 @@ public class SystemSettingController : ControllerBase
     /// 獲取退信處理設定
     /// </summary>
     [HttpGet("bounce-mail")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "獲取退信處理設定（IMAP 連線資訊）")]
     public async Task<IActionResult> GetBounceMailSettings()
     {
@@ -920,6 +954,7 @@ public class SystemSettingController : ControllerBase
     /// 更新退信處理設定
     /// </summary>
     [HttpPut("bounce-mail")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新退信處理設定（IMAP 連線資訊）")]
     public async Task<IActionResult> UpdateBounceMailSettings([FromBody] BounceMailSettingsDto settings)
     {
@@ -931,6 +966,7 @@ public class SystemSettingController : ControllerBase
     /// 手動觸發退信處理
     /// </summary>
     [HttpPost("bounce-mail/process")]
+    [RequirePermission(UserPermission.ManageSettings, UserPermission.ManageMailLogs)]
     [SwaggerOperation(Summary = "手動觸發退信處理", Description = "立即連線 IMAP 伺服器檢查並處理退信郵件")]
     public async Task<IActionResult> ProcessBounces(
         [FromServices] Infrastructure.Services.BounceProcessingService bounceService,
@@ -973,6 +1009,7 @@ public class SystemSettingController : ControllerBase
     /// 測試 IMAP 連線
     /// </summary>
     [HttpPost("bounce-mail/test-connection")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "測試 IMAP 連線", Description = "測試 IMAP 伺服器連線是否正常")]
     public async Task<IActionResult> TestImapConnection([FromBody] BounceMailSettingsDto settings)
     {
@@ -1010,6 +1047,7 @@ public class SystemSettingController : ControllerBase
     // ==================== ProTrack 整合設定 ====================
 
     [HttpGet("protrack")]
+    [RequirePermission(UserPermission.ManageSettings, UserPermission.ManageDemands)]
     [SwaggerOperation(Summary = "取得 ProTrack 整合設定")]
     public async Task<IActionResult> GetProTrackSettings(CancellationToken ct)
     {
@@ -1018,6 +1056,7 @@ public class SystemSettingController : ControllerBase
     }
 
     [HttpPut("protrack")]
+    [RequirePermission(UserPermission.ManageSettings, UserPermission.ManageDemands)]
     [SwaggerOperation(Summary = "更新 ProTrack 整合設定")]
     public async Task<IActionResult> UpdateProTrackSettings([FromBody] ProTrackSettingsDto settings, CancellationToken ct)
     {
@@ -1026,6 +1065,7 @@ public class SystemSettingController : ControllerBase
     }
 
     [HttpPost("protrack/test")]
+    [RequirePermission(UserPermission.ManageSettings, UserPermission.ManageDemands)]
     [SwaggerOperation(Summary = "測試 ProTrack 連線（不儲存設定）")]
     public async Task<IActionResult> TestProTrackConnection([FromBody] ProTrackSettingsDto settings, CancellationToken ct)
     {
@@ -1038,6 +1078,7 @@ public class SystemSettingController : ControllerBase
     // ==================== AI 語意搜尋設定 ====================
 
     [HttpGet("embedding")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "取得 AI 語意搜尋設定")]
     public async Task<IActionResult> GetEmbeddingSettings(CancellationToken ct)
     {
@@ -1046,6 +1087,7 @@ public class SystemSettingController : ControllerBase
     }
 
     [HttpPut("embedding")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "更新 AI 語意搜尋設定")]
     public async Task<IActionResult> UpdateEmbeddingSettings([FromBody] EmbeddingSettingsDto settings, CancellationToken ct)
     {
@@ -1054,6 +1096,7 @@ public class SystemSettingController : ControllerBase
     }
 
     [HttpPost("embedding/test")]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "測試 AI 語意搜尋連線（不儲存設定）")]
     public async Task<IActionResult> TestEmbeddingConnection([FromBody] EmbeddingSettingsDto settings, CancellationToken ct)
     {

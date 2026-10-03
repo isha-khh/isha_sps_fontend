@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -10,7 +12,8 @@ namespace SPS.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/analytics")]
-[Authorize(Roles = "SuperAdmin,AnalyticsViewer")]
+[Authorize(Roles = "Admin")]
+[RequirePermission(UserPermission.ViewAnalytics)]
 [Produces("application/json")]
 [SwaggerTag("網站數據分析控制器")]
 public class AnalyticsController : ControllerBase
