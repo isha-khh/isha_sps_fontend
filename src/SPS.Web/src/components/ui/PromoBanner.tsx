@@ -1,6 +1,7 @@
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
 import TrackedLink from "@/components/ui/TrackedLink";
+import BannerImpressions from "@/components/ui/BannerImpressions";
 import { withBasePath } from "@/lib/api-client";
 
 export interface PromoBannerSlide {
@@ -12,12 +13,6 @@ export interface PromoBannerSlide {
   /** 後台 Banner 的 id，有的話點擊會記錄次數（`TrackedLink`）；內建假資料沒有 */
   bannerId?: number;
 }
-
-const SLIDES: PromoBannerSlide[] = [
-  { href: "#", title: "石化產業智慧轉型——從數據到決策", image: withBasePath("/images/banner/b1.jpg") },
-  { href: "#", title: "AI 智慧安全帽偵測系統導入石化廠", image: withBasePath("/images/banner/b1.jpg") },
-  { href: "#", title: "ESG 永續發展實務：石化廠的碳盤查經驗分享", image: withBasePath("/images/banner/b1.jpg") },
-];
 
 /**
  * 積木元件：內頁頂端的輪播看板，對應舊站 `.banner_section` +
@@ -33,10 +28,11 @@ const SLIDES: PromoBannerSlide[] = [
  * banner，不會真的撞到，但比照 `Carousel` 元件本來的介面設計還是
  * 讓呼叫端自己指定。
  *
- * `slides` 沒給就用上面寫死的 `SLIDES`（`/talent`、`/support` 目前還是這份）；`/news` 改傳後台
- * 「橫幅管理」設定在「公告頂部輪播」版位的真資料，見 `NewsBanner.tsx`。
+ * 2026-10-03：`slides` 改成必填，拿掉原本內建、連結是 `#` 的 3 張假輪播——`/news`、`/talent`、`/support`
+ * 現在都傳後台「橫幅管理」設定在各自頂部輪播版位的真資料（見 `NewsBanner.tsx`）。
+ * 有 `bannerId` 的 slide 會記錄點擊與曝光；沒有 slide 時呼叫端不要渲染這顆元件。
  */
-export default function PromoBanner({ id, slides = SLIDES }: { id: string; slides?: PromoBannerSlide[] }) {
+export default function PromoBanner({ id, slides }: { id: string; slides: PromoBannerSlide[] }) {
   return (
     <div className="banner_section">
       <Carousel
@@ -98,6 +94,7 @@ export default function PromoBanner({ id, slides = SLIDES }: { id: string; slide
       />
 
       <CarouselControls carouselId={id} prevLabel="上一則" nextLabel="下一則" />
+      <BannerImpressions ids={slides.flatMap((slide) => (slide.bannerId !== undefined ? [slide.bannerId] : []))} />
 
       <style>{`
         /* 說明見原本 NewsBanner.tsx 同一段註解：hover 位移、z-index、.slider margin 這三條都是共用的既有 bug fix，跟哪個頁面用這顆元件無關 */

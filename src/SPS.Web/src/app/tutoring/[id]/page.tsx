@@ -7,16 +7,11 @@ import MoreLink from "@/components/ui/MoreLink";
 import ShareBox from "@/components/ui/ShareBox";
 import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
 import PopularPosts from "@/components/layout/PopularPosts";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import { TUTORING_ITEMS, getTutoringItem } from "@/lib/tutoring-data";
-import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 // 說明見 tutoring/page.tsx 同一份假資料的註解
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-
 export function generateStaticParams() {
   return TUTORING_ITEMS.map((item) => ({ id: item.id }));
 }
@@ -37,6 +32,7 @@ export async function generateMetadata({ params }: PageProps<"/tutoring/[id]">):
  * 返回按鈕），目前後端沒有對應的內容類型，先用固定假資料。
  */
 export default async function TutoringShowPage({ params }: PageProps<"/tutoring/[id]">) {
+  const sidebarBanners = await fetchBanners("sidebar-tutoring");
   const { id } = await params;
   const item = getTutoringItem(id);
 
@@ -59,7 +55,7 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
         aside={
           <>
             <PopularPosts items={popularItems} heading="熱門輔導" />
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
       >

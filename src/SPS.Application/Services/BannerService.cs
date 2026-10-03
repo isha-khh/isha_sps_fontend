@@ -45,6 +45,11 @@ public class BannerService : IBannerService
     public async Task<Result<BannerResponse>> CreateAsync(
         CreateBannerRequest request, CancellationToken cancellationToken = default)
     {
+        // 沒指定版位的 Banner 前台任何地方都不會顯示：上架（預設就是上架）時一定要選版位，
+        // 不然後台看到「上架中」、前台卻永遠看不到，最難查。想先存草稿就把「上架」關掉
+        if ((request.Published ?? true) && request.PositionId == null)
+            return Result<BannerResponse>.Failure("上架中的 Banner 必須指定版位，否則前台不會顯示；想先存草稿請取消「上架」");
+
         try
         {
             // 創建 Banner 實體
@@ -95,6 +100,9 @@ public class BannerService : IBannerService
         var banner = await _unitOfWork.Banners.GetByIdAsync(id, cancellationToken);
         if (banner == null)
             return Result<BannerResponse>.Failure("Banner 不存在");
+
+        if ((request.Published ?? banner.Published) && request.PositionId == null)
+            return Result<BannerResponse>.Failure("上架中的 Banner 必須指定版位，否則前台不會顯示；想先存草稿請取消「上架」");
 
         // 注意：PositionId 的外鍵驗證由資料庫約束處理
         if (!string.IsNullOrEmpty(request.Name)) banner.Name = request.Name;
@@ -235,6 +243,23 @@ public class BannerService : IBannerService
         await _unitOfWork.Banners.UpdateAsync(banner, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<int>> RecordViewsAsync(
+        IReadOnlyCollection<long> ids, CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+            return Result<int>.Success(0);
+
+        var active = await _unitOfWork.Banners.GetActiveByIdsAsync(ids, DateTime.UtcNow, cancellationToken);
+        foreach (var banner in active)
+        {
+            // 只動計數，不更新 UpdatedTime（那是「內容最後修改時間」）
+            banner.ViewCount++;
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result<int>.Success(active.Count);
     }
 
     public async Task<Result<bool>> IncrementClickCountAsync(long id, CancellationToken cancellationToken = default)

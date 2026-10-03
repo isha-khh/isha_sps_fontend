@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.News;
 using SPS.Application.Interfaces.IServices;
@@ -18,6 +19,10 @@ public class NewsController : ControllerBase
 {
     private readonly INewsService _newsService;
     private readonly ILogger<NewsController> _logger;
+    private readonly IMemoryCache _cache;
+
+    /// <summary>同一個來源 IP 對同一篇公告，這段時間內只累計一次瀏覽數</summary>
+    private static readonly TimeSpan ViewDedupeWindow = TimeSpan.FromMinutes(30);
 
     /// <summary>
     /// 初始化新聞管理控制器
@@ -26,10 +31,12 @@ public class NewsController : ControllerBase
     /// <param name="logger">日誌記錄器</param>
     public NewsController(
         INewsService newsService,
-        ILogger<NewsController> logger)
+        ILogger<NewsController> logger,
+        IMemoryCache cache)
     {
         _newsService = newsService;
         _logger = logger;
+        _cache = cache;
     }
 
     /// <summary>
@@ -234,6 +241,20 @@ public class NewsController : ControllerBase
         int id,
         CancellationToken cancellationToken)
     {
+        // 這支是匿名、不需要 CSRF token 的計數 API，任何人都能對著它狂打來灌「熱門公告」排名；
+        // 同一個來源 IP 對同一篇 30 分鐘內只累計一次（前台頁面另外還有 sessionStorage 去重）。
+        // 後台使用者預覽公告不算瀏覽
+        if (User.IsInRole("Admin"))
+        {
+            return Ok(new { counted = false });
+        }
+
+        var dedupeKey = $"news-view:{HttpContext.Connection.RemoteIpAddress}:{id}";
+        if (_cache.TryGetValue(dedupeKey, out _))
+        {
+            return Ok(new { counted = false });
+        }
+
         var result = await _newsService.IncrementViewCountAsync(id, cancellationToken);
 
         if (!result.IsSuccess)
@@ -241,6 +262,7 @@ public class NewsController : ControllerBase
             return NotFound(new { error = result.Error });
         }
 
-        return Ok(new { viewCount = result.Data });
+        _cache.Set(dedupeKey, true, ViewDedupeWindow);
+        return Ok(new { counted = true, viewCount = result.Data });
     }
 }

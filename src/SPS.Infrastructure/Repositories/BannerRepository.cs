@@ -99,6 +99,13 @@ public class BannerRepository : Repository<Banner, long>, IBannerRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Banner>> GetActiveByIdsAsync(IReadOnlyCollection<long> ids, DateTime nowUtc, CancellationToken cancellationToken = default)
+    {
+        return await ActiveBanners(nowUtc)
+            .Where(b => ids.Contains(b.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<BannerPosition>> GetPositionsAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Set<BannerPosition>().OrderBy(p => p.Id).ToListAsync(cancellationToken);

@@ -75,7 +75,7 @@ public class CompanyController : ControllerBase
             return NotFound(new { error = result.Error });
         }
 
-        return Ok(result.Data);
+        return Ok(HideInternalFields(result.Data!));
     }
 
     /// <summary>
@@ -101,7 +101,7 @@ public class CompanyController : ControllerBase
             return NotFound(new { error = result.Error });
         }
 
-        return Ok(result.Data);
+        return Ok(HideInternalFields(result.Data!));
     }
 
     /// <summary>
@@ -300,5 +300,29 @@ public class CompanyController : ControllerBase
         }
 
         return Ok(result.Data);
+    }
+
+    /// <summary>
+    /// 詳情端點是匿名可呼叫的公開資料，但回傳的 <see cref="CompanyResponse"/> 同時是後台編輯用的完整資料：
+    /// 負責人姓名／信箱／電話／手機、窗口名單、內部備註、營收、驗證時間都不該給匿名者或一般會員。
+    /// 非後台使用者（Admin 角色）一律清掉這些欄位；後台照舊回完整資料。
+    /// </summary>
+    private CompanyResponse HideInternalFields(CompanyResponse company)
+    {
+        if (User.IsInRole("Admin"))
+        {
+            return company;
+        }
+
+        company.Charge = null;
+        company.ChargeEmail = null;
+        company.ChargePhone = null;
+        company.ChargeMobile = null;
+        company.ChargeJobTitle = null;
+        company.Remark = null;
+        company.Revenue = null;
+        company.VerifiedAt = null;
+        company.DesignatedContacts = null;
+        return company;
     }
 }

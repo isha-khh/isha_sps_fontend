@@ -39,6 +39,12 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetPaged([FromQuery] ProductQueryParameters parameters, CancellationToken ct)
     {
+        // 匿名可呼叫的公開列表：草稿（未發布）只有後台使用者（Admin 角色）看得到，其他人一律只回已發布
+        if (!User.IsInRole("Admin"))
+        {
+            parameters.Published = true;
+        }
+
         var result = await _productService.GetPagedAsync(parameters, ct);
         return result.IsSuccess ? Ok(result.Data) : BadRequest(new { error = result.Error });
     }
@@ -58,6 +64,12 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken ct)
     {
         var result = await _productService.GetByIdAsync(id, ct);
+        // 未發布的資料對非後台使用者視同不存在（404，不洩漏草稿存在與否）
+        if (result.IsSuccess && result.Data is { Published: false } && !User.IsInRole("Admin"))
+        {
+            return NotFound(new { error = "資料不存在" });
+        }
+
         return result.IsSuccess ? Ok(result.Data) : NotFound(new { error = result.Error });
     }
 

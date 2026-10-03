@@ -6,10 +6,10 @@ import PromotionSubNav from "@/components/promotion/PromotionSubNav";
 import FeaturedVideoCard from "@/components/promotion/FeaturedVideoCard";
 import VideoGridCard from "@/components/promotion/VideoGridCard";
 import PopularPosts from "@/components/layout/PopularPosts";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
-import { fetchVideos } from "@/lib/api.server";
+import { fetchVideos, fetchBanners } from "@/lib/api.server";
 import { PROMOTION_VIDEOS, deriveVideoCategories, sortVideosByOrdinal } from "@/lib/promotion-data";
 import { formatIsoDate, getYouTubeThumbnail } from "@/lib/content-list-utils";
 import type { VideoItem } from "@/lib/types";
@@ -18,10 +18,6 @@ import { withBasePath } from "@/lib/api-client";
 export const metadata: Metadata = {
   title: "影音專區",
 };
-
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
 
 const VIDEO_PAGE_SIZE = 9;
 const VIDEO_FALLBACK_THUMBNAIL = withBasePath("/images/home/ser_bg2.jpg");
@@ -76,6 +72,7 @@ function toGridCardData(video: VideoItem) {
  * 接篩選邏輯，先不為了一頁多做一個下拉變體。
  */
 export default async function PromotionVideoPage({ searchParams }: PageProps<"/promotion/video">) {
+  const sidebarBanners = await fetchBanners("sidebar-promotion");
   const { category: rawCategory, page: rawPage, q: rawQuery } = await searchParams;
   const category = typeof rawCategory === "string" ? rawCategory : undefined;
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
@@ -136,7 +133,7 @@ export default async function PromotionVideoPage({ searchParams }: PageProps<"/p
         aside={
           <>
             <PopularPosts items={sorted.slice(0, 5).map(toGridCardData).map((v) => ({ href: v.href, title: v.title, date: v.date, image: v.thumbnail }))} heading="熱門影片" imageRatio="ratio-16x9" />
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
         decorations={

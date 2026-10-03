@@ -368,13 +368,14 @@ public class NewsService : INewsService
     public async Task<Result<int>> IncrementViewCountAsync(int id, CancellationToken cancellationToken = default)
     {
         var news = await _unitOfWork.News.GetByIdAsync(id, cancellationToken);
-        if (news == null)
+        // 草稿（未發布）前台看不到，也不該累計瀏覽數（後台預覽草稿不算）
+        if (news == null || !news.Published)
         {
             return Result<int>.Failure("新聞不存在");
         }
 
+        // 只動 ViewCount，不更新 UpdatedTime——那是「內容最後修改時間」，被讀者瀏覽就跳動會誤導
         news.ViewCount++;
-        news.UpdatedTime = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<int>.Success(news.ViewCount);

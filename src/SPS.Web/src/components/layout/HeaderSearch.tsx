@@ -16,9 +16,11 @@ import { withBasePath } from "@/lib/api-client";
  *   選單文字折行；≥1200px 又因為版面左右留白變大而更擠（1280px 不加搜尋主選單就已經折行），
  *   實測要到 1536px 才有餘裕，1440px 放得下。
  * - `panel`：手機版選單面板（<768px）頂端直接放一個輸入框，不用先點圖示。
- * 768–1399px 沿用原本的 header，沒有放搜尋入口——這個寬度原本就沒有餘裕。
+ * - `float`：768–1399px 的懸浮按鈕（固定在視窗右下角）。這個寬度的 header 一個多餘的按鈕都放不下
+ *   （放進選單列會折行、放在 header 其他位置會跟 logo／電子報按鈕打架），所以不跟 header 搶空間，
+ *   改成不會被捲走的懸浮入口；展開的面板往上長，避免被視窗底部切到。
  */
-export default function HeaderSearch({ variant = "header" }: { variant?: "header" | "panel" }) {
+export default function HeaderSearch({ variant = "header" }: { variant?: "header" | "panel" | "float" }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,11 +63,14 @@ export default function HeaderSearch({ variant = "header" }: { variant?: "header
     );
   }
 
+  const isFloat = variant === "float";
+
+  // float 不能加 `position-relative`：Bootstrap 這個 class 是 `!important`，會蓋掉懸浮用的 `position: fixed`
   return (
-    <div className="header-search header-search--header position-relative me-2" ref={wrapRef}>
+    <div className={`header-search header-search--${variant} ${isFloat ? "" : "position-relative me-2"}`} ref={wrapRef}>
       <button
         type="button"
-        className="btn btn-light rounded-circle header-search-toggle"
+        className={`btn ${isFloat ? "btn-primary shadow" : "btn-light"} rounded-circle header-search-toggle`}
         aria-label="開啟全站搜尋"
         aria-expanded={open}
         aria-controls="header-search-panel"
@@ -93,6 +98,26 @@ export default function HeaderSearch({ variant = "header" }: { variant?: "header
         @media (min-width: 1400px) {
           .header-search--header {
             display: block;
+          }
+        }
+
+        .header-search--float {
+          display: none;
+        }
+
+        @media (min-width: 768px) and (max-width: 1399.98px) {
+          .header-search--float {
+            display: block;
+            position: fixed;
+            right: 16px;
+            bottom: 24px;
+            z-index: 1100;
+          }
+
+          /* 懸浮在右下角：面板往上長 */
+          .header-search--float .header-search-panel {
+            top: auto;
+            bottom: calc(100% + 10px);
           }
         }
 

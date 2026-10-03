@@ -73,6 +73,14 @@ public interface IBannerService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 批次累計曝光：只計算目前「上架中」的 Banner，草稿／已下架／已過期的不算。
+    /// 回傳實際累計的筆數。
+    /// </summary>
+    Task<Result<int>> RecordViewsAsync(
+        IReadOnlyCollection<long> ids,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 增加 Banner 點擊次數
     /// </summary>
     Task<Result<bool>> IncrementClickCountAsync(

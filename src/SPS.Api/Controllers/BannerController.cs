@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SPS.Application.DTOs.Banner;
 using SPS.Application.DTOs.Common;
 using SPS.Application.Interfaces.IServices;
@@ -18,6 +19,13 @@ public class BannerController : ControllerBase
 {
     private readonly IBannerService _bannerService;
     private readonly ILogger<BannerController> _logger;
+    private readonly IMemoryCache _cache;
+
+    /// <summary>同一個來源 IP 對同一個 Banner，這段時間內只累計一次曝光</summary>
+    private static readonly TimeSpan ViewDedupeWindow = TimeSpan.FromMinutes(30);
+
+    /// <summary>單次批次曝光最多接受幾個 id（一頁不會有這麼多 Banner，擋掉惡意灌大陣列）</summary>
+    private const int MaxViewBatchSize = 50;
 
     /// <summary>
     /// 初始化 Banner 管理控制器
@@ -26,10 +34,12 @@ public class BannerController : ControllerBase
     /// <param name="logger">日誌記錄器</param>
     public BannerController(
         IBannerService bannerService,
-        ILogger<BannerController> logger)
+        ILogger<BannerController> logger,
+        IMemoryCache cache)
     {
         _bannerService = bannerService;
         _logger = logger;
+        _cache = cache;
     }
 
     /// <summary>
@@ -281,6 +291,55 @@ public class BannerController : ControllerBase
         }
 
         return Ok(new { message = "檢視次數已增加" });
+    }
+
+    /// <summary>
+    /// 批次累計 Banner 曝光（前台頁面載入時，把這頁顯示的所有 Banner id 一次送來）
+    /// </summary>
+    /// <remarks>
+    /// 匿名、不需要 CSRF token 的計數 API。只累計目前上架中的 Banner；同一個來源 IP 對同一個 Banner
+    /// 30 分鐘內只算一次；後台使用者預覽不算。
+    /// </remarks>
+    /// <response code="200">回傳實際累計的筆數</response>
+    /// <response code="400">id 清單為空或超過上限</response>
+    [HttpPost("views")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RecordViews(
+        [FromBody] RecordBannerViewsRequest request,
+        CancellationToken cancellationToken)
+    {
+        var ids = request.Ids?.Distinct().ToList() ?? new List<long>();
+        if (ids.Count == 0 || ids.Count > MaxViewBatchSize)
+        {
+            return BadRequest(new { error = $"ids 必須為 1～{MaxViewBatchSize} 個 Banner id" });
+        }
+
+        if (User.IsInRole("Admin"))
+        {
+            return Ok(new { counted = 0 });
+        }
+
+        var ip = HttpContext.Connection.RemoteIpAddress;
+        var fresh = ids.Where(id => !_cache.TryGetValue($"banner-view:{ip}:{id}", out _)).ToList();
+        if (fresh.Count == 0)
+        {
+            return Ok(new { counted = 0 });
+        }
+
+        var result = await _bannerService.RecordViewsAsync(fresh, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { error = result.Error });
+        }
+
+        foreach (var id in fresh)
+        {
+            _cache.Set($"banner-view:{ip}:{id}", true, ViewDedupeWindow);
+        }
+
+        return Ok(new { counted = result.Data });
     }
 
     /// <summary>

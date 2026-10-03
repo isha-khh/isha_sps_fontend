@@ -6,16 +6,11 @@ import ShareBox from "@/components/ui/ShareBox";
 import MoreLink from "@/components/ui/MoreLink";
 import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
 import PopularCourses from "@/components/talent/PopularCourses";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import { TALENT_COURSES, getTalentCourse } from "@/lib/talent-data";
-import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 // 說明見 talent/page.tsx 同一份假資料的註解
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-
 export function generateStaticParams() {
   return TALENT_COURSES.map((course) => ({ id: course.id }));
 }
@@ -48,6 +43,7 @@ const INFO_ROWS = (course: NonNullable<ReturnType<typeof getTalentCourse>>) => [
  * 特有的課程資訊表格（跟 news/serve 詳情頁的 meta 清單不同版型）。
  */
 export default async function TalentShowPage({ params }: PageProps<"/talent/[id]">) {
+  const sidebarBanners = await fetchBanners("sidebar-talent");
   const { id } = await params;
   const course = getTalentCourse(id);
 
@@ -65,7 +61,7 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
         aside={
           <>
             <PopularCourses courses={TALENT_COURSES} />
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
       >

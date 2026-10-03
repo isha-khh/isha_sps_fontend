@@ -466,6 +466,9 @@ export default function Headers() {
           </div>
         </nav>
 
+        {/* 768–1399px 的搜尋入口：header 在這個寬度沒有餘裕，改成懸浮按鈕，見 HeaderSearch.tsx */}
+        <HeaderSearch variant="float" />
+
         {/* 手機版選單面板——跟上面桌機版是同一份 NavLinks，各自渲染，
             不是 runtime clone 出來的（見檔案開頭的說明） */}
         <div className="bsnav-mobile right d-md-none" role="dialog" aria-modal="true" aria-hidden="true">

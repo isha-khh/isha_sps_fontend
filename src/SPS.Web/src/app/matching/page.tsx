@@ -7,9 +7,10 @@ import NeedListItem from "@/components/matching/NeedListItem";
 import PublishNeedModal from "@/components/matching/PublishNeedModal";
 import SubscribeSolutionModal from "@/components/matching/SubscribeSolutionModal";
 import Pagination from "@/components/ui/Pagination";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import { MATCHING_NEEDS } from "@/lib/matching-need-data";
 import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 export const metadata: Metadata = {
   title: "媒合對接",
@@ -18,11 +19,6 @@ export const metadata: Metadata = {
 const NEED_PAGE_SIZE = 8;
 
 // 說明見 talent/page.tsx 同一份假資料的註解
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-
 /**
  * 「媒合對接」需求列表，對應設計稿 `page/matching/index.html`。跟已經
  * 做好的企業名錄列表（`/matching/enterprise`）是同一個模組底下的另一
@@ -40,6 +36,7 @@ const SIDEBAR_BANNERS: SidebarBannerItem[] = [
  * 同一行、還會變窄到裡面的篩選按鈕擠不下換行。
  */
 export default async function MatchingPage({ searchParams }: PageProps<"/matching">) {
+  const sidebarBanners = await fetchBanners("sidebar-matching");
   const { page: rawPage } = await searchParams;
 
   const totalPages = Math.max(1, Math.ceil(MATCHING_NEEDS.length / NEED_PAGE_SIZE));
@@ -69,7 +66,7 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
               <i className="bi bi-pencil-square" aria-hidden="true" />
             </a>
 
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
         decorations={

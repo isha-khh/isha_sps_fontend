@@ -5,10 +5,11 @@ import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import CourseTable from "@/components/talent/CourseTable";
 import PopularCourses from "@/components/talent/PopularCourses";
-import PromoBanner from "@/components/ui/PromoBanner";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import NewsBanner from "@/components/news/NewsBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import { TALENT_COURSES } from "@/lib/talent-data";
 import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 export const metadata: Metadata = {
   title: "人才培訓",
@@ -17,28 +18,24 @@ export const metadata: Metadata = {
 // 對應設計稿 page/_uc/side2_banner.html——原本漏掉這塊，只做了
 // 「熱門課程」，忘了它下面還有一個共用的廣告欄位（跟 /serve、/faq、
 // /news、/promotion* 這幾頁側欄用的是同一份假資料/元件）。
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-
 /**
  * 人才培訓課程列表，對應設計稿 page/talent/index.html。目前後端
  * 沒有對應的內容類型，先用 talent-data.ts 的假資料，分頁跟
  * /serve、/tutoring 一樣先用寫死的佔位。
  */
-export default function TalentIndexPage() {
+export default async function TalentIndexPage() {
+  const [sidebarBanners, topBanners] = await Promise.all([fetchBanners("sidebar-talent"), fetchBanners("talent-top")]);
   return (
     <>
       <BodyClass className="talent" />
       <InnerPageShell
         title="人才培訓"
         breadcrumb={[{ label: "人才培育" }, { label: "人才培訓" }]}
-        banner={<PromoBanner id="talent-banner" />}
+        banner={topBanners.some((b) => b.uri) ? <NewsBanner id="talent-banner" banners={topBanners} /> : undefined}
         aside={
           <>
             <PopularCourses courses={TALENT_COURSES} />
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
         decorations={

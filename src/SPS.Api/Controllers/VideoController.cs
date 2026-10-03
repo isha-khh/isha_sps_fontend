@@ -36,6 +36,12 @@ public class VideoController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting paged videos");
+        // 匿名可呼叫的公開列表：草稿（未發布）只有後台使用者（Admin 角色）看得到，其他人一律只回已發布
+        if (!User.IsInRole("Admin"))
+        {
+            parameters.Published = true;
+        }
+
         var result = await _videoService.GetPagedAsync(parameters, cancellationToken);
         if (!result.IsSuccess)
             return BadRequest(new { error = result.Error });
@@ -53,6 +59,12 @@ public class VideoController : ControllerBase
     {
         _logger.LogInformation("Getting video by ID: {VideoId}", id);
         var result = await _videoService.GetByIdAsync(id, cancellationToken);
+        // 未發布的資料對非後台使用者視同不存在（404，不洩漏草稿存在與否）
+        if (result.IsSuccess && result.Data is { Published: false } && !User.IsInRole("Admin"))
+        {
+            return NotFound(new { error = "資料不存在" });
+        }
+
         if (!result.IsSuccess)
             return NotFound(new { error = result.Error });
         return Ok(result.Data);

@@ -4,18 +4,14 @@ import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MoreLink from "@/components/ui/MoreLink";
 import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import RelatedNeeds from "@/components/matching/RelatedNeeds";
 import ProposeSolutionModal from "@/components/matching/ProposeSolutionModal";
 import { MATCHING_NEEDS, getMatchingNeed } from "@/lib/matching-need-data";
 import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 // 說明見 talent/[id]/page.tsx 同一份假資料的註解
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-
 export function generateStaticParams() {
   return MATCHING_NEEDS.map((need) => ({ id: need.id }));
 }
@@ -39,6 +35,7 @@ export async function generateMetadata({ params }: PageProps<"/matching/[id]">):
  * 開頭的說明）。
  */
 export default async function MatchingNeedDetailPage({ params }: PageProps<"/matching/[id]">) {
+  const sidebarBanners = await fetchBanners("sidebar-matching");
   const { id } = await params;
   const need = getMatchingNeed(id);
 
@@ -62,7 +59,7 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
               <i className="bi bi-pencil-square" aria-hidden="true" />
             </a>
 
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
         decorations={

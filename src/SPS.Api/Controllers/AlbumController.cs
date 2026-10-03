@@ -49,6 +49,12 @@ public class AlbumController : ControllerBase
     {
         _logger.LogInformation("Getting paged albums");
 
+        // 匿名可呼叫的公開列表：草稿（未發布）只有後台使用者（Admin 角色）看得到，其他人一律只回已發布
+        if (!User.IsInRole("Admin"))
+        {
+            parameters.Published = true;
+        }
+
         var result = await _albumService.GetPagedAsync(parameters, cancellationToken);
 
         if (!result.IsSuccess)
@@ -78,6 +84,12 @@ public class AlbumController : ControllerBase
         _logger.LogInformation("Getting album by ID: {AlbumId}", id);
 
         var result = await _albumService.GetByIdAsync(id, cancellationToken);
+        // 未發布的資料對非後台使用者視同不存在（404，不洩漏草稿存在與否）
+        if (result.IsSuccess && result.Data is { Published: false } && !User.IsInRole("Admin"))
+        {
+            return NotFound(new { error = "資料不存在" });
+        }
+
 
         if (!result.IsSuccess)
         {

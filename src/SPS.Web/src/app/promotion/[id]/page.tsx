@@ -7,9 +7,9 @@ import ShareBox from "@/components/ui/ShareBox";
 import ZoomableImage from "@/components/ui/ZoomableImage";
 import MoreLink from "@/components/ui/MoreLink";
 import PopularPosts from "@/components/layout/PopularPosts";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
-import { fetchPromotionCases, fetchPromotionCaseDetail } from "@/lib/api.server";
+import { fetchPromotionCases, fetchPromotionCaseDetail, fetchBanners } from "@/lib/api.server";
 import { formatIsoDate, sortByViewCount } from "@/lib/content-list-utils";
 import { INDUSTRY_CASES, PROMOTION_FALLBACK_IMAGE, getIndustryCase } from "@/lib/promotion-data";
 import { withBasePath } from "@/lib/api-client";
@@ -36,10 +36,6 @@ export async function generateMetadata({ params }: PageProps<"/promotion/[id]">)
   return { title: item?.title ?? "找不到頁面" };
 }
 
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-
 /**
  * 產業案例詳情頁，對應舊站 page/promotion/show.html。
  *
@@ -59,6 +55,7 @@ const SIDEBAR_BANNERS: SidebarBannerItem[] = [
  * - 「熱門產業案例」側欄一樣改用 `sortByViewCount()` 照點閱率排序。
  */
 export default async function PromotionShowPage({ params }: PageProps<"/promotion/[id]">) {
+  const sidebarBanners = await fetchBanners("sidebar-promotion");
   const { id } = await params;
   const item = await getCase(id);
 
@@ -91,7 +88,7 @@ export default async function PromotionShowPage({ params }: PageProps<"/promotio
         aside={
           <>
             <PopularPosts items={popularItems} heading="熱門產業案例" />
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
         decorations={

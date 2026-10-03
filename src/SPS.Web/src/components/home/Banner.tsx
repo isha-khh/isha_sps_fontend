@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BannerImpressions from "@/components/ui/BannerImpressions";
 import HeroImage from "@/components/ui/HeroImage";
 import TrackedLink from "@/components/ui/TrackedLink";
 import { withBasePath } from "@/lib/api-client";
@@ -56,6 +57,7 @@ export default function Banner({ banner }: { banner?: BannerItem }) {
 
   return (
     <div className="banner_home" aria-label="輪播廣告看板">
+      {banner && <BannerImpressions ids={[banner.id]} />}
       <div className="container-fluid p-0">
         <div>
           <div className="item">

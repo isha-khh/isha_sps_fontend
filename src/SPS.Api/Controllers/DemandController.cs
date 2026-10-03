@@ -41,6 +41,12 @@ public class DemandController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetPaged([FromQuery] DemandQueryParameters p, CancellationToken ct)
     {
+        // 匿名可呼叫的公開列表：草稿（未發布）只有後台使用者（Admin 角色）看得到，其他人一律只回已發布
+        if (!User.IsInRole("Admin"))
+        {
+            p.Published = true;
+        }
+
         var r = await _demandService.GetPagedAsync(p, ct);
         return r.IsSuccess ? Ok(r.Data) : BadRequest(new { error = r.Error });
     }
@@ -60,6 +66,12 @@ public class DemandController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken ct)
     {
         var r = await _demandService.GetByIdAsync(id, ct);
+        // 未發布的資料對非後台使用者視同不存在（404，不洩漏草稿存在與否）
+        if (r.IsSuccess && r.Data is { Published: false } && !User.IsInRole("Admin"))
+        {
+            return NotFound(new { error = "資料不存在" });
+        }
+
         return r.IsSuccess ? Ok(r.Data) : NotFound(new { error = r.Error });
     }
 

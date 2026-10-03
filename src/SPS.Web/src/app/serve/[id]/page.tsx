@@ -6,10 +6,11 @@ import Badge from "@/components/ui/Badge";
 import MoreLink from "@/components/ui/MoreLink";
 import ShareBox from "@/components/ui/ShareBox";
 import ZoomableImage from "@/components/ui/ZoomableImage";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import DownloadRequestForm from "@/components/serve/DownloadRequestForm";
 import { SERVE_ITEMS, getServeItem } from "@/lib/serve-data";
 import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 export function generateStaticParams() {
   return SERVE_ITEMS.map((item) => ({ id: item.id }));
@@ -28,11 +29,6 @@ export async function generateMetadata({ params }: PageProps<"/serve/[id]">): Pr
   return { title: item?.title ?? "找不到頁面" };
 }
 
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-
 /**
  * 服務專區詳情頁，對應舊站 serve/show.html。跟 `/news/[id]` 結構很像
  * （沒有跑馬燈標題、沒有左側分類選單、ShareBox 在這裡才用），主要差異
@@ -41,6 +37,7 @@ const SIDEBAR_BANNERS: SidebarBannerItem[] = [
  * 個資蒐集同意 modal）。
  */
 export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">) {
+  const sidebarBanners = await fetchBanners("sidebar-serve");
   const { id } = await params;
   const item = getServeItem(id);
 
@@ -53,7 +50,7 @@ export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">
       <BodyClass className="serve show" />
       <InnerPageShell
         breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: item.category, href: `/serve?category=${item.category}` }, { label: item.title }]}
-        aside={<SidebarBanner items={SIDEBAR_BANNERS} />}
+        aside={<SidebarBanner banners={sidebarBanners} />}
         decorations={
           <>
             <div className="s_round_6" aria-hidden="true">

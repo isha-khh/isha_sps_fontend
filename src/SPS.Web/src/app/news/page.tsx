@@ -4,7 +4,7 @@ import BodyClass from "@/components/BodyClass";
 import CategoryTabStrip from "@/components/news/CategoryTabStrip";
 import NewsBanner from "@/components/news/NewsBanner";
 import PopularPosts from "@/components/layout/PopularPosts";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import NewsListCard from "@/components/news/NewsListCard";
@@ -22,11 +22,6 @@ import {
 export const metadata: Metadata = {
   title: "最新消息",
 };
-
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
 
 /**
  * 每頁顯示幾筆——後端 `NewsQueryParameters` 其實支援真的伺服器端分頁
@@ -92,6 +87,7 @@ const NEWS_PAGE_SIZE = 5;
  * news/show.html（文章內頁）在用的，不是列表頁。
  */
 export default async function NewsIndexPage({ searchParams }: PageProps<"/news">) {
+  const sidebarBanners = await fetchBanners("sidebar-news");
   const { category: rawCategory, q: rawQuery, page: rawPage, tag: rawTag } = await searchParams;
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
   // `?tag=<標籤 id>` 對到後端 NewsQueryParameters.TagId，點公告上的標籤會帶進來
@@ -167,7 +163,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
         aside={
           <>
             <PopularPosts items={popularPosts} />
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
       >

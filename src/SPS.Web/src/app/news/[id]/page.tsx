@@ -10,9 +10,10 @@ import ZoomableImage from "@/components/ui/ZoomableImage";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
-import { fetchNews, fetchNewsDetail } from "@/lib/api.server";
+import { fetchNews, fetchNewsDetail, fetchBanners } from "@/lib/api.server";
 import { NEWS_ARTICLES, NEWS_FALLBACK_IMAGE, getNewsArticle, formatNewsDate, sortNewsByViewCount } from "@/lib/news-data";
 import { withBasePath } from "@/lib/api-client";
+import NewsViewTracker from "@/components/news/NewsViewTracker";
 
 /**
  * 查一篇公告，後端沒有（或連不到）才退回假資料用 id 查找。
@@ -64,6 +65,7 @@ export async function generateMetadata({ params }: PageProps<"/news/[id]">): Pro
  * 效果，先跳過沒做，之後要做就是同一套邏輯，兩邊一起補。
  */
 export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) {
+  const sidebarBanners = await fetchBanners("sidebar-news");
   const { id } = await params;
   const article = await getArticle(id);
 
@@ -83,14 +85,10 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
     image: item.imageUrl || NEWS_FALLBACK_IMAGE,
   }));
 
-  const sidebarBanners = [
-    { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-    { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  ];
-
   return (
     <>
       <BodyClass className="news show" />
+      <NewsViewTracker newsId={article.id} />
       <InnerPageShell
         breadcrumb={[
           { label: "公告事項", href: "/news" },
@@ -100,7 +98,7 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
         aside={
           <>
             <PopularPosts items={popularPosts} />
-            <SidebarBanner items={sidebarBanners} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
         decorations={

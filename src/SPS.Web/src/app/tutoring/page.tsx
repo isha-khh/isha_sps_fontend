@@ -5,21 +5,17 @@ import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import TutoringItemCard from "@/components/tutoring/TutoringItemCard";
 import PopularPosts from "@/components/layout/PopularPosts";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import CategoryTabList from "@/components/layout/CategoryTabList";
 import { TUTORING_ITEMS, TUTORING_INDUSTRIES } from "@/lib/tutoring-data";
 import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 export const metadata: Metadata = {
   title: "產業輔導",
 };
 
 // 對應設計稿 page/_uc/side2_banner.html
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-
 /**
  * 產業輔導列表，對應設計稿 page/tutoring/index.html。目前後端沒有
  * 對應的內容類型，先用 tutoring-data.ts 的假資料，分頁跟 /serve
@@ -27,6 +23,7 @@ const SIDEBAR_BANNERS: SidebarBannerItem[] = [
  * 照實際筆數切頁。
  */
 export default async function TutoringIndexPage({ searchParams }: PageProps<"/tutoring">) {
+  const sidebarBanners = await fetchBanners("sidebar-tutoring");
   const { category: rawCategory } = await searchParams;
   // 對應設計稿 page/_uc/side/side1_tutoring.html——「石化業」是設計稿
   // 裡寫死 class="active" 的預設分類，沒帶 ?category= 時比照辦理。
@@ -59,7 +56,7 @@ export default async function TutoringIndexPage({ searchParams }: PageProps<"/tu
         aside={
           <>
             <PopularPosts items={popularItems} heading="熱門輔導" />
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
         decorations={

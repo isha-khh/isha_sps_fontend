@@ -41,6 +41,12 @@ public class SuccessCaseController : ControllerBase
     [SwaggerOperation(Summary = "獲取成功案例列表", Description = "根據條件分頁獲取成功案例列表")]
     public async Task<IActionResult> GetPaged([FromQuery] SuccessCaseQueryParameters parameters)
     {
+        // 匿名可呼叫的公開列表：草稿（未發布）只有後台使用者（Admin 角色）看得到，其他人一律只回已發布
+        if (!User.IsInRole("Admin"))
+        {
+            parameters.IsPublished = true;
+        }
+
         var result = await _successCaseService.GetPagedAsync(parameters);
         return result.IsSuccess ? Ok(result.Data) : BadRequest(result.Error);
     }
@@ -58,6 +64,12 @@ public class SuccessCaseController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _successCaseService.GetByIdAsync(id);
+        // 未發布的資料對非後台使用者視同不存在（404，不洩漏草稿存在與否）
+        if (result.IsSuccess && result.Data is { IsPublished: false } && !User.IsInRole("Admin"))
+        {
+            return NotFound(new { error = "資料不存在" });
+        }
+
         return result.IsSuccess ? Ok(result.Data) : NotFound(result.Error);
     }
 

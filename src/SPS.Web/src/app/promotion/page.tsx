@@ -5,10 +5,10 @@ import CategoryTabList from "@/components/layout/CategoryTabList";
 import PromotionSubNav from "@/components/promotion/PromotionSubNav";
 import IndustryCaseCard from "@/components/promotion/IndustryCaseCard";
 import PopularPosts from "@/components/layout/PopularPosts";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
-import { fetchPromotionCases } from "@/lib/api.server";
+import { fetchPromotionCases, fetchBanners } from "@/lib/api.server";
 import { formatIsoDate, sortByViewCount } from "@/lib/content-list-utils";
 import { INDUSTRY_CASES, PROMOTION_FALLBACK_IMAGE, derivePromotionIndustries } from "@/lib/promotion-data";
 import { withBasePath } from "@/lib/api-client";
@@ -16,10 +16,6 @@ import { withBasePath } from "@/lib/api-client";
 export const metadata: Metadata = {
   title: "產業案例",
 };
-
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
 
 /**
  * 每頁顯示幾筆——跟 `/news`（`NEWS_PAGE_SIZE`）同一套理由：後端
@@ -60,6 +56,7 @@ const PROMOTION_PAGE_SIZE = 9;
  *   搜尋條件，`page` 超出範圍時夾回最後一頁。
  */
 export default async function PromotionIndexPage({ searchParams }: PageProps<"/promotion">) {
+  const sidebarBanners = await fetchBanners("sidebar-promotion");
   const { industry: rawIndustry, q: rawQuery, page: rawPage } = await searchParams;
   const activeIndustry = typeof rawIndustry === "string" ? rawIndustry : undefined;
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
@@ -127,7 +124,7 @@ export default async function PromotionIndexPage({ searchParams }: PageProps<"/p
         aside={
           <>
             <PopularPosts items={popularItems} heading="熱門產業案例" />
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
         decorations={

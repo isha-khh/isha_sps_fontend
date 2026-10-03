@@ -33,6 +33,11 @@ public interface IBannerRepository : IRepository<Banner, long>
     Task<List<Banner>> GetActiveByPositionCodeAsync(string code, DateTime nowUtc, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 從指定的 id 中，挑出目前「上架中」的 Banner（用來累計曝光：下架/過期/草稿的不算）。
+    /// </summary>
+    Task<List<Banner>> GetActiveByIdsAsync(IReadOnlyCollection<long> ids, DateTime nowUtc, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 所有版位
     /// </summary>
     Task<List<BannerPosition>> GetPositionsAsync(CancellationToken cancellationToken = default);

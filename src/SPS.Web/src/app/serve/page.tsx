@@ -3,21 +3,16 @@ import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import CategoryTabList from "@/components/layout/CategoryTabList";
 import ServeSubNav from "@/components/serve/ServeSubNav";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import ServeItemCard from "@/components/serve/ServeItemCard";
 import { SERVE_ITEMS, getServeSiblingCategories } from "@/lib/serve-data";
-import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 export const metadata: Metadata = {
   title: "服務專區",
 };
-
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
 
 /**
  * 服務專區列表，對應舊站 serve/index.html。跟 `/news` 同一套組裝方式，
@@ -43,6 +38,7 @@ const SIDEBAR_BANNERS: SidebarBannerItem[] = [
  *    「全部」固定顯示 active。
  */
 export default async function ServeIndexPage({ searchParams }: PageProps<"/serve">) {
+  const sidebarBanners = await fetchBanners("sidebar-serve");
   const { category: rawCategory } = await searchParams;
   const category = typeof rawCategory === "string" ? rawCategory : undefined;
   const siblingCategories = category ? getServeSiblingCategories(category) : undefined;
@@ -71,7 +67,7 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
             ]}
           />
         }
-        aside={<SidebarBanner items={SIDEBAR_BANNERS} />}
+        aside={<SidebarBanner banners={sidebarBanners} />}
       >
         <div className="search2 mb-md-5 mb-4">
           <SearchBar keywordPlaceholder="請輸入關鍵字" />

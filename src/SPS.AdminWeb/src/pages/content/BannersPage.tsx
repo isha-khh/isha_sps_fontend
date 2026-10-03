@@ -166,6 +166,12 @@ export const BannersPage = () => {
       return;
     }
 
+    // 沒指定版位的橫幅前台任何地方都不會顯示；上架時一定要選，後端也有同樣的檢查
+    if ((formData.published ?? true) && !formData.positionId) {
+      await notify.warning('上架中的橫幅必須選擇「顯示位置」，否則前台不會顯示；想先存草稿請取消「上架」');
+      return;
+    }
+
     // 自動偵測內容類型
     const contentType = formData.contentType || getContentTypeFromUri(formData.uri);
 
@@ -187,7 +193,8 @@ export const BannersPage = () => {
       fetchBanners();
     } catch (error) {
       console.error('Failed to save banner:', error);
-      await notify.error('儲存橫幅失敗');
+      const serverMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      await notify.error(serverMessage || '儲存橫幅失敗');
     } finally {
       setIsSaving(false);
     }
@@ -287,7 +294,14 @@ export const BannersPage = () => {
                           <p className="text-sm text-base-content/70 mb-2">{banner.remark}</p>
                         )}
                         <div className="flex flex-wrap gap-2 text-sm text-base-content/60">
-                          <span className="badge badge-info badge-outline">{banner.positionName || '未指定版位'}</span>
+                          {banner.positionName ? (
+                            <span className="badge badge-info badge-outline">{banner.positionName}</span>
+                          ) : (
+                            <span className="badge badge-warning gap-1" title="沒有指定版位的 Banner 不會顯示在前台，請編輯並選擇版位">
+                              <span className="iconify lucide--triangle-alert size-3" />
+                              未指定版位（前台不顯示）
+                            </span>
+                          )}
                           <span className="badge badge-outline">排序 {banner.ordinal}</span>
                           {(banner.startDate || banner.endDate) && (
                             <span className="badge badge-outline">

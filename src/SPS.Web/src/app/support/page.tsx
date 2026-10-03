@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
-import SidebarBanner, { type SidebarBannerItem } from "@/components/layout/SidebarBanner";
-import PromoBanner from "@/components/ui/PromoBanner";
+import SidebarBanner from "@/components/layout/SidebarBanner";
+import NewsBanner from "@/components/news/NewsBanner";
 import { SUPPORT_INFO_BLOCKS, SUPPORT_QUICK_LINKS, SUPPORT_ANNOUNCEMENTS } from "@/lib/support-data";
 import { withBasePath } from "@/lib/api-client";
+import { fetchBanners } from "@/lib/api.server";
 
 export const metadata: Metadata = {
   title: "本計畫補助",
@@ -12,15 +13,6 @@ export const metadata: Metadata = {
 
 // 對應設計稿 page/_uc/side2_banner2.html（標題「產業輔導」，疑似
 // 跨單元互相導流的廣告位）＋ page/_uc/side2_banner.html（一般廣告）。
-const TUTORING_CROSS_PROMO_BANNERS: SidebarBannerItem[] = [
-  { href: "/tutoring", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "/tutoring", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-const SIDEBAR_BANNERS: SidebarBannerItem[] = [
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-  { href: "#", image: withBasePath("/images/all/new_logo.jpg"), title: "114年度石化產業智慧化補助計畫正式開放申請" },
-];
-
 /**
  * 「本計畫補助」，對應設計稿 page/support/index.html——「輔助資源」
  * 底下兩個平行頁面之一（另一個是 /support/resources，對應
@@ -29,18 +21,23 @@ const SIDEBAR_BANNERS: SidebarBannerItem[] = [
  * 目前後端沒有對應的內容類型，四個資訊區塊跟公告列表都先用
  * `support-data.ts` 的假資料，之後有真後端再換掉。
  */
-export default function SupportPage() {
+export default async function SupportPage() {
+  const [supportTutoringBanners, sidebarBanners, topBanners] = await Promise.all([
+    fetchBanners("sidebar-support-tutoring"),
+    fetchBanners("sidebar-support"),
+    fetchBanners("support-top"),
+  ]);
   return (
     <>
       <BodyClass className="support" />
       <InnerPageShell
         title="本計畫補助"
         breadcrumb={[{ label: "輔助資源" }, { label: "本計畫補助" }]}
-        banner={<PromoBanner id="support-banner" />}
+        banner={topBanners.some((b) => b.uri) ? <NewsBanner id="support-banner" banners={topBanners} /> : undefined}
         aside={
           <>
-            <SidebarBanner items={TUTORING_CROSS_PROMO_BANNERS} heading="產業輔導" />
-            <SidebarBanner items={SIDEBAR_BANNERS} />
+            <SidebarBanner banners={supportTutoringBanners} heading="產業輔導" />
+            <SidebarBanner banners={sidebarBanners} />
           </>
         }
         decorations={
