@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using SPS.Application.Common;
 using SPS.Application.DTOs.Application;
@@ -102,9 +104,11 @@ public class ApplicationService : IApplicationService
             }
 
             // 5. 創建 MemberApplication（前端負責調用 /api/Applications/company-info 查詢公司資訊）
+            var accessKey = Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
             var application = new MemberApplication
             {
                 Id = Guid.NewGuid(),
+                AccessKeyHash = HashAccessKey(accessKey),
                 ApplicationNumber = GenerateApplicationNumber(),
                 ApplicantType = request.ApplicantType,
                 ExistingMemberId = request.ExistingMemberId,
@@ -165,7 +169,9 @@ public class ApplicationService : IApplicationService
             _logger.LogInformation("Created application {ApplicationNumber} with {MemberCount} members",
                 application.ApplicationNumber, request.Members.Count);
 
-            return Result<ApplicationResponse>.Success(await MapToResponseAsync(application, cancellationToken));
+            var created = await MapToResponseAsync(application, cancellationToken);
+            created.AccessKey = accessKey;
+            return Result<ApplicationResponse>.Success(created);
         }
         catch (Exception ex)
         {
@@ -244,6 +250,35 @@ public class ApplicationService : IApplicationService
             return Result<ApplicationResponse>.Failure($"更新申請失敗: {ex.Message}");
         }
     }
+
+    public async Task<bool> CanAccessAsync(
+        Guid applicationId, string? accessKey, Guid? memberId, CancellationToken cancellationToken = default)
+    {
+        var application = await _unitOfWork.Applications.GetByIdAsync(applicationId, cancellationToken);
+        if (application == null) return false;
+
+        // 升級申請：既有會員本人（已登入）換裝置也能繼續
+        if (memberId.HasValue && application.ExistingMemberId == memberId) return true;
+
+        if (string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(application.AccessKeyHash)) return false;
+
+        // 比雜湊而不是比明文，且用常數時間比較
+        var provided = Encoding.UTF8.GetBytes(HashAccessKey(accessKey));
+        var expected = Encoding.UTF8.GetBytes(application.AccessKeyHash);
+        return CryptographicOperations.FixedTimeEquals(provided, expected);
+    }
+
+    public async Task<Guid?> GetApplicationIdByDocumentIdAsync(Guid documentId, CancellationToken cancellationToken = default)
+    {
+        var document = await _unitOfWork.ApplicationDocuments.GetByIdAsync(documentId, cancellationToken);
+        return document?.ApplicationId;
+    }
+
+    private static string HashAccessKey(string key) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(key))).ToLowerInvariant();
+
+    private static string Base64UrlEncode(byte[] bytes) =>
+        Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
     public async Task<Result<ApplicationResponse>> GetApplicationByIdAsync(
         Guid applicationId,

@@ -25,6 +25,23 @@ public interface IApplicationService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 呼叫者是否有權存取這份申請：出示了正確的存取密鑰，或是這份升級申請的既有會員本人。
+    /// 申請不存在、沒有密鑰（舊資料）一律回 false，讓呼叫端對外統一回 404。
+    /// </summary>
+    Task<bool> CanAccessAsync(
+        Guid applicationId,
+        string? accessKey,
+        Guid? memberId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 由申請文件 id 反查所屬申請 id（刪除文件的端點只收 documentId）
+    /// </summary>
+    Task<Guid?> GetApplicationIdByDocumentIdAsync(
+        Guid documentId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 獲取申請詳情
     /// </summary>
     Task<Result<ApplicationResponse>> GetApplicationByIdAsync(

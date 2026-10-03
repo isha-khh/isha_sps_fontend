@@ -133,6 +133,12 @@ public interface IFileManagementService
 
 
     /// <summary>
+    /// 這個檔案是不是會員申請的附件（含申請人個資）。下載端點對一般檔案維持匿名（網站圖片要能公開讀），
+    /// 但申請附件不可匿名下載
+    /// </summary>
+    Task<bool> IsApplicationDocumentFileAsync(Guid fileId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 下載文件
     /// </summary>
     /// <param name="fileId">文件 ID</param>

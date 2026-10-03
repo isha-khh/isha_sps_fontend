@@ -431,6 +431,9 @@ public class FileManagementService : IFileManagementService
         }
     }
 
+    public Task<bool> IsApplicationDocumentFileAsync(Guid fileId, CancellationToken cancellationToken = default)
+        => _unitOfWork.ApplicationDocuments.ExistsByUploadedFileIdAsync(fileId, cancellationToken);
+
     public async Task<Result<(Stream FileStream, string FileName, string ContentType)>> DownloadFileAsync(
         Guid fileId,
         CancellationToken cancellationToken = default)

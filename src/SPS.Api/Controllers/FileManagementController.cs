@@ -194,13 +194,29 @@ public class FileManagementController : ControllerBase
     /// <param name="id">文件 ID</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>文件流</returns>
+    /// <remarks>
+    /// 一般檔案維持匿名可下載（前台圖片、公告附件都走這裡）；但會員申請的附件含申請人個資，
+    /// 只有擁有「檢視申請」權限的後台使用者能下載。後台審核頁本來就用
+    /// <c>admin/applications/documents/{id}/download</c>，前台也沒有任何地方用這個網址取附件。
+    /// 注意不能改成依 <c>IsPublic</c> 判斷：網站圖片目前上傳時都是 <c>IsPublic = false</c>，一擋全站圖片都會壞。
+    /// </remarks>
     [HttpGet("{id:guid}/download")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadFile(
         Guid id,
         CancellationToken cancellationToken)
     {
+        if (await _fileManagementService.IsApplicationDocumentFileAsync(id, cancellationToken)
+            && !User.GetAdminPermissions().HasAny(UserPermission.ViewApplications))
+        {
+            // 未登入也回 404：不讓匿名者確認某個 GUID 是不是申請附件
+            return User.Identity?.IsAuthenticated == true
+                ? StatusCode(StatusCodes.Status403Forbidden, new { message = "無權限下載申請附件" })
+                : NotFound(new { message = "文件不存在" });
+        }
+
         var result = await _fileManagementService.DownloadFileAsync(id, cancellationToken);
 
         if (!result.IsSuccess)

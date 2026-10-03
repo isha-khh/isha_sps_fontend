@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
@@ -44,7 +45,11 @@ export default async function MemberRegisterCompletePage({ searchParams }: PageP
   const id = typeof applicationId === "string" ? applicationId : undefined;
   if (id) {
     try {
-      application = await applicationsApi.getById(id);
+      // 申請的存取密鑰在 `appkey_{id}` cookie，Server Component 打後端時要手動轉傳
+      const keyCookie = (await cookies()).get(`appkey_${id}`);
+      application = await applicationsApi.getById(id, {
+        cookieHeader: keyCookie ? `${keyCookie.name}=${keyCookie.value}` : undefined,
+      });
     } catch {
       loadError = true;
     }

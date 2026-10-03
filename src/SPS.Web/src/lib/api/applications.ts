@@ -28,10 +28,16 @@ export const applicationsApi = {
   /**
    * 獲取申請詳情
    * GET /api/Applications/{id}
+   *
+   * 後端要求出示申請的存取密鑰（建立申請時寫進 `appkey_{id}` HttpOnly cookie）。瀏覽器端呼叫會自動帶；
+   * 在 Server Component 裡呼叫時瀏覽器的 cookie 不會跟著過來，要把收到的 `cookie` 標頭手動轉傳
+   * （見 `app/member/register/complete/page.tsx`）。
    */
-  async getById(id: string): Promise<ApplicationResponse> {
+  async getById(id: string, options?: { cookieHeader?: string }): Promise<ApplicationResponse> {
     try {
-      const response = await apiClient.get<ApplicationResponse>(`/api/Applications/${id}`);
+      const response = await apiClient.get<ApplicationResponse>(`/api/Applications/${id}`, {
+        headers: options?.cookieHeader ? { Cookie: options.cookieHeader } : undefined,
+      });
       return response.data;
     } catch (error) {
       console.error('Failed to fetch application:', error);

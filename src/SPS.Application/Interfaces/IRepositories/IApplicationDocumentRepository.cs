@@ -31,6 +31,13 @@ public interface IApplicationDocumentRepository : IRepository<ApplicationDocumen
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 這個上傳檔案是不是某份申請文件（申請人的證明文件，含個資，不可匿名下載）
+    /// </summary>
+    Task<bool> ExistsByUploadedFileIdAsync(
+        Guid uploadedFileId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 刪除申請的所有文件
     /// </summary>
     Task DeleteByApplicationIdAsync(

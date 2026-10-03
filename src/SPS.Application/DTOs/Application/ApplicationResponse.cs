@@ -8,6 +8,14 @@ namespace SPS.Application.DTOs.Application;
 public class ApplicationResponse
 {
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 存取密鑰明文——只有「建立申請」那一次的回應會有值，由 controller 轉成 HttpOnly cookie 後清掉，
+    /// 不會出現在回應內容；其他情況一律為 null
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? AccessKey { get; set; }
+
     public string ApplicationNumber { get; set; } = string.Empty;
     public ApplicantType ApplicantType { get; set; }
     public Guid? ExistingMemberId { get; set; }

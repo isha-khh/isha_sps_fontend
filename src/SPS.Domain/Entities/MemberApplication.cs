@@ -34,6 +34,13 @@ public class MemberApplication : BaseEntity<Guid>
     /// </summary>
     public ApplicationStatus Status { get; set; }
 
+    /// <summary>
+    /// 存取密鑰的 SHA-256（hex）。匿名申請人沒有帳號，建立申請時發一組隨機密鑰（只回給建立者一次，
+    /// 以 cookie 保存），之後匿名讀寫這份申請都要出示，資料庫只存雜湊。
+    /// 舊資料（這個機制上線前建立的）是 null，表示匿名者不可存取，審核走後台端點不受影響
+    /// </summary>
+    public string? AccessKeyHash { get; set; }
+
     // ==================== 申請人信息 ====================
 
     /// <summary>

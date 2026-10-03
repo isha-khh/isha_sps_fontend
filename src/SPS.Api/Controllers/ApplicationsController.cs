@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SPS.Api.Attributes;
 using SPS.Application.DTOs.Application;
+using SPS.Application.DTOs.SystemSettings;
 using SPS.Application.Interfaces.IServices;
+using SPS.Domain.Enums;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace SPS.Api.Controllers;
@@ -17,6 +20,13 @@ public class ApplicationsController : ControllerBase
     private readonly IApplicationService _applicationService;
     private readonly IBusinessRegistryService _businessRegistryService;
     private readonly ILogger<ApplicationsController> _logger;
+    private readonly ISystemSettingService _settingService;
+
+    /// <summary>申請存取密鑰 cookie 的名稱前綴；每份申請一個 cookie（<c>appkey_{申請id}</c>），同時填多份申請不會互相覆蓋</summary>
+    private const string KeyCookiePrefix = "appkey_";
+
+    /// <summary>存取密鑰 cookie 的有效天數：夠填完申請與補件，過期就得重新申請</summary>
+    private const int KeyCookieDays = 7;
 
     /// <summary>
     /// 初始化會員申請控制器
@@ -27,11 +37,58 @@ public class ApplicationsController : ControllerBase
     public ApplicationsController(
         IApplicationService applicationService,
         IBusinessRegistryService businessRegistryService,
-        ILogger<ApplicationsController> logger)
+        ILogger<ApplicationsController> logger,
+        ISystemSettingService settingService)
     {
         _applicationService = applicationService;
         _businessRegistryService = businessRegistryService;
         _logger = logger;
+        _settingService = settingService;
+    }
+
+    /// <summary>
+    /// 這支控制器的端點都開放匿名（申請人註冊前沒有帳號），所以改成「持有這份申請的密鑰才能存取」：
+    /// 建立申請時發一組隨機密鑰存進 HttpOnly cookie，之後讀寫都要出示。
+    /// 放行條件：後台使用者有對應權限（讀=ViewApplications、寫=ManageApplications），
+    /// 或這份是升級申請且呼叫者就是該會員本人，或 cookie 密鑰正確。
+    /// 不符一律回 404，不透露這個 id 存不存在。
+    /// </summary>
+    private async Task<IActionResult?> DenyUnlessCanAccessAsync(Guid applicationId, bool write, CancellationToken cancellationToken)
+    {
+        var admin = User.GetAdminPermissions();
+        if (write ? admin.HasAny(UserPermission.ManageApplications) : admin.HasAny(UserPermission.ViewApplications))
+            return null;
+
+        Guid? memberId = Guid.TryParse(User.FindFirst("MemberId")?.Value, out var m) ? m : null;
+        var key = Request.Cookies[KeyCookiePrefix + applicationId];
+
+        return await _applicationService.CanAccessAsync(applicationId, key, memberId, cancellationToken)
+            ? null
+            : NotFound(new { error = "申請不存在" });
+    }
+
+    /// <summary>
+    /// 把存取密鑰寫進 HttpOnly cookie（安全設定與登入 cookie 一致，從 DB 的 HttpSecurity 設定讀）
+    /// </summary>
+    private async Task SetAccessKeyCookieAsync(Guid applicationId, string accessKey, CancellationToken cancellationToken)
+    {
+        var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development";
+        var settings = await _settingService.GetSettingAsync<HttpSecuritySettingsDto>("HttpSecurity", cancellationToken);
+        var cookie = settings.Data?.Cookie ?? new CookieSecuritySettingsDto();
+
+        Response.Cookies.Append(KeyCookiePrefix + applicationId, accessKey, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = isProduction && cookie.Secure,
+            SameSite = (cookie.SameSite ?? "Lax").ToLowerInvariant() switch
+            {
+                "strict" => SameSiteMode.Strict,
+                "none" => SameSiteMode.None,
+                _ => SameSiteMode.Lax
+            },
+            Path = "/",
+            Expires = DateTimeOffset.UtcNow.AddDays(KeyCookieDays)
+        });
     }
 
     /// <summary>
@@ -84,6 +141,13 @@ public class ApplicationsController : ControllerBase
             return BadRequest(new { error = result.Error });
         }
 
+        // 密鑰只給這一次：轉成 HttpOnly cookie，不放在回應內容（AccessKey 本身也標了 JsonIgnore）
+        if (result.Data!.AccessKey != null)
+        {
+            await SetAccessKeyCookieAsync(result.Data.Id, result.Data.AccessKey, cancellationToken);
+            result.Data.AccessKey = null;
+        }
+
         return Ok(result.Data);
     }
 
@@ -101,6 +165,9 @@ public class ApplicationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetApplication(Guid id, CancellationToken cancellationToken)
     {
+        var denied = await DenyUnlessCanAccessAsync(id, write: false, cancellationToken);
+        if (denied != null) return denied;
+
         var result = await _applicationService.GetApplicationByIdAsync(id, cancellationToken);
 
         if (!result.IsSuccess)
@@ -129,6 +196,9 @@ public class ApplicationsController : ControllerBase
         [FromBody] UpdateApplicationRequest request,
         CancellationToken cancellationToken)
     {
+        var denied = await DenyUnlessCanAccessAsync(id, write: true, cancellationToken);
+        if (denied != null) return denied;
+
         var result = await _applicationService.UpdateApplicationAsync(id, request, cancellationToken);
 
         if (!result.IsSuccess)
@@ -201,6 +271,9 @@ public class ApplicationsController : ControllerBase
             return BadRequest(new { error = "申請ID不匹配" });
         }
 
+        var denied = await DenyUnlessCanAccessAsync(id, write: true, cancellationToken);
+        if (denied != null) return denied;
+
         var result = await _applicationService.SubmitApplicationAsync(
             request.ApplicationId,
             request.Remark,
@@ -232,6 +305,9 @@ public class ApplicationsController : ControllerBase
         [FromBody] CancelApplicationRequest? request,
         CancellationToken cancellationToken)
     {
+        var denied = await DenyUnlessCanAccessAsync(id, write: true, cancellationToken);
+        if (denied != null) return denied;
+
         var result = await _applicationService.CancelApplicationAsync(
             id,
             request?.Reason,
@@ -269,6 +345,9 @@ public class ApplicationsController : ControllerBase
             return BadRequest(new { error = "申請ID不匹配" });
         }
 
+        var denied = await DenyUnlessCanAccessAsync(id, write: true, cancellationToken);
+        if (denied != null) return denied;
+
         var result = await _applicationService.UploadDocumentAsync(request, cancellationToken);
 
         if (!result.IsSuccess)
@@ -295,6 +374,12 @@ public class ApplicationsController : ControllerBase
         Guid documentId,
         CancellationToken cancellationToken)
     {
+        var owner = await _applicationService.GetApplicationIdByDocumentIdAsync(documentId, cancellationToken);
+        if (owner == null) return NotFound(new { error = "文件不存在" });
+
+        var denied = await DenyUnlessCanAccessAsync(owner.Value, write: true, cancellationToken);
+        if (denied != null) return denied;
+
         var result = await _applicationService.DeleteDocumentAsync(documentId, cancellationToken);
 
         if (!result.IsSuccess)
@@ -321,6 +406,9 @@ public class ApplicationsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
+        var denied = await DenyUnlessCanAccessAsync(id, write: false, cancellationToken);
+        if (denied != null) return denied;
+
         var result = await _applicationService.ValidateApplicationForSubmitAsync(id, cancellationToken);
 
         if (!result.IsSuccess)

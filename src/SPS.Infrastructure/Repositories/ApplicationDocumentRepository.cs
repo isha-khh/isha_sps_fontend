@@ -16,6 +16,11 @@ public class ApplicationDocumentRepository : Repository<ApplicationDocument, Gui
     {
     }
 
+    public async Task<bool> ExistsByUploadedFileIdAsync(Guid uploadedFileId, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.AnyAsync(d => d.UploadedFileId == uploadedFileId, cancellationToken);
+    }
+
     public async Task<List<ApplicationDocument>> GetByApplicationIdAsync(Guid applicationId, CancellationToken cancellationToken = default)
     {
         return await _dbSet
