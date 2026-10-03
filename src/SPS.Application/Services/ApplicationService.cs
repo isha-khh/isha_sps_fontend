@@ -416,8 +416,40 @@ public class ApplicationService : IApplicationService
     {
         try
         {
-            var applications = await _unitOfWork.Applications.GetByEmailAsync(email, cancellationToken);
-            var response = applications.Select(MapToListItemResponse).ToList();
+            // 新流程：申請人的信箱、姓名、電話存在「申請成員」上，MemberApplication.Email／ContactName／Phone 是空的，
+            // 只有舊資料才直接存在申請本身。以前只查申請本身，所以查不到新申請；兩邊都要找
+            var ids = (await _unitOfWork.ApplicationMembers.FindByEmailAsync(email, cancellationToken))
+                .Select(m => m.ApplicationId)
+                .ToHashSet();
+            foreach (var legacy in await _unitOfWork.Applications.GetByEmailAsync(email, cancellationToken))
+                ids.Add(legacy.Id);
+
+            var response = new List<ApplicationListItemResponse>();
+            foreach (var id in ids)
+            {
+                var application = await _unitOfWork.Applications.GetByIdAsync(id, cancellationToken);
+                if (application == null) continue;
+
+                var item = MapToListItemResponse(application);
+                if (string.IsNullOrEmpty(item.Email))
+                {
+                    // 申請本身沒有聯絡資料（新流程）：用聯絡人（第一位成員）補上
+                    var contact = (await _unitOfWork.ApplicationMembers.GetByApplicationIdAsync(id, cancellationToken))
+                        .OrderBy(m => m.OrderIndex)
+                        .FirstOrDefault();
+                    if (contact != null)
+                    {
+                        item.Email = contact.Email;
+                        item.ContactName = contact.ContactName;
+                        item.Phone = contact.Phone;
+                        item.Extension = contact.Extension;
+                        item.MobilePhone = contact.MobilePhone;
+                    }
+                }
+                response.Add(item);
+            }
+
+            response = response.OrderByDescending(r => r.CreatedTime).ToList();
             return Result<List<ApplicationListItemResponse>>.Success(response);
         }
         catch (Exception ex)

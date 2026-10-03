@@ -41,20 +41,22 @@ public interface ITokenService
     /// <summary>
     /// 生成密碼重置令牌
     /// </summary>
-    string GeneratePasswordResetToken(Guid userId, string email);
+    string GeneratePasswordResetToken(Guid userId, string email, string passwordStamp);
 
     /// <summary>
-    /// 驗證密碼重置令牌並返回使用者ID
+    /// 驗證密碼重置令牌（簽章、效期、用途）並返回使用者ID與密碼指紋；
+    /// 呼叫端還要用 <see cref="Common.PasswordStamp.Matches"/> 比對指紋，令牌才算「還沒被用過」
     /// </summary>
-    Guid? ValidatePasswordResetToken(string token);
+    Common.PasswordResetTokenInfo? ValidatePasswordResetToken(string token);
 
     /// <summary>
     /// 生成會員密碼重置令牌
     /// </summary>
-    string GenerateMemberPasswordResetToken(Guid memberId, string email);
+    string GenerateMemberPasswordResetToken(Guid memberId, string email, string passwordStamp);
 
     /// <summary>
-    /// 驗證會員密碼重置令牌並返回會員ID
+    /// 驗證會員密碼重置令牌（簽章、效期、用途）並返回會員ID與密碼指紋；
+    /// 呼叫端還要用 <see cref="Common.PasswordStamp.Matches"/> 比對指紋，令牌才算「還沒被用過」
     /// </summary>
-    Guid? ValidateMemberPasswordResetToken(string token);
+    Common.PasswordResetTokenInfo? ValidateMemberPasswordResetToken(string token);
 }

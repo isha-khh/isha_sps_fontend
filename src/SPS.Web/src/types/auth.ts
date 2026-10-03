@@ -86,6 +86,8 @@ export interface MemberChangePasswordRequest {
  */
 export interface MemberForgotPasswordRequest {
   email: string;
+  /** 驗證碼；後台「系統設定」有開 forgot-password 場景時後端會驗證 */
+  captcha?: CaptchaData;
 }
 
 /**

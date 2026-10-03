@@ -443,7 +443,7 @@ public class AuthService : IAuthService
         }
 
         // 生成重置密碼 Token
-        var resetToken = _tokenService.GenerateMemberPasswordResetToken(member.Id, member.Email);
+        var resetToken = _tokenService.GenerateMemberPasswordResetToken(member.Id, member.Email, PasswordStamp.Compute(member.Password));
 
         // 構建重置密碼連結
         var baseUrl = _configuration["App:BaseUrl"] ?? "http://localhost:3000";
@@ -476,19 +476,26 @@ public class AuthService : IAuthService
         _logger.LogInformation("Reset password attempt");
 
         // 驗證 Token
-        var memberId = _tokenService.ValidateMemberPasswordResetToken(request.Token);
-        if (memberId == null)
+        var tokenInfo = _tokenService.ValidateMemberPasswordResetToken(request.Token);
+        if (tokenInfo == null)
         {
             _logger.LogWarning("Reset password failed: Invalid or expired token");
             return Result.Failure("重置連結無效或已過期，請重新申請");
         }
 
         // 查找會員
-        var member = await _unitOfWork.Members.GetByIdAsync(memberId.Value, cancellationToken);
+        var member = await _unitOfWork.Members.GetByIdAsync(tokenInfo.SubjectId, cancellationToken);
         if (member == null)
         {
-            _logger.LogWarning("Reset password failed: Member {MemberId} not found", memberId);
+            _logger.LogWarning("Reset password failed: Member {MemberId} not found", tokenInfo.SubjectId);
             return Result.Failure("會員不存在");
+        }
+
+        // 連結只能用一次：簽發當下的密碼指紋要和目前一致，密碼改過（含用這個連結重設過）就失效
+        if (!PasswordStamp.Matches(tokenInfo.PasswordStamp, member.Password))
+        {
+            _logger.LogWarning("Reset password failed: token already used or password changed for member {MemberId}", member.Id);
+            return Result.Failure("重置連結無效或已過期，請重新申請");
         }
 
         // 檢查會員狀態
@@ -557,19 +564,25 @@ public class AuthService : IAuthService
         _logger.LogInformation("Validating member reset token");
 
         // 驗證 Token
-        var memberId = _tokenService.ValidateMemberPasswordResetToken(token);
-        if (memberId == null)
+        var tokenInfo = _tokenService.ValidateMemberPasswordResetToken(token);
+        if (tokenInfo == null)
         {
             _logger.LogWarning("Token validation failed: Invalid or expired token");
             return Result<string>.Failure("重置連結無效或已過期");
         }
 
         // 查找會員
-        var member = await _unitOfWork.Members.GetByIdAsync(memberId.Value, cancellationToken);
+        var member = await _unitOfWork.Members.GetByIdAsync(tokenInfo.SubjectId, cancellationToken);
         if (member == null)
         {
-            _logger.LogWarning("Token validation failed: Member {MemberId} not found", memberId);
+            _logger.LogWarning("Token validation failed: Member {MemberId} not found", tokenInfo.SubjectId);
             return Result<string>.Failure("會員不存在");
+        }
+
+        // 已經用過（或密碼已被改過）的連結視同無效，連同「會員不存在」都回同樣的訊息，不洩漏差別
+        if (!PasswordStamp.Matches(tokenInfo.PasswordStamp, member.Password))
+        {
+            return Result<string>.Failure("重置連結無效或已過期");
         }
 
         // 返回會員郵箱（用於前端顯示）

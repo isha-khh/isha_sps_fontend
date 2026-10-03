@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SPS.Application.DTOs.Auth;
 using SPS.Application.DTOs.SystemSettings;
 using SPS.Application.Interfaces.IServices;
@@ -23,6 +24,19 @@ public class AuthController : ControllerBase
     private readonly IActionLogService _actionLogService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthController> _logger;
+    private readonly IMemoryCache _cache;
+
+    /// <summary>忘記密碼：同一個信箱兩次寄信之間至少間隔多久（避免被拿來灌爆某人的信箱）</summary>
+    private static readonly TimeSpan ForgotPasswordEmailCooldown = TimeSpan.FromMinutes(1);
+
+    /// <summary>忘記密碼：同一個來源 IP 在視窗內最多可以送出幾次</summary>
+    private const int MaxForgotPasswordPerIp = 10;
+    private static readonly TimeSpan ForgotPasswordIpWindow = TimeSpan.FromMinutes(15);
+
+    private sealed class RequestCounter
+    {
+        public int Count;
+    }
 
     public AuthController(
         IAuthService authService,
@@ -31,8 +45,10 @@ public class AuthController : ControllerBase
         ISystemSettingService settingService,
         IActionLogService actionLogService,
         IConfiguration configuration,
-        ILogger<AuthController> logger)
+        ILogger<AuthController> logger,
+        IMemoryCache cache)
     {
+        _cache = cache;
         _authService = authService;
         _captchaService = captchaService;
         _fido2Service = fido2Service;
@@ -440,6 +456,40 @@ public class AuthController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Forgot password request for email: {Email}", request.Email);
+
+        var ipAddress = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+            ?? HttpContext.Request.Headers["X-Real-IP"].FirstOrDefault()
+            ?? HttpContext.Connection.RemoteIpAddress?.ToString();
+
+        // 這支匿名端點會「替任意信箱寄信」，沒有任何保護的話可以拿來灌爆別人的信箱。三道防線：
+        // 1) 驗證碼（系統設定有開 forgot-password 場景時；沒設定就不驗，所以還需要下面兩道）
+        if (await _captchaService.IsScenarioEnabledAsync("forgot-password", cancellationToken))
+        {
+            var captchaResult = await _captchaService.VerifyCaptchaAsync(request.Captcha, ipAddress, cancellationToken);
+            if (!captchaResult.IsSuccess)
+            {
+                return BadRequest(new { error = captchaResult.Error });
+            }
+        }
+
+        // 2) 同一個來源 IP 15 分鐘內最多 10 次（視窗固定，不會因為持續嘗試而延長）
+        var counter = _cache.GetOrCreate($"forgot-pw-ip:{HttpContext.Connection.RemoteIpAddress}", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = ForgotPasswordIpWindow;
+            return new RequestCounter();
+        })!;
+        if (Interlocked.Increment(ref counter.Count) > MaxForgotPasswordPerIp)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, new { error = "操作過於頻繁，請 15 分鐘後再試" });
+        }
+
+        // 3) 同一個信箱 1 分鐘內只寄一次；冷卻中也回成功（和「查無此信箱」一樣，不透露這個信箱有沒有註冊、剛不剛寄過）
+        var emailKey = $"forgot-pw-email:{request.Email.Trim().ToLowerInvariant()}";
+        if (_cache.TryGetValue(emailKey, out _))
+        {
+            return Ok(new { message = "重置密碼郵件已發送至您的信箱" });
+        }
+        _cache.Set(emailKey, true, ForgotPasswordEmailCooldown);
 
         var result = await _authService.ForgotPasswordAsync(request, cancellationToken);
 

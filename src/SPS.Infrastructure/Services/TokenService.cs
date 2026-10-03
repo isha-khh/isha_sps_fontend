@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SPS.Application.DTOs.Auth;
+using SPS.Application.Common;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Constants;
 using SPS.Domain.Entities;
@@ -337,14 +338,15 @@ public class TokenService : ITokenService
     /// <summary>
     /// 生成密碼重置令牌（有效期 30 分鐘）
     /// </summary>
-    public string GeneratePasswordResetToken(Guid userId, string email)
+    public string GeneratePasswordResetToken(Guid userId, string email, string passwordStamp)
     {
         var claims = new List<Claim>
         {
             new Claim("UserId", userId.ToString()),
             new Claim(ClaimTypes.Email, email),
             new Claim("Purpose", "PasswordReset"),
-            new Claim("TokenId", Guid.NewGuid().ToString()) // 確保每次生成的 Token 都是唯一的
+            new Claim("TokenId", Guid.NewGuid().ToString()), // 確保每次生成的 Token 都是唯一的
+            new Claim("PwdStamp", passwordStamp) // 密碼一改就對不上，讓連結用過一次就失效
         };
 
         var key = new SymmetricSecurityKey(
@@ -370,7 +372,7 @@ public class TokenService : ITokenService
     /// <summary>
     /// 驗證密碼重置令牌並返回使用者ID
     /// </summary>
-    public Guid? ValidatePasswordResetToken(string token)
+    public PasswordResetTokenInfo? ValidatePasswordResetToken(string token)
     {
         try
         {
@@ -400,7 +402,7 @@ public class TokenService : ITokenService
             var userIdClaim = principal.FindFirst("UserId");
             if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
             {
-                return userId;
+                return new PasswordResetTokenInfo(userId, principal.FindFirst("PwdStamp")?.Value);
             }
 
             return null;
@@ -414,14 +416,15 @@ public class TokenService : ITokenService
     /// <summary>
     /// 生成會員密碼重置令牌（有效期 30 分鐘）
     /// </summary>
-    public string GenerateMemberPasswordResetToken(Guid memberId, string email)
+    public string GenerateMemberPasswordResetToken(Guid memberId, string email, string passwordStamp)
     {
         var claims = new List<Claim>
         {
             new Claim("MemberId", memberId.ToString()),
             new Claim(ClaimTypes.Email, email),
             new Claim("Purpose", "MemberPasswordReset"),
-            new Claim("TokenId", Guid.NewGuid().ToString())
+            new Claim("TokenId", Guid.NewGuid().ToString()),
+            new Claim("PwdStamp", passwordStamp) // 密碼一改就對不上，讓連結用過一次就失效
         };
 
         var key = new SymmetricSecurityKey(
@@ -447,7 +450,7 @@ public class TokenService : ITokenService
     /// <summary>
     /// 驗證會員密碼重置令牌並返回會員ID
     /// </summary>
-    public Guid? ValidateMemberPasswordResetToken(string token)
+    public PasswordResetTokenInfo? ValidateMemberPasswordResetToken(string token)
     {
         try
         {
@@ -477,7 +480,7 @@ public class TokenService : ITokenService
             var memberIdClaim = principal.FindFirst("MemberId");
             if (memberIdClaim != null && Guid.TryParse(memberIdClaim.Value, out var memberId))
             {
-                return memberId;
+                return new PasswordResetTokenInfo(memberId, principal.FindFirst("PwdStamp")?.Value);
             }
 
             return null;

@@ -473,7 +473,7 @@ public class AdminAuthService : IAdminAuthService
         }
 
         // 生成重置密碼 Token
-        var resetToken = _tokenService.GeneratePasswordResetToken(user.Id, user.Email ?? request.Email);
+        var resetToken = _tokenService.GeneratePasswordResetToken(user.Id, user.Email ?? request.Email, PasswordStamp.Compute(user.Password));
 
         // 構建重置密碼連結
         var adminBaseUrl = _configuration["App:AdminBaseUrl"] ?? "http://localhost:5173";
@@ -506,19 +506,26 @@ public class AdminAuthService : IAdminAuthService
         _logger.LogInformation("Reset password attempt");
 
         // 驗證 Token
-        var userId = _tokenService.ValidatePasswordResetToken(request.Token);
-        if (userId == null)
+        var tokenInfo = _tokenService.ValidatePasswordResetToken(request.Token);
+        if (tokenInfo == null)
         {
             _logger.LogWarning("Reset password failed: Invalid or expired token");
             return Result.Failure("重置連結無效或已過期，請重新申請");
         }
 
         // 查找使用者
-        var user = await _unitOfWork.Users.GetByIdAsync(userId.Value, cancellationToken);
+        var user = await _unitOfWork.Users.GetByIdAsync(tokenInfo.SubjectId, cancellationToken);
         if (user == null)
         {
-            _logger.LogWarning("Reset password failed: User {UserId} not found", userId);
+            _logger.LogWarning("Reset password failed: User {UserId} not found", tokenInfo.SubjectId);
             return Result.Failure("使用者不存在");
+        }
+
+        // 連結只能用一次：簽發當下的密碼指紋要和目前一致，密碼改過（含用這個連結重設過）就失效
+        if (!PasswordStamp.Matches(tokenInfo.PasswordStamp, user.Password))
+        {
+            _logger.LogWarning("Reset password failed: token already used or password changed for user {UserId}", user.Id);
+            return Result.Failure("重置連結無效或已過期，請重新申請");
         }
 
         // 檢查使用者狀態
@@ -583,19 +590,25 @@ public class AdminAuthService : IAdminAuthService
         _logger.LogInformation("Validating reset token");
 
         // 驗證 Token
-        var userId = _tokenService.ValidatePasswordResetToken(token);
-        if (userId == null)
+        var tokenInfo = _tokenService.ValidatePasswordResetToken(token);
+        if (tokenInfo == null)
         {
             _logger.LogWarning("Token validation failed: Invalid or expired token");
             return Result<string>.Failure("重置連結無效或已過期");
         }
 
         // 查找使用者
-        var user = await _unitOfWork.Users.GetByIdAsync(userId.Value, cancellationToken);
+        var user = await _unitOfWork.Users.GetByIdAsync(tokenInfo.SubjectId, cancellationToken);
         if (user == null)
         {
-            _logger.LogWarning("Token validation failed: User {UserId} not found", userId);
+            _logger.LogWarning("Token validation failed: User {UserId} not found", tokenInfo.SubjectId);
             return Result<string>.Failure("使用者不存在");
+        }
+
+        // 已經用過（或密碼已被改過）的連結視同無效
+        if (!PasswordStamp.Matches(tokenInfo.PasswordStamp, user.Password))
+        {
+            return Result<string>.Failure("重置連結無效或已過期");
         }
 
         // 返回使用者郵箱（用於前端顯示）
