@@ -44,6 +44,7 @@ import { CategoriesPage } from '@/pages/taxonomy/CategoriesPage';
 
 // Content
 import { BannersPage } from '@/pages/content/BannersPage';
+import { FooterLinksPage } from '@/pages/content/FooterLinksPage';
 import { PopupAnnouncementsPage } from '@/pages/content/PopupAnnouncementsPage';
 import { PopupAnnouncementFormPage } from '@/pages/content/PopupAnnouncementFormPage';
 
@@ -200,6 +201,7 @@ function App() {
 
           {/* 內容管理 */}
           <Route path="content/banners" element={<BannersPage />} />
+          <Route path="content/footer-links" element={<FooterLinksPage />} />
           <Route path="content/files" element={<FilesPage />} />
           <Route path="content/albums" element={<AlbumsPage />} />
           <Route path="content/videos" element={<VideosPage />} />

@@ -515,3 +515,21 @@ export type UpdateApplicationRequest = RegisterRequest;
 export type CancelApplicationResponse = {
     success: boolean;
 };
+
+/**
+ * 頁尾（Footer）的外部連結，後台「內容管理 → 頁尾連結」維護（`GET /api/settings/footer-links/public`）。
+ * 欄位空字串＝前台不顯示該項目；`functionZoneUrl` 可以是站內路徑（`/serve`）或 http／https 網址，
+ * 其餘一律是 http／https 網址。
+ */
+export interface FooterLinks {
+    functionZoneUrl: string;
+    lineUrl: string;
+    facebookUrl: string;
+    instagramUrl: string;
+    youTubeUrl: string;
+    threadsUrl: string;
+    podcastUrl: string;
+    accessibilityBadgeUrl: string;
+    idaUrl: string;
+    ishaUrl: string;
+}

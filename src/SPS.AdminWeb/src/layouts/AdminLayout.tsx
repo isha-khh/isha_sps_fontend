@@ -76,6 +76,7 @@ const allMenuItems: MenuItemWithPermission[] = [
     children: [
       { id: 'banners', label: '橫幅管理', url: '/content/banners', permissions: [Permission.ManageBanners] },
       { id: 'popup-announcements', label: '彈窗公告', url: '/content/popup-announcements', permissions: [Permission.ManageSiteContent] },
+      { id: 'footer-links', label: '頁尾連結', url: '/content/footer-links', permissions: [Permission.ManageSiteContent] },
       { id: 'files', label: '系統檔案', url: '/content/files', permissions: [Permission.ManageFiles] },
       { id: 'albums', label: '相簿管理', url: '/content/albums', permissions: [Permission.ManageMedia] },
       { id: 'videos', label: '影音管理', url: '/content/videos', permissions: [Permission.ManageMedia] },

@@ -1,5 +1,14 @@
 import Link from "next/link";
 import { withBasePath } from "@/lib/api-client";
+import { fetchFooterLinks } from "@/lib/api.server";
+
+/**
+ * 外部網址只放行 http／https。後端已經驗證過一次，這裡再擋一次：就算資料庫裡被塞進
+ * `javascript:` 之類的值，也不會變成出現在每一頁的可點連結。
+ */
+function safeExternalUrl(url: string): string | undefined {
+  return /^https?:\/\//i.test(url.trim()) ? url.trim() : undefined;
+}
 
 /**
  * 過渡期元件：內容照抄舊站的 page/_uc/footer.html，樣式繼續吃舊站 CSS。
@@ -9,11 +18,33 @@ import { withBasePath } from "@/lib/api-client";
  * 「公告事項」／「產業案例」／「會員中心」／「常見問題」／「關於
  * 我們」／「網站導覽」／「我要媒合」連到真的存在的路由，用 next/link
  * （ESLint 的 no-html-link-for-pages 規則對已存在的路由會直接噴錯）；
- * 「功能專區」設計稿 `page/_uc/footer.html` 本身也只給 `#`，沒有對應
- * 頁面/明確目標，維持原本的 `<a href="#">`，等之後確認這塊實際上該
- * 連去哪裡再換。
+ * 2026-10-03：「功能專區」、社群（LINE／Facebook／Instagram／YouTube／Threads／Podcast）、
+ * 頁尾標章的連結原本全是設計稿遺留的 `href="#"`（點了只會回到頁首）。改成吃後台「內容管理 → 頁尾連結」
+ * 的設定（`fetchFooterLinks`，快取 5 分鐘）：**沒設定網址的項目整個不顯示**，不再出現假連結；
+ * 標章圖片固定，只有點擊後的連結可設定，沒設連結就只顯示圖片。
  */
-export default function Footer() {
+export default async function Footer() {
+  const links = await fetchFooterLinks();
+
+  const functionZone = links.functionZoneUrl.trim();
+  const functionZoneInternal = functionZone.startsWith("/") && !functionZone.startsWith("//") ? functionZone : undefined;
+  const functionZoneExternal = safeExternalUrl(functionZone);
+
+  const socials = [
+    { url: safeExternalUrl(links.lineUrl), cls: "bi_line", img: "fot_line.svg", label: "LINE 官方帳號", title: "LINE 官方帳號" },
+    { url: safeExternalUrl(links.facebookUrl), cls: "bi_fb", img: "fot_fb.svg", label: "Facebook 粉絲專頁", title: "Facebook 粉絲專頁" },
+    { url: safeExternalUrl(links.instagramUrl), cls: "bi_ig", img: "fot_ig.svg", label: "Instagram", title: "Instagram" },
+    { url: safeExternalUrl(links.youTubeUrl), cls: "bi_yt", img: "fot_yt.svg", label: "YouTube", title: "YouTube" },
+    { url: safeExternalUrl(links.threadsUrl), cls: "bi_ts", img: "fot_th.svg", label: "Threads", title: "Threads" },
+    { url: safeExternalUrl(links.podcastUrl), cls: "bi_pod", img: "fot_pod.svg", label: "Podcast", title: "Podcast" },
+  ].filter((item) => item.url);
+
+  const badges = [
+    { url: safeExternalUrl(links.accessibilityBadgeUrl), img: "footer_1.jpg", alt: "無障礙網頁標章2.0", title: "無障礙網頁標章2.0" },
+    { url: safeExternalUrl(links.idaUrl), img: "footer_2.svg", alt: "經濟部產業發展署", title: "經濟部產業發展署" },
+    { url: safeExternalUrl(links.ishaUrl), img: "footer_3.svg", alt: "工業安全衛生協會", title: "工業安全衛生協會" },
+  ];
+
   return (
     <footer className="footer" role="contentinfo">
       <div className="footer-top">
@@ -86,11 +117,19 @@ export default function Footer() {
                     公告事項
                   </Link>
                 </li>
-                <li>
-                  <a href="#" title="前往 功能專區">
-                    功能專區
-                  </a>
-                </li>
+                {functionZoneInternal ? (
+                  <li>
+                    <Link href={functionZoneInternal} title="前往 功能專區">
+                      功能專區
+                    </Link>
+                  </li>
+                ) : functionZoneExternal ? (
+                  <li>
+                    <a href={functionZoneExternal} target="_blank" rel="noopener noreferrer" title="前往 功能專區(另開新視窗)">
+                      功能專區
+                    </a>
+                  </li>
+                ) : null}
                 <li>
                   <Link href="/matching/enterprise" title="前往 我要媒合">
                     我要媒合
@@ -150,50 +189,19 @@ export default function Footer() {
           </div>
 
           <div className="footer-mid">
-            <ul className="social-list">
-              <li>
-                <a href="#" target="_blank" rel="noopener noreferrer" title="LINE 官方帳號(另開新視窗)">
-                  <span className="bi_line" aria-hidden="true">
-                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_line.svg")} alt="LINE 官方帳號" />
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" target="_blank" rel="noopener noreferrer" title="Facebook 粉絲專頁(另開新視窗)">
-                  <span className="bi_fb" aria-hidden="true">
-                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_fb.svg")} alt="Facebook 粉絲專頁" />
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" target="_blank" rel="noopener noreferrer" title="Instagram(另開新視窗)">
-                  <span className="bi_ig" aria-hidden="true">
-                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_ig.svg")} alt="Instagram" />
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" target="_blank" rel="noopener noreferrer" title="YouTube(另開新視窗)">
-                  <span className="bi_yt" aria-hidden="true">
-                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_yt.svg")} alt="YouTube" />
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" target="_blank" rel="noopener noreferrer" title="Threads(另開新視窗)">
-                  <span className="bi_ts" aria-hidden="true">
-                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_th.svg")} alt="Threads" />
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" target="_blank" rel="noopener noreferrer" title="Podcast(另開新視窗)">
-                  <span className="bi_pod" aria-hidden="true">
-                    <img className="img-fluid d-block" src={withBasePath("/images/all/fot_pod.svg")} alt="Podcast" />
-                  </span>
-                </a>
-              </li>
-            </ul>
+            {socials.length > 0 && (
+              <ul className="social-list">
+                {socials.map((item) => (
+                  <li key={item.cls}>
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" title={`${item.title}(另開新視窗)`}>
+                      <span className={item.cls} aria-hidden="true">
+                        <img className="img-fluid d-block" src={withBasePath(`/images/all/${item.img}`)} alt={item.label} />
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <div className="counter-list">
               <span>
@@ -206,15 +214,16 @@ export default function Footer() {
 
           <div className="footer-bottom">
             <div className="badges-group">
-              <a href="#" target="_blank" rel="noopener noreferrer" title="無障礙網頁標章2.0（另開新視窗）">
-                <img className="img-fluid" src={withBasePath("/images/all/footer_1.jpg")} alt="無障礙網頁標章2.0" />
-              </a>
-              <a href="https://www.ida.gov.tw/" target="_blank" rel="noopener noreferrer" title="經濟部產業發展署（另開新視窗）">
-                <img className="img-fluid" src={withBasePath("/images/all/footer_2.svg")} alt="經濟部產業發展署" />
-              </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" title="工業安全衛生協會（另開新視窗）">
-                <img className="img-fluid" src={withBasePath("/images/all/footer_3.svg")} alt="工業安全衛生協會" />
-              </a>
+              {badges.map((badge) => {
+                const image = <img className="img-fluid" src={withBasePath(`/images/all/${badge.img}`)} alt={badge.alt} />;
+                return badge.url ? (
+                  <a href={badge.url} target="_blank" rel="noopener noreferrer" title={`${badge.title}（另開新視窗）`} key={badge.img}>
+                    {image}
+                  </a>
+                ) : (
+                  <span key={badge.img}>{image}</span>
+                );
+              })}
             </div>
 
             <div className="copyright-group">

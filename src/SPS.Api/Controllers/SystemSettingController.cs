@@ -218,6 +218,50 @@ public class SystemSettingController : ControllerBase
         return result.IsSuccess ? Ok(result.Data ?? new MembershipGuideSettingsDto()) : Ok(new MembershipGuideSettingsDto());
     }
 
+    // ==================== 頁尾連結設定 ====================
+
+    /// <summary>
+    /// 獲取頁尾連結設定（後台編輯用）
+    /// </summary>
+    [HttpGet("footer-links")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "獲取頁尾連結設定")]
+    public async Task<IActionResult> GetFooterLinksSettings()
+    {
+        var result = await _settingService.GetSettingAsync<FooterLinksSettingsDto>("FooterLinks");
+        return result.IsSuccess ? Ok(result.Data ?? new FooterLinksSettingsDto()) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>
+    /// 更新頁尾連結設定。網址只接受 http／https（功能專區另外允許站內路徑），欄位留空代表前台不顯示
+    /// </summary>
+    [HttpPut("footer-links")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新頁尾連結設定")]
+    public async Task<IActionResult> UpdateFooterLinksSettings([FromBody] FooterLinksSettingsDto settings)
+    {
+        var error = FooterLinksValidator.Validate(settings);
+        if (error != null) return BadRequest(new { error });
+
+        var result = await _settingService.UpdateSettingAsync("FooterLinks", FooterLinksValidator.Normalize(settings));
+        return result.IsSuccess ? Ok(new { message = "Footer links updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>
+    /// 獲取頁尾連結設定（公開，前台使用）。讀不到設定時回預設值，不讓頁尾因此出錯
+    /// </summary>
+    [HttpGet("footer-links/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "獲取頁尾連結設定（公開）")]
+    public async Task<IActionResult> GetFooterLinksSettingsPublic()
+    {
+        var result = await _settingService.GetSettingAsync<FooterLinksSettingsDto>("FooterLinks");
+        var data = result.IsSuccess ? result.Data ?? new FooterLinksSettingsDto() : new FooterLinksSettingsDto();
+
+        // 輸出前再驗證一次：就算資料庫裡有繞過驗證寫進去的髒資料（直接改 DB、舊版本），也不輸出不安全的網址
+        return Ok(FooterLinksValidator.Validate(data) == null ? data : new FooterLinksSettingsDto());
+    }
+
     // ==================== CAPTCHA 設定 ====================
 
     /// <summary>

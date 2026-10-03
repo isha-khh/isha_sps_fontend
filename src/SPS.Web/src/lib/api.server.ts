@@ -10,6 +10,7 @@ import {
     PagedResult,
     CompanyList,
     VideoItem,
+    FooterLinks,
 } from "@/lib/types";
 import { apiClient } from "@/lib/api-client";
 import { resolveBackendAssetUrl } from "@/lib/content-list-utils";
@@ -29,9 +30,10 @@ function buildUrl(base: string, path: string): string {
     return `${base}${normalizedPath}`;
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
+async function fetchJson<T>(url: string, revalidateSeconds?: number): Promise<T> {
+    // 預設不快取；每一頁都會用到、很少變動的資料（頁尾連結）可以給 revalidate，省下每次頁面渲染多打一支 API
     const res = await fetch(url, {
-        cache: "no-store",
+        ...(revalidateSeconds === undefined ? { cache: "no-store" as const } : { next: { revalidate: revalidateSeconds } }),
         headers: { "Accept": "application/json" },
     });
     if (!res.ok) throw new Error(`Request failed: ${url} (${res.status})`);
@@ -41,7 +43,7 @@ async function fetchJson<T>(url: string): Promise<T> {
 /**
  * 打後端 API（API_URL 優先，適用 Docker 環境）
  */
-async function getBackendJson<T>(path: string): Promise<T> {
+async function getBackendJson<T>(path: string, revalidateSeconds?: number): Promise<T> {
     const apiUrl = process.env.API_URL?.trim();
     const envBase = process.env.NEXT_PUBLIC_API_BASE?.trim();
     const reqBase = await getBaseUrlFromRequest();
@@ -50,7 +52,7 @@ async function getBackendJson<T>(path: string): Promise<T> {
     if (!base) throw new Error("Cannot determine base url for backend fetch.");
     if (!base.startsWith('http')) base = `https://${base}`;
 
-    return fetchJson<T>(buildUrl(base, path));
+    return fetchJson<T>(buildUrl(base, path), revalidateSeconds);
 }
 
 
@@ -363,4 +365,31 @@ async function tryBackendVideos(search?: string): Promise<VideoItem[] | null> {
 export async function fetchVideos(options?: { search?: string }): Promise<{ items: VideoItem[]; backendAvailable: boolean }> {
     const backendItems = await tryBackendVideos(options?.search);
     return { items: backendItems ?? [], backendAvailable: backendItems !== null };
+}
+
+/** 讀不到頁尾連結設定時的預設值：只保留產業發展署（跟設計稿一樣是真網址），其餘都不顯示 */
+const DEFAULT_FOOTER_LINKS: FooterLinks = {
+    functionZoneUrl: "",
+    lineUrl: "",
+    facebookUrl: "",
+    instagramUrl: "",
+    youTubeUrl: "",
+    threadsUrl: "",
+    podcastUrl: "",
+    accessibilityBadgeUrl: "",
+    idaUrl: "https://www.ida.gov.tw/",
+    ishaUrl: "",
+};
+
+/**
+ * 頁尾連結（後台「頁尾連結」維護）。每一頁的 Footer 都會用到，所以快取 5 分鐘——
+ * 後台改完最多 5 分鐘後前台才會看到。後端連不到就退回預設值，頁尾不能因為這個壞掉。
+ */
+export async function fetchFooterLinks(): Promise<FooterLinks> {
+    try {
+        const data = await getBackendJson<Partial<FooterLinks>>("/api/settings/footer-links/public", 300);
+        return { ...DEFAULT_FOOTER_LINKS, ...data };
+    } catch {
+        return DEFAULT_FOOTER_LINKS;
+    }
 }
