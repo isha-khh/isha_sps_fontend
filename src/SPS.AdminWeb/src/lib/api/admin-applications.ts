@@ -241,6 +241,17 @@ export const adminApplicationsApi = {
   },
 
   /**
+   * 補寄申請通知信（申請人信箱故障或沒收到信時用；信箱填錯可帶更正後的信箱）
+   * POST /api/admin/applications/{id}/resend-email
+   *
+   * 錯誤（冷卻中、信箱格式／已被使用、郵件服務停用、寄信失敗…）後端回 400 `{ error }`，由呼叫端顯示。
+   */
+  async resendNotificationEmail(id: string, newEmail?: string): Promise<{ message: string; sentTo: string }> {
+    const response = await apiClient.post(`/api/admin/applications/${id}/resend-email`, { newEmail });
+    return response.data;
+  },
+
+  /**
    * 審核申請（通過或拒絕）
    * POST /api/admin/applications/{id}/review
    */

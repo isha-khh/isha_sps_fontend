@@ -42,6 +42,13 @@ public interface IApplicationService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 申請人用「申請編號＋信箱」查進度。編號不存在、信箱對不上都回同樣的失敗，不透露哪一項錯。
+    /// </summary>
+    Task<Result<ApplicationStatusResponse>> GetStatusAsync(
+        ApplicationStatusRequest request,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 獲取申請詳情
     /// </summary>
     Task<Result<ApplicationResponse>> GetApplicationByIdAsync(

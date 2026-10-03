@@ -303,6 +303,7 @@ public class ApplicationReviewService : IApplicationReviewService
                             {
                                 { "contactName", appMember.ContactName },
                                 { "applicationNumber", application.ApplicationNumber },
+                                { "statusUrl", BuildStatusUrl(application.ApplicationNumber) },
                                 { "loginUrl", _configuration["App:BaseUrl"] ?? "https://localhost" }
                             });
                     }
@@ -315,6 +316,7 @@ public class ApplicationReviewService : IApplicationReviewService
                             {
                                 { "contactName", appMember.ContactName },
                                 { "applicationNumber", application.ApplicationNumber },
+                                { "statusUrl", BuildStatusUrl(application.ApplicationNumber) },
                                 { "rejectionReason", request.RejectionReason ?? "未說明" }
                             });
                     }
@@ -780,5 +782,124 @@ public class ApplicationReviewService : IApplicationReviewService
         }
 
         return response;
+    }
+
+    /// <summary>補寄的最短間隔：避免連點或被拿來當垃圾信發送器</summary>
+    private static readonly TimeSpan ResendCooldown = TimeSpan.FromMinutes(1);
+
+    public async Task<Result<string>> ResendNotificationEmailAsync(
+        Guid applicationId, string? newEmail, Guid operatorId, string? ipAddress,
+        CancellationToken cancellationToken = default)
+    {
+        var application = await _unitOfWork.Applications.GetByIdAsync(applicationId, cancellationToken);
+        if (application == null) return Result<string>.Failure("申請不存在");
+
+        var (template, variables) = application.Status switch
+        {
+            ApplicationStatus.PendingReview or ApplicationStatus.UnderReview => ("application_submitted",
+                new Dictionary<string, string>()),
+            ApplicationStatus.Approved => ("application_approved",
+                new Dictionary<string, string> { { "loginUrl", _configuration["App:BaseUrl"] ?? "https://localhost" } }),
+            ApplicationStatus.Rejected => ("application_rejected",
+                new Dictionary<string, string> { { "rejectionReason", application.RejectionReason ?? "未說明" } }),
+            _ => (null!, null!)
+        };
+        if (template == null)
+            return Result<string>.Failure("草稿或已取消的申請沒有可補寄的通知信");
+
+        // 收件人：申請的聯絡人（第一位成員）。原本審核結果信會寄給所有成員，補寄只針對聯絡人
+        var members = await _unitOfWork.ApplicationMembers.GetByApplicationIdAsync(applicationId, cancellationToken);
+        var contact = members.OrderBy(m => m.OrderIndex).FirstOrDefault();
+        if (contact == null) return Result<string>.Failure("找不到申請的聯絡人");
+
+        var logs = await _unitOfWork.ApplicationLogs.GetByApplicationIdAsync(applicationId, cancellationToken);
+        var last = logs.Where(l => l.Action == ResendLogAction).OrderByDescending(l => l.OperatedAt).FirstOrDefault();
+        if (last != null && DateTime.UtcNow - last.OperatedAt < ResendCooldown)
+            return Result<string>.Failure("剛補寄過，請稍後一分鐘再試");
+
+        var oldEmail = contact.Email;
+        var target = oldEmail;
+        var changing = !string.IsNullOrWhiteSpace(newEmail);
+        if (changing)
+        {
+            target = newEmail!.Trim();
+            if (application.Status == ApplicationStatus.Approved)
+                return Result<string>.Failure("已通過的申請已建立會員帳號，不能在這裡改信箱，請到會員管理修改");
+            if (!System.Net.Mail.MailAddress.TryCreate(target, out var parsed) || parsed.Address != target)
+                return Result<string>.Failure("信箱格式不正確");
+            if (!string.Equals(target, oldEmail, StringComparison.OrdinalIgnoreCase)
+                && await _unitOfWork.Members.GetByEmailAsync(target, cancellationToken) != null)
+                return Result<string>.Failure("這個信箱已經有會員帳號，請確認是否填錯");
+        }
+
+        variables["contactName"] = contact.ContactName;
+        variables["applicationNumber"] = application.ApplicationNumber;
+        variables["statusUrl"] = BuildStatusUrl(application.ApplicationNumber);
+
+        // 郵件服務停用時 SendEmailAsync 會靜默略過；補寄要明確告訴管理員「沒寄出」，不能回成功
+        if (!await _emailService.IsEnabledAsync())
+            return Result<string>.Failure("郵件服務目前停用，信件沒有寄出。請先到系統設定啟用郵件服務");
+
+        // 先寄，成功了才改信箱與寫日誌：寄不出去（信箱仍然有問題）不能留下被改過的資料
+        try
+        {
+            await _emailService.SendTemplateEmailAsync(target, template, variables);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to resend {Template} for application {ApplicationNumber} to {Email}",
+                template, application.ApplicationNumber, target);
+            return Result<string>.Failure("寄信失敗，請確認信箱是否正確、郵件設定是否正常（詳細原因見「寄信紀錄」）");
+        }
+
+        if (changing && !string.Equals(target, oldEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            contact.Email = target;
+            await _unitOfWork.ApplicationMembers.UpdateAsync(contact, cancellationToken);
+            // 申請的聯絡信箱（進度查詢用的信箱）一併更新，否則申請人用新信箱查不到
+            if (string.Equals(application.Email, oldEmail, StringComparison.OrdinalIgnoreCase))
+            {
+                application.Email = target;
+                application.UpdatedTime = DateTime.UtcNow;
+                await _unitOfWork.Applications.UpdateAsync(application, cancellationToken);
+            }
+        }
+
+        await _unitOfWork.ApplicationLogs.AddLogAsync(new ApplicationLog
+        {
+            Id = Guid.NewGuid(),
+            ApplicationId = applicationId,
+            FromStatus = application.Status,
+            ToStatus = application.Status,
+            OperatorId = operatorId,
+            Action = ResendLogAction,
+            Comment = changing && !string.Equals(target, oldEmail, StringComparison.OrdinalIgnoreCase)
+                ? $"更正信箱 {MaskEmail(oldEmail)} → {MaskEmail(target)} 並補寄"
+                : $"補寄至 {MaskEmail(target)}",
+            IpAddress = ipAddress,
+            OperatedAt = DateTime.UtcNow
+        }, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<string>.Success(MaskEmail(target));
+    }
+
+    private const string ResendLogAction = "補寄通知信";
+
+    /// <summary>日誌與回應只放遮罩過的信箱（abc***@example.com），避免個資散在各處</summary>
+    private static string MaskEmail(string email)
+    {
+        var at = email.IndexOf('@');
+        if (at <= 1) return email.Length > 0 ? "***" + email[Math.Max(at, 0)..] : "***";
+        return email[..Math.Min(3, at)] + "***" + email[at..];
+    }
+
+    /// <summary>
+    /// 申請進度查詢頁網址（帶申請編號預填；信箱要申請人自己輸入，網址裡不放任何個資）
+    /// </summary>
+    private string BuildStatusUrl(string applicationNumber)
+    {
+        var baseUrl = (_configuration["App:BaseUrl"] ?? "http://localhost:3000").TrimEnd('/');
+        return $"{baseUrl}/member/register/status?applicationNumber={Uri.EscapeDataString(applicationNumber)}";
     }
 }

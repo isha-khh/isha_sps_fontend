@@ -192,6 +192,40 @@ public class AdminApplicationsController : ControllerBase
     /// <response code="200">成功審核申請</response>
     /// <response code="400">請求參數錯誤或申請狀態不允許審核</response>
     /// <response code="401">未授權或權限不足</response>
+    /// <summary>
+    /// 補寄申請通知信（申請人信箱故障或沒收到信時用；信箱填錯可帶更正後的信箱）
+    /// </summary>
+    [HttpPost("{id}/resend-email")]
+    [RequirePermission(UserPermission.ManageApplications)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> ResendEmail(
+        Guid id,
+        [FromBody] ResendApplicationEmailRequest? request,
+        CancellationToken cancellationToken)
+    {
+        var operatorId = GetCurrentUserId();
+        if (!operatorId.HasValue)
+        {
+            return Unauthorized(new { error = "無法獲取當前用戶ID" });
+        }
+
+        var result = await _reviewService.ResendNotificationEmailAsync(
+            id,
+            request?.NewEmail,
+            operatorId.Value,
+            HttpContext.Connection.RemoteIpAddress?.ToString(),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { error = result.Error });
+        }
+
+        return Ok(new { message = "已補寄通知信", sentTo = result.Data });
+    }
+
     [HttpPost("{id}/review")]
     [RequirePermission(UserPermission.ManageApplications)]
     [ProducesResponseType(typeof(ApplicationResponse), StatusCodes.Status200OK)]

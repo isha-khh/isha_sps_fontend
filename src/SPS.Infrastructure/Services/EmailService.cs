@@ -92,6 +92,13 @@ public class EmailService : IEmailService
     /// </summary>
     /// <param name="option">包含電子郵件發送資訊的選項。</param>
     /// <exception cref="EmailServiceException">當郵件發送失敗時拋出異常。</exception>
+    public async Task<bool> IsEnabledAsync()
+    {
+        var settings = await _systemSettingService.GetSettingAsync<EmailSettingsDto>("Email");
+        // 沒有 DB 設定時（回退到 appsettings）視為啟用，與 SendEmailAsync 的判斷一致
+        return !(settings.IsSuccess && settings.Data != null && !settings.Data.IsEnabled);
+    }
+
     public async Task SendEmailAsync(EmailOption option)
     {
         var mailLog = new MailLog
@@ -655,6 +662,7 @@ public class EmailService : IEmailService
 </div>
 <p style='margin-bottom: 16px;'>我們的審核團隊將盡快處理您的申請。審核結果將通過電子郵件通知您。</p>
 <p style='margin-bottom: 16px;'>審核過程通常需要 1-3 個工作日，請耐心等待。</p>
+<p style='margin-bottom: 16px;'>您可以隨時用申請編號與申請時填寫的信箱，到<a href='{{statusUrl}}'>申請進度查詢</a>查看目前的審核狀態。</p>
 <p style='margin-bottom: 16px;'>如有任何問題，請隨時與我們聯繫。</p>"
             ),
             "application_approved" => (
@@ -682,6 +690,7 @@ public class EmailService : IEmailService
     {{rejectionReason}}
 </div>
 <p style='margin-bottom: 16px;'>如對審核結果有疑問，歡迎與我們聯繫。</p>
+<p style='margin-bottom: 16px;'>您也可以到<a href='{{statusUrl}}'>申請進度查詢</a>，用申請編號與申請時填寫的信箱再次查看審核結果。</p>
 <p style='margin-bottom: 16px;'>您可以在修正相關問題後重新提交申請。</p>"
             ),
             "application_document_required" => (

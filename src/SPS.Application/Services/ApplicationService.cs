@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SPS.Application.Common;
 using SPS.Application.DTOs.Application;
@@ -22,6 +23,7 @@ public class ApplicationService : IApplicationService
     private readonly IFileManagementService _fileManagementService;
     private readonly IEmailService _emailService;
     private readonly ILogger<ApplicationService> _logger;
+    private readonly IConfiguration _configuration;
 
     public ApplicationService(
         IUnitOfWork unitOfWork,
@@ -29,8 +31,10 @@ public class ApplicationService : IApplicationService
         IFileStorageService fileStorageService,
         IFileManagementService fileManagementService,
         IEmailService emailService,
-        ILogger<ApplicationService> logger)
+        ILogger<ApplicationService> logger,
+        IConfiguration configuration)
     {
+        _configuration = configuration;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
         _fileStorageService = fileStorageService;
@@ -268,10 +272,59 @@ public class ApplicationService : IApplicationService
         return CryptographicOperations.FixedTimeEquals(provided, expected);
     }
 
+    public async Task<Result<ApplicationStatusResponse>> GetStatusAsync(
+        ApplicationStatusRequest request, CancellationToken cancellationToken = default)
+    {
+        const string notFound = "查無符合的申請，請確認申請編號與電子信箱是否正確";
+
+        var application = await _unitOfWork.Applications
+            .GetByApplicationNumberAsync(request.ApplicationNumber.Trim(), cancellationToken);
+        if (application == null) return Result<ApplicationStatusResponse>.Failure(notFound);
+
+        // 申請的所有成員都會收到結果信，所以任何一位成員的信箱都能查
+        var email = request.Email.Trim();
+        var matches = string.Equals(application.Email, email, StringComparison.OrdinalIgnoreCase);
+        if (!matches)
+        {
+            var members = await _unitOfWork.ApplicationMembers.GetByApplicationIdAsync(application.Id, cancellationToken);
+            matches = members.Any(m => string.Equals(m.Email, email, StringComparison.OrdinalIgnoreCase));
+        }
+        if (!matches) return Result<ApplicationStatusResponse>.Failure(notFound);
+
+        return Result<ApplicationStatusResponse>.Success(new ApplicationStatusResponse
+        {
+            ApplicationNumber = application.ApplicationNumber,
+            Status = application.Status,
+            StatusText = application.Status switch
+            {
+                ApplicationStatus.Draft => "尚未送出",
+                ApplicationStatus.PendingReview => "已送出，等待審核",
+                ApplicationStatus.UnderReview => "審核中",
+                ApplicationStatus.Approved => "審核通過",
+                ApplicationStatus.Rejected => "審核未通過",
+                ApplicationStatus.Cancelled => "已取消",
+                _ => application.Status.ToString()
+            },
+            SubmittedAt = application.SubmittedAt,
+            ReviewedAt = application.ReviewedAt,
+            RejectionReason = application.Status == ApplicationStatus.Rejected ? application.RejectionReason : null,
+            CanLogin = application.Status == ApplicationStatus.Approved
+        });
+    }
+
     public async Task<Guid?> GetApplicationIdByDocumentIdAsync(Guid documentId, CancellationToken cancellationToken = default)
     {
         var document = await _unitOfWork.ApplicationDocuments.GetByIdAsync(documentId, cancellationToken);
         return document?.ApplicationId;
+    }
+
+    /// <summary>
+    /// 申請進度查詢頁網址（帶申請編號預填；信箱要申請人自己輸入，網址裡不放任何個資）
+    /// </summary>
+    private string BuildStatusUrl(string applicationNumber)
+    {
+        var baseUrl = (_configuration["App:BaseUrl"] ?? "http://localhost:3000").TrimEnd('/');
+        return $"{baseUrl}/member/register/status?applicationNumber={Uri.EscapeDataString(applicationNumber)}";
     }
 
     private static string HashAccessKey(string key) =>
@@ -384,7 +437,8 @@ public class ApplicationService : IApplicationService
                         new Dictionary<string, string>
                         {
                             { "contactName", firstMember.ContactName },
-                            { "applicationNumber", application.ApplicationNumber }
+                            { "applicationNumber", application.ApplicationNumber },
+                            { "statusUrl", BuildStatusUrl(application.ApplicationNumber) }
                         });
                 }
                 catch (Exception ex)

@@ -45,6 +45,19 @@ public interface IApplicationReviewService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 補寄申請通知信給申請人（聯絡人）。依目前狀態選信件：待審核／審核中＝申請提交確認，
+    /// 已通過＝通過通知，未通過＝未通過通知（含原因）。申請人的信箱故障、信沒收到時，後台用這個補寄；
+    /// 信箱填錯時可以帶更正後的信箱（只在尚未通過的申請可以改）。
+    /// 寄信失敗會回失敗，不會改動申請；每次補寄都會寫進申請日誌。
+    /// </summary>
+    Task<Result<string>> ResendNotificationEmailAsync(
+        Guid applicationId,
+        string? newEmail,
+        Guid operatorId,
+        string? ipAddress,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 審核申請
     /// </summary>
     Task<Result<ApplicationResponse>> ReviewApplicationAsync(

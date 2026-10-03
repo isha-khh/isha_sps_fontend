@@ -17,7 +17,8 @@ export const metadata: Metadata = {
  * `MemberLoginForm.tsx`。
  *
  * 「還沒註冊會員帳號嗎？」／「查詢申請狀態」／「權益比較表」這半邊
- * （`.melo_box_right`）維持原本純靜態連結，沒有要接的資料。
+ * （`.melo_box_right`）是純靜態連結；其中「查詢申請狀態」原本是 `href="#"`，
+ * 2026-10-03 接上 `/member/register/status`（申請編號＋信箱查審核進度）。
  *
  * 沒有側欄/右欄（`.side1`／`.side2` 都是 d-none），所以不給
  * `InnerPageShell` 的 `sidebar`／`aside`。
@@ -41,9 +42,9 @@ export default function MemberLoginPage() {
                 </div>
 
                 <p>查詢申請狀態</p>
-                <a href="#" className="more_x more_x_gu" title="立即查詢">
+                <Link href="/member/register/status" className="more_x more_x_gu" title="立即查詢">
                   <span>立即查詢</span>
-                </a>
+                </Link>
               </div>
 
               <div className="melo_box_right_2">

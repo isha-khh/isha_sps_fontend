@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SPS.Api.Attributes;
 using SPS.Application.DTOs.Application;
 using SPS.Application.DTOs.SystemSettings;
@@ -21,6 +22,16 @@ public class ApplicationsController : ControllerBase
     private readonly IBusinessRegistryService _businessRegistryService;
     private readonly ILogger<ApplicationsController> _logger;
     private readonly ISystemSettingService _settingService;
+    private readonly IMemoryCache _cache;
+
+    /// <summary>查詢進度：同一個來源 IP 在視窗內最多可以查錯幾次，超過就先擋（防止用申請編號＋信箱暴力猜）</summary>
+    private const int MaxStatusFailures = 10;
+    private static readonly TimeSpan StatusFailureWindow = TimeSpan.FromMinutes(15);
+
+    private sealed class FailureCounter
+    {
+        public int Count;
+    }
 
     /// <summary>申請存取密鑰 cookie 的名稱前綴；每份申請一個 cookie（<c>appkey_{申請id}</c>），同時填多份申請不會互相覆蓋</summary>
     private const string KeyCookiePrefix = "appkey_";
@@ -38,8 +49,10 @@ public class ApplicationsController : ControllerBase
         IApplicationService applicationService,
         IBusinessRegistryService businessRegistryService,
         ILogger<ApplicationsController> logger,
-        ISystemSettingService settingService)
+        ISystemSettingService settingService,
+        IMemoryCache cache)
     {
+        _cache = cache;
         _applicationService = applicationService;
         _businessRegistryService = businessRegistryService;
         _logger = logger;
@@ -146,6 +159,49 @@ public class ApplicationsController : ControllerBase
         {
             await SetAccessKeyCookieAsync(result.Data.Id, result.Data.AccessKey, cancellationToken);
             result.Data.AccessKey = null;
+        }
+
+        return Ok(result.Data);
+    }
+
+    /// <summary>
+    /// 申請人查詢申請進度（申請編號＋申請時的信箱）
+    /// </summary>
+    /// <remarks>
+    /// 給「已經送出申請、之後想回來看審核結果」的人用——不需要登入，因為被拒絕或還在審核的申請人沒有會員帳號。
+    /// 編號與信箱都對得上才回結果；找不到與信箱不符回同樣的 404，不透露是哪一項錯。
+    /// 只回申請人本來就會在郵件裡收到的資訊（狀態、時間、未通過原因）。
+    /// 申請編號是時間戳記格式、可以猜，所以靠信箱當第二因子，並限制同一 IP 查錯次數（429）。
+    /// </remarks>
+    /// <response code="200">回傳申請進度</response>
+    /// <response code="404">查無符合的申請</response>
+    /// <response code="429">查錯次數過多，請稍後再試</response>
+    [HttpPost("status")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(ApplicationStatusResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> GetStatus(
+        [FromBody] ApplicationStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        // 計數器在第一次失敗時建立、固定 15 分鐘後過期（之後的失敗只加計數，不會延長視窗）
+        var counter = _cache.GetOrCreate($"app-status-fail:{HttpContext.Connection.RemoteIpAddress}", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = StatusFailureWindow;
+            return new FailureCounter();
+        })!;
+        if (Volatile.Read(ref counter.Count) >= MaxStatusFailures)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests,
+                new { error = "查詢失敗次數過多，請 15 分鐘後再試" });
+        }
+
+        var result = await _applicationService.GetStatusAsync(request, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            Interlocked.Increment(ref counter.Count);
+            return NotFound(new { error = result.Error });
         }
 
         return Ok(result.Data);

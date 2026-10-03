@@ -208,3 +208,19 @@ export interface ValidationResult {
   valid: boolean;
   error?: string;
 }
+
+/**
+ * 申請進度查詢結果（`POST /api/Applications/status`）。只含申請人本來就會在郵件裡收到的資訊。
+ */
+export interface ApplicationStatusResponse {
+  applicationNumber: string;
+  status: number;
+  /** 狀態中文說明，給畫面直接顯示 */
+  statusText: string;
+  submittedAt?: string | null;
+  reviewedAt?: string | null;
+  /** 只有「審核未通過」才有值 */
+  rejectionReason?: string | null;
+  /** 已通過：可以用註冊時的信箱與密碼登入 */
+  canLogin: boolean;
+}

@@ -8,9 +8,25 @@ import type {
   DocumentResponse,
   DocumentType,
   ValidationResult,
+  ApplicationStatusResponse,
 } from '@/types/application';
 
 export const applicationsApi = {
+  /**
+   * 申請人用「申請編號＋申請時的信箱」查審核進度（不需登入）
+   * POST /api/Applications/status
+   *
+   * 編號與信箱對不上回 404（不透露是哪一項錯）；同一個 IP 查錯太多次回 429。
+   * 呼叫端要自己用 `getApiErrorMessage` 取出後端的 `error` 訊息顯示。
+   */
+  async getStatus(applicationNumber: string, email: string): Promise<ApplicationStatusResponse> {
+    const response = await apiClient.post<ApplicationStatusResponse>('/api/Applications/status', {
+      applicationNumber,
+      email,
+    });
+    return response.data;
+  },
+
   /**
    * 創建申請（草稿）
    * POST /api/Applications

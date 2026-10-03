@@ -843,8 +843,9 @@ public class SystemSettingController : ControllerBase
     <strong>申請編號：</strong>{{applicationNumber}}
 </div>
 <p style='margin-bottom: 16px;'>我們的審核團隊將盡快處理您的申請。審核結果將通過電子郵件通知您。</p>
-<p style='margin-bottom: 16px;'>審核過程通常需要 1-3 個工作日，請耐心等待。</p>",
-                AvailableVariables = new List<string> { "contactName", "applicationNumber" },
+<p style='margin-bottom: 16px;'>審核過程通常需要 1-3 個工作日，請耐心等待。</p>
+<p style='margin-bottom: 16px;'>您可以隨時用申請編號與申請時填寫的信箱，到<a href='{{statusUrl}}'>申請進度查詢</a>查看目前的審核狀態。</p>",
+                AvailableVariables = new List<string> { "contactName", "applicationNumber", "statusUrl" },
                 IsActive = true
             },
             new EmailTemplate
@@ -874,7 +875,7 @@ public class SystemSettingController : ControllerBase
 </div>
 <p style='margin-bottom: 16px;'>您現在可以使用註冊時填寫的郵箱和密碼登入系統。</p>
 <p><a href='{{loginUrl}}' style='display: inline-block; background-color: #4caf50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin-top: 10px;'>立即登入</a></p>",
-                AvailableVariables = new List<string> { "contactName", "applicationNumber", "loginUrl" },
+                AvailableVariables = new List<string> { "contactName", "applicationNumber", "loginUrl", "statusUrl" },
                 IsActive = true
             },
             new EmailTemplate
@@ -893,8 +894,9 @@ public class SystemSettingController : ControllerBase
     {{rejectionReason}}
 </div>
 <p style='margin-bottom: 16px;'>如對審核結果有疑問，歡迎與我們聯繫。</p>
+<p style='margin-bottom: 16px;'>您也可以到<a href='{{statusUrl}}'>申請進度查詢</a>，用申請編號與申請時填寫的信箱再次查看審核結果。</p>
 <p style='margin-bottom: 16px;'>您可以在修正相關問題後重新提交申請。</p>",
-                AvailableVariables = new List<string> { "contactName", "applicationNumber", "rejectionReason" },
+                AvailableVariables = new List<string> { "contactName", "applicationNumber", "rejectionReason", "statusUrl" },
                 IsActive = true
             },
             new EmailTemplate

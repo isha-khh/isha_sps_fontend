@@ -6,6 +6,12 @@ namespace SPS.Application.Interfaces.IServices;
 public interface IEmailService
 {
     /// <summary>
+    /// 郵件服務是否啟用。停用時 <see cref="SendEmailAsync"/> 會「靜默略過」（不丟例外、只寫一筆失敗的寄信紀錄），
+    /// 需要確實告知使用者「信有沒有寄出去」的功能（例如後台補寄）要先檢查這個，不能只靠有沒有例外判斷。
+    /// </summary>
+    Task<bool> IsEnabledAsync();
+
+    /// <summary>
     /// 發送一般電子郵件
     /// </summary>
     Task SendEmailAsync(EmailOption option);

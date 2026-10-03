@@ -4,6 +4,8 @@ import { PageTitle } from '@/components/PageTitle';
 import { ApplicationStatusBadge } from '@/components/applications/ApplicationStatusBadge';
 import { adminApplicationsApi } from '@/lib/api/admin-applications.ts';
 import { ExpertScoringSection } from '@/components/applications/ExpertScoringSection';
+import { ResendEmailModal } from '@/components/applications/ResendEmailModal';
+import { usePermission, Permission } from '@/hooks/usePermission';
 import { ApplicantType } from '@/types/api';
 
 import type {
@@ -81,6 +83,8 @@ export const ApplicationDetailPage = () => {
   const [downloadingAll, setDownloadingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadDocType, setUploadDocType] = useState<number>(1);
+  const [isResendOpen, setIsResendOpen] = useState(false);
+  const { has: hasPerm } = usePermission();
 
   const fetchApplication = async () => {
     if (!id) return;
@@ -105,6 +109,13 @@ export const ApplicationDetailPage = () => {
   };
 
   const isUnderReview = application?.status === ApplicationStatusEnum.UnderReview;
+  // 草稿與已取消的申請沒有可補寄的信；需要維護申請的權限
+  const canResendEmail =
+    hasPerm(Permission.ManageApplications) &&
+    (application?.status === ApplicationStatusEnum.PendingReview ||
+      application?.status === ApplicationStatusEnum.UnderReview ||
+      application?.status === ApplicationStatusEnum.Approved ||
+      application?.status === ApplicationStatusEnum.Rejected);
   const isIndividual = application?.applicantType === ApplicantType.Individual;
   const isEmerging = application?.supplierTier === 2;
   // 決議（核准/退回）之後評分只能檢視，不能再新增或刪除
@@ -205,7 +216,15 @@ export const ApplicationDetailPage = () => {
             <h2 className="card-title text-2xl">
               申請編號: {application.applicationNumber}
             </h2>
-            <ApplicationStatusBadge status={application.status} />
+            <div className="flex items-center gap-3">
+              {canResendEmail && (
+                <button className="btn btn-sm btn-outline" onClick={() => setIsResendOpen(true)}>
+                  <span className="iconify lucide--mail size-4" />
+                  補寄通知信
+                </button>
+              )}
+              <ApplicationStatusBadge status={application.status} />
+            </div>
           </div>
 
           {/* 申請說明 */}
@@ -552,6 +571,19 @@ export const ApplicationDetailPage = () => {
           </div>
         </div>
       </div>
+
+      <ResendEmailModal
+        isOpen={isResendOpen}
+        applicationId={application.id}
+        applicationNumber={application.applicationNumber}
+        currentEmail={application.email}
+        canChangeEmail={application.status !== ApplicationStatusEnum.Approved}
+        onClose={() => setIsResendOpen(false)}
+        onSent={(emailChanged) => {
+          // 信箱有更正時重新載入，畫面上的聯絡信箱與申請日誌才會更新
+          if (emailChanged) void fetchApplication();
+        }}
+      />
     </div>
   );
 };
