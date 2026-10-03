@@ -36,18 +36,16 @@ public class MemberPermissionRequiredAttribute : Attribute, IAuthorizationFilter
             return;
         }
 
-        // 獲取會員權限
-        var permissionsClaim = user.FindFirst("Permissions");
-        if (permissionsClaim == null || !long.TryParse(permissionsClaim.Value, out var permissionsValue))
+        // 獲取會員權限（讀 MemberPermissions；不是會員、或帶 Admin 角色的 token 讀不到，視為權限不足）
+        var memberPermissions = user.GetMemberPermissions();
+        if (memberPermissions == null)
         {
             context.Result = new ForbidResult();
             return;
         }
 
-        var memberPermissions = (MemberPermission)permissionsValue;
-
         // 檢查是否有所需權限
-        if (!memberPermissions.HasFlag(_requiredPermission))
+        if (!memberPermissions.Value.HasFlag(_requiredPermission))
         {
             context.Result = new ObjectResult(new { error = "權限不足" })
             {

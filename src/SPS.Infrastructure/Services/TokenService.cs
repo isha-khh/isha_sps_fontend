@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SPS.Application.DTOs.Auth;
 using SPS.Application.Interfaces.IServices;
+using SPS.Domain.Constants;
 using SPS.Domain.Entities;
 using SPS.Domain.Enums;
 
@@ -38,7 +39,8 @@ public class TokenService : ITokenService
         };
 
         // 添加權限
-        claims.Add(new Claim("Permissions", ((long)member.Permissions).ToString()));
+        // 會員用 MemberPermissions，不和後台的 Permissions 同名（見 AuthClaimTypes）
+        claims.Add(new Claim(AuthClaimTypes.MemberPermissions, ((long)member.Permissions).ToString()));
         claims.Add(new Claim("MemberPosition", ((int)member.MemberPosition).ToString()));
         claims.Add(new Claim("MemberRole", ((int)member.Role).ToString()));
 
@@ -226,7 +228,7 @@ public class TokenService : ITokenService
         }
 
         // 添加權限到 Claims
-        claims.Add(new Claim("Permissions", ((long)combinedPermissions).ToString()));
+        claims.Add(new Claim(AuthClaimTypes.AdminPermissions, ((long)combinedPermissions).ToString()));
 
         // 所有後台使用者都有 Admin 角色
         claims.Add(new Claim(ClaimTypes.Role, "Admin"));

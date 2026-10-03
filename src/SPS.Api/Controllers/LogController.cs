@@ -776,14 +776,7 @@ public class LogController : ControllerBase
     /// </summary>
     private bool CheckPermission(UserPermission requiredPermission)
     {
-        var permsClaim = User.FindFirst("Permissions")?.Value;
-        if (long.TryParse(permsClaim, out var perms))
-        {
-            var userPermissions = (UserPermission)perms;
-            if (userPermissions.HasFlag(UserPermission.All)) return true;
-            return userPermissions.HasFlag(requiredPermission);
-        }
-        return false;
+        return User.GetAdminPermissions().HasAny(requiredPermission);
     }
 }
 

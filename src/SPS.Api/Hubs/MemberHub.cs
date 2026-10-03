@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using SPS.Api.Attributes;
 using SPS.Application.DTOs.Notification;
 using SPS.Application.Interfaces;
 using SPS.Application.Interfaces.IServices;
@@ -48,10 +49,8 @@ public class MemberHub : Hub
 
     private bool HasCustomerServicePermission()
     {
-        var permClaim = Context.User?.FindFirst("Permissions")?.Value;
-        if (string.IsNullOrEmpty(permClaim) || !long.TryParse(permClaim, out var permValue))
-            return false;
-        return ((UserPermission)permValue).HasFlag(UserPermission.CustomerService);
+        // 一定要走 GetAdminPermissions：它先確認是後台 token，不會把會員 token 的權限位元誤當後台權限
+        return Context.User?.GetAdminPermissions().HasAny(UserPermission.CustomerService) ?? false;
     }
 
     public override async Task OnConnectedAsync()

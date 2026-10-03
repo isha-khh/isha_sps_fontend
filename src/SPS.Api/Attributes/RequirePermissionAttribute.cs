@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using SPS.Domain.Constants;
 using SPS.Domain.Enums;
 
 namespace SPS.Api.Attributes;
@@ -46,7 +47,7 @@ public class RequirePermissionAttribute : Attribute, IAuthorizationFilter
             return;
         }
 
-        var claim = user.FindFirst("Permissions")?.Value;
+        var claim = user.FindFirst(AuthClaimTypes.AdminPermissions)?.Value;
         if (!long.TryParse(claim, out var value) || !((UserPermission)value).HasAny(_anyOf))
         {
             var names = string.Join("、", _anyOf.Select(p => p.ToString()));
