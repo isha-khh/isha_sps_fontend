@@ -13,6 +13,20 @@ import type {
 
 export const applicationsApi = {
   /**
+   * 忘了申請編號：用「申請時的信箱＋聯絡電話」列出符合的申請（不需登入）
+   * POST /api/Applications/status/by-phone
+   *
+   * 兩項都對得上才有結果（最多 20 筆，新到舊）；對不上回 404、查錯太多次回 429，與編號查詢共用次數限制。
+   */
+  async findStatusByPhone(email: string, phone: string): Promise<ApplicationStatusResponse[]> {
+    const response = await apiClient.post<ApplicationStatusResponse[]>('/api/Applications/status/by-phone', {
+      email,
+      phone,
+    });
+    return response.data;
+  },
+
+  /**
    * 申請人用「申請編號＋申請時的信箱」查審核進度（不需登入）
    * POST /api/Applications/status
    *

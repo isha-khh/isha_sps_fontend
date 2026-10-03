@@ -49,6 +49,14 @@ public interface IApplicationService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 忘了申請編號：用「信箱＋聯絡電話」列出符合的申請（含編號）。信箱或電話對不上、沒有任何符合的申請，
+    /// 一律回同樣的失敗，不透露哪一項錯。
+    /// </summary>
+    Task<Result<List<ApplicationStatusResponse>>> FindStatusByPhoneAsync(
+        ApplicationStatusByPhoneRequest request,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 獲取申請詳情
     /// </summary>
     Task<Result<ApplicationResponse>> GetApplicationByIdAsync(

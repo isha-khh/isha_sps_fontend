@@ -28,8 +28,10 @@ public class ApplicationRepository : Repository<MemberApplication, Guid>, IAppli
 
     public async Task<List<MemberApplication>> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
+        // 信箱不分大小寫：申請人可能用 Foo@x.com 申請、之後輸入 foo@x.com 查詢
+        var normalized = email.Trim().ToLower();
         return await _dbSet
-            .Where(a => a.Email == email)
+            .Where(a => a.Email.ToLower() == normalized)
             .OrderByDescending(a => a.CreatedTime)
             .ToListAsync(cancellationToken);
     }

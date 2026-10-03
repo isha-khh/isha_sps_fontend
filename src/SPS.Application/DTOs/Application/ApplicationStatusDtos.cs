@@ -18,6 +18,20 @@ public class ApplicationStatusRequest
 }
 
 /// <summary>
+/// 忘了申請編號時的查詢：申請時填的信箱＋聯絡電話（市話或手機都可以），兩項都對得上才列出該信箱的申請
+/// </summary>
+public class ApplicationStatusByPhoneRequest
+{
+    [Required(ErrorMessage = "請輸入申請時填寫的電子信箱")]
+    [MaxLength(320)]
+    public string Email { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "請輸入申請時填寫的聯絡電話")]
+    [MaxLength(40)]
+    public string Phone { get; set; } = string.Empty;
+}
+
+/// <summary>
 /// 申請進度。刻意只放申請人已經會在郵件裡收到的資訊（狀態、時間、未通過原因），
 /// 不含聯絡資料、附件、審核員內部備註或評分
 /// </summary>

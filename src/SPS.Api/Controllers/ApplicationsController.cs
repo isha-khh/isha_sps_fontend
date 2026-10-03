@@ -185,12 +185,7 @@ public class ApplicationsController : ControllerBase
         [FromBody] ApplicationStatusRequest request,
         CancellationToken cancellationToken)
     {
-        // 計數器在第一次失敗時建立、固定 15 分鐘後過期（之後的失敗只加計數，不會延長視窗）
-        var counter = _cache.GetOrCreate($"app-status-fail:{HttpContext.Connection.RemoteIpAddress}", entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = StatusFailureWindow;
-            return new FailureCounter();
-        })!;
+        var counter = GetStatusFailureCounter();
         if (Volatile.Read(ref counter.Count) >= MaxStatusFailures)
         {
             return StatusCode(StatusCodes.Status429TooManyRequests,
@@ -198,6 +193,53 @@ public class ApplicationsController : ControllerBase
         }
 
         var result = await _applicationService.GetStatusAsync(request, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            Interlocked.Increment(ref counter.Count);
+            return NotFound(new { error = result.Error });
+        }
+
+        return Ok(result.Data);
+    }
+
+    /// <summary>
+    /// 同一個來源 IP 的查詢失敗計數器（兩種查詢方式共用）：第一次失敗時建立、固定 15 分鐘後過期，
+    /// 之後的失敗只加計數，不會延長視窗
+    /// </summary>
+    private FailureCounter GetStatusFailureCounter() =>
+        _cache.GetOrCreate($"app-status-fail:{HttpContext.Connection.RemoteIpAddress}", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = StatusFailureWindow;
+            return new FailureCounter();
+        })!;
+
+    /// <summary>
+    /// 忘了申請編號：用申請時的信箱＋聯絡電話列出符合的申請（含編號）
+    /// </summary>
+    /// <remarks>
+    /// 兩項都對得上才有結果；沒有符合的申請與資料不符回同樣的 404。與編號查詢共用失敗次數限制（429）。
+    /// 回傳的內容與編號查詢相同，只是可能有多筆（同一個信箱申請過多次）。
+    /// </remarks>
+    /// <response code="200">回傳符合的申請進度（最多 20 筆，新到舊）</response>
+    /// <response code="404">查無符合的申請</response>
+    /// <response code="429">查錯次數過多，請稍後再試</response>
+    [HttpPost("status/by-phone")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<ApplicationStatusResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> GetStatusByPhone(
+        [FromBody] ApplicationStatusByPhoneRequest request,
+        CancellationToken cancellationToken)
+    {
+        var counter = GetStatusFailureCounter();
+        if (Volatile.Read(ref counter.Count) >= MaxStatusFailures)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests,
+                new { error = "查詢失敗次數過多，請 15 分鐘後再試" });
+        }
+
+        var result = await _applicationService.FindStatusByPhoneAsync(request, cancellationToken);
         if (!result.IsSuccess)
         {
             Interlocked.Increment(ref counter.Count);

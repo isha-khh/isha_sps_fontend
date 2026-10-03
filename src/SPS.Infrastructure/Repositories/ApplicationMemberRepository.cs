@@ -40,6 +40,14 @@ public class ApplicationMemberRepository : IApplicationMemberRepository
             .FirstOrDefaultAsync(am => am.Email == email, ct);
     }
 
+    public async Task<List<ApplicationMember>> FindByEmailAsync(string email, CancellationToken ct = default)
+    {
+        var normalized = email.Trim().ToLower();
+        return await _context.ApplicationMembers
+            .Where(am => am.Email.ToLower() == normalized)
+            .ToListAsync(ct);
+    }
+
     public async Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default)
     {
         // 檢查 Email 是否已在 Members 表中存在

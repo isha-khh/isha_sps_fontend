@@ -291,25 +291,81 @@ public class ApplicationService : IApplicationService
         }
         if (!matches) return Result<ApplicationStatusResponse>.Failure(notFound);
 
-        return Result<ApplicationStatusResponse>.Success(new ApplicationStatusResponse
+        return Result<ApplicationStatusResponse>.Success(ToStatusResponse(application));
+    }
+
+    private static ApplicationStatusResponse ToStatusResponse(MemberApplication application) => new()
+    {
+        ApplicationNumber = application.ApplicationNumber,
+        Status = application.Status,
+        StatusText = application.Status switch
         {
-            ApplicationNumber = application.ApplicationNumber,
-            Status = application.Status,
-            StatusText = application.Status switch
-            {
-                ApplicationStatus.Draft => "尚未送出",
-                ApplicationStatus.PendingReview => "已送出，等待審核",
-                ApplicationStatus.UnderReview => "審核中",
-                ApplicationStatus.Approved => "審核通過",
-                ApplicationStatus.Rejected => "審核未通過",
-                ApplicationStatus.Cancelled => "已取消",
-                _ => application.Status.ToString()
-            },
-            SubmittedAt = application.SubmittedAt,
-            ReviewedAt = application.ReviewedAt,
-            RejectionReason = application.Status == ApplicationStatus.Rejected ? application.RejectionReason : null,
-            CanLogin = application.Status == ApplicationStatus.Approved
-        });
+            ApplicationStatus.Draft => "尚未送出",
+            ApplicationStatus.PendingReview => "已送出，等待審核",
+            ApplicationStatus.UnderReview => "審核中",
+            ApplicationStatus.Approved => "審核通過",
+            ApplicationStatus.Rejected => "審核未通過",
+            ApplicationStatus.Cancelled => "已取消",
+            _ => application.Status.ToString()
+        },
+        SubmittedAt = application.SubmittedAt,
+        ReviewedAt = application.ReviewedAt,
+        RejectionReason = application.Status == ApplicationStatus.Rejected ? application.RejectionReason : null,
+        CanLogin = application.Status == ApplicationStatus.Approved
+    };
+
+    public async Task<Result<List<ApplicationStatusResponse>>> FindStatusByPhoneAsync(
+        ApplicationStatusByPhoneRequest request, CancellationToken cancellationToken = default)
+    {
+        const string notFound = "查無符合的申請，請確認電子信箱與聯絡電話是否與申請時填寫的一致";
+
+        var phone = NormalizePhone(request.Phone);
+        // 太短的電話等於沒有第二因子（例如只輸入 1 位數字就想碰運氣）
+        if (phone.Length < 8) return Result<List<ApplicationStatusResponse>>.Failure(notFound);
+
+        var email = request.Email.Trim();
+
+        // 新流程：信箱與電話在「申請成員」上（任何一位成員的資料對得上都算）
+        var applicationIds = (await _unitOfWork.ApplicationMembers.FindByEmailAsync(email, cancellationToken))
+            .Where(m => NormalizePhone(m.Phone) == phone || NormalizePhone(m.MobilePhone) == phone)
+            .Select(m => m.ApplicationId)
+            .ToHashSet();
+
+        // 舊資料：信箱與電話直接存在申請本身
+        foreach (var legacy in await _unitOfWork.Applications.GetByEmailAsync(email, cancellationToken))
+        {
+            if (NormalizePhone(legacy.Phone) == phone || NormalizePhone(legacy.MobilePhone) == phone)
+                applicationIds.Add(legacy.Id);
+        }
+
+        var matched = new List<MemberApplication>();
+        foreach (var id in applicationIds)
+        {
+            var application = await _unitOfWork.Applications.GetByIdAsync(id, cancellationToken);
+            if (application != null) matched.Add(application);
+        }
+
+        var response = matched
+            .OrderByDescending(a => a.CreatedTime)
+            .Take(20)
+            .Select(ToStatusResponse)
+            .ToList();
+        var matchedCount = response.Count;
+
+        return matchedCount == 0
+            ? Result<List<ApplicationStatusResponse>>.Failure(notFound)
+            : Result<List<ApplicationStatusResponse>>.Success(response);
+    }
+
+    /// <summary>
+    /// 電話只比數字：去掉空白、連字號、括號，並把國碼 +886／886 開頭換成 0，
+    /// 讓「02-1234-5678」「(02)12345678」「+886 2 1234 5678」「0912-345-678」「+886912345678」視為同一支
+    /// </summary>
+    private static string NormalizePhone(string? phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone)) return string.Empty;
+        var digits = new string(phone.Where(char.IsDigit).ToArray());
+        return digits.StartsWith("886") && digits.Length >= 11 ? "0" + digits[3..] : digits;
     }
 
     public async Task<Guid?> GetApplicationIdByDocumentIdAsync(Guid documentId, CancellationToken cancellationToken = default)
