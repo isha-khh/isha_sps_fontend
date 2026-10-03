@@ -379,6 +379,11 @@ const DEFAULT_FOOTER_LINKS: FooterLinks = {
     accessibilityBadgeUrl: "",
     idaUrl: "https://www.ida.gov.tw/",
     ishaUrl: "",
+    // 連不到後端時的聯絡資訊：沿用原本頁尾寫死的內容，聯絡資訊比較不會有人希望整塊消失
+    contactAddress: "813707 高雄市左營區博愛三路12號15樓",
+    contactMapUrl: "https://maps.app.goo.gl/iZ6rqmW5CcSKJgp17",
+    contactPhone: "+886-7-550-3115",
+    contactEmail: "isha_khh@mail.isha.org.tw",
 };
 
 /**
@@ -391,5 +396,18 @@ export async function fetchFooterLinks(): Promise<FooterLinks> {
         return { ...DEFAULT_FOOTER_LINKS, ...data };
     } catch {
         return DEFAULT_FOOTER_LINKS;
+    }
+}
+
+/**
+ * 頁尾的累計瀏覽人次（後台「網站內容」可手動校正初始值，之後由前台每個新訪客累計）。
+ * 快取 60 秒；取不到回 null，頁尾就不顯示這一塊——不拿假數字頂替。
+ */
+export async function fetchSiteVisitorCount(): Promise<number | null> {
+    try {
+        const data = await getBackendJson<{ totalVisitors?: number }>("/api/site-counter", 60);
+        return typeof data.totalVisitors === "number" ? data.totalVisitors : null;
+    } catch {
+        return null;
     }
 }

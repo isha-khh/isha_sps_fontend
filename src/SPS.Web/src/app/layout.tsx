@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import BootstrapModalRouteCleanup from "@/components/BootstrapModalRouteCleanup";
+import SiteVisitTracker from "@/components/SiteVisitTracker";
 import { notoSansTC } from "@/lib/fonts";
 import "./globals.css";
 import { withBasePath } from "@/lib/api-client";
@@ -102,6 +103,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <link key={href} rel="stylesheet" href={href} precedence="legacy-site" />
         ))}
         <BootstrapModalRouteCleanup />
+        <SiteVisitTracker />
 
         {children}
 

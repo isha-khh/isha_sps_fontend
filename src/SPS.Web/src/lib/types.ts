@@ -532,4 +532,9 @@ export interface FooterLinks {
     accessibilityBadgeUrl: string;
     idaUrl: string;
     ishaUrl: string;
+    /** 聯絡資訊；空字串＝不顯示那一列。地址有 `contactMapUrl` 才會變成連結 */
+    contactAddress: string;
+    contactMapUrl: string;
+    contactPhone: string;
+    contactEmail: string;
 }

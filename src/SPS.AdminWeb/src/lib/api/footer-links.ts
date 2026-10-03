@@ -15,6 +15,11 @@ export interface FooterLinksSettings {
   accessibilityBadgeUrl: string;
   idaUrl: string;
   ishaUrl: string;
+  /** 聯絡資訊（頁尾 Contact Us）；留空＝前台不顯示那一列 */
+  contactAddress: string;
+  contactMapUrl: string;
+  contactPhone: string;
+  contactEmail: string;
 }
 
 export const footerLinksApi = {

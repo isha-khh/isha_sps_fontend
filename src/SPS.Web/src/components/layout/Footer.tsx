@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { withBasePath } from "@/lib/api-client";
-import { fetchFooterLinks } from "@/lib/api.server";
+import { fetchFooterLinks, fetchSiteVisitorCount } from "@/lib/api.server";
 
 /**
  * 外部網址只放行 http／https。後端已經驗證過一次，這裡再擋一次：就算資料庫裡被塞進
@@ -24,7 +24,14 @@ function safeExternalUrl(url: string): string | undefined {
  * 標章圖片固定，只有點擊後的連結可設定，沒設連結就只顯示圖片。
  */
 export default async function Footer() {
-  const links = await fetchFooterLinks();
+  const [links, visitorCount] = await Promise.all([fetchFooterLinks(), fetchSiteVisitorCount()]);
+
+  const address = links.contactAddress.trim();
+  const mapUrl = safeExternalUrl(links.contactMapUrl);
+  const phone = links.contactPhone.trim();
+  // tel: 只留數字與開頭的 +；「#」之後是分機，不能接在號碼後面一起撥（會變成另一支號碼），所以先截掉
+  const phoneHref = phone ? `tel:${phone.split("#")[0].replace(/[^0-9+]/g, "")}` : undefined;
+  const email = links.contactEmail.trim();
 
   const functionZone = links.functionZoneUrl.trim();
   const functionZoneInternal = functionZone.startsWith("/") && !functionZone.startsWith("//") ? functionZone : undefined;
@@ -161,29 +168,34 @@ export default async function Footer() {
             <div className="footer-col footer-contact">
               <div className="footer-title">Contact Us</div>
               <ul className="contact-list">
-                <li>
-                  <span className="label">聯絡地址：</span>
-                  <a
-                    href="https://maps.app.goo.gl/iZ6rqmW5CcSKJgp17"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="開啟 Google 地圖查看公司地址（另開新視窗）"
-                  >
-                    813707 高雄市左營區博愛三路12號15樓
-                  </a>
-                </li>
-                <li>
-                  <span className="label">電話：</span>
-                  <a href="tel:+886-7-550-3115" title="撥打電話至 +886-7-550-3115">
-                    +886-7-550-3115
-                  </a>
-                </li>
-                <li>
-                  <span className="label">信箱：</span>
-                  <a href="mailto:isha_khh@mail.isha.org.tw" title="寄信至 isha_khh@mail.isha.org.tw">
-                    isha_khh@mail.isha.org.tw
-                  </a>
-                </li>
+                {address && (
+                  <li>
+                    <span className="label">聯絡地址：</span>
+                    {mapUrl ? (
+                      <a href={mapUrl} target="_blank" rel="noopener noreferrer" title="開啟地圖查看地址（另開新視窗）">
+                        {address}
+                      </a>
+                    ) : (
+                      <span>{address}</span>
+                    )}
+                  </li>
+                )}
+                {phone && (
+                  <li>
+                    <span className="label">電話：</span>
+                    <a href={phoneHref} title={`撥打電話至 ${phone}`}>
+                      {phone}
+                    </a>
+                  </li>
+                )}
+                {email && (
+                  <li>
+                    <span className="label">信箱：</span>
+                    <a href={`mailto:${email}`} title={`寄信至 ${email}`}>
+                      {email}
+                    </a>
+                  </li>
+                )}
               </ul>
             </div>
           </div>
@@ -203,11 +215,13 @@ export default async function Footer() {
               </ul>
             )}
 
-            <div className="counter-list">
-              <span>
-                瀏覽 <strong>10,781</strong>
-              </span>
-            </div>
+            {visitorCount !== null && (
+              <div className="counter-list">
+                <span>
+                  瀏覽 <strong>{visitorCount.toLocaleString("en-US")}</strong>
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="footer-divider"></div>
