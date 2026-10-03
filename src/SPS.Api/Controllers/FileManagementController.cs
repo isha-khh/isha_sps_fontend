@@ -5,6 +5,8 @@ using SPS.Application.DTOs.File;
 using SPS.Application.Interfaces.IServices;
 using System.Security.Claims;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -35,6 +37,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>上傳結果</returns>
     [HttpPost("upload")]
+    [RequirePermission(UserPermission.ManageFiles, UserPermission.ManageNews, UserPermission.ManageBanners, UserPermission.ManageSiteContent, UserPermission.ManageMedia, UserPermission.ManageProducts, UserPermission.ManageDemands, UserPermission.ManageMemos, UserPermission.ManageCategories, UserPermission.ManageQuestions, UserPermission.ManageRegulations, UserPermission.ManageCompanies, UserPermission.ManageSettings)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FileUploadResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -66,6 +69,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>批量上傳結果</returns>
     [HttpPost("upload/batch")]
+    [RequirePermission(UserPermission.ManageFiles, UserPermission.ManageNews, UserPermission.ManageBanners, UserPermission.ManageSiteContent, UserPermission.ManageMedia, UserPermission.ManageProducts, UserPermission.ManageDemands, UserPermission.ManageMemos, UserPermission.ManageCategories, UserPermission.ManageQuestions, UserPermission.ManageRegulations, UserPermission.ManageCompanies, UserPermission.ManageSettings)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BatchFileUploadResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -95,6 +99,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>文件統計數據</returns>
     [HttpGet("statistics")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FileStatisticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStatistics(CancellationToken cancellationToken)
@@ -116,6 +121,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>文件信息</returns>
     [HttpGet("{id:guid}")]
+    [RequirePermission(UserPermission.ManageFiles, UserPermission.ManageNews, UserPermission.ManageBanners, UserPermission.ManageSiteContent, UserPermission.ManageMedia, UserPermission.ManageProducts, UserPermission.ManageDemands, UserPermission.ManageMemos, UserPermission.ManageCategories, UserPermission.ManageQuestions, UserPermission.ManageRegulations, UserPermission.ManageCompanies, UserPermission.ManageSettings)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FileInfoResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -140,6 +146,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>文件信息</returns>
     [HttpGet("number/{fileNumber}")]
+    [RequirePermission(UserPermission.ManageFiles, UserPermission.ManageNews, UserPermission.ManageBanners, UserPermission.ManageSiteContent, UserPermission.ManageMedia, UserPermission.ManageProducts, UserPermission.ManageDemands, UserPermission.ManageMemos, UserPermission.ManageCategories, UserPermission.ManageQuestions, UserPermission.ManageRegulations, UserPermission.ManageCompanies, UserPermission.ManageSettings)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FileInfoResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -164,6 +171,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>文件列表</returns>
     [HttpGet("query")]
+    [RequirePermission(UserPermission.ManageFiles, UserPermission.ManageNews, UserPermission.ManageBanners, UserPermission.ManageSiteContent, UserPermission.ManageMedia, UserPermission.ManageProducts, UserPermission.ManageDemands, UserPermission.ManageMemos, UserPermission.ManageCategories, UserPermission.ManageQuestions, UserPermission.ManageRegulations, UserPermission.ManageCompanies, UserPermission.ManageSettings)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(PagedResponse<FileListItemResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> QueryFiles(
@@ -212,6 +220,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>刪除結果</returns>
     [HttpDelete("{id:guid}")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -243,6 +252,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>刪除結果</returns>
     [HttpDelete("{id:guid}/permanent")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "SuperAdmin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -269,6 +279,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>更新結果</returns>
     [HttpPut("{id:guid}/description")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -295,6 +306,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>更新結果</returns>
     [HttpPut("{id:guid}/tags")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -317,6 +329,7 @@ public class FileManagementController : ControllerBase
     /// 創建資料夾
     /// </summary>
     [HttpPost("folder")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FileInfoResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateFolder(
@@ -340,6 +353,7 @@ public class FileManagementController : ControllerBase
     /// 創建空文件
     /// </summary>
     [HttpPost("create")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FileInfoResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateFile(
@@ -364,6 +378,7 @@ public class FileManagementController : ControllerBase
     /// 重新命名
     /// </summary>
     [HttpPut("{id:guid}/rename")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RenameFile(
         Guid id,
@@ -379,6 +394,7 @@ public class FileManagementController : ControllerBase
     /// 移動文件
     /// </summary>
     [HttpPut("{id:guid}/move")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> MoveFile(
         Guid id,
@@ -394,6 +410,7 @@ public class FileManagementController : ControllerBase
     /// 複製文件
     /// </summary>
     [HttpPost("{id:guid}/copy")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FileInfoResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CopyFile(
@@ -421,6 +438,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>批量操作結果</returns>
     [HttpPost("batch/delete")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BatchOperationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -467,6 +485,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>批量操作結果</returns>
     [HttpPost("batch/move")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BatchOperationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -506,6 +525,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>批量操作結果</returns>
     [HttpPost("batch/copy")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BatchOperationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -545,6 +565,7 @@ public class FileManagementController : ControllerBase
     /// <param name="taskId">任務 ID</param>
     /// <returns>任務狀態</returns>
     [HttpGet("batch/status/{taskId}")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BatchOperationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -567,6 +588,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>還原結果</returns>
     [HttpPost("{id:guid}/restore")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -591,6 +613,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>批量操作結果</returns>
     [HttpPost("batch/restore")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BatchOperationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -622,6 +645,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>掃描結果</returns>
     [HttpPost("static/scan")]
+    [RequirePermission(UserPermission.ManageFiles)]
     [Authorize(Roles = "SuperAdmin,Admin")]
     [ProducesResponseType(typeof(ScanStaticFilesResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -645,6 +669,7 @@ public class FileManagementController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>靜態檔案列表</returns>
     [HttpGet("static/query")]
+    [RequirePermission(UserPermission.ManageFiles, UserPermission.ManageNews, UserPermission.ManageBanners, UserPermission.ManageSiteContent, UserPermission.ManageMedia, UserPermission.ManageProducts, UserPermission.ManageDemands, UserPermission.ManageMemos, UserPermission.ManageCategories, UserPermission.ManageQuestions, UserPermission.ManageRegulations, UserPermission.ManageCompanies, UserPermission.ManageSettings)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(PagedResponse<StaticFileListItemResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> QueryStaticFiles(

@@ -4,6 +4,8 @@ using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.Tag;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -77,6 +79,7 @@ public class TagController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>新創建的標籤詳情</returns>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageNews, UserPermission.ManageCompanies, UserPermission.ManageDemands, UserPermission.ManageProducts)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(TagResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -98,6 +101,7 @@ public class TagController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>更新後的標籤詳情</returns>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageNews, UserPermission.ManageCompanies, UserPermission.ManageDemands, UserPermission.ManageProducts)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(TagResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -123,6 +127,7 @@ public class TagController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>無內容</returns>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageNews, UserPermission.ManageCompanies, UserPermission.ManageDemands, UserPermission.ManageProducts)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -5,6 +5,7 @@ using SPS.Application.DTOs.Common;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Enums;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
 
 namespace SPS.Api.Controllers;
 
@@ -15,17 +16,21 @@ namespace SPS.Api.Controllers;
 [Route("api/admin/users")]
 [Produces("application/json")]
 [SwaggerTag("後台使用者管理控制器")]
-[Authorize(Roles = "SuperAdmin,Reviewer")]
+[Authorize(Roles = "Admin")]
+[RequirePermission(UserPermission.ManageUsers)]
 public class AdminUsersController : ControllerBase
 {
     private readonly IAdminUserService _adminUserService;
+    private readonly IAdminRoleService _adminRoleService;
     private readonly ILogger<AdminUsersController> _logger;
 
     public AdminUsersController(
         IAdminUserService adminUserService,
+        IAdminRoleService adminRoleService,
         ILogger<AdminUsersController> logger)
     {
         _adminUserService = adminUserService;
+        _adminRoleService = adminRoleService;
         _logger = logger;
     }
 
@@ -40,8 +45,6 @@ public class AdminUsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetList([FromQuery] QueryParameters parameters, CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageUsers)) return Forbid();
-
         var result = await _adminUserService.GetPagedAsync(parameters, cancellationToken);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
 
@@ -60,8 +63,6 @@ public class AdminUsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageUsers)) return Forbid();
-
         var result = await _adminUserService.GetByIdAsync(id, cancellationToken);
         if (!result.IsSuccess) return NotFound(new { error = result.Error });
 
@@ -80,7 +81,8 @@ public class AdminUsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Create([FromBody] CreateAdminUserRequest request, CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageUsers)) return Forbid();
+        var denied = await CheckRolesAssignableAsync(request.RoleIds, cancellationToken);
+        if (denied != null) return denied;
 
         var result = await _adminUserService.CreateAsync(request, cancellationToken);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
@@ -101,7 +103,8 @@ public class AdminUsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdatePermissions(Guid id, [FromBody] UpdateAdminPermissionsRequest request, CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageUsers)) return Forbid();
+        var denied = await CheckRolesAssignableAsync(request.RoleIds, cancellationToken);
+        if (denied != null) return denied;
 
         var result = await _adminUserService.UpdatePermissionsAsync(id, request, cancellationToken);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
@@ -122,23 +125,30 @@ public class AdminUsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateAdminUserStatusRequest request, CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageUsers)) return Forbid();
-
         var result = await _adminUserService.UpdateStatusAsync(id, request, cancellationToken);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
 
         return Ok(new { message = "狀態更新成功" });
     }
 
-    private bool CheckPermission(UserPermission requiredPermission)
+    /// <summary>
+    /// 只能指派權限不超過自己的角色（否則可以把自己或別人指派成全權限角色）
+    /// </summary>
+    private async Task<IActionResult?> CheckRolesAssignableAsync(List<Guid>? roleIds, CancellationToken cancellationToken)
     {
-        var permissionsStr = User.FindFirst("Permissions")?.Value;
-        if (long.TryParse(permissionsStr, out var perms))
-        {
-            var userPermissions = (UserPermission)perms;
-            if (userPermissions.HasFlag(UserPermission.All)) return true;
-            return userPermissions.HasFlag(requiredPermission);
-        }
-        return false;
+        if (roleIds == null || roleIds.Count == 0) return null;
+
+        var roles = await _adminRoleService.GetAllAsync(cancellationToken);
+        if (!roles.IsSuccess) return BadRequest(new { error = roles.Error });
+
+        var caller = User.GetAdminPermissions();
+        var tooPowerful = roles.Data!
+            .Where(r => roleIds.Contains(r.Id) && !caller.CanGrant(r.Permissions))
+            .Select(r => r.Name)
+            .ToList();
+
+        return tooPowerful.Count == 0
+            ? null
+            : StatusCode(StatusCodes.Status403Forbidden, new { error = $"不能指派權限超過自己的角色：{string.Join("、", tooPowerful)}" });
     }
 }

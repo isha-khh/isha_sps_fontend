@@ -65,9 +65,7 @@ About、Album、Attribute、Company、Demand、Mou、Picture、Product、Regulat
 
 ## 未處理（需要決策，建議排下一輪）
 
-1. **細粒度權限沒有在後端落實**：`UserPermission` 有 `ManageMembers`、`ManageCompanies`、`ManageProducts`、`ManageNews`… 18 個旗標，AdminWeb 用它們控制選單，但後端除了上面幾支（用戶／角色／群發信／日誌部分端點）外都只看 `Admin`。
-   結果：任何後台帳號（即使角色沒有任何權限）都能匯出全部會員、刪除公司、改公告。建議做一個 `[RequireAdminPermission(UserPermission.X)]` 屬性（同時檢查 `UserType=Admin`），逐 controller 對應旗標。
-   沒直接做的原因：Banner／Tag／About／Album／Mou 在 `UserPermission` 沒有對應旗標，需要先決定歸哪個；而且硬套會讓現有角色（例如「客服人員」）突然失去目前能用的功能，要先盤點正式環境的角色資料。
+1. ~~細粒度權限沒有在後端落實~~ → **已處理**：見 [rbac-permission-design-2026-10-03.md](rbac-permission-design-2026-10-03.md)（`[RequirePermission]`、檢視／維護兩層、授權上限、預設角色）。
 2. **權限位元撞號的根本修法**：把會員 token 的 claim 改名（例如 `MemberPermissions`），`MemberPermissionRequiredAttribute` 與 `MemberHub` 同步改。現在靠 `Roles = "Admin"` 擋住，但只要未來有人在後台 controller 用 in-action `CheckPermission` 又忘了加角色限制，這個洞就會重現。
 3. **Applications 的 GUID 即憑證**：`GET/PUT {id}`、`submit`、`cancel`、文件上傳／刪除都匿名，只靠 GUID 不可猜。GUID 外流（郵件連結、瀏覽器紀錄）就能讀寫別人的申請。若申請流程改成「先註冊／驗證信箱再申請」可改為需登入並比對擁有者。
 4. **`POST Log/mail/bounce`**（郵件伺服器 webhook）匿名且沒有任何簽章／共享密鑰驗證，任何人可偽造退信紀錄。建議加共享密鑰標頭。

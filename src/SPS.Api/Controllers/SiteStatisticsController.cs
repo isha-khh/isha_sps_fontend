@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.SiteStatistics;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -41,6 +43,7 @@ public class SiteStatisticsController : ControllerBase
 [ApiController]
 [Route("api/admin/site-statistics")]
 [Authorize(Roles = "Admin")]
+[RequirePermission(UserPermission.ManageSiteContent)]
 [Produces("application/json")]
 [SwaggerTag("網站統計數據管理")]
 public class AdminSiteStatisticsController : ControllerBase

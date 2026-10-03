@@ -8,6 +8,7 @@ using SPS.Domain.Entities;
 using SPS.Domain.Enums;
 using SPS.Infrastructure.Data;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
 
 namespace SPS.Api.Controllers;
 
@@ -124,6 +125,7 @@ public class LogController : ControllerBase
     /// 分頁查詢操作日誌
     /// </summary>
     [HttpGet("action")]
+    [RequirePermission(UserPermission.ViewActionLogs)]
     [ProducesResponseType(typeof(PagedResult<ActionLogDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActionLogs(
         [FromQuery] QueryParameters parameters,
@@ -191,6 +193,7 @@ public class LogController : ControllerBase
     /// 分頁查詢申請日誌
     /// </summary>
     [HttpGet("application")]
+    [RequirePermission(UserPermission.ViewActionLogs)]
     [ProducesResponseType(typeof(PagedResult<ApplicationLogDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetApplicationLogs(
         [FromQuery] QueryParameters parameters,
@@ -351,6 +354,8 @@ public class LogController : ControllerBase
     /// <param name="actionType">操作類型篩選</param>
     /// <param name="cancellationToken">取消令牌</param>
     [HttpGet("action/export")]
+    [RequirePermission(UserPermission.ViewActionLogs)]
+    [RequirePermission(UserPermission.ExportData)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> ExportActionLogs(
         [FromQuery] DateOnly? startDate,
@@ -539,6 +544,7 @@ public class LogController : ControllerBase
     /// 獲取操作日誌詳情
     /// </summary>
     [HttpGet("action/{id}")]
+    [RequirePermission(UserPermission.ViewActionLogs)]
     [ProducesResponseType(typeof(ActionLogDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetActionLogById(long id, CancellationToken cancellationToken)
@@ -577,6 +583,7 @@ public class LogController : ControllerBase
     /// 獲取申請日誌詳情
     /// </summary>
     [HttpGet("application/{id}")]
+    [RequirePermission(UserPermission.ViewActionLogs)]
     [ProducesResponseType(typeof(ApplicationLogDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetApplicationLogById(Guid id, CancellationToken cancellationToken)

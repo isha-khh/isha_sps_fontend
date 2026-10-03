@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Enums;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
 
 namespace SPS.Api.Controllers;
 
@@ -60,6 +61,8 @@ public class ExportController : ControllerBase
     /// 匯出公司列表為 Excel
     /// </summary>
     [HttpPost("companies")]
+    [RequirePermission(UserPermission.ExportData)]
+    [RequirePermission(UserPermission.ViewCompanies)]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ExportCompanies(
@@ -90,6 +93,8 @@ public class ExportController : ControllerBase
     /// 匯出會員列表為 Excel
     /// </summary>
     [HttpPost("members")]
+    [RequirePermission(UserPermission.ExportData)]
+    [RequirePermission(UserPermission.ViewMembers)]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ExportMembers(
@@ -122,6 +127,7 @@ public class ExportController : ControllerBase
     /// 匯出產品列表為 Excel
     /// </summary>
     [HttpPost("products")]
+    [RequirePermission(UserPermission.ExportData)]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ExportProducts(

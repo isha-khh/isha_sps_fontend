@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.Demand;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -85,6 +87,7 @@ public class DemandController : ControllerBase
     /// <response code="400">請求數據無效</response>
     /// <response code="401">未授權</response>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageDemands)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -107,6 +110,7 @@ public class DemandController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">需求不存在</response>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageDemands)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -139,6 +143,7 @@ public class DemandController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">需求不存在</response>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageDemands)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -171,6 +176,7 @@ public class DemandController : ControllerBase
     /// <param name="ct">取消令牌</param>
     /// <returns>相似業者清單</returns>
     [HttpGet("similar-companies")]
+    [RequirePermission(UserPermission.ManageDemands)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSimilarCompanies([FromQuery] List<int> tagIds, CancellationToken ct)
@@ -186,6 +192,7 @@ public class DemandController : ControllerBase
     /// <param name="ct">取消令牌</param>
     /// <returns>相似業者清單（依語意相關度排序）</returns>
     [HttpGet("{id}/similar-companies-ai")]
+    [RequirePermission(UserPermission.ManageDemands)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSimilarCompaniesByVector(int id, CancellationToken ct)
@@ -202,6 +209,7 @@ public class DemandController : ControllerBase
     /// <param name="ct">取消令牌</param>
     /// <returns>相似業者清單（依語意相關度排序）</returns>
     [HttpPost("similar-companies-ai/preview")]
+    [RequirePermission(UserPermission.ManageDemands)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> PreviewSimilarCompaniesByVector([FromBody] PreviewSimilarCompaniesRequest request, CancellationToken ct)
@@ -240,6 +248,7 @@ public class DemandController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">需求不存在</response>
     [HttpPut("{id}/tags")]
+    [RequirePermission(UserPermission.ManageDemands)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(DemandTagsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -255,6 +264,7 @@ public class DemandController : ControllerBase
     }
 
     [HttpGet("{id}/notifications")]
+    [RequirePermission(UserPermission.ManageDemands)]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetNotifications(int id, CancellationToken ct)
     {

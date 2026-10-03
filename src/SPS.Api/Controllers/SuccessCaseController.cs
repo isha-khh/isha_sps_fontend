@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.SuccessCase;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -79,6 +81,7 @@ public class SuccessCaseController : ControllerBase
     /// <param name="request">創建成功案例的請求數據</param>
     /// <returns>新創建的成功案例詳情</returns>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageSiteContent)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -101,6 +104,7 @@ public class SuccessCaseController : ControllerBase
     /// <param name="request">更新成功案例的請求數據</param>
     /// <returns>更新後的成功案例詳情</returns>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -120,6 +124,7 @@ public class SuccessCaseController : ControllerBase
     /// <param name="id">要刪除的成功案例 ID</param>
     /// <returns>無內容</returns>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -137,6 +142,7 @@ public class SuccessCaseController : ControllerBase
     /// <param name="isPublished">是否發布</param>
     /// <returns>更新後的成功案例</returns>
     [HttpPatch("{id}/publish")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

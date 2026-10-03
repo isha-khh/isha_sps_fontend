@@ -5,6 +5,7 @@ import type { RoleDto, PermissionDto, CreateRoleRequest, UpdateRoleRequest } fro
 import { permissionBitmaskToArray, permissionArrayToBitmask } from '@/types/admin-role';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useNotify } from '@/hooks/useNotify';
+import { usePermission } from '@/hooks/usePermission';
 
 interface RoleFormData {
   name: string;
@@ -14,6 +15,8 @@ interface RoleFormData {
 
 export const RolesPage = () => {
   const notify = useNotify();
+  // 只能授予自己也擁有的權限（後端同樣會檢查，這裡只是讓畫面一開始就不給勾）
+  const { has: hasPerm } = usePermission();
   const [roles, setRoles] = useState<RoleDto[]>([]);
   const [availablePermissions, setAvailablePermissions] = useState<PermissionDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,7 +118,8 @@ export const RolesPage = () => {
       await fetchRoles();
     } catch (error) {
       console.error('Failed to save role:', error);
-      await notify.error('儲存角色失敗');
+      const serverMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      await notify.error(serverMessage || '儲存角色失敗');
     } finally {
       setIsSaving(false);
     }
@@ -320,15 +324,21 @@ export const RolesPage = () => {
                         <div key={group} className="border border-base-300 rounded-lg p-4">
                           <h4 className="font-semibold mb-3">{group}</h4>
                           <div className="grid grid-cols-1 gap-2">
-                            {perms.map((perm) => (
+                            {perms.map((perm) => {
+                              const checked = formData.selectedPermissions.some((p) => p === BigInt(perm.value));
+                              // 自己沒有的權限不能新授予別人；但角色本來就含有的可以取消勾選
+                              const cannotGrant = !checked && !hasPerm(BigInt(perm.value));
+                              return (
                               <label
                                 key={perm.value}
-                                className="label cursor-pointer justify-start gap-3 hover:bg-base-200 rounded p-2"
+                                className={`label justify-start gap-3 rounded p-2 ${cannotGrant ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-base-200'}`}
+                                title={cannotGrant ? '你沒有這項權限，不能授予給別人' : undefined}
                               >
                                 <input
                                   type="checkbox"
                                   className="checkbox checkbox-sm checkbox-primary"
-                                  checked={formData.selectedPermissions.some((p) => p === BigInt(perm.value))}
+                                  checked={checked}
+                                  disabled={cannotGrant}
                                   onChange={() => togglePermission(perm.value)}
                                 />
                                 <div className="flex-1">
@@ -343,7 +353,8 @@ export const RolesPage = () => {
                                   {perm.value}
                                 </span>
                               </label>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       ))}

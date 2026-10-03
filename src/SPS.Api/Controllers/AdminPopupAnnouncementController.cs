@@ -4,6 +4,8 @@ using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.PopupAnnouncement;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -13,6 +15,7 @@ namespace SPS.Api.Controllers;
 [ApiController]
 [Route("api/admin/popup-announcements")]
 [Authorize(Roles = "Admin")]
+[RequirePermission(UserPermission.ManageSiteContent)]
 [Produces("application/json")]
 [SwaggerTag("彈窗公告管理控制器（後台）")]
 public class AdminPopupAnnouncementController : ControllerBase

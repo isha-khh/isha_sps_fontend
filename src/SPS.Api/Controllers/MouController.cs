@@ -4,6 +4,7 @@ using SPS.Application.DTOs.Mou;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Enums;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
 
 namespace SPS.Api.Controllers;
 
@@ -62,6 +63,7 @@ public class MouController : ControllerBase
     /// <param name="request">新增請求</param>
     /// <returns>新增的備忘錄</returns>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageMemos)]
     [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "新增合作備忘錄", Description = "建立新的合作備忘錄")]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
@@ -84,6 +86,7 @@ public class MouController : ControllerBase
     /// <param name="request">更新請求</param>
     /// <returns>更新後的備忘錄</returns>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageMemos)]
     [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "更新合作備忘錄", Description = "更新指定的合作備忘錄")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
@@ -104,6 +107,7 @@ public class MouController : ControllerBase
     /// <param name="id">備忘錄 ID</param>
     /// <returns>無內容</returns>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageMemos)]
     [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "刪除合作備忘錄", Description = "刪除指定的合作備忘錄")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -122,6 +126,7 @@ public class MouController : ControllerBase
     /// <param name="status">新狀態</param>
     /// <returns>更新後的備忘錄</returns>
     [HttpPatch("{id}/status")]
+    [RequirePermission(UserPermission.ManageMemos)]
     [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "更新合作備忘錄狀態", Description = "更新指定備忘錄的狀態（如：生效中、已到期等）")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]

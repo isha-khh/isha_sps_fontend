@@ -6,13 +6,18 @@ export const Permission = {
   ManageUsers: 1n << 0n,
   ManageRoles: 1n << 1n,
   ManageSettings: 1n << 2n,
+  ViewActionLogs: 1n << 4n,
 
   // 審核管理
   ManageApplications: 1n << 10n,
+  ViewApplications: 1n << 11n,
 
   // 會員管理
   ManageMembers: 1n << 20n,
   ManageCompanies: 1n << 21n,
+  ViewMembers: 1n << 22n,
+  ViewCompanies: 1n << 23n,
+  ExportData: 1n << 24n,
 
   // 內容管理
   ManageProducts: 1n << 30n,
@@ -22,12 +27,16 @@ export const Permission = {
   ManageCategories: 1n << 34n,
   ManageQuestions: 1n << 35n,
   ManageRegulations: 1n << 36n,
+  ManageBanners: 1n << 37n,
+  ManageSiteContent: 1n << 39n,
 
   // 數據分析
   ViewAnalytics: 1n << 40n,
 
   // 客服
   CustomerService: 1n << 41n,
+  ManageMedia: 1n << 42n,
+  ManageFiles: 1n << 45n,
 
   // 通訊管理
   SendBulkEmail: 1n << 50n,
@@ -38,18 +47,31 @@ export const Permission = {
 export type PermissionKey = keyof typeof Permission;
 
 /**
- * 從使用者角色中計算總權限
+ * 「維護」包含「檢視」：擁有 ManageMembers 就等於同時有 ViewMembers。
+ * 與後端 UserPermissionExtensions.Expand 一致，兩邊要一起改
+ */
+export function expandPermissions(permissions: bigint): bigint {
+  let expanded = permissions;
+  if (permissions & Permission.ManageApplications) expanded |= Permission.ViewApplications;
+  if (permissions & Permission.ManageMembers) expanded |= Permission.ViewMembers;
+  if (permissions & Permission.ManageCompanies) expanded |= Permission.ViewCompanies;
+  return expanded;
+}
+
+/**
+ * 從使用者角色中計算總權限（已展開「維護包含檢視」）
  */
 export function calculateUserPermissions(roles: { permissions: string }[]): bigint {
   if (!roles || roles.length === 0) return 0n;
 
-  return roles.reduce((acc, role) => {
+  const combined = roles.reduce((acc, role) => {
     try {
       return acc | BigInt(role.permissions);
     } catch {
       return acc;
     }
   }, 0n);
+  return expandPermissions(combined);
 }
 
 /**
@@ -85,12 +107,21 @@ export const PermissionLabels: Record<PermissionKey, string> = {
   ManageUsers: '用戶管理',
   ManageRoles: '角色管理',
   ManageSettings: '系統設定',
+  ViewActionLogs: '檢視操作記錄',
   ManageApplications: '會員申請審核',
+  ViewApplications: '檢視會員申請',
   ManageMembers: '會員管理',
   ManageCompanies: '企業管理',
+  ViewMembers: '檢視會員',
+  ViewCompanies: '檢視企業',
+  ExportData: '匯出資料',
   ManageProducts: '產品管理',
   ManageDemands: '需求管理',
-  ManageNews: '新聞管理',
+  ManageNews: '公告管理',
+  ManageBanners: '橫幅管理',
+  ManageSiteContent: '網站內容管理',
+  ManageMedia: '媒體管理',
+  ManageFiles: '系統檔案管理',
   ManageMemos: '備忘錄管理',
   ManageCategories: '分類管理',
   ManageQuestions: '常見問題管理',

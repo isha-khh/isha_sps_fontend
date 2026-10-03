@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.About;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -89,6 +91,7 @@ public class AboutController : ControllerBase
     /// <response code="400">請求數據無效</response>
     /// <response code="401">未授權</response>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageSiteContent)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -115,6 +118,7 @@ public class AboutController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">內容不存在</response>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -138,6 +142,7 @@ public class AboutController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">內容不存在</response>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

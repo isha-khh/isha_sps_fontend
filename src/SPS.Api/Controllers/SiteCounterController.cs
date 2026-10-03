@@ -4,6 +4,7 @@ using SPS.Api.Attributes;
 using SPS.Application.DTOs.SiteCounter;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -59,6 +60,7 @@ public class SiteCounterController : ControllerBase
 [ApiController]
 [Route("api/admin/site-counter")]
 [Authorize(Roles = "Admin")]
+[RequirePermission(UserPermission.ManageSiteContent)]
 [Produces("application/json")]
 [SwaggerTag("網站計數器管理")]
 public class AdminSiteCounterController : ControllerBase

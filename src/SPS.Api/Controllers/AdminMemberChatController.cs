@@ -4,12 +4,15 @@ using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.Chat;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
 [ApiController]
 [Route("api/admin/member-chat")]
 [Authorize(Roles = "Admin")]
+[RequirePermission(UserPermission.CustomerService)]
 [Produces("application/json")]
 [SwaggerTag("管理員聊天控制器")]
 public class AdminMemberChatController : ControllerBase

@@ -5,6 +5,8 @@ using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.News;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -113,6 +115,7 @@ public class NewsController : ControllerBase
     /// <response code="400">請求參數錯誤</response>
     /// <response code="401">未授權</response>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageNews)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(NewsResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -148,6 +151,7 @@ public class NewsController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">找不到指定的新聞</response>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageNews)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(NewsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -182,6 +186,7 @@ public class NewsController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">找不到指定的新聞</response>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageNews)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

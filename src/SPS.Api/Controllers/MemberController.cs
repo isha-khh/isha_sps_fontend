@@ -4,6 +4,8 @@ using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.Member;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -30,6 +32,7 @@ public class MemberController : ControllerBase
     /// 分頁查詢會員列表
     /// </summary>
     [HttpGet]
+    [RequirePermission(UserPermission.ViewMembers)]
     [ProducesResponseType(typeof(PagedResult<MemberListItemResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPaged([FromQuery] MemberQueryParameters parameters, CancellationToken cancellationToken)
     {
@@ -42,6 +45,7 @@ public class MemberController : ControllerBase
     /// 獲取會員詳情
     /// </summary>
     [HttpGet("{id}")]
+    [RequirePermission(UserPermission.ViewMembers)]
     [ProducesResponseType(typeof(MemberResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
@@ -55,6 +59,7 @@ public class MemberController : ControllerBase
     /// 更新會員資訊
     /// </summary>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageMembers)]
     [ProducesResponseType(typeof(MemberResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMemberRequest request, CancellationToken cancellationToken)
     {
@@ -67,6 +72,7 @@ public class MemberController : ControllerBase
     /// 刪除會員
     /// </summary>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageMembers)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
@@ -79,6 +85,7 @@ public class MemberController : ControllerBase
     /// 獲取會員統計數據
     /// </summary>
     [HttpGet("statistics")]
+    [RequirePermission(UserPermission.ViewMembers)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStatistics(CancellationToken cancellationToken)
     {
@@ -90,6 +97,7 @@ public class MemberController : ControllerBase
     /// 管理員重置會員密碼
     /// </summary>
     [HttpPost("{id}/reset-password")]
+    [RequirePermission(UserPermission.ManageMembers)]
     [ProducesResponseType(typeof(MemberResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ResetPassword(Guid id, [FromBody] AdminResetMemberPasswordRequest request, CancellationToken cancellationToken)
@@ -103,6 +111,7 @@ public class MemberController : ControllerBase
     /// 解鎖會員帳戶
     /// </summary>
     [HttpPost("{id}/unlock")]
+    [RequirePermission(UserPermission.ManageMembers)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UnlockMember(Guid id, CancellationToken cancellationToken)
@@ -116,6 +125,7 @@ public class MemberController : ControllerBase
     /// 更新會員信箱驗證狀態
     /// </summary>
     [HttpPut("{id}/email-verification")]
+    [RequirePermission(UserPermission.ManageMembers)]
     [ProducesResponseType(typeof(MemberResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateEmailVerification(Guid id, [FromBody] UpdateEmailVerificationRequest request, CancellationToken cancellationToken)
@@ -128,6 +138,7 @@ public class MemberController : ControllerBase
     /// 批次重置會員密碼
     /// </summary>
     [HttpPost("batch/reset-password")]
+    [RequirePermission(UserPermission.ManageMembers)]
     [ProducesResponseType(typeof(BatchOperationResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> BatchResetPassword([FromBody] BatchResetPasswordRequest request, CancellationToken cancellationToken)
     {
@@ -143,6 +154,7 @@ public class MemberController : ControllerBase
     /// 批次更新會員信箱驗證狀態
     /// </summary>
     [HttpPut("batch/email-verification")]
+    [RequirePermission(UserPermission.ManageMembers)]
     [ProducesResponseType(typeof(BatchOperationResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> BatchUpdateEmailVerification([FromBody] BatchUpdateEmailVerificationRequest request, CancellationToken cancellationToken)
     {
@@ -158,6 +170,7 @@ public class MemberController : ControllerBase
     /// 批次設定要求下次登入修改密碼
     /// </summary>
     [HttpPut("batch/require-password-change")]
+    [RequirePermission(UserPermission.ManageMembers)]
     [ProducesResponseType(typeof(BatchOperationResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> BatchRequirePasswordChange([FromBody] BatchRequirePasswordChangeRequest request, CancellationToken cancellationToken)
     {
@@ -173,6 +186,7 @@ public class MemberController : ControllerBase
     /// Admin 切換指定聯絡人
     /// </summary>
     [HttpPut("{id}/designated-contact")]
+    [RequirePermission(UserPermission.ManageMembers)]
     [ProducesResponseType(typeof(MemberResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ToggleDesignatedContact(Guid id, [FromBody] AdminToggleDesignatedContactRequest request, CancellationToken cancellationToken)

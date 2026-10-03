@@ -4,6 +4,8 @@ using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.Picture;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -74,6 +76,7 @@ public class PictureController : ControllerBase
     /// 創建圖片
     /// </summary>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageMedia)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(PictureResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -92,6 +95,7 @@ public class PictureController : ControllerBase
     /// 更新圖片
     /// </summary>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageMedia)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(PictureResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -116,6 +120,7 @@ public class PictureController : ControllerBase
     /// 刪除圖片
     /// </summary>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageMedia)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

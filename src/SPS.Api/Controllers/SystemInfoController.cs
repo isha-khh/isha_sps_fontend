@@ -9,6 +9,8 @@ using SPS.Application.Interfaces.IServices;
 using SPS.Infrastructure.Data;
 using StackExchange.Redis;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -51,6 +53,7 @@ public class SystemInfoController : ControllerBase
     /// 取得系統資訊
     /// </summary>
     [HttpGet]
+    [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "取得系統資訊", Description = "取得伺服器、資料庫、快取等系統資訊")]
     [ProducesResponseType(typeof(SystemInfoDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<SystemInfoDto>> GetSystemInfo()

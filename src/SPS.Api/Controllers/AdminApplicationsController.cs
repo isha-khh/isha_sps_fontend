@@ -6,6 +6,8 @@ using SPS.Application.DTOs.Scoring;
 using SPS.Application.Interfaces.IServices;
 using System.Security.Claims;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -14,7 +16,7 @@ namespace SPS.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/admin/applications")]
-[Authorize(Roles = "SuperAdmin,Reviewer")]
+[Authorize(Roles = "Admin")]
 [SwaggerTag("管理員申請審核控制器")]
 public class AdminApplicationsController : ControllerBase
 {
@@ -46,6 +48,7 @@ public class AdminApplicationsController : ControllerBase
     /// <response code="400">請求參數錯誤</response>
     /// <response code="401">未授權或權限不足</response>
     [HttpGet("pending")]
+    [RequirePermission(UserPermission.ViewApplications)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -76,6 +79,7 @@ public class AdminApplicationsController : ControllerBase
     /// <response code="400">請求參數錯誤</response>
     /// <response code="401">未授權或權限不足</response>
     [HttpGet("under-review")]
+    [RequirePermission(UserPermission.ViewApplications)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -111,6 +115,7 @@ public class AdminApplicationsController : ControllerBase
     /// <response code="400">請求參數錯誤</response>
     /// <response code="401">未授權或權限不足</response>
     [HttpGet("completed")]
+    [RequirePermission(UserPermission.ViewApplications)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -153,6 +158,7 @@ public class AdminApplicationsController : ControllerBase
     /// <response code="400">請求參數錯誤或申請狀態不允許領取</response>
     /// <response code="401">未授權或權限不足</response>
     [HttpPost("{id}/claim")]
+    [RequirePermission(UserPermission.ManageApplications)]
     [ProducesResponseType(typeof(ApplicationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -187,6 +193,7 @@ public class AdminApplicationsController : ControllerBase
     /// <response code="400">請求參數錯誤或申請狀態不允許審核</response>
     /// <response code="401">未授權或權限不足</response>
     [HttpPost("{id}/review")]
+    [RequirePermission(UserPermission.ManageApplications)]
     [ProducesResponseType(typeof(ApplicationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -230,6 +237,7 @@ public class AdminApplicationsController : ControllerBase
     /// <response code="400">請求失敗</response>
     /// <response code="401">未授權或權限不足</response>
     [HttpGet("statistics")]
+    [RequirePermission(UserPermission.ViewApplications)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -249,6 +257,7 @@ public class AdminApplicationsController : ControllerBase
     /// 下載單個附件
     /// </summary>
     [HttpGet("documents/{documentId}/download")]
+    [RequirePermission(UserPermission.ViewApplications)]
     [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -270,6 +279,7 @@ public class AdminApplicationsController : ControllerBase
     /// 打包下載所有附件
     /// </summary>
     [HttpGet("{id}/documents/download-all")]
+    [RequirePermission(UserPermission.ViewApplications)]
     [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DownloadAllDocuments(
@@ -312,6 +322,7 @@ public class AdminApplicationsController : ControllerBase
     /// 管理員上傳附件（UnderReview 狀態）
     /// </summary>
     [HttpPost("{id}/documents/upload")]
+    [RequirePermission(UserPermission.ManageApplications)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadDocument(
@@ -333,6 +344,7 @@ public class AdminApplicationsController : ControllerBase
     /// 管理員刪除附件（UnderReview 狀態）
     /// </summary>
     [HttpDelete("documents/{documentId}")]
+    [RequirePermission(UserPermission.ManageApplications)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteDocument(
@@ -358,6 +370,7 @@ public class AdminApplicationsController : ControllerBase
     /// <response code="400">請求參數錯誤或申請不存在</response>
     /// <response code="401">未授權或權限不足</response>
     [HttpPost("{id}/scores")]
+    [RequirePermission(UserPermission.ManageApplications)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -388,6 +401,7 @@ public class AdminApplicationsController : ControllerBase
     /// <param name="scoringId">評分紀錄ID</param>
     /// <param name="cancellationToken">取消令牌</param>
     [HttpDelete("{id}/scores/{scoringId:long}")]
+    [RequirePermission(UserPermission.ManageApplications)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -414,6 +428,7 @@ public class AdminApplicationsController : ControllerBase
     /// <response code="400">請求失敗</response>
     /// <response code="401">未授權或權限不足</response>
     [HttpGet("{id}/scores")]
+    [RequirePermission(UserPermission.ViewApplications)]
     [ProducesResponseType(typeof(ScoringSummaryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

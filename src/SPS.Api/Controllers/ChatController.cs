@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using SPS.Application.Interfaces.IServices;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -11,6 +13,7 @@ namespace SPS.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
+[RequirePermission(UserPermission.CustomerService)]
 [SwaggerTag("聊天管理 API")]
 public class ChatController : ControllerBase
 {

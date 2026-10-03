@@ -4,6 +4,7 @@ using SPS.Application.DTOs.AdminRole;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Enums;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
 
 namespace SPS.Api.Controllers;
 
@@ -34,12 +35,11 @@ public class AdminRolesController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>角色列表</returns>
     [HttpGet]
+    [RequirePermission(UserPermission.ManageRoles, UserPermission.ManageUsers)]
     [ProducesResponseType(typeof(List<RoleDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetList(CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageRoles) && !CheckPermission(UserPermission.ManageUsers)) return Forbid();
-
         var result = await _adminRoleService.GetAllAsync(cancellationToken);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
 
@@ -51,12 +51,11 @@ public class AdminRolesController : ControllerBase
     /// </summary>
     /// <returns>權限列表</returns>
     [HttpGet("permissions")]
+    [RequirePermission(UserPermission.ManageRoles)]
     [ProducesResponseType(typeof(List<PermissionDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public IActionResult GetPermissions()
     {
-        if (!CheckPermission(UserPermission.ManageRoles)) return Forbid();
-
         var result = _adminRoleService.GetAllPermissions();
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
 
@@ -70,13 +69,12 @@ public class AdminRolesController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>角色詳情</returns>
     [HttpGet("{id}")]
+    [RequirePermission(UserPermission.ManageRoles)]
     [ProducesResponseType(typeof(RoleDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageRoles)) return Forbid();
-
         var result = await _adminRoleService.GetByIdAsync(id, cancellationToken);
         if (!result.IsSuccess) return NotFound(new { error = result.Error });
 
@@ -90,12 +88,14 @@ public class AdminRolesController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>創建的角色ID</returns>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageRoles)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Create([FromBody] CreateRoleRequest request, CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageRoles)) return Forbid();
+        var denied = CheckGrantable(request.Permissions);
+        if (denied != null) return denied;
 
         var result = await _adminRoleService.CreateAsync(request, cancellationToken);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
@@ -111,12 +111,14 @@ public class AdminRolesController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>成功訊息</returns>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageRoles)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRoleRequest request, CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageRoles)) return Forbid();
+        var denied = CheckGrantable(request.Permissions);
+        if (denied != null) return denied;
 
         var result = await _adminRoleService.UpdateAsync(id, request, cancellationToken);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
@@ -131,28 +133,29 @@ public class AdminRolesController : ControllerBase
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>成功訊息</returns>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageRoles)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        if (!CheckPermission(UserPermission.ManageRoles)) return Forbid();
-
         var result = await _adminRoleService.DeleteAsync(id, cancellationToken);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
 
         return Ok(new { message = "角色刪除成功" });
     }
 
-    private bool CheckPermission(UserPermission requiredPermission)
+    /// <summary>
+    /// 角色的權限只能是操作者自己也擁有的子集，且不能含未定義的位元
+    /// </summary>
+    private IActionResult? CheckGrantable(UserPermission requested)
     {
-        var permissionsStr = User.FindFirst("Permissions")?.Value;
-        if (long.TryParse(permissionsStr, out var perms))
-        {
-            var userPermissions = (UserPermission)perms;
-            if (userPermissions.HasFlag(UserPermission.All)) return true;
-            return userPermissions.HasFlag(requiredPermission);
-        }
-        return false;
+        if ((requested & ~UserPermission.All) != UserPermission.None)
+            return BadRequest(new { error = "包含未定義的權限" });
+
+        if (!User.GetAdminPermissions().CanGrant(requested))
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "不能授予自己沒有的權限" });
+
+        return null;
     }
 }

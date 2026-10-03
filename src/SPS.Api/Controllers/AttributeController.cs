@@ -4,6 +4,7 @@ using SPS.Application.DTOs.Attribute;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Enums;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
 
 namespace SPS.Api.Controllers;
 
@@ -78,6 +79,7 @@ public class AttributeController : ControllerBase
     /// <param name="request">創建屬性請求</param>
     /// <returns>創建的屬性</returns>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageCategories, UserPermission.ManageProducts)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -100,6 +102,7 @@ public class AttributeController : ControllerBase
     /// <param name="request">更新屬性請求</param>
     /// <returns>更新後的屬性</returns>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageCategories, UserPermission.ManageProducts)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -120,6 +123,7 @@ public class AttributeController : ControllerBase
     /// <param name="id">屬性 ID</param>
     /// <returns>無內容</returns>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageCategories, UserPermission.ManageProducts)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

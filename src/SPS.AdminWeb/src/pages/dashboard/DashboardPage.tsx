@@ -61,19 +61,25 @@ export const DashboardPage = () => {
           has(Permission.ViewAnalytics)
             ? safeApiCall(() => analyticsApi.getReport() as Promise<AnalyticsReport>, emptyAnalyticsReport)
             : Promise.resolve(emptyAnalyticsReport),
-          // Applications - 需要 ManageApplications 權限
-          has(Permission.ManageApplications)
+          // Applications - 需要檢視申請權限
+          has(Permission.ViewApplications)
             ? safeApiCall(() => adminApplicationsApi.getStatistics(), emptyApplicationStats)
             : Promise.resolve(emptyApplicationStats),
-          // Chat - 不需特別權限，但可能失敗
-          safeApiCall(() => chatApi.getStatistics(), emptyChatStats),
-          safeApiCall(() => chatApi.getOnlineVisitors(), []),
-          // Companies - 需要 ManageCompanies 權限
-          has(Permission.ManageCompanies)
+          // Chat - 需要客服權限
+          has(Permission.CustomerService)
+            ? safeApiCall(() => chatApi.getStatistics(), emptyChatStats)
+            : Promise.resolve(emptyChatStats),
+          has(Permission.CustomerService)
+            ? safeApiCall(() => chatApi.getOnlineVisitors(), [])
+            : Promise.resolve([]),
+          // Companies - 需要檢視企業權限
+          has(Permission.ViewCompanies)
             ? safeApiCall(() => companiesApi.getStatistics(), emptyCompanyStats)
             : Promise.resolve(emptyCompanyStats),
-          // Files - 檔案統計
-          safeApiCall(() => filesManagementApi.getStatistics(), emptyFileStats),
+          // Files - 檔案統計，需要系統檔案管理權限
+          has(Permission.ManageFiles)
+            ? safeApiCall(() => filesManagementApi.getStatistics(), emptyFileStats)
+            : Promise.resolve(emptyFileStats),
         ]);
 
         // 轉換數據格式

@@ -5,6 +5,8 @@ using SPS.Application.DTOs.Banner;
 using SPS.Application.DTOs.Common;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
+using SPS.Api.Attributes;
+using SPS.Domain.Enums;
 
 namespace SPS.Api.Controllers;
 
@@ -113,6 +115,7 @@ public class BannerController : ControllerBase
     /// <response code="400">請求參數錯誤</response>
     /// <response code="401">未授權</response>
     [HttpPost]
+    [RequirePermission(UserPermission.ManageBanners)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BannerResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -148,6 +151,7 @@ public class BannerController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">找不到指定的 Banner</response>
     [HttpPut("{id}")]
+    [RequirePermission(UserPermission.ManageBanners)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(BannerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -182,6 +186,7 @@ public class BannerController : ControllerBase
     /// <response code="401">未授權</response>
     /// <response code="404">找不到指定的 Banner</response>
     [HttpDelete("{id}")]
+    [RequirePermission(UserPermission.ManageBanners)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -254,6 +259,7 @@ public class BannerController : ControllerBase
     /// 取得所有 Banner 版位（後台新增/編輯 Banner 的下拉選單）
     /// </summary>
     [HttpGet("positions")]
+    [RequirePermission(UserPermission.ManageBanners)]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(List<BannerPositionResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPositions(CancellationToken cancellationToken)
