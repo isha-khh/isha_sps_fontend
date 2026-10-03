@@ -68,6 +68,6 @@ About、Album、Attribute、Company、Demand、Mou、Picture、Product、Regulat
 1. ~~細粒度權限沒有在後端落實~~ → **已處理**：見 [rbac-permission-design-2026-10-03.md](rbac-permission-design-2026-10-03.md)（`[RequirePermission]`、檢視／維護兩層、授權上限、預設角色）。
 2. **權限位元撞號的根本修法**：把會員 token 的 claim 改名（例如 `MemberPermissions`），`MemberPermissionRequiredAttribute` 與 `MemberHub` 同步改。現在靠 `Roles = "Admin"` 擋住，但只要未來有人在後台 controller 用 in-action `CheckPermission` 又忘了加角色限制，這個洞就會重現。
 3. **Applications 的 GUID 即憑證**：`GET/PUT {id}`、`submit`、`cancel`、文件上傳／刪除都匿名，只靠 GUID 不可猜。GUID 外流（郵件連結、瀏覽器紀錄）就能讀寫別人的申請。若申請流程改成「先註冊／驗證信箱再申請」可改為需登入並比對擁有者。
-4. **`POST Log/mail/bounce`**（郵件伺服器 webhook）匿名且沒有任何簽章／共享密鑰驗證，任何人可偽造退信紀錄。建議加共享密鑰標頭。
+4. ~~`POST Log/mail/bounce` 匿名且沒有驗證~~ → **已處理**（2026-10-03）：改用共享密鑰標頭 `X-Webhook-Secret`，值需等於設定 `Bounce_Webhook:Secret`（環境變數 `Bounce_Webhook__Secret`，至少 16 字元）；沒設定時端點停用（503），密鑰錯誤 401（驗證在查詢郵件記錄之前，探測不到記錄是否存在）。用常數時間比較，並限制 BounceCode／Reason／RemoteMta 長度、BounceTime 不得晚於現在。實際影響範圍：退信狀態只寫入 `MailLog` 供報表／寄信紀錄頁顯示，沒有任何寄送邏輯會依它抑制寄信，所以被偽造的後果是退信統計被汙染，不會讓會員收不到信；repo 內也找不到呼叫它的程式（實際的退信處理走 IMAP 的 `BounceProcessingService`）。若有外部郵件伺服器在呼叫，部署時要在兩邊設定同一組密鑰。
 5. **前台會員自助管理產品／需求**：目前 Company/Product/Demand 寫入已鎖後台。之後若要開放供給端／需求端會員維護自家資料，應新增「依 `CompanyId` claim 限定擁有者」的獨立端點（例如 `api/member/products`），不要放寬現有端點。
 6. `GET FileManagement/{id}/download` 匿名（前台圖片需要），知道 GUID 即可下載任何上傳檔（申請附件是否也走這條尚未確認，若是就有外洩風險）。申請附件建議改走需授權的下載端點。

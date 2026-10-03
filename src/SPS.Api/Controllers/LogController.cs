@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,11 +26,16 @@ public class LogController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<LogController> _logger;
+    private readonly IConfiguration _configuration;
 
-    public LogController(ApplicationDbContext context, ILogger<LogController> logger)
+    /// <summary>退信 webhook 共享密鑰的最短長度；沒設定或太短視為「未啟用」，端點直接拒絕</summary>
+    private const int MinBounceWebhookSecretLength = 16;
+
+    public LogController(ApplicationDbContext context, ILogger<LogController> logger, IConfiguration configuration)
     {
         _context = context;
         _logger = logger;
+        _configuration = configuration;
     }
 
     /// <summary>
@@ -666,15 +673,41 @@ public class LogController : ControllerBase
     /// </summary>
     /// <remarks>
     /// 用於記錄郵件退信資訊。可透過 Message-ID 精確匹配，或透過收件人郵箱匹配最近的郵件。
+    ///
+    /// 給郵件伺服器呼叫的 webhook，沒有使用者登入，所以用共享密鑰驗證：呼叫端要帶標頭
+    /// <c>X-Webhook-Secret</c>，值必須等於設定 <c>Bounce_Webhook:Secret</c>（環境變數 <c>Bounce_Webhook__Secret</c>，
+    /// 至少 16 字元）。沒設定密鑰時整個端點停用（503），不會變成開放狀態。
+    /// 驗證前就擋掉，所以匿名者連「有沒有對應的郵件記錄」（404 vs 200）都探測不到。
     /// </remarks>
     [HttpPost("mail/bounce")]
-    [AllowAnonymous] // 允許郵件伺服器 webhook 呼叫
+    [AllowAnonymous] // 沒有使用者身分，改由共享密鑰驗證（見上）
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> RecordBounce(
         [FromBody] Application.DTOs.Log.RecordBounceRequest request,
         CancellationToken cancellationToken)
     {
+        var secret = _configuration["Bounce_Webhook:Secret"];
+        if (string.IsNullOrEmpty(secret) || secret.Length < MinBounceWebhookSecretLength)
+        {
+            _logger.LogWarning("Bounce webhook called but Bounce_Webhook:Secret is not configured; rejecting");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { error = "退信 webhook 尚未啟用" });
+        }
+
+        if (!IsSecretValid(Request.Headers["X-Webhook-Secret"].ToString(), secret))
+        {
+            _logger.LogWarning("Bounce webhook rejected: invalid secret from {Ip}", HttpContext.Connection.RemoteIpAddress);
+            return Unauthorized(new { error = "驗證失敗" });
+        }
+
+        // 欄位長度與時間防呆：即使密鑰外洩，也不能塞超大字串或未來時間進日誌
+        request.BounceCode = Truncate(request.BounceCode, 50);
+        request.BounceReason = Truncate(request.BounceReason, 1000);
+        request.RemoteMta = Truncate(request.RemoteMta, 255);
+        if (request.BounceTime > DateTime.UtcNow) request.BounceTime = DateTime.UtcNow;
+
         _logger.LogInformation("Recording bounce for {Email}, Code: {Code}, Reason: {Reason}",
             request.RecipientEmail, request.BounceCode, request.BounceReason);
 
@@ -723,6 +756,20 @@ public class LogController : ControllerBase
 
         return Ok(new { message = "退信已記錄", mailLogId = mailLog.Id });
     }
+
+    /// <summary>
+    /// 常數時間比較：先各自 SHA-256 再比，避免從回應時間推測密鑰內容，也不洩漏長度
+    /// </summary>
+    private static bool IsSecretValid(string provided, string expected)
+    {
+        if (string.IsNullOrEmpty(provided)) return false;
+        var a = SHA256.HashData(Encoding.UTF8.GetBytes(provided));
+        var b = SHA256.HashData(Encoding.UTF8.GetBytes(expected));
+        return CryptographicOperations.FixedTimeEquals(a, b);
+    }
+
+    private static string? Truncate(string? value, int maxLength) =>
+        value is { Length: > 0 } && value.Length > maxLength ? value[..maxLength] : value;
 
     /// <summary>
     /// 檢查當前用戶是否擁有指定權限
