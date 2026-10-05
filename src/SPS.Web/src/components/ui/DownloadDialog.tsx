@@ -183,15 +183,16 @@ export default function DownloadDialog({
               }
               /* 舊站 CSS 把標題、字距、字級都放得很大；對話框整體縮小（約 80%），並限制高度不超出視窗 */
               .download-dialog .modal-dialog {
-                max-width: 420px;
-                margin: 1rem auto;
+                max-width: 468px;
+                /* 舊站的關閉鈕（X）會超出對話框右上角，上方、右方都要留空間，.modal-content 也不能 overflow: hidden */
+                margin: 2.5rem auto 1rem;
+                padding: 0 1.5rem;
               }
               .download-dialog .modal-content {
                 font-size: 14px;
                 letter-spacing: normal;
                 line-height: 1.5;
-                max-height: calc(100vh - 2rem);
-                overflow: hidden;
+                overflow: visible;
               }
               .download-dialog .modal-header {
                 padding: 0.75rem 1rem;
@@ -204,6 +205,7 @@ export default function DownloadDialog({
               }
               .download-dialog .modal-body {
                 padding: 1rem;
+                max-height: calc(100vh - 10rem);
                 overflow-y: auto;
               }
               .download-dialog .modal-body p {
