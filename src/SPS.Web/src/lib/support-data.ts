@@ -1,7 +1,7 @@
 import { withBasePath } from "@/lib/api-client";
 
 /**
- * 「輔助資源」底下兩個平行頁面的假資料，對應設計稿：
+ * 「補助資源」底下兩個平行頁面的假資料，對應設計稿：
  * - page/support/index.html（本計畫補助）：計畫本身的公告消息列表。
  * - page/support/p01.html（政府補助資源）：跟本計畫無關、外部政府
  *   補助方案的卡片列表，點進去是「索取資料協助評估」的表單 modal，
@@ -20,6 +20,8 @@ export interface SupportInfoBlock {
   icon: string;
   title: string;
   items: { label: string; children?: string[] }[];
+  /** 區塊底部的「完整內容請參閱〈…〉」：連到對應的下載資源（後台「下載資源」的 key） */
+  fullTextLink?: { resourceKey: string; label: string };
 }
 
 export const SUPPORT_INFO_BLOCKS: SupportInfoBlock[] = [
@@ -28,12 +30,9 @@ export const SUPPORT_INFO_BLOCKS: SupportInfoBlock[] = [
     title: "適用對象",
     items: [
       { label: "符合產業類別", children: ["17石油及煤製品製造業", "18化學材料及肥料製造業", "19其他化學製品製造業"] },
-      { label: "依法辦理工廠登記" },
-      { label: "須與至少1家具備相關量能之智慧科技業者合作" },
-      { label: "非屬銀行拒絕往來戶" },
-      { label: "公司淨值應為正值" },
-      { label: "不得有陸資投資" },
     ],
+    // 2026-10-05 設計稿：其他資格條件不在這裡逐條列，改請讀者看申請須知
+    fullTextLink: { resourceKey: "support-notice", label: "申請須知" },
   },
   {
     icon: "bi-card-checklist",

@@ -24,7 +24,7 @@ export default function PromotionContactInfo({
     <div className="dow_t">
       <div className="dow-name">
         <i className="bi bi-person-vcard me-2" aria-hidden="true"></i>
-        <span>聯繫人資訊</span>
+        <span>聯絡資訊</span>
       </div>
 
       <div className="dow_box">

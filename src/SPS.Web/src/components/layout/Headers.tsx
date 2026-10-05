@@ -76,7 +76,7 @@ function NavLinks() {
       {/* 服務專區：分類其實是兩層（盤點細節見 serve-data.ts 開頭的說明），
           這裡「技術工具」/「人才培育」是分組標籤，disabled、本來就點不了
           （見下面 dropdown-toggle disabled 那則註解）。
-          2026-09-16：「人才培育」「產業輔導」「輔助資源」原本葉節點都是
+          2026-09-16：「人才培育」「產業輔導」「補助資源」原本葉節點都是
           連去 `/serve?category=<葉節點>`（用泛用的 ServeItemCard 假資料
           代打，那時候還沒有專屬設計稿）——這次設計稿交來了各自專屬的
           頁面（`/talent`、`/talent/xr`、`/tutoring`、`/support`、
@@ -137,8 +137,8 @@ function NavLinks() {
             </ul>
           </li>
           <li className="hover_r_sider dropdown-submenu">
-            <Link className="dropdown-item" href="/support" title="輔助資源">
-              輔助資源
+            <Link className="dropdown-item" href="/support" title="補助資源">
+              補助資源
             </Link>
             <ul className="dropdown-menu">
               <li>

@@ -63,7 +63,7 @@ const SERVICE_LINKS = [
     children: [{ label: "輔導", href: "/tutoring" }],
   },
   {
-    label: "輔助資源",
+    label: "補助資源",
     href: "/support",
     children: [
       { label: "本計畫補助", href: "/support" },

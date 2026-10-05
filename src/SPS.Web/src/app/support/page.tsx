@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 // 對應設計稿 page/_uc/side2_banner2.html（標題「產業輔導」，疑似
 // 跨單元互相導流的廣告位）＋ page/_uc/side2_banner.html（一般廣告）。
 /**
- * 「本計畫補助」，對應設計稿 page/support/index.html——「輔助資源」
+ * 「本計畫補助」，對應設計稿 page/support/index.html——「補助資源」
  * 底下兩個平行頁面之一（另一個是 /support/resources，對應
  * page/support/p01.html「政府補助資源」），不是這頁的詳情頁。
  *
@@ -35,10 +35,19 @@ export default async function SupportPage() {
       <BodyClass className="support" />
       <InnerPageShell
         title="本計畫補助"
-        breadcrumb={[{ label: "輔助資源" }, { label: "本計畫補助" }]}
+        breadcrumb={[{ label: "補助資源" }, { label: "本計畫補助" }]}
         banner={topBanners.some((b) => b.uri) ? <NewsBanner id="support-banner" banners={topBanners} /> : undefined}
         aside={
           <>
+            {/* 「申請入口」：外部申請系統的網址由後台「下載資源 → 申請入口」設定，沒設定就整顆不顯示 */}
+            {(downloads["support-apply-entry"]?.links.length ?? 0) > 0 && (
+              <div className="matching">
+                <DownloadDialog links={downloads["support-apply-entry"].links} dialogTitle="前往申請入口" className="me_Publish more_x">
+                  <span>申請入口</span>
+                  <i className="bi bi-box-arrow-up-right" aria-hidden="true" />
+                </DownloadDialog>
+              </div>
+            )}
             <SidebarBanner banners={supportTutoringBanners} heading="產業輔導" />
             <SidebarBanner banners={sidebarBanners} />
           </>
@@ -68,7 +77,7 @@ export default async function SupportPage() {
                       <i className="bi bi-caret-right-fill me-1 blue" />
                       <span>{item.label}</span>
                       {item.children && (
-                        <ul className="nav">
+                        <ul className="nav d-block">
                           {item.children.map((child) => (
                             <li key={child}>{child}</li>
                           ))}
@@ -77,6 +86,20 @@ export default async function SupportPage() {
                     </li>
                   ))}
                 </ul>
+                {block.fullTextLink && (
+                  <div>
+                    <i className="bi bi-caret-right-fill me-1 blue" />
+                    完整內容請參閱
+                    <DownloadDialog
+                      links={downloads[block.fullTextLink.resourceKey]?.links ?? []}
+                      dialogTitle={`下載：${block.fullTextLink.label}`}
+                      emptyLabel={`${block.fullTextLink.label}準備中`}
+                    >
+                      {block.fullTextLink.label}
+                      <i className="bi bi-file-earmark-arrow-down" />
+                    </DownloadDialog>
+                  </div>
+                )}
               </div>
             ))}
           </div>

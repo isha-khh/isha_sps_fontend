@@ -31,6 +31,8 @@ public static class DownloadResourceCatalog
             new[] { ".pdf" }, "support/subsidy-qa", "QA(115年度)申請階段常見問答"),
 
         // 沒有檔案格式：只能設外部連結（安裝檔太大，通常放在雲端空間）
+        new("support-apply-entry", "補助專區", "申請入口", "補助專區 /support 右側欄的「申請入口」按鈕（沒設定就不顯示）",
+            Array.Empty<string>(), null, null),
         new("talent-xr", "人才培訓", "XR 訓練模組", "人才培訓 XR /talent/xr 下載區的「立即下載」",
             Array.Empty<string>(), null, null),
     };

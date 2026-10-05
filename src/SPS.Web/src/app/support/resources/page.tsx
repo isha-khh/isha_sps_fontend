@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * 「政府補助資源」，對應設計稿 page/support/p01.html——「輔助資源」
+ * 「政府補助資源」，對應設計稿 page/support/p01.html——「補助資源」
  * 底下跟 /support（本計畫補助）平行的另一頁，卡片列表，點卡片上的
  * 「索取資料協助評估」開 modal 留資料，不是連去文章詳情頁。
  *
@@ -30,7 +30,7 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
       <BodyClass className="support resources" />
       <InnerPageShell
         title="政府補助資源"
-        breadcrumb={[{ label: "輔助資源" }, { label: "政府補助資源" }]}
+        breadcrumb={[{ label: "補助資源" }, { label: "政府補助資源" }]}
         sidebar={
           <CategoryTabList
             activeHref={`/support/resources?category=${encodeURIComponent(activeCategory)}`}

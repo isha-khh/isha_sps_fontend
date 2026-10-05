@@ -8,6 +8,13 @@
 @media (min-width: 1680px) {
 }
 @media (max-width: 1800px) {
+    .support .support_box .d-flex .support_er {
+        height: 485px;
+    }
+    .elevator-box {
+        left: 28%;
+   
+    }
     .matching.show .item_box_six .item_box_six_1 .pic {
         width: 13%;
     }
@@ -210,6 +217,9 @@
 
 
 @media (max-width: 991px) {
+    .support_box .d-flex .support_er {
+        padding: 15px;
+    }
     .matching.show .item_box_six .item_box_six_1 .pic {
         width: 18%;
     }
@@ -302,20 +312,21 @@
             display: none !important;
         }
 
- 
+
     .elevator-box {
         display: block !important;
-        width: 65px;
-        margin-right: -24px;
+        width: 135px;
+        margin-right: -64px;
         transform: unset;
         position: sticky;
         top: 0;
-        left: 4.7%;
-        height: 50px;
+        left: 0;
+        height: 90px;
         top: 23vh;
         z-index: 10;
         margin-top: 30px;
         align-self: unset;
+        transform: translateX(-20px);
     }
 
         .elevator-box svg {
@@ -681,6 +692,9 @@
 
 
 @media (max-width: 767px) {
+    .support .support_box .d-flex .support_er {
+        height: 455px;
+    }
     .mat_Award_box {
         gap: 30px 15px;
     
@@ -1056,7 +1070,11 @@
     /*關於我們*/
     .elevator-box {
         top: 15vh;
-        transform: translateX(-35px);
+        transform: translateX(-36px);
+        height: 50px;
+        width: 92px;
+        margin-right: -30px;
+   
     }
     .indicator-pointer {
         top: 12vh;

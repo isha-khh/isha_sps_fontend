@@ -37,7 +37,7 @@ export const SERVE_CATEGORY_GROUPS: ServeCategoryGroup[] = [
   { label: "技術工具", leaves: ["產業AI", "技術文件"] },
   { label: "人才培育", leaves: ["知識加值", "XR"] },
   { label: "產業輔導", leaves: ["輔導"] },
-  { label: "輔助資源", leaves: ["本計畫補助", "政府補助資源"] },
+  { label: "補助資源", leaves: ["本計畫補助", "政府補助資源"] },
 ];
 
 /** 給 titleAside 用：查某個葉節點分類屬於哪一組，回傳同組的兄弟節點清單（含自己） */

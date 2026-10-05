@@ -4,6 +4,7 @@ export interface AttachmentLink {
 }
 
 export interface ContactInfo {
+  name?: string;
   phone?: string;
   email?: string;
   address?: string;
@@ -11,7 +12,7 @@ export interface ContactInfo {
 }
 
 /**
- * 積木元件：詳情頁常見的「附件下載／相關連結／聯繫人資訊」三小塊，
+ * 積木元件：詳情頁常見的「附件下載／相關連結／聯絡資訊」三小塊，
  * 對應 page/news/_uc/dot.html／link.html／cont.html（三個獨立的
  * jQuery load 掛載點，內容形狀都一樣，這裡合併成一顆元件，各區塊
  * 沒給資料就不渲染）。
@@ -70,15 +71,24 @@ export default function AttachmentsPanel({
         </div>
       )}
 
-      {contact && (contact.phone || contact.email || contact.address) && (
+      {contact && (contact.name || contact.phone || contact.email || contact.address) && (
         <div className="dow_t">
           <div className="dow-name">
             <i className="bi bi-person-vcard me-2" />
-            <span>聯繫人資訊</span>
+            <span>聯絡資訊</span>
           </div>
 
           <div className="dow_box">
             <ul className="nav d-block">
+              {contact.name && (
+                <li>
+                  <span className="label">
+                    <i className="bi bi-person me-1" />
+                    聯絡人：
+                  </span>
+                  <p className="mb-0">{contact.name}</p>
+                </li>
+              )}
               {contact.phone && (
                 <li>
                   <span className="label">
