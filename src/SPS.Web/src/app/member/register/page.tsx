@@ -87,7 +87,7 @@ export default async function MemberRegisterPage() {
             </div>
           </div>
 
-          <RegisterDownloadList resources={resources} keys={["register-guide", "register-consent"]} />
+          <RegisterDownloadList resources={resources} keys={["register-guide", "register-consent", "register-application", "register-review"]} />
 
           <MemberConsentGate />
         </div>
