@@ -58,14 +58,14 @@ export default async function PromotionContributePage() {
 
             <ul className="nav ul-key">
               <li>
-                <a href="#" title="前往產業AI" tabIndex={0}>
+                <Link href="/serve?category=產業AI" title="前往產業AI" tabIndex={0}>
                   產業AI
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" title="前往技術文件" tabIndex={0}>
+                <Link href="/serve?category=技術文件" title="前往技術文件" tabIndex={0}>
                   技術文件
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
