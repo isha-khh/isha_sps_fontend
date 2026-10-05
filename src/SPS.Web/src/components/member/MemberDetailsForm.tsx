@@ -7,6 +7,8 @@ import PasswordField from "@/components/member/PasswordField";
 import ChecklistGroup from "@/components/member/ChecklistGroup";
 import SmartTechSelector from "@/components/member/SmartTechSelector";
 import DocumentUploadField from "@/components/member/DocumentUploadField";
+import RegisterDownloadList from "@/components/member/RegisterDownloadList";
+import type { DownloadResources } from "@/lib/types";
 import { APPLICATION_SCENARIOS, APPLICATION_SCOPES } from "@/lib/member-registration-data";
 import { withBasePath } from "@/lib/api-client";
 import { applicationsApi } from "@/lib/api/applications";
@@ -101,6 +103,7 @@ export default function MemberDetailsForm({
   companyRole = "supply",
   tier = "emerging",
   application,
+  downloads,
 }: {
   mode: "edit" | "review";
   /** `mode="edit"` 專用：送出成功後導去 Step4 的網址，`applicationId` 會自動帶在後面 */
@@ -111,6 +114,8 @@ export default function MemberDetailsForm({
   tier?: SupplierTier;
   /** `mode="review"` 專用：Step4 要顯示的真實申請資料（由 page.tsx 先查好傳進來） */
   application?: ApplicationResponse;
+  /** `mode="edit"` 專用：申請須知與附件（登錄申請書等）的下載，由 page.tsx 先查好傳進來 */
+  downloads?: DownloadResources;
 }) {
   const router = useRouter();
   const disabled = mode === "review";
@@ -564,6 +569,18 @@ export default function MemberDetailsForm({
           <h3 className="mb-4 me_sho mt-md-5 mt-4">
             上傳文件{mode === "edit" && <label>({REQUIRED}為必填欄位)</label>}
           </h3>
+          {mode === "edit" && downloads && (
+            <RegisterDownloadList
+              resources={downloads}
+              keys={
+                // 供給端新興會員要自己填「登錄申請書」（附件二）並依「審查評定方式」（附件三）備齊資料；其他人只需要申請須知
+                isSupplier && tier === "emerging"
+                  ? ["register-guide", "register-application", "register-review"]
+                  : ["register-guide"]
+              }
+              heading="請先下載空白文件（再填寫後上傳）"
+            />
+          )}
           <div className="menb_inp_tit form-group w-100">
             <div className="d-flex dow-document">
               {isDemand && (

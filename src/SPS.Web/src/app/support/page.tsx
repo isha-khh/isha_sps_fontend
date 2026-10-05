@@ -5,7 +5,8 @@ import SidebarBanner from "@/components/layout/SidebarBanner";
 import NewsBanner from "@/components/news/NewsBanner";
 import { SUPPORT_INFO_BLOCKS, SUPPORT_QUICK_LINKS, SUPPORT_ANNOUNCEMENTS } from "@/lib/support-data";
 import { withBasePath } from "@/lib/api-client";
-import { fetchBanners } from "@/lib/api.server";
+import { fetchBanners, fetchDownloadResources } from "@/lib/api.server";
+import DownloadDialog from "@/components/ui/DownloadDialog";
 
 export const metadata: Metadata = {
   title: "本計畫補助",
@@ -22,6 +23,8 @@ export const metadata: Metadata = {
  * `support-data.ts` 的假資料，之後有真後端再換掉。
  */
 export default async function SupportPage() {
+  // 五個快速連結的檔案／外部連結由後台「頁面設定 → 下載資源」維護
+  const downloads = await fetchDownloadResources();
   const [supportTutoringBanners, sidebarBanners, topBanners] = await Promise.all([
     fetchBanners("sidebar-support-tutoring"),
     fetchBanners("sidebar-support"),
@@ -102,10 +105,15 @@ export default async function SupportPage() {
         <div className="supp_five mt-md-5 mt-4">
           <div className="d-flex">
             {SUPPORT_QUICK_LINKS.map((link) => (
-              <a href="#" title={`${link.label}(另開視窗)`} target="_blank" rel="noopener noreferrer" key={link.label}>
+              <DownloadDialog
+                links={downloads[link.resourceKey]?.links ?? []}
+                dialogTitle={`下載：${link.label}`}
+                emptyLabel={`${link.label}準備中`}
+                key={link.label}
+              >
                 <img className="img-fluid d-block img-small mx-auto" src={withBasePath(`/images/all/${link.icon}`)} alt="" />
                 <span>{link.label}</span>
-              </a>
+              </DownloadDialog>
             ))}
           </div>
         </div>

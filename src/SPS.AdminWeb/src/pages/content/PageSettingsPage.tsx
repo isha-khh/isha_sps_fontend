@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { PageTitle } from '@/components/PageTitle';
+import { DownloadResourcesSection } from './DownloadResourcesSection';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import { pageSettingsApi, type ContributeFormatFile, type ContributePageSettings } from '@/lib/api/page-settings';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
@@ -41,6 +42,9 @@ function pickedFile(file: FileListItem | FileUploadResponse): { id: string; name
  * 投稿格式檔從檔案管理系統挑（對話框可以直接上傳新檔案），前台「下載投稿格式」按鈕會開一個對話框，
  * 列出這裡設定好的格式讓使用者下載。沒有設定的格式不會出現；兩個都沒設定時前台顯示「投稿格式準備中」。
  * 副檔名必須對得上（Word＝.docx、ODF＝.odt、PDF＝.pdf），後端也會再檢查一次。
+ *
+ * 頁面最下方的「下載資源」區塊維護前台其他地方的下載按鈕（會員申請須知與附件、補助專區、XR 訓練模組），可設檔案或外部連結，
+ * 見 `DownloadResourcesSection.tsx`；它有自己的儲存按鈕。
  *
  * 前台有 1 分鐘的快取，儲存後最多 1 分鐘才看得到。需要「網站內容管理」權限。
  */
@@ -214,6 +218,8 @@ export const PageSettingsPage = () => {
           </div>
         </form>
       )}
+
+      {!isLoading && <DownloadResourcesSection />}
 
       <FilePickerModal
         isOpen={pickerFor !== null}

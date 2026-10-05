@@ -26,6 +26,41 @@ export interface ContributePageAdminData {
   docx: ContributeFormatFile | null;
 }
 
+/** 下載資源項目目前選到的檔案（檔案已刪除或副檔名不符時後端回 null） */
+export interface DownloadResourceFile {
+  kind: 'docx' | 'odt' | 'pdf';
+  fileId: string;
+  fileName: string;
+  fileSize: number;
+  formattedFileSize: string;
+  url: string;
+}
+
+/** 一個下載資源項目（固定項目，由後端目錄定義；後台只能改檔案與外部連結） */
+export interface DownloadResourceItem {
+  key: string;
+  group: string;
+  title: string;
+  usedAt: string;
+  /** 允許的格式（不含點）；空陣列＝只能設外部連結 */
+  formats: Array<'docx' | 'odt' | 'pdf'>;
+  docxFileId: string | null;
+  odtFileId: string | null;
+  pdfFileId: string | null;
+  externalUrl: string;
+  docx: DownloadResourceFile | null;
+  odt: DownloadResourceFile | null;
+  pdf: DownloadResourceFile | null;
+}
+
+export interface DownloadResourceUpdate {
+  key: string;
+  docxFileId: string | null;
+  odtFileId: string | null;
+  pdfFileId: string | null;
+  externalUrl: string;
+}
+
 export const pageSettingsApi = {
   /**
    * 取得「我要投稿」頁設定
@@ -44,5 +79,24 @@ export const pageSettingsApi = {
    */
   async updateContribute(settings: ContributePageSettings): Promise<void> {
     await apiClient.put('/api/page-settings/contribute', settings);
+  },
+
+  /**
+   * 取得所有下載資源
+   * GET /api/page-settings/downloads
+   */
+  async getDownloads(): Promise<DownloadResourceItem[]> {
+    const response = await apiClient.get<{ items: DownloadResourceItem[] }>('/api/page-settings/downloads');
+    return response.data.items;
+  },
+
+  /**
+   * 更新下載資源（只送要改的項目）
+   * PUT /api/page-settings/downloads
+   *
+   * 檔案不存在／副檔名不符、連結不是 http(s) 時後端回 400 `{ error }`，由呼叫端顯示。
+   */
+  async updateDownloads(items: DownloadResourceUpdate[]): Promise<void> {
+    await apiClient.put('/api/page-settings/downloads', { items });
   },
 };

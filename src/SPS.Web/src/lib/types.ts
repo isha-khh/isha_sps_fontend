@@ -558,3 +558,22 @@ export interface ContributeFormat {
     /** 已經轉成瀏覽器可用的完整下載網址 */
     url: string;
 }
+
+/**
+ * 一個可下載的選項。`kind` 是檔案格式（docx／odt／pdf）或 `link`（後台設定的外部連結，另開新分頁）。
+ * `url` 已經轉成瀏覽器可用的完整網址。
+ */
+export interface DownloadLink {
+    kind: "docx" | "odt" | "pdf" | "link";
+    url: string;
+    fileName: string;
+    formattedFileSize: string;
+}
+
+/**
+ * 前台「固定下載資源」（會員申請須知與附件、補助專區文件、XR 訓練模組…），後台
+ * 「內容管理 → 頁面設定 → 下載資源」維護（`GET /api/page-settings/downloads/public`）。
+ * key 是 `DownloadResourceCatalog` 裡的識別碼；`links` 為空陣列＝目前沒有可下載的東西。
+ */
+export type DownloadResources = Record<string, { title: string; links: DownloadLink[] }>;
+

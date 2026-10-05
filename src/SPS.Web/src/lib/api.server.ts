@@ -12,6 +12,8 @@ import {
     VideoItem,
     FooterLinks,
     ContributePage,
+    DownloadResources,
+    DownloadLink,
 } from "@/lib/types";
 import { apiClient } from "@/lib/api-client";
 import { resolveBackendAssetUrl } from "@/lib/content-list-utils";
@@ -445,5 +447,32 @@ export async function fetchContributePage(): Promise<ContributePage> {
         };
     } catch {
         return DEFAULT_CONTRIBUTE_PAGE;
+    }
+}
+
+/**
+ * 固定下載資源（後台「頁面設定 → 下載資源」維護）。快取 60 秒；後端連不到就回空物件
+ * （各處用 `resources[key]?.links ?? []`，沒有資料就顯示「準備中」，不會壞）。
+ * 檔案的下載網址在這裡轉成完整網址；外部連結維持原樣（後端已驗證只有 http／https）。
+ */
+export async function fetchDownloadResources(): Promise<DownloadResources> {
+    try {
+        const data = await getBackendJson<{
+            items?: Record<string, { title?: string; links?: Array<Partial<DownloadLink>> }>;
+        }>("/api/page-settings/downloads/public", 60);
+
+        const result: DownloadResources = {};
+        for (const [key, value] of Object.entries(data.items ?? {})) {
+            result[key] = {
+                title: value.title ?? key,
+                links: (value.links ?? []).flatMap((l) => {
+                    const url = l.kind === "link" ? l.url : resolveBackendAssetUrl(l.url);
+                    return url && l.kind ? [{ kind: l.kind, url, fileName: l.fileName ?? "", formattedFileSize: l.formattedFileSize ?? "" }] : [];
+                }),
+            };
+        }
+        return result;
+    } catch {
+        return {};
     }
 }

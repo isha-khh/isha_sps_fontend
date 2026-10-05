@@ -44,6 +44,7 @@ public static class DependencyInjection
         services.AddScoped<IPictureService, PictureService>();
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<ContributeFormatSeeder>();
+        services.AddScoped<DownloadResourceSeeder>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IFido2Service, Fido2Service>();
         services.AddScoped<IPasswordPolicyService, PasswordPolicyService>();

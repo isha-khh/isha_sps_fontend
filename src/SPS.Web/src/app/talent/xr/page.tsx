@@ -1,3 +1,5 @@
+import DownloadDialog from "@/components/ui/DownloadDialog";
+import { fetchDownloadResources } from "@/lib/api.server";
 import { Fragment } from "react";
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
@@ -53,7 +55,10 @@ const TRAINING_OUTCOMES = [
  * 靜態頁，沒有列表也沒有後端資料，跟 talent 列表頁是同一組（人才培育）
  * 底下的兩個平行頁面，不是 talent 的詳情頁。
  */
-export default function TalentXrPage() {
+export default async function TalentXrPage() {
+  // 「立即下載」的連結由後台「頁面設定 → 下載資源」維護（XR 訓練模組只能設外部連結）
+  const downloads = await fetchDownloadResources();
+
   return (
     <>
       <BodyClass className="talent xr" />
@@ -198,9 +203,9 @@ export default function TalentXrPage() {
                   </span>
                 </li>
                 <li>
-                  <a href="#" title="立即下載(另開視窗)" className="more_x" target="_blank" rel="noopener noreferrer">
+                  <DownloadDialog links={downloads["talent-xr"]?.links ?? []} dialogTitle="下載 XR 訓練模組" className="more_x" emptyLabel="下載連結準備中">
                     <span>立即下載</span> <i className="bi bi-arrow-right" aria-hidden="true" />
-                  </a>
+                  </DownloadDialog>
                 </li>
               </ul>
             </div>

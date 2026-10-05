@@ -51,6 +51,7 @@ public class StaticFileScannerService : IHostedService
 
             // 掃描完才 seed：seed 檔案要先被登錄成靜態檔案才有 id 可以設定（見 ContributeFormatSeeder）
             await scope.ServiceProvider.GetRequiredService<ContributeFormatSeeder>().SeedAsync(cancellationToken);
+            await scope.ServiceProvider.GetRequiredService<DownloadResourceSeeder>().SeedAsync(cancellationToken);
         }
         catch (Exception ex)
         {

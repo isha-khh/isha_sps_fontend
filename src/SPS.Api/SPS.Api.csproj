@@ -32,6 +32,8 @@
   <ItemGroup>
     <Folder Include="Uploads\" />
     <Folder Include="wwwroot\seed\contribute\" />
+    <Folder Include="wwwroot\seed\register\" />
+    <Folder Include="wwwroot\seed\support\" />
     <Folder Include="wwwroot\voice\" />
   </ItemGroup>
 

@@ -3,6 +3,7 @@ import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import StepProgress from "@/components/member/StepProgress";
 import MemberDetailsForm from "@/components/member/MemberDetailsForm";
+import { fetchDownloadResources } from "@/lib/api.server";
 
 export const metadata: Metadata = {
   title: "會員註冊 - 填寫資料",
@@ -39,6 +40,9 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
   if (applicantType === "company" && role === "supply") qs.set("tier", tier);
   const nextHrefBase = `/member/register/complete?${qs.toString()}`;
 
+  // 申請須知與附件的下載（後台「頁面設定 → 下載資源」維護）
+  const downloads = await fetchDownloadResources();
+
   return (
     <>
       <BodyClass className="member register p02" />
@@ -70,6 +74,7 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
             applicantType={applicantType}
             companyRole={role}
             tier={tier}
+            downloads={downloads}
           />
         </div>
       </InnerPageShell>

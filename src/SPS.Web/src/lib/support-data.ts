@@ -61,12 +61,17 @@ export const SUPPORT_INFO_BLOCKS: SupportInfoBlock[] = [
   },
 ];
 
+/**
+ * 補助專區下方的五個快速連結。`resourceKey` 對應後台「頁面設定 → 下載資源」的項目
+ * （後端 `DownloadResourceCatalog` 的 key）：檔案與格式（Word／ODF／PDF）或外部連結由後台維護，
+ * 這裡只決定圖示、文字與對應哪個項目。
+ */
 export const SUPPORT_QUICK_LINKS = [
-  { icon: "supp_five_icon01.svg", label: "補助懶人包" },
-  { icon: "supp_five_icon02.svg", label: "申請須知" },
-  { icon: "supp_five_icon03.svg", label: "計畫書格式" },
-  { icon: "supp_five_icon04.svg", label: "線上申請說明" },
-  { icon: "supp_five_icon05.svg", label: "常見問答" },
+  { icon: "supp_five_icon01.svg", label: "補助懶人包", resourceKey: "support-leaflet" },
+  { icon: "supp_five_icon02.svg", label: "申請須知", resourceKey: "support-notice" },
+  { icon: "supp_five_icon03.svg", label: "計畫書格式", resourceKey: "support-plan" },
+  { icon: "supp_five_icon04.svg", label: "線上申請說明", resourceKey: "support-online-guide" },
+  { icon: "supp_five_icon05.svg", label: "常見問答", resourceKey: "support-qa" },
 ];
 
 export interface SupportAnnouncement {

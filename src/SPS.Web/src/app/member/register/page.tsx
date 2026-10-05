@@ -3,6 +3,8 @@ import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import StepProgress from "@/components/member/StepProgress";
 import MemberConsentGate from "@/components/member/MemberConsentGate";
+import RegisterDownloadList from "@/components/member/RegisterDownloadList";
+import { fetchDownloadResources } from "@/lib/api.server";
 
 export const metadata: Metadata = {
   title: "會員註冊",
@@ -20,7 +22,9 @@ export const metadata: Metadata = {
  * 直接按「同意，下一步」跳到 Step2，這是 git 歷史那版註解已經記著
  * 的已知缺口，這次補上，說明見 `MemberConsentGate.tsx`。
  */
-export default function MemberRegisterPage() {
+export default async function MemberRegisterPage() {
+  const resources = await fetchDownloadResources();
+
   return (
     <>
       <BodyClass className="member register" />
@@ -82,6 +86,8 @@ export default function MemberRegisterPage() {
               </ul>
             </div>
           </div>
+
+          <RegisterDownloadList resources={resources} keys={["register-guide", "register-consent"]} />
 
           <MemberConsentGate />
         </div>

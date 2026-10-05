@@ -19,6 +19,7 @@ namespace SPS.Api.Controllers;
 public class PageSettingsController : ControllerBase
 {
     private const string ContributeKey = "PageContribute";
+    public const string DownloadsKey = "DownloadResources";
 
     private readonly ISystemSettingService _settingService;
     private readonly IFileManagementService _fileService;
@@ -113,6 +114,180 @@ public class PageSettingsController : ControllerBase
             ContactPhone = contactOk ? settings.ContactPhone : string.Empty,
             ContactEmail = contactOk ? settings.ContactEmail : string.Empty,
         });
+    }
+
+    // ==================== 下載資源（固定檔案與外部連結）====================
+
+    /// <summary>
+    /// 取得所有下載資源的設定（後台編輯用：目錄、目前設定、目前選的檔案資訊）
+    /// </summary>
+    [HttpGet("downloads")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得下載資源設定（後台）")]
+    public async Task<IActionResult> GetDownloads(CancellationToken cancellationToken)
+    {
+        var stored = await LoadDownloadsAsync(cancellationToken);
+        var items = new List<DownloadResourceAdminItemDto>();
+
+        foreach (var slot in DownloadResourceCatalog.Slots)
+        {
+            stored.Items.TryGetValue(slot.Key, out var entry);
+            entry ??= new DownloadResourceEntryDto();
+
+            items.Add(new DownloadResourceAdminItemDto
+            {
+                Key = slot.Key,
+                Group = slot.Group,
+                Title = slot.Title,
+                UsedAt = slot.UsedAt,
+                Formats = slot.Extensions.Select(e => e.TrimStart('.')).ToList(),
+                DocxFileId = entry.DocxFileId,
+                OdtFileId = entry.OdtFileId,
+                PdfFileId = entry.PdfFileId,
+                ExternalUrl = entry.ExternalUrl ?? string.Empty,
+                Docx = await ResolveDownloadAsync(slot, entry, ".docx", cancellationToken),
+                Odt = await ResolveDownloadAsync(slot, entry, ".odt", cancellationToken),
+                Pdf = await ResolveDownloadAsync(slot, entry, ".pdf", cancellationToken),
+            });
+        }
+
+        return Ok(new { items });
+    }
+
+    /// <summary>
+    /// 更新下載資源。只送要改的項目，沒出現的維持原樣。每個項目：檔案必須是檔案管理中存在、副檔名與該項目
+    /// 允許的格式相符（不能是資料夾或會員申請附件）；外部連結只接受 http／https；不存在的 key 一律拒絕
+    /// </summary>
+    [HttpPut("downloads")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新下載資源設定（後台）")]
+    public async Task<IActionResult> UpdateDownloads(
+        [FromBody] UpdateDownloadResourcesRequest request,
+        CancellationToken cancellationToken)
+    {
+        var stored = await LoadDownloadsAsync(cancellationToken);
+
+        foreach (var item in request.Items)
+        {
+            var slot = DownloadResourceCatalog.Find(item.Key);
+            if (slot == null) return BadRequest(new { error = $"不存在的下載項目：{item.Key}" });
+
+            var urlError = DownloadResourceValidator.ValidateExternalUrl(slot.Title, item.ExternalUrl);
+            if (urlError != null) return BadRequest(new { error = urlError });
+
+            var submitted = new (string Extension, Guid? Id)[]
+            {
+                (".docx", item.DocxFileId), (".odt", item.OdtFileId), (".pdf", item.PdfFileId)
+            };
+
+            foreach (var (extension, id) in submitted)
+            {
+                if (id == null) continue;
+                if (!slot.Extensions.Contains(extension))
+                    return BadRequest(new { error = $"「{slot.Title}」不提供 {extension} 格式" });
+
+                if (await GetUsableFileAsync(id.Value, extension, cancellationToken) == null)
+                    return BadRequest(new
+                    {
+                        error = $"「{slot.Title}」的 {extension} 必須選擇檔案管理中副檔名為 {extension} 的檔案（檔案不存在、是資料夾或副檔名不符）"
+                    });
+            }
+
+            // seed 標記是內部欄位，後台不會送；沿用現有的值，否則每次儲存都會清掉標記，
+            // 下次重啟就會把 seed 檔又套回來、蓋掉管理員剛剛的選擇
+            stored.Items.TryGetValue(item.Key, out var existing);
+            stored.Items[item.Key] = new DownloadResourceEntryDto
+            {
+                DocxFileId = item.DocxFileId,
+                OdtFileId = item.OdtFileId,
+                PdfFileId = item.PdfFileId,
+                ExternalUrl = item.ExternalUrl?.Trim() ?? string.Empty,
+                DocxSeedHash = existing?.DocxSeedHash,
+                OdtSeedHash = existing?.OdtSeedHash,
+                PdfSeedHash = existing?.PdfSeedHash,
+            };
+        }
+
+        var result = await _settingService.UpdateSettingAsync(DownloadsKey, stored);
+        return result.IsSuccess ? Ok(new { message = "Download resources updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>
+    /// 取得所有下載資源的公開資料（前台使用）。有外部連結就只回那個連結；否則回目前真的可下載的檔案格式。
+    /// 檔案已被刪除或不可用時那個格式就不出現，不會回出下載了會 404 的連結
+    /// </summary>
+    [HttpGet("downloads/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "取得下載資源公開資料")]
+    public async Task<IActionResult> GetDownloadsPublic(CancellationToken cancellationToken)
+    {
+        var stored = await LoadDownloadsAsync(cancellationToken);
+        var items = new Dictionary<string, DownloadResourcePublicDto>();
+
+        foreach (var slot in DownloadResourceCatalog.Slots)
+        {
+            stored.Items.TryGetValue(slot.Key, out var entry);
+            entry ??= new DownloadResourceEntryDto();
+            var dto = new DownloadResourcePublicDto { Title = slot.Title };
+
+            // 外部連結輸出前再驗證一次：資料庫裡若有繞過驗證寫進去的髒資料，不輸出
+            var externalUrl = entry.ExternalUrl?.Trim() ?? string.Empty;
+            if (externalUrl.Length > 0 && DownloadResourceValidator.ValidateExternalUrl(slot.Title, externalUrl) == null)
+            {
+                dto.Links.Add(new DownloadLinkDto { Kind = "link", Url = externalUrl });
+            }
+            else
+            {
+                foreach (var extension in new[] { ".docx", ".odt", ".pdf" })
+                {
+                    var file = await ResolveDownloadAsync(slot, entry, extension, cancellationToken);
+                    if (file == null) continue;
+                    dto.Links.Add(new DownloadLinkDto
+                    {
+                        Kind = file.Kind,
+                        Url = file.Url,
+                        FileName = file.FileName,
+                        FormattedFileSize = file.FormattedFileSize,
+                    });
+                }
+            }
+
+            items[slot.Key] = dto;
+        }
+
+        return Ok(new { items });
+    }
+
+    private async Task<DownloadResourcesSettingsDto> LoadDownloadsAsync(CancellationToken cancellationToken)
+    {
+        var result = await _settingService.GetSettingAsync<DownloadResourcesSettingsDto>(DownloadsKey, cancellationToken);
+        return result.IsSuccess ? result.Data ?? new DownloadResourcesSettingsDto() : new DownloadResourcesSettingsDto();
+    }
+
+    /// <summary>
+    /// 把某個項目某個格式的檔案 id 換成可下載的資訊；該項目不提供這個格式、沒設定、或檔案不可用都回 null
+    /// </summary>
+    private async Task<DownloadFileDto?> ResolveDownloadAsync(
+        DownloadResourceSlot slot, DownloadResourceEntryDto entry, string extension, CancellationToken cancellationToken)
+    {
+        if (!slot.Extensions.Contains(extension)) return null;
+        var id = entry.GetFileId(extension);
+        if (id == null) return null;
+
+        var file = await GetUsableFileAsync(id.Value, extension, cancellationToken);
+        if (file == null) return null;
+
+        return new DownloadFileDto
+        {
+            Kind = extension.TrimStart('.'),
+            FileId = file.Id,
+            FileName = file.OriginalFileName,
+            FileSize = file.FileSize,
+            FormattedFileSize = file.FormattedFileSize,
+            Url = $"/api/FileManagement/{file.Id}/download",
+        };
     }
 
     private async Task<ContributePageSettingsDto> LoadAsync(CancellationToken cancellationToken)
