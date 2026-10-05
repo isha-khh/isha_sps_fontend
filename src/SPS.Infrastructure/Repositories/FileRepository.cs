@@ -142,7 +142,8 @@ public class FileRepository : IFileRepository
             }
             else if (type == "document" || type == "documents")
             {
-                var docExtensions = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv" };
+                // ODF（.odt／.ods／.odp）也是文件：後台「頁面設定」的投稿格式要從「文件」類別挑 .odt
+                var docExtensions = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".odt", ".ods", ".odp" };
                 query = query.Where(f => docExtensions.Contains(f.FileExtension.ToLower()));
             }
              else if (type == "other" || type == "others")
@@ -151,7 +152,7 @@ public class FileRepository : IFileRepository
                 {
                     ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg",
                     ".mp4", ".avi", ".mov", ".wmv", ".flv", ".mkv",
-                    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv"
+                    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".odt", ".ods", ".odp"
                 };
                 query = query.Where(f => !knownExtensions.Contains(f.FileExtension.ToLower()) && !f.IsFolder);
             }

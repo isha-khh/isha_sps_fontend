@@ -6,6 +6,8 @@ import Badge from "@/components/ui/Badge";
 import ShareBox from "@/components/ui/ShareBox";
 import PromotionSubNav from "@/components/promotion/PromotionSubNav";
 import PromotionContactInfo from "@/components/promotion/PromotionContactInfo";
+import ContributeFormatDialog from "@/components/promotion/ContributeFormatDialog";
+import { fetchContributePage } from "@/lib/api.server";
 import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
@@ -19,11 +21,17 @@ export const metadata: Metadata = {
  * 兩顆按鈕（下載投稿格式／參考已發布的產業案例）都是連結，沒有
  * 上傳檔案這類互動，所以沒有做成表單元件。
  *
+ * 2026-10-05：「下載投稿格式」原本是連到 `#` 的假連結，改成開對話框讓使用者選 ODF 或 PDF 格式；
+ * 檔案、投稿聯絡人／電話／信箱都由後台「內容管理 → 頁面設定 → 我要投稿」維護，沒設定檔案時按鈕顯示
+ * 「投稿格式準備中」，不再有失效連結。
+ *
  * 沒有側欄/右欄（舊站這頁 `.side1`／`.side2` 都是單純的 d-none／固定
  * 內容，不是真的分類篩選），所以 `InnerPageShell` 不給 `sidebar`／
  * `aside`，讓 `.content` 自動撐滿。
  */
-export default function PromotionContributePage() {
+export default async function PromotionContributePage() {
+  const page = await fetchContributePage();
+
   return (
     <>
       <BodyClass className="news show contribute" />
@@ -76,17 +84,11 @@ export default function PromotionContributePage() {
           </div>
 
           <div className="dk_conbo mb-md-5 mb-4">
-            <PromotionContactInfo />
+            <PromotionContactInfo name={page.contactName} phone={page.contactPhone} email={page.contactEmail} />
           </div>
 
           <div className="contribute_box d-flex mb-md-5 mb-4">
-            <a href="#" title="下載投稿格式（另開視窗）" className="contribute_more_1">
-              <i className="bi bi-file-earmark-arrow-down me-1" aria-hidden="true"></i>
-              <span>下載投稿格式</span>
-              <div className="con-arrow" aria-hidden="true">
-                <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt="" />
-              </div>
-            </a>
+            <ContributeFormatDialog formats={page.formats} />
             <Link href="/promotion" title="前往參考已發布的產業案例" className="contribute_more_2">
               <i className="bi bi-file-text me-1" aria-hidden="true"></i>
               <span>參考已發布的產業案例</span>

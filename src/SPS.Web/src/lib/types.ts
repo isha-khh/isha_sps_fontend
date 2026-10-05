@@ -538,3 +538,23 @@ export interface FooterLinks {
     contactPhone: string;
     contactEmail: string;
 }
+
+/**
+ * 「我要投稿」頁的頁面設定（後台「內容管理 → 頁面設定」維護，`GET /api/page-settings/contribute/public`）。
+ * `formats` 只含目前真的可以下載的格式（ODF／PDF），沒有設定或檔案已被刪除就不會出現。
+ * 聯絡資訊欄位空字串＝不顯示那一列。
+ */
+export interface ContributePage {
+    formats: ContributeFormat[];
+    contactName: string;
+    contactPhone: string;
+    contactEmail: string;
+}
+
+export interface ContributeFormat {
+    kind: "odt" | "pdf";
+    fileName: string;
+    formattedFileSize: string;
+    /** 已經轉成瀏覽器可用的完整下載網址 */
+    url: string;
+}

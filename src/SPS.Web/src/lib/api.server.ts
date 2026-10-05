@@ -11,6 +11,7 @@ import {
     CompanyList,
     VideoItem,
     FooterLinks,
+    ContributePage,
 } from "@/lib/types";
 import { apiClient } from "@/lib/api-client";
 import { resolveBackendAssetUrl } from "@/lib/content-list-utils";
@@ -409,5 +410,40 @@ export async function fetchSiteVisitorCount(): Promise<number | null> {
         return typeof data.totalVisitors === "number" ? data.totalVisitors : null;
     } catch {
         return null;
+    }
+}
+
+/** 讀不到投稿頁設定時的預設值：沒有可下載的格式，聯絡資訊沿用原本頁面寫死的電話與信箱 */
+const DEFAULT_CONTRIBUTE_PAGE: ContributePage = {
+    formats: [],
+    contactName: "",
+    contactPhone: "+886-7-550-3115",
+    contactEmail: "isha_khh@mail.isha.org.tw",
+};
+
+/**
+ * 「我要投稿」頁設定（後台「頁面設定」維護）。快取 60 秒；後端連不到就退回預設值，頁面不會壞。
+ * 下載網址在這裡就轉成完整網址（跟 Banner 圖片同一套 `resolveBackendAssetUrl`）。
+ */
+export async function fetchContributePage(): Promise<ContributePage> {
+    try {
+        const data = await getBackendJson<{
+            formats?: Array<{ kind: "odt" | "pdf"; fileName: string; formattedFileSize: string; url: string }>;
+            contactName?: string;
+            contactPhone?: string;
+            contactEmail?: string;
+        }>("/api/page-settings/contribute/public", 60);
+
+        return {
+            formats: (data.formats ?? []).flatMap((f) => {
+                const url = resolveBackendAssetUrl(f.url);
+                return url ? [{ kind: f.kind, fileName: f.fileName, formattedFileSize: f.formattedFileSize, url }] : [];
+            }),
+            contactName: data.contactName ?? "",
+            contactPhone: data.contactPhone ?? "",
+            contactEmail: data.contactEmail ?? "",
+        };
+    } catch {
+        return DEFAULT_CONTRIBUTE_PAGE;
     }
 }
