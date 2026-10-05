@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import type { DownloadLink } from "@/lib/types";
 
 const FORMAT_INFO: Record<DownloadLink["kind"], { label: string; hint: string; icon: string }> = {
@@ -113,7 +114,9 @@ export default function DownloadDialog({
         </a>
       )}
 
-      {open && (
+      {/* 掛到 document.body：入口常在帶有 transform（AOS 動畫）或自己 z-index 的區塊裡，
+          `position: fixed` 會相對那個區塊定位、層級也壓不過頁首，對話框就會跑版或被頁首蓋住 */}
+      {open && createPortal(
         <>
           <div className="modal-backdrop fade show download-dialog-backdrop" onClick={() => setOpen(false)}></div>
           <div
@@ -176,6 +179,54 @@ export default function DownloadDialog({
               }
               .download-dialog {
                 z-index: 100001;
+                overflow-y: auto;
+              }
+              /* 舊站 CSS 把標題、字距、字級都放得很大；對話框整體縮小（約 80%），並限制高度不超出視窗 */
+              .download-dialog .modal-dialog {
+                max-width: 420px;
+                margin: 1rem auto;
+              }
+              .download-dialog .modal-content {
+                font-size: 14px;
+                letter-spacing: normal;
+                line-height: 1.5;
+                max-height: calc(100vh - 2rem);
+                overflow: hidden;
+              }
+              .download-dialog .modal-header {
+                padding: 0.75rem 1rem;
+              }
+              .download-dialog .modal-title {
+                font-size: 1.125rem;
+                line-height: 1.4;
+                letter-spacing: normal;
+                margin: 0;
+              }
+              .download-dialog .modal-body {
+                padding: 1rem;
+                overflow-y: auto;
+              }
+              .download-dialog .modal-body p {
+                font-size: 14px;
+                margin-bottom: 0.75rem;
+              }
+              .download-dialog .format-link {
+                padding: 0.75rem !important;
+                gap: 0.75rem !important;
+              }
+              .download-dialog .format-link strong {
+                font-size: 15px;
+                font-weight: 600;
+                letter-spacing: normal;
+              }
+              .download-dialog .format-link small,
+              .download-dialog .format-link .small {
+                font-size: 12px;
+                letter-spacing: normal;
+                word-break: break-all;
+              }
+              .download-dialog .format-link .fs-2 {
+                font-size: 1.5rem !important;
               }
               .download-dialog .format-link,
               .download-dialog .format-link * {
@@ -190,7 +241,8 @@ export default function DownloadDialog({
               }
             `}</style>
           </div>
-        </>
+        </>,
+        document.body,
       )}
     </>
   );
