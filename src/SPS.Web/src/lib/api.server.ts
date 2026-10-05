@@ -428,7 +428,7 @@ const DEFAULT_CONTRIBUTE_PAGE: ContributePage = {
 export async function fetchContributePage(): Promise<ContributePage> {
     try {
         const data = await getBackendJson<{
-            formats?: Array<{ kind: "odt" | "pdf"; fileName: string; formattedFileSize: string; url: string }>;
+            formats?: Array<{ kind: "docx" | "odt" | "pdf"; fileName: string; formattedFileSize: string; url: string }>;
             contactName?: string;
             contactPhone?: string;
             contactEmail?: string;

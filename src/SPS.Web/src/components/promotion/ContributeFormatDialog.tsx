@@ -5,6 +5,7 @@ import type { ContributeFormat } from "@/lib/types";
 import { withBasePath } from "@/lib/api-client";
 
 const FORMAT_INFO: Record<ContributeFormat["kind"], { label: string; hint: string; icon: string }> = {
+  docx: { label: "Word 文件格式（.docx）", hint: "適用 Microsoft Word、WPS、LibreOffice 等", icon: "bi-file-earmark-word" },
   odt: { label: "ODF 文件格式（.odt）", hint: "適用 LibreOffice、WPS、Word（另存 ODF）等", icon: "bi-file-earmark-text" },
   pdf: { label: "PDF 格式", hint: "適合先閱讀填寫說明", icon: "bi-file-earmark-pdf" },
 };
@@ -12,7 +13,7 @@ const FORMAT_INFO: Record<ContributeFormat["kind"], { label: string; hint: strin
 /**
  * 積木元件：「下載投稿格式」按鈕與選擇格式的對話框（ODF／PDF）。
  *
- * 投稿格式檔由後台「內容管理 → 頁面設定 → 我要投稿」上傳；對話框只列出目前真的有的格式：
+ * 投稿格式檔（Word .docx、ODF .odt、PDF）由後台「內容管理 → 頁面設定 → 我要投稿」維護（或隨程式碼 seed）；對話框只列出目前真的有的格式：
  * - 沒有任何格式：按鈕變成不可點的「投稿格式準備中」，不顯示失效連結
  * - 只有一種格式：一樣開對話框（讓使用者看得到檔名與大小，知道點下去會下載什麼）
  *
@@ -77,7 +78,7 @@ export default function ContributeFormatDialog({ formats }: { formats: Contribut
 
       {open && (
         <>
-          <div className="modal-backdrop fade show" onClick={() => setOpen(false)}></div>
+          <div className="modal-backdrop fade show contribute-format-backdrop" onClick={() => setOpen(false)}></div>
           <div
             className="modal fade show d-block contribute-format-dialog"
             role="dialog"
@@ -132,6 +133,14 @@ export default function ContributeFormatDialog({ formats }: { formats: Contribut
               </div>
             </div>
             <style>{`
+              /* 頁首選單裡的 logo、「訂閱電子報」按鈕等元素的 z-index 比 bootstrap 預設的對話框高，
+                 會浮在背景遮罩和對話框上面（對話框最上面被蓋住），所以把對話框與遮罩拉到比它們都高 */
+              .contribute-format-backdrop {
+                z-index: 100000;
+              }
+              .contribute-format-dialog {
+                z-index: 100001;
+              }
               /* 舊站 CSS 在這個頁面把連結文字設成白色（原本是放在深色底的按鈕上），
                  對話框是白底，不指定顏色會整行字與圖示都看不見 */
               .contribute-format-dialog .format-link,

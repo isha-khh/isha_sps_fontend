@@ -5,9 +5,17 @@ import { pageSettingsApi, type ContributeFormatFile, type ContributePageSettings
 import type { FileListItem, FileUploadResponse } from '@/types/files';
 import { useNotify } from '@/hooks/useNotify';
 
-type FormatKind = 'odt' | 'pdf';
+type FormatKind = 'docx' | 'odt' | 'pdf';
+
+/** 格式 → 設定裡存檔案 id 的欄位 */
+const ID_FIELD: Record<FormatKind, 'docxFileId' | 'odtFileId' | 'pdfFileId'> = {
+  docx: 'docxFileId',
+  odt: 'odtFileId',
+  pdf: 'pdfFileId',
+};
 
 const FORMATS: Record<FormatKind, { label: string; extension: string; hint: string }> = {
+  docx: { label: 'Word 格式（.docx）', extension: '.docx', hint: 'Microsoft Word 文件，多數投稿者習慣使用。' },
   odt: { label: 'ODF 格式（.odt）', extension: '.odt', hint: 'OpenDocument 文字文件，LibreOffice、WPS 等都能開啟。' },
   pdf: { label: 'PDF 格式（.pdf）', extension: '.pdf', hint: '前台可先閱讀填寫說明。' },
 };
@@ -15,6 +23,7 @@ const FORMATS: Record<FormatKind, { label: string; extension: string; hint: stri
 const EMPTY: ContributePageSettings = {
   odtFileId: null,
   pdfFileId: null,
+  docxFileId: null,
   contactName: '',
   contactPhone: '',
   contactEmail: '',
@@ -27,11 +36,11 @@ function pickedFile(file: FileListItem | FileUploadResponse): { id: string; name
 
 /**
  * 頁面設定：前台各頁面可以在後台調整的內容。目前有「我要投稿」頁——
- * 投稿格式檔（ODF、PDF 各一個）與投稿聯絡資訊；之後其他頁面的設定也放在這一頁。
+ * 投稿格式檔（Word、ODF、PDF 各一個）與投稿聯絡資訊；之後其他頁面的設定也放在這一頁。
  *
  * 投稿格式檔從檔案管理系統挑（對話框可以直接上傳新檔案），前台「下載投稿格式」按鈕會開一個對話框，
  * 列出這裡設定好的格式讓使用者下載。沒有設定的格式不會出現；兩個都沒設定時前台顯示「投稿格式準備中」。
- * 副檔名必須對得上（ODF＝.odt、PDF＝.pdf），後端也會再檢查一次。
+ * 副檔名必須對得上（Word＝.docx、ODF＝.odt、PDF＝.pdf），後端也會再檢查一次。
  *
  * 前台有 1 分鐘的快取，儲存後最多 1 分鐘才看得到。需要「網站內容管理」權限。
  */
@@ -39,7 +48,7 @@ export const PageSettingsPage = () => {
   const notify = useNotify();
   const [form, setForm] = useState<ContributePageSettings>(EMPTY);
   // 目前選到的檔案資訊（檔名、大小）；剛從對話框選的檔案還沒儲存前，先用選到的檔名顯示
-  const [files, setFiles] = useState<Record<FormatKind, { name: string; size?: string } | null>>({ odt: null, pdf: null });
+  const [files, setFiles] = useState<Record<FormatKind, { name: string; size?: string } | null>>({ docx: null, odt: null, pdf: null });
   const [pickerFor, setPickerFor] = useState<FormatKind | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -53,7 +62,7 @@ export const PageSettingsPage = () => {
       .then((data) => {
         if (cancelled) return;
         setForm({ ...EMPTY, ...data.settings });
-        setFiles({ odt: describe(data.odt), pdf: describe(data.pdf) });
+        setFiles({ docx: describe(data.docx), odt: describe(data.odt), pdf: describe(data.pdf) });
       })
       .catch(async () => {
         if (!cancelled) await notify.error('載入頁面設定失敗');
@@ -74,13 +83,13 @@ export const PageSettingsPage = () => {
       await notify.warning(`「${FORMATS[kind].label}」必須選擇副檔名為 ${ext} 的檔案`);
       return;
     }
-    setForm((prev) => ({ ...prev, [kind === 'odt' ? 'odtFileId' : 'pdfFileId']: id }));
+    setForm((prev) => ({ ...prev, [ID_FIELD[kind]]: id }));
     setFiles((prev) => ({ ...prev, [kind]: { name, size: 'formattedFileSize' in file ? file.formattedFileSize : undefined } }));
     setPickerFor(null);
   };
 
   const handleClear = (kind: FormatKind) => {
-    setForm((prev) => ({ ...prev, [kind === 'odt' ? 'odtFileId' : 'pdfFileId']: null }));
+    setForm((prev) => ({ ...prev, [ID_FIELD[kind]]: null }));
     setFiles((prev) => ({ ...prev, [kind]: null }));
   };
 
@@ -171,10 +180,11 @@ export const PageSettingsPage = () => {
             <div className="card-body space-y-4">
               <h3 className="card-title text-lg">我要投稿（前台 /promotion/contribute）</h3>
               <p className="text-sm text-base-content/70">
-                前台「下載投稿格式」按鈕會開啟對話框，讓使用者選擇下載 ODF 或 PDF 格式。只有設定好的格式會出現；兩個都沒設定時，前台顯示「投稿格式準備中」。
+                前台「下載投稿格式」按鈕會開啟對話框，讓使用者選擇下載 Word、ODF 或 PDF 格式。只有設定好的格式會出現；三個都沒設定時，前台顯示「投稿格式準備中」。這三個檔案也可以隨程式碼 seed（放在 API 專案的 wwwroot/seed/contribute/），後台這裡的更換與移除不會被重啟蓋掉。
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {renderFormat('docx')}
                 {renderFormat('odt')}
                 {renderFormat('pdf')}
               </div>

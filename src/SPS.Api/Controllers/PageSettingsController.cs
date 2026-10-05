@@ -44,12 +44,13 @@ public class PageSettingsController : ControllerBase
             Settings = settings,
             Odt = await ResolveFormatAsync("odt", settings.OdtFileId, ".odt", cancellationToken),
             Pdf = await ResolveFormatAsync("pdf", settings.PdfFileId, ".pdf", cancellationToken),
+            Docx = await ResolveFormatAsync("docx", settings.DocxFileId, ".docx", cancellationToken),
         });
     }
 
     /// <summary>
     /// 更新「我要投稿」頁設定。投稿格式檔必須是檔案管理系統裡真的存在、副檔名對得上的檔案
-    /// （ODF＝.odt、PDF＝.pdf），不能是資料夾或會員申請附件
+    /// （ODF＝.odt、PDF＝.pdf、Word＝.docx），不能是資料夾或會員申請附件
     /// </summary>
     [HttpPut("contribute")]
     [Authorize(Roles = "Admin")]
@@ -68,12 +69,16 @@ public class PageSettingsController : ControllerBase
         var pdfError = await CheckFormatFileAsync("PDF 格式", settings.PdfFileId, ".pdf", cancellationToken);
         if (pdfError != null) return BadRequest(new { error = pdfError });
 
+        var docxError = await CheckFormatFileAsync("Word 格式", settings.DocxFileId, ".docx", cancellationToken);
+        if (docxError != null) return BadRequest(new { error = docxError });
+
         // seed 標記是內部欄位，後台畫面不會送；沿用資料庫裡現有的值，否則每次儲存都會把標記清掉，
         // 下次重啟就會把 seed 檔又套回來、蓋掉管理員剛剛的選擇
         var normalized = ContributePageValidator.Normalize(settings);
         var existing = await LoadAsync(cancellationToken);
         normalized.OdtSeedHash = existing.OdtSeedHash;
         normalized.PdfSeedHash = existing.PdfSeedHash;
+        normalized.DocxSeedHash = existing.DocxSeedHash;
 
         var result = await _settingService.UpdateSettingAsync(ContributeKey, normalized);
         return result.IsSuccess ? Ok(new { message = "Contribute page settings updated" }) : BadRequest(new { error = result.Error });
@@ -90,9 +95,12 @@ public class PageSettingsController : ControllerBase
     {
         var settings = await LoadAsync(cancellationToken);
 
+        // 顯示順序：Word（最多人用）、ODF、PDF
         var formats = new List<ContributeFormatFileDto>();
+        var docx = await ResolveFormatAsync("docx", settings.DocxFileId, ".docx", cancellationToken);
         var odt = await ResolveFormatAsync("odt", settings.OdtFileId, ".odt", cancellationToken);
         var pdf = await ResolveFormatAsync("pdf", settings.PdfFileId, ".pdf", cancellationToken);
+        if (docx != null) formats.Add(docx);
         if (odt != null) formats.Add(odt);
         if (pdf != null) formats.Add(pdf);
 

@@ -14,6 +14,9 @@ public class ContributePageSettingsDto
     /// <summary>投稿格式（PDF，副檔名 .pdf）在檔案管理系統裡的檔案 id；空＝沒有提供</summary>
     public Guid? PdfFileId { get; set; }
 
+    /// <summary>投稿格式（Word，副檔名 .docx）在檔案管理系統裡的檔案 id；空＝沒有提供</summary>
+    public Guid? DocxFileId { get; set; }
+
     // ===== 內部欄位：部署時 seed 的版本標記（見 ContributeFormatSeeder），不出現在後台畫面與公開資料 =====
 
     /// <summary>上次 seed 進來的 ODF 檔案雜湊；只有 seed 檔案內容變了（雜湊不同）才會再次套用，後台改選或移除的結果因此不會被每次重啟蓋掉</summary>
@@ -21,6 +24,9 @@ public class ContributePageSettingsDto
 
     /// <summary>同 <see cref="OdtSeedHash"/>，PDF 版</summary>
     public string? PdfSeedHash { get; set; }
+
+    /// <summary>同 <see cref="OdtSeedHash"/>，Word 版</summary>
+    public string? DocxSeedHash { get; set; }
 
     /// <summary>投稿聯絡人姓名；空＝前台不顯示這一列</summary>
     public string ContactName { get; set; } = string.Empty;
@@ -41,6 +47,7 @@ public class ContributePageAdminDto
     public ContributePageSettingsDto Settings { get; set; } = new();
     public ContributeFormatFileDto? Odt { get; set; }
     public ContributeFormatFileDto? Pdf { get; set; }
+    public ContributeFormatFileDto? Docx { get; set; }
 }
 
 /// <summary>
@@ -58,7 +65,7 @@ public class ContributePagePublicDto
 
 public class ContributeFormatFileDto
 {
-    /// <summary>odt／pdf</summary>
+    /// <summary>odt／pdf／docx</summary>
     public string Kind { get; set; } = string.Empty;
 
     public Guid FileId { get; set; }
@@ -96,8 +103,10 @@ public static class ContributePageValidator
     {
         OdtFileId = s.OdtFileId,
         PdfFileId = s.PdfFileId,
+        DocxFileId = s.DocxFileId,
         OdtSeedHash = s.OdtSeedHash,
         PdfSeedHash = s.PdfSeedHash,
+        DocxSeedHash = s.DocxSeedHash,
         ContactName = s.ContactName?.Trim() ?? string.Empty,
         ContactPhone = s.ContactPhone?.Trim() ?? string.Empty,
         ContactEmail = s.ContactEmail?.Trim() ?? string.Empty,

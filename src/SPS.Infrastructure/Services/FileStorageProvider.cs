@@ -305,6 +305,11 @@ public class LocalFileStorageProvider : IFileStorageProvider
             try
             {
                 var fileInfo = new FileInfo(filePath);
+
+                // 隱藏檔與系統垃圾檔（.DS_Store、.gitkeep、Thumbs.db…）不是網站內容，掃進來會變成公開的檔案
+                if (fileInfo.Name.StartsWith('.') || fileInfo.Name.Equals("Thumbs.db", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 var relativePath = Path.GetRelativePath(webRootPath, filePath).Replace("\\", "/");
                 var extension = fileInfo.Extension.ToLowerInvariant();
                 var contentType = GetContentType(extension);
