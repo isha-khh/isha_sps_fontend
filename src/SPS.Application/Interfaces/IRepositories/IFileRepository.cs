@@ -111,6 +111,16 @@ public interface IFileRepository
     Task<UploadedFile?> GetByStaticFilePathAsync(string staticFilePath, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 取得所有靜態檔案實體（已追蹤，可直接修改後存檔；掃描時用來更新被替換過內容的檔案）
+    /// </summary>
+    Task<List<UploadedFile>> GetStaticFilesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 取得相對路徑以指定前綴開頭的靜態檔案（例如 seed/contribute/）
+    /// </summary>
+    Task<List<UploadedFile>> GetStaticFilesByPathPrefixAsync(string pathPrefix, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 取得所有靜態檔案路徑（用於批次檢查）
     /// </summary>
     /// <param name="cancellationToken">取消令牌</param>

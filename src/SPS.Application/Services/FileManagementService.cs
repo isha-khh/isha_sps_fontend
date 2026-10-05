@@ -1200,8 +1200,12 @@ public class FileManagementService : IFileManagementService
             var staticFiles = await _storageProvider.ScanWebRootFilesAsync(cancellationToken);
             response.ScannedCount = staticFiles.Count;
 
-            // 一次性取得所有已存在的靜態檔案路徑（避免 N+1 查詢問題）
-            var existingPaths = await _unitOfWork.Files.GetAllStaticFilePathsAsync(cancellationToken);
+            // 一次性取得所有已存在的靜態檔案（避免 N+1 查詢問題）。要拿實體而不只是路徑：
+            // 部署時用同檔名換了新版內容（例如 seed 的投稿格式檔），資料庫裡的大小與雜湊要跟著更新，
+            // 否則後台與前台顯示的檔案大小是舊的、seed 也無法判斷檔案有沒有更新
+            var existingFiles = (await _unitOfWork.Files.GetStaticFilesAsync(cancellationToken))
+                .GroupBy(f => f.StaticFilePath!, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
             foreach (var fileInfo in staticFiles)
             {
@@ -1211,8 +1215,23 @@ public class FileManagementService : IFileManagementService
                 try
                 {
                     // 使用 HashSet 檢查該靜態檔案是否已存在
-                    if (existingPaths.Contains(fileInfo.RelativePath))
+                    if (existingFiles.TryGetValue(fileInfo.RelativePath, out var existing))
                     {
+                        if (!string.Equals(existing.FileHash, fileInfo.FileHash, StringComparison.OrdinalIgnoreCase))
+                        {
+                            existing.FileHash = fileInfo.FileHash;
+                            existing.FileSize = fileInfo.FileSize;
+                            existing.ContentType = fileInfo.ContentType;
+                            existing.UpdatedTime = DateTime.UtcNow;
+
+                            // 內容換成新版的檔案，視為新的檔案：就算舊版曾被丟進回收桶也要恢復，
+                            // 否則部署了新版 seed 範本卻永遠停在「已刪除」。內容沒變的檔案維持原狀（管理員刪掉就是刪掉）
+                            if (existing.Status == FileStatus.Deleted)
+                            {
+                                existing.Status = FileStatus.Active;
+                                existing.DeletedAt = null;
+                            }
+                        }
                         response.ExistingCount++;
                         continue;
                     }

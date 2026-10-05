@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SPS.Application.Interfaces.IServices;
+using SPS.Application.Services;
 
 namespace SPS.Infrastructure.Services;
 
@@ -47,6 +48,9 @@ public class StaticFileScannerService : IHostedService
             {
                 _logger.LogWarning("靜態檔案掃描失敗: {Error}", result.Error);
             }
+
+            // 掃描完才 seed：seed 檔案要先被登錄成靜態檔案才有 id 可以設定（見 ContributeFormatSeeder）
+            await scope.ServiceProvider.GetRequiredService<ContributeFormatSeeder>().SeedAsync(cancellationToken);
         }
         catch (Exception ex)
         {

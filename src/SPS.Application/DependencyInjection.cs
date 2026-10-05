@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IVideoService, VideoService>();
         services.AddScoped<IPictureService, PictureService>();
         services.AddScoped<ITagService, TagService>();
+        services.AddScoped<ContributeFormatSeeder>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IFido2Service, Fido2Service>();
         services.AddScoped<IPasswordPolicyService, PasswordPolicyService>();

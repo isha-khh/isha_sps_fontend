@@ -266,6 +266,21 @@ public class FileRepository : IFileRepository
             .FirstOrDefaultAsync(f => f.IsStaticFile && f.StaticFilePath == staticFilePath, cancellationToken);
     }
 
+    public async Task<List<UploadedFile>> GetStaticFilesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.UploadedFiles
+            .Where(f => f.IsStaticFile && f.StaticFilePath != null)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<UploadedFile>> GetStaticFilesByPathPrefixAsync(string pathPrefix, CancellationToken cancellationToken = default)
+    {
+        var prefix = pathPrefix.ToLowerInvariant();
+        return await _context.UploadedFiles
+            .Where(f => f.IsStaticFile && f.StaticFilePath != null && f.StaticFilePath.ToLower().StartsWith(prefix))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<HashSet<string>> GetAllStaticFilePathsAsync(CancellationToken cancellationToken = default)
     {
         var paths = await _context.UploadedFiles
