@@ -59,6 +59,13 @@ public class CompanyRepository : Repository<Company, Guid>, ICompanyRepository
                 (c.Introduction != null && c.Introduction.Contains(search)));
         }
 
+        // 標籤過濾（符合任一勾選標籤）
+        if (parameters.TagIds is { Count: > 0 })
+        {
+            var tagIds = parameters.TagIds;
+            query = query.Where(c => _context.Set<CompanyTagCategory>().Any(t => t.CompanyId == c.Id && tagIds.Contains(t.CategoryId)));
+        }
+
         // 類型過濾
         if (parameters.Type.HasValue)
         {

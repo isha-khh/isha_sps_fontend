@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
-import { APPLICATION_SCENARIOS, APPLICATION_SCOPES, TECH_ATTRIBUTE_GROUPS } from "@/lib/matching-data";
+import type { TagTaxonomy } from "@/lib/company-tags";
 
 type PanelId = "scenario" | "scope" | "tech";
 
@@ -18,23 +18,43 @@ type PanelId = "scenario" | "scope" | "tech";
  * jQuery 插件搶控制權的情況，直接用這個專案比較新的元件（如
  * MarqueeTrack）偏好的寫法，不用另外掛 jQuery 事件代理。
  *
- * 2026-10-06：「查詢」按鈕與 Enter 會把關鍵字放進目前頁面網址的 `?q=`（企業名錄、媒合需求兩頁共用，
- * 由各頁的 Server Component 交給後端搜尋）。三個勾選面板（應用情境／應用範疇／智慧技術）後端的企業與需求
- * 目前沒有對應欄位，所以仍然只是畫面互動，沒有篩選作用。
+ * 2026-10-06：篩選條件全部放在網址（`?q=關鍵字&tags=標籤id,標籤id`），企業名錄與媒合需求兩頁共用，
+ * 由各頁的 Server Component 交給後端查詢；三個面板的選項來自後台「分類管理」的企業標籤
+ * （`fetchTagTaxonomy`），不再寫死。多個標籤的規則是「符合任一勾選項目」。
  */
-export default function MatchingSearchBar({ defaultKeyword = "" }: { defaultKeyword?: string }) {
+export default function MatchingSearchBar({
+  defaultKeyword = "",
+  taxonomy,
+  selectedTagIds = [],
+}: {
+  defaultKeyword?: string;
+  taxonomy: TagTaxonomy;
+  selectedTagIds?: number[];
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const [keyword, setKeyword] = useState(defaultKeyword);
 
   function submitSearch() {
+    const params = new URLSearchParams();
     const trimmed = keyword.trim();
-    router.push(trimmed ? `${pathname}?q=${encodeURIComponent(trimmed)}` : pathname);
+    if (trimmed) params.set("q", trimmed);
+    const tagIds = Object.entries(checked)
+      .filter(([, on]) => on)
+      .map(([id]) => id);
+    if (tagIds.length > 0) params.set("tags", tagIds.join(","));
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
   }
 
+  function toggleChecked(value: string) {
+    setChecked((prev) => ({ ...prev, [value]: !prev[value] }));
+  }
+
+
   const [openPanel, setOpenPanel] = useState<PanelId | null>(null);
-  const [checkedScenarios, setCheckedScenarios] = useState<Record<string, boolean>>({});
-  const [checkedScopes, setCheckedScopes] = useState<Record<string, boolean>>({});
+  // 勾選狀態一律用標籤 id（字串）當 key，三個面板共用同一份
+  const [checked, setChecked] = useState<Record<string, boolean>>(() => Object.fromEntries(selectedTagIds.map((id) => [String(id), true])));
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,10 +76,6 @@ export default function MatchingSearchBar({ defaultKeyword = "" }: { defaultKeyw
 
   function togglePanel(panel: PanelId) {
     setOpenPanel((current) => (current === panel ? null : panel));
-  }
-
-  function toggleChecked(setter: typeof setCheckedScenarios, value: string) {
-    setter((prev) => ({ ...prev, [value]: !prev[value] }));
   }
 
   const filterButtons: { id: PanelId; label: string }[] = [
@@ -117,19 +133,19 @@ export default function MatchingSearchBar({ defaultKeyword = "" }: { defaultKeyw
         <div className="menb_inp_tit form-group">
           <label className="mb-2 fw-bold">應用情境(可多選)</label>
           <div className="project_fx project_three d-flex flex-wrap gap-2">
-            {APPLICATION_SCENARIOS.map((scenario) => {
-              const id = `fxContext-${scenario}`;
+            {taxonomy.scenarios.map((tag) => {
+              const id = `fxContext-${tag.id}`;
               return (
-                <div className="form-check" key={scenario}>
+                <div className="form-check" key={tag.id}>
                   <input
                     className="form-check-input"
                     type="checkbox"
                     id={id}
-                    checked={Boolean(checkedScenarios[scenario])}
-                    onChange={() => toggleChecked(setCheckedScenarios, scenario)}
+                    checked={Boolean(checked[String(tag.id)])}
+                    onChange={() => toggleChecked(String(tag.id))}
                   />
                   <label className="form-check-label" htmlFor={id}>
-                    {scenario}
+                    {tag.name}
                   </label>
                 </div>
               );
@@ -142,19 +158,19 @@ export default function MatchingSearchBar({ defaultKeyword = "" }: { defaultKeyw
       <div className="ma_sear_1 ma_sear_panel" id="filter_panel_scope" style={openPanel === "scope" ? undefined : { display: "none" }}>
         <div className="menb_inp_tit form-group w-100">
           <div className="project_fx d-flex flex-wrap">
-            {APPLICATION_SCOPES.map((scope) => {
-              const id = `fxScope-${scope}`;
+            {taxonomy.scopes.map((tag) => {
+              const id = `fxScope-${tag.id}`;
               return (
-                <div className="form-check" key={scope}>
+                <div className="form-check" key={tag.id}>
                   <input
                     className="form-check-input"
                     type="checkbox"
                     id={id}
-                    checked={Boolean(checkedScopes[scope])}
-                    onChange={() => toggleChecked(setCheckedScopes, scope)}
+                    checked={Boolean(checked[String(tag.id)])}
+                    onChange={() => toggleChecked(String(tag.id))}
                   />
                   <label className="form-check-label" htmlFor={id}>
-                    {scope}
+                    {tag.name}
                   </label>
                 </div>
               );
@@ -169,7 +185,7 @@ export default function MatchingSearchBar({ defaultKeyword = "" }: { defaultKeyw
           <label className="mb-2">
             <span className="red me-1">*</span>智慧技術(可多選)
           </label>
-          <TechAttributeSelector groups={TECH_ATTRIBUTE_GROUPS} name="filter" variant="checkboxes" />
+          <TechAttributeSelector groups={taxonomy.techGroups} name="filter" variant="checkboxes" checked={checked} onToggle={toggleChecked} />
         </div>
       </div>
     </div>

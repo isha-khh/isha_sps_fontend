@@ -80,12 +80,12 @@ export default function NeedListItem({ need }: { need: MatchingNeed }) {
           </div>
         </div>
 
-        {need.keywords.length > 0 && (
+        {need.tags.length > 0 && (
           <ul className="nav ul-key">
-            {need.keywords.map((keyword) => (
-              <li key={keyword}>
-                <a href="#" title={`前往${keyword}`} tabIndex={0}>
-                  {keyword}
+            {need.tags.map((tag) => (
+              <li key={tag.id}>
+                <a href={withBasePath(`/matching?tags=${tag.id}`)} title={`查看同樣是「${tag.name}」的需求`} tabIndex={0}>
+                  {tag.name}
                 </a>
               </li>
             ))}

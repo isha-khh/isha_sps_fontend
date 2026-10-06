@@ -19,6 +19,7 @@ import {
 } from "@/lib/types";
 import { apiClient } from "@/lib/api-client";
 import { resolveBackendAssetUrl } from "@/lib/content-list-utils";
+import { buildTaxonomy, type TagRecord, type TagTaxonomy } from "@/lib/company-tags";
 
 async function getBaseUrlFromRequest() {
     const h = await headers();
@@ -335,6 +336,58 @@ export async function fetchCompanies(options?: { search?: string }): Promise<{ i
 }
 
 /**
+ * 取得企業標籤（應用情境／應用範疇／智慧技術）的分類結構，給搜尋列的篩選面板與企業詳情頁用。
+ * 連不到後端時回傳空的結構（篩選面板沒有選項、詳情頁不顯示標籤分類）。
+ */
+export async function fetchTagTaxonomy(): Promise<TagTaxonomy> {
+    try {
+        const response = await apiClient.get<PagedResult<TagRecord & { published: boolean }>>(
+            "/api/Category", { params: { type: 6, page: 1, pageSize: 500 } }
+        );
+        return buildTaxonomy((response.data.items ?? []).filter((c) => c.published));
+    } catch {
+        return buildTaxonomy([]);
+    }
+}
+
+/** 企業名錄的後端分頁查詢（只回已審核且啟用的企業）；篩選條件交給後端，`totalCount` 是符合條件的總筆數 */
+export async function fetchCompaniesPage(options: {
+    page: number;
+    pageSize: number;
+    search?: string;
+    tagIds?: number[];
+}): Promise<{ items: CompanyList[]; totalCount: number; backendAvailable: boolean }> {
+    try {
+        const response = await apiClient.get<PagedResult<CompanyList>>("/api/Company", {
+            params: { page: options.page, pageSize: options.pageSize, search: options.search || undefined, tagIds: options.tagIds },
+            paramsSerializer: { indexes: null },
+        });
+        const items = (response.data.items ?? []).map((c) => ({ ...c, photo: resolveBackendAssetUrl(c.photo) }));
+        return { items, totalCount: response.data.totalCount ?? items.length, backendAvailable: true };
+    } catch {
+        return { items: [], totalCount: 0, backendAvailable: false };
+    }
+}
+
+/** 媒合需求的後端分頁查詢（只回已發布的需求） */
+export async function fetchDemandsPage(options: {
+    page: number;
+    pageSize: number;
+    search?: string;
+    tagIds?: number[];
+}): Promise<{ items: DemandItem[]; totalCount: number; backendAvailable: boolean }> {
+    try {
+        const response = await apiClient.get<PagedResult<DemandItem>>("/api/Demand", {
+            params: { page: options.page, pageSize: options.pageSize, search: options.search || undefined, tagIds: options.tagIds },
+            paramsSerializer: { indexes: null },
+        });
+        return { items: response.data.items ?? [], totalCount: response.data.totalCount ?? 0, backendAvailable: true };
+    } catch {
+        return { items: [], totalCount: 0, backendAvailable: false };
+    }
+}
+
+/**
  * 取得單一企業的公開詳情（`GET /api/Company/{id}`）。沒審核通過／已停用的企業後端會回 404，
  * 這裡回 null（呼叫端轉成 404 頁）。負責人、窗口等內部欄位後端對匿名呼叫已清掉。
  */
@@ -348,9 +401,11 @@ export async function fetchCompanyDetail(id: string): Promise<PublicCompanyDetai
             photo?: { uri?: string | null } | null;
         }>(`/api/Company/${id}`);
         const c = response.data;
+        let tagIds: number[] = [];
         let tagNames: string[] = [];
         try {
-            const tags = await apiClient.get<{ tagNames?: string[] }>(`/api/Company/${id}/tags`);
+            const tags = await apiClient.get<{ tagIds?: number[]; tagNames?: string[] }>(`/api/Company/${id}/tags`);
+            tagIds = tags.data.tagIds ?? [];
             tagNames = tags.data.tagNames ?? [];
         } catch {
             // 標籤載不到不影響詳情頁
@@ -362,6 +417,7 @@ export async function fetchCompanyDetail(id: string): Promise<PublicCompanyDetai
             establishmentDate: c.establishmentDate, charge: c.charge, chargePhone: c.chargePhone,
             photoUrl: resolveBackendAssetUrl(c.photo?.uri),
             address: address || undefined,
+            tagIds,
             tagNames,
         };
     } catch {

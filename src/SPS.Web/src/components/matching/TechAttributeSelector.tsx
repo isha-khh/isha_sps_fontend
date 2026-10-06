@@ -20,16 +20,20 @@ import type { TechAttributeGroup } from "@/lib/matching-data";
  * 只能開一個」的手風琴），對照設計稿裡每個 `.accordion-item` 各自有
  * 自己的 `aria-expanded`，不是互斥的。
  *
- * checkbox 目前只是畫面互動（可以勾/取消勾選），還沒有接到任何送出
- * 邏輯——跟 `DownloadRequestForm` 的提交按鈕一樣，先把畫面做出來，
- * 真的要接篩選/送出時再處理。
+ * checkbox 預設是元件自己管理的畫面互動（發布需求表單用）；搜尋列的篩選面板要把勾選結果送出去，
+ * 所以另外提供 `checked`／`onToggle` 讓外面接管勾選狀態（受控模式）。
  */
 export default function TechAttributeSelector({
   groups,
   name,
   variant,
+  checked,
+  onToggle,
 }: {
   groups: TechAttributeGroup[];
+  /** 受控模式：目前勾選的項目（value → 是否勾選），要搭配 `onToggle` */
+  checked?: Record<string, boolean>;
+  onToggle?: (value: string) => void;
   /** checkbox id 前綴，同一頁如果放兩份這個元件要給不同的 name 避免 id 衝突 */
   name: string;
   variant: "tags" | "checkboxes";
@@ -44,14 +48,16 @@ export default function TechAttributeSelector({
     }
     return initial;
   });
-  const [checkedValues, setCheckedValues] = useState<Record<string, boolean>>({});
+  const [internalChecked, setInternalChecked] = useState<Record<string, boolean>>({});
+  const checkedValues = checked ?? internalChecked;
 
   function toggleSection(id: string) {
     setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
   function toggleValue(value: string) {
-    setCheckedValues((prev) => ({ ...prev, [value]: !prev[value] }));
+    if (onToggle) onToggle(value);
+    else setInternalChecked((prev) => ({ ...prev, [value]: !prev[value] }));
   }
 
   return (

@@ -5,7 +5,8 @@ import MatchingSubNav from "@/components/matching/MatchingSubNav";
 import MatchingSearchBar from "@/components/matching/MatchingSearchBar";
 import EnterpriseCard from "@/components/matching/EnterpriseCard";
 import Pagination from "@/components/ui/Pagination";
-import { fetchCompanies } from "@/lib/api.server";
+import { fetchCompaniesPage, fetchTagTaxonomy } from "@/lib/api.server";
+import { parseTagIds } from "@/lib/company-tags";
 import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
@@ -25,14 +26,20 @@ const ENTERPRISE_PAGE_SIZE = 8;
  * 所以 `InnerPageShell` 沒給 `sidebar`／`aside`，讓 `.content` 自動撐滿。
  */
 export default async function MatchingEnterprisePage({ searchParams }: PageProps<"/matching/enterprise">) {
-  const { page: rawPage, q: rawQuery } = await searchParams;
+  const { page: rawPage, q: rawQuery, tags: rawTags } = await searchParams;
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
-  const { items: listings } = await fetchCompanies({ search: query });
-
-  const totalPages = Math.max(1, Math.ceil(listings.length / ENTERPRISE_PAGE_SIZE));
+  const tagIds = parseTagIds(rawTags);
   const requestedPage = typeof rawPage === "string" ? Number(rawPage) : 1;
-  const currentPage = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.min(requestedPage, totalPages) : 1;
-  const pagedListings = listings.slice((currentPage - 1) * ENTERPRISE_PAGE_SIZE, currentPage * ENTERPRISE_PAGE_SIZE);
+  const page = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.floor(requestedPage) : 1;
+
+  const [taxonomy, result] = await Promise.all([
+    fetchTagTaxonomy(),
+    fetchCompaniesPage({ page, pageSize: ENTERPRISE_PAGE_SIZE, search: query, tagIds }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(result.totalCount / ENTERPRISE_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedListings = result.items;
+  const hasFilter = Boolean(query) || tagIds.length > 0;
 
   return (
     <>
@@ -43,12 +50,12 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
         breadcrumb={[{ label: "企業名錄" }]}
         topBar={
           <div className="searchma_tching mb-5">
-            <MatchingSearchBar defaultKeyword={query} />
+            <MatchingSearchBar defaultKeyword={query} taxonomy={taxonomy} selectedTagIds={tagIds} />
           </div>
         }
       >
         <div className="row">
-          {pagedListings.length === 0 && <p>{query ? "沒有符合的企業。" : "目前沒有刊登中的企業。"}</p>}
+          {pagedListings.length === 0 && <p>{hasFilter ? "沒有符合的企業。" : "目前沒有刊登中的企業。"}</p>}
 
           {pagedListings.map((company) => (
             <EnterpriseCard
@@ -67,6 +74,7 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
         <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(page) => {
             const params = new URLSearchParams();
             if (query) params.set("q", query);
+            if (tagIds.length > 0) params.set("tags", tagIds.join(","));
             if (page > 1) params.set("page", String(page));
             const qs = params.toString();
             return qs ? `/matching/enterprise?${qs}` : "/matching/enterprise";

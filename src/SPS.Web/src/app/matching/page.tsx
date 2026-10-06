@@ -10,7 +10,8 @@ import Pagination from "@/components/ui/Pagination";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import { demandToNeed } from "@/lib/matching-need-data";
 import { withBasePath } from "@/lib/api-client";
-import { fetchBanners, fetchDemands } from "@/lib/api.server";
+import { fetchBanners, fetchDemandsPage, fetchTagTaxonomy } from "@/lib/api.server";
+import { parseTagIds } from "@/lib/company-tags";
 
 export const metadata: Metadata = {
   title: "媒合對接",
@@ -37,16 +38,20 @@ const NEED_PAGE_SIZE = 8;
  */
 export default async function MatchingPage({ searchParams }: PageProps<"/matching">) {
   const sidebarBanners = await fetchBanners("sidebar-matching");
-  const { page: rawPage, q: rawQuery } = await searchParams;
+  const { page: rawPage, q: rawQuery, tags: rawTags } = await searchParams;
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
-
-  const { items: demands } = await fetchDemands({ search: query });
-  const needs = demands.map(demandToNeed);
-
-  const totalPages = Math.max(1, Math.ceil(needs.length / NEED_PAGE_SIZE));
+  const tagIds = parseTagIds(rawTags);
   const requestedPage = typeof rawPage === "string" ? Number(rawPage) : 1;
-  const currentPage = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.min(requestedPage, totalPages) : 1;
-  const pagedNeeds = needs.slice((currentPage - 1) * NEED_PAGE_SIZE, currentPage * NEED_PAGE_SIZE);
+  const page = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.floor(requestedPage) : 1;
+
+  const [taxonomy, result] = await Promise.all([
+    fetchTagTaxonomy(),
+    fetchDemandsPage({ page, pageSize: NEED_PAGE_SIZE, search: query, tagIds }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(result.totalCount / NEED_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedNeeds = result.items.map(demandToNeed);
+  const hasFilter = Boolean(query) || tagIds.length > 0;
 
   return (
     <>
@@ -60,7 +65,7 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
         breadcrumb={[{ label: "媒合對接" }]}
         topBar={
           <div className="searchma_tching mb-5">
-            <MatchingSearchBar defaultKeyword={query} />
+            <MatchingSearchBar defaultKeyword={query} taxonomy={taxonomy} selectedTagIds={tagIds} />
           </div>
         }
         aside={
@@ -93,7 +98,7 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
         }
       >
         <div className="column_box">
-          {pagedNeeds.length === 0 && <p>{query ? "沒有符合的需求。" : "目前沒有刊登中的需求。"}</p>}
+          {pagedNeeds.length === 0 && <p>{hasFilter ? "沒有符合的需求。" : "目前沒有刊登中的需求。"}</p>}
           {pagedNeeds.map((need) => (
             <NeedListItem key={need.id} need={need} />
           ))}
@@ -102,6 +107,7 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
         <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(page) => {
             const params = new URLSearchParams();
             if (query) params.set("q", query);
+            if (tagIds.length > 0) params.set("tags", tagIds.join(","));
             if (page > 1) params.set("page", String(page));
             const qs = params.toString();
             return qs ? `/matching?${qs}` : "/matching";

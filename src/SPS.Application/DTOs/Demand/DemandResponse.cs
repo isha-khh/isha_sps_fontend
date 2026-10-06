@@ -58,6 +58,9 @@ public class DemandQueryParameters
     public string? Search { get; set; }
     public Guid? CompanyId { get; set; }
     public bool? Published { get; set; }
+
+    /// <summary>標籤篩選（共用企業標籤分類 ID）：符合任一勾選標籤的需求</summary>
+    public List<int>? TagIds { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 20;
 }

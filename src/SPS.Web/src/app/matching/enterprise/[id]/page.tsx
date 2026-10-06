@@ -4,7 +4,9 @@ import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MoreLink from "@/components/ui/MoreLink";
 import { getCompanyTypeLabels } from "@/lib/matching-data";
-import { fetchCompanyDetail } from "@/lib/api.server";
+import { fetchCompanyDetail, fetchTagTaxonomy } from "@/lib/api.server";
+import { splitTagsByKind } from "@/lib/company-tags";
+import Link from "next/link";
 import { withBasePath } from "@/lib/api-client";
 
 export async function generateMetadata({ params }: PageProps<"/matching/enterprise/[id]">): Promise<Metadata> {
@@ -33,6 +35,13 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
     notFound();
   }
 
+  const taxonomy = await fetchTagTaxonomy();
+  const tags = splitTagsByKind(company.tagIds, taxonomy);
+  const tagSections = [
+    { label: "應用情境", items: tags.scenario },
+    { label: "應用範疇", items: tags.scope },
+    { label: "智慧技術", items: tags.tech },
+  ].filter((section) => section.items.length > 0);
   const typeLabels = getCompanyTypeLabels(company.type);
   const phoneDial = company.phone ? company.phone.split("#")[0].replace(/[^0-9+]/g, "") : "";
 
@@ -132,7 +141,7 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
             </div>
           )}
 
-          {(company.subject || company.tagNames.length > 0) && (
+          {(company.subject || tagSections.length > 0) && (
             <div className="item_box_two_1">
               <div className="dow-name">
                 <i className="bi bi-file-earmark-text"></i>
@@ -141,17 +150,24 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
 
               {company.subject && <p>{company.subject}</p>}
 
-              {company.tagNames.length > 0 && (
-                <ul className="nav ul-key mb-4">
-                  {company.tagNames.map((tag) => (
-                    <li key={tag}>
-                      <a href="#" title={tag}>
-                        {tag}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {/* 應用情境／應用範疇／智慧技術：公司在後台勾選的標籤，點進去看有同樣標籤的其他企業 */}
+              {tagSections.map((section) => (
+                <div key={section.label}>
+                  <h5 className="mb-3">
+                    <i className="bi bi-caret-right-fill me-1 blue"></i>
+                    {section.label}
+                  </h5>
+                  <ul className="nav ul-key mb-4">
+                    {section.items.map((tag) => (
+                      <li key={tag.id}>
+                        <Link href={`/matching/enterprise?tags=${tag.id}`} title={`查看同樣是「${tag.name}」的企業`}>
+                          {tag.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           )}
         </div>

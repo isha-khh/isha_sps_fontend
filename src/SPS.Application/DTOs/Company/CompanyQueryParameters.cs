@@ -33,6 +33,11 @@ public class CompanyQueryParameters
     public bool? IsVerified { get; set; }
 
     /// <summary>
+    /// 標籤篩選（企業標籤分類 ID）：符合任一勾選標籤的企業
+    /// </summary>
+    public List<int>? TagIds { get; set; }
+
+    /// <summary>
     /// 頁碼（從1開始）
     /// </summary>
     public int Page { get; set; } = 1;

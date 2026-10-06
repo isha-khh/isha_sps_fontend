@@ -18,7 +18,8 @@ export interface MatchingNeed {
   description: string;
   publishedDate: string;
   needCode: string;
-  keywords: string[];
+  /** 需求的標籤（後台「需求張貼管理」勾選），點進去看有同樣標籤的需求 */
+  tags: { id: number; name: string }[];
   /** 詳情頁內文（純文字，換行分段） */
   body: string;
 }
@@ -35,7 +36,7 @@ export function demandToNeed(demand: DemandItem): MatchingNeed {
     description: flat.length > DESCRIPTION_LENGTH ? `${flat.slice(0, DESCRIPTION_LENGTH)}…` : flat,
     publishedDate: formatIsoDate(demand.createdTime),
     needCode: demand.number,
-    keywords: demand.tagNames ?? [],
+    tags: (demand.tagIds ?? []).map((id, index) => ({ id, name: demand.tagNames?.[index] ?? "" })).filter((t) => t.name),
     body,
   };
 }

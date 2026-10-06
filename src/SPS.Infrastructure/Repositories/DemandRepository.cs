@@ -24,6 +24,11 @@ public class DemandRepository : Repository<Demand, int>, IDemandRepository
             query = query.Where(d => d.Name.Contains(parameters.Search) || d.Number.Contains(parameters.Search));
         if (parameters.CompanyId.HasValue)
             query = query.Where(d => d.CompanyId == parameters.CompanyId.Value);
+        if (parameters.TagIds is { Count: > 0 })
+        {
+            var tagIds = parameters.TagIds;
+            query = query.Where(d => _context.Set<DemandTagCategory>().Any(t => t.DemandId == d.Id && tagIds.Contains(t.CategoryId)));
+        }
         if (parameters.Published.HasValue)
             query = query.Where(d => d.Status == (parameters.Published.Value ? SPS.Domain.Enums.Status.Active : SPS.Domain.Enums.Status.Inactive));
         

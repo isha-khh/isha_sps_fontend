@@ -315,6 +315,7 @@ export type PublicCompanyDetail = {
     chargePhone?: string | null;
     photoUrl?: string;
     address?: string;
+    tagIds: number[];
     tagNames: string[];
 };
 
