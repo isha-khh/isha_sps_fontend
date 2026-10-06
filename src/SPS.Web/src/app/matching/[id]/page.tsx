@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MoreLink from "@/components/ui/MoreLink";
+import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
+import Link from "next/link";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import RelatedNeeds from "@/components/matching/RelatedNeeds";
 import ProposeSolutionModal from "@/components/matching/ProposeSolutionModal";
@@ -78,6 +80,15 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
               <h3>{need.title}</h3>
 
               <ul className="nav mb-4">
+                {need.location && (
+                  <li className="mb-2">
+                    <i className="bi bi-geo-alt me-1" />
+                    <span>
+                      <b>地點 : </b>
+                      {need.location}
+                    </span>
+                  </li>
+                )}
                 <li className="mb-2">
                   <i className="bi bi-calendar4-week me-1" />
                   <span>
@@ -108,12 +119,43 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
             )}
           </div>
 
-          {/* 內文是後台輸入的純文字，不當 HTML 輸出（避免後台內容夾帶腳本）；換行分段 */}
-          <div className="txt editor mb-md-5 mb-4">
-            {need.body.split(/\n+/).filter(Boolean).map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
+          {/* 公開摘要：所有訪客都看得到 */}
+          {need.description && (
+            <div className="public_box mb-md-5 mb-4">
+              <div className="h4 blue">
+                <span>公開摘要</span>
+              </div>
+              <div className="txt editor">{need.description}</div>
+            </div>
+          )}
+
+          {need.contentLocked ? (
+            <p className="mb-md-5 mb-4">
+              <i className="bi bi-lock me-2" aria-hidden="true" />
+              <b className="red">企業會員可見完整內容與附件。</b>
+              <Link href="/member/login" title="前往登入" className="ms-2">
+                登入企業會員
+              </Link>
+            </p>
+          ) : (
+            <>
+              {/* 內文是後台輸入的純文字，不當 HTML 輸出（避免後台內容夾帶腳本）；換行分段 */}
+              <div className="txt editor mb-md-5 mb-4">
+                {need.body
+                  .split(/\n+/)
+                  .filter(Boolean)
+                  .map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+              </div>
+
+              {need.attachments.length > 0 && (
+                <div className="dk_conbo mb-md-5 mb-4">
+                  <AttachmentsPanel attachments={need.attachments} />
+                </div>
+              )}
+            </>
+          )}
 
           <div className="dk_conbo mb-md-5 mb-4">
             <RelatedNeeds id={`related-needs-${need.id}`} needs={relatedNeeds} />

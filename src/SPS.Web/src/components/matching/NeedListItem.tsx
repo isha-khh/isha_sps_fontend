@@ -35,6 +35,15 @@ export default function NeedListItem({ need }: { need: MatchingNeed }) {
 
           <div className="d-flex sup_xbox mb-md-4 mb-2">
             <ul className="nav d-block">
+              {need.location && (
+                <li className="mb-2">
+                  <i className="bi bi-geo-alt me-1" />
+                  <span>
+                    <b>地點 : </b>
+                    {need.location}
+                  </span>
+                </li>
+              )}
               <li className="mb-2">
                 <i className="bi bi-calendar4-week me-1" />
                 <span>

@@ -4,6 +4,8 @@ import { PageTitle } from '@/components/PageTitle';
 import { demandsApi } from '@/lib/api/demands';
 import type { CreateDemandRequest, UpdateDemandRequest } from '@/types/demand';
 import type { CompanyTagOption } from '@/types/company';
+import { FilePickerModal } from '@/components/shared/FilePickerModal';
+import type { FileListItem, FileUploadResponse } from '@/types/files';
 import { TagCategoryTreeSelect } from '@/components/shared/TagCategoryTreeSelect';
 import { ProTrackImportModal } from '@/components/shared/ProTrackImportModal';
 import { SimilarCompaniesPanel } from '@/components/shared/SimilarCompaniesPanel';
@@ -20,8 +22,13 @@ export const DemandFormPage = () => {
   const [formData, setFormData] = useState<CreateDemandRequest>({
     name: '',
     introduction: '',
+    location: '',
+    publicSummary: '',
     published: false,
   });
+  // 附件：檔案 id 與顯示用檔名（依顯示順序）
+  const [attachments, setAttachments] = useState<{ fileId: string; name: string }[]>([]);
+  const [isFilePickerOpen, setIsFilePickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
   const [availableTags, setAvailableTags] = useState<CompanyTagOption[]>([]);
@@ -44,9 +51,12 @@ export const DemandFormPage = () => {
           setFormData({
             name: data.name,
             introduction: data.introduction,
+            location: data.location ?? '',
+            publicSummary: data.publicSummary ?? '',
             companyId: data.companyId,
             published: data.published,
           });
+          setAttachments((data.attachments ?? []).map((a) => ({ fileId: a.fileId, name: `${a.fileName}（${a.formattedFileSize}）` })));
           const bound = await demandsApi.getDemandTags(id!);
           setSelectedTagIds(bound.tagIds ?? []);
         }
@@ -68,6 +78,17 @@ export const DemandFormPage = () => {
     );
   };
 
+  const handleAttachmentPick = async (file: FileListItem | FileUploadResponse) => {
+    const picked = 'fileId' in file ? { fileId: file.fileId, name: file.fileName } : { fileId: file.id, name: file.originalFileName };
+    setIsFilePickerOpen(false);
+    if (attachments.some((a) => a.fileId === picked.fileId)) return;
+    if (attachments.length >= 10) {
+      await notify.warning('附件最多 10 個');
+      return;
+    }
+    setAttachments((prev) => [...prev, picked]);
+  };
+
   const handleSubmit = async (e: React.FormEvent, publish: boolean) => {
     e.preventDefault();
 
@@ -85,6 +106,9 @@ export const DemandFormPage = () => {
         const updateData: UpdateDemandRequest = {
           name: formData.name,
           introduction: formData.introduction,
+          location: formData.location ?? '',
+          publicSummary: formData.publicSummary ?? '',
+          attachmentFileIds: attachments.map((a) => a.fileId),
           published: publish,
           notifyCompanyIds: publish ? notifyCompanyIds : undefined,
         };
@@ -93,6 +117,7 @@ export const DemandFormPage = () => {
       } else {
         const createData: CreateDemandRequest = {
           ...formData,
+          attachmentFileIds: attachments.map((a) => a.fileId),
           published: false, // 先建草稿
         };
         const created = await demandsApi.createDemand(createData);
@@ -239,6 +264,81 @@ export const DemandFormPage = () => {
                 </label>
               </div>
 
+              {/* 地點、公開摘要、附件：前台媒合對接頁顯示 */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">地點</span>
+                  <span className="label-text-alt text-base-content/60">前台列表與詳情顯示，例如「高雄市小港區」</span>
+                </label>
+                <input
+                  type="text"
+                  className="input input-bordered"
+                  maxLength={100}
+                  value={formData.location ?? ''}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">公開摘要</span>
+                  <span className="label-text-alt text-base-content/60">所有訪客都看得到；不填就用需求介紹開頭 120 字</span>
+                </label>
+                <textarea
+                  className="textarea textarea-bordered h-24"
+                  maxLength={500}
+                  placeholder="例如：專注於提供企業數位轉型與智慧工安解決方案…"
+                  value={formData.publicSummary ?? ''}
+                  onChange={(e) => setFormData({ ...formData, publicSummary: e.target.value })}
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">附件</span>
+                  <span className="label-text-alt text-base-content/60">只有登入的企業會員看得到、可下載；最多 10 個</span>
+                </label>
+                {attachments.length > 0 && (
+                  <ul className="mb-2 space-y-1">
+                    {attachments.map((a, index) => (
+                      <li className="flex items-center gap-2 rounded-box border border-base-300 px-3 py-2 text-sm" key={a.fileId}>
+                        <span className="iconify lucide--paperclip size-4" />
+                        <span className="flex-1 break-all">{a.name}</span>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-xs"
+                          disabled={index === 0}
+                          onClick={() =>
+                            setAttachments((prev) => {
+                              const next = [...prev];
+                              [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                              return next;
+                            })
+                          }
+                          title="上移"
+                        >
+                          <span className="iconify lucide--arrow-up size-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-xs text-error"
+                          onClick={() => setAttachments((prev) => prev.filter((x) => x.fileId !== a.fileId))}
+                          title="移除"
+                        >
+                          <span className="iconify lucide--x size-4" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div>
+                  <button type="button" className="btn btn-sm btn-neutral" onClick={() => setIsFilePickerOpen(true)}>
+                    <span className="iconify lucide--folder-open size-4" />
+                    從檔案系統選擇附件
+                  </button>
+                </div>
+              </div>
+
               <div className="divider" />
 
               {/* 需求標籤 */}
@@ -340,6 +440,14 @@ export const DemandFormPage = () => {
           </div>
         </div>
       </form>
+
+      <FilePickerModal
+        isOpen={isFilePickerOpen}
+        onClose={() => setIsFilePickerOpen(false)}
+        onSelect={(file) => void handleAttachmentPick(file)}
+        fileType="all"
+        title="選擇需求附件"
+      />
     </div>
   );
 };

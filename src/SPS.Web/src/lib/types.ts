@@ -288,7 +288,14 @@ export type DemandItem = {
     id: number;
     number: string;
     name: string;
+    /** 完整內容；匿名與非企業會員拿到的是 null（`contentLocked` = true） */
     introduction?: string | null;
+    location?: string | null;
+    /** 給所有訪客看的摘要（後台填的公開摘要，沒填就是內容開頭） */
+    summary?: string | null;
+    contentLocked: boolean;
+    /** 附件（只有企業會員與後台看得到，且只在詳情回傳） */
+    attachments?: { fileId: string; fileName: string; formattedFileSize: string; url: string }[];
     published: boolean;
     createdTime: string;
     tagIds: number[];

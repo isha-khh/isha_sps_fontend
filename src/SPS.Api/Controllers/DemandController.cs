@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.Demand;
+using SPS.Application.DTOs.File;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
 using SPS.Api.Attributes;
@@ -19,15 +20,19 @@ public class DemandController : ControllerBase
 {
     private readonly IDemandService _demandService;
     private readonly IAdminUserService _adminUserService;
+    private readonly IFileManagementService _fileService;
 
     /// <summary>
     /// 需求控制器建構函數
     /// </summary>
-    public DemandController(IDemandService demandService, IAdminUserService adminUserService)
+    public DemandController(IDemandService demandService, IAdminUserService adminUserService, IFileManagementService fileService)
     {
         _demandService = demandService;
         _adminUserService = adminUserService;
+        _fileService = fileService;
     }
+
+    private const int MaxAttachments = 10;
 
     /// <summary>
     /// 獲取需求分頁列表
@@ -50,10 +55,9 @@ public class DemandController : ControllerBase
         }
 
         var r = await _demandService.GetPagedAsync(p, ct);
-        if (r.IsSuccess && !User.IsInRole("Admin"))
+        if (r.IsSuccess)
         {
-            // 前台需求列表不公開刊登需求的企業身分（「企業會員可見完整內容」）
-            foreach (var item in r.Data!.Items) HideCompany(item);
+            foreach (var item in r.Data!.Items) await ApplyVisibilityAsync(item, includeAttachments: false, ct);
         }
 
         return r.IsSuccess ? Ok(r.Data) : BadRequest(new { error = r.Error });
@@ -80,15 +84,80 @@ public class DemandController : ControllerBase
             return NotFound(new { error = "資料不存在" });
         }
 
-        if (r.IsSuccess && !User.IsInRole("Admin")) HideCompany(r.Data!);
+        if (r.IsSuccess) await ApplyVisibilityAsync(r.Data!, includeAttachments: true, ct);
 
         return r.IsSuccess ? Ok(r.Data) : NotFound(new { error = r.Error });
     }
 
-    private static void HideCompany(DemandResponse demand)
+    /// <summary>
+    /// 依呼叫者身分決定看得到多少：後台使用者全部；企業會員（Supplier／Buyer）看得到完整內容與附件但看不到刊登企業；
+    /// 其他人（匿名、個人會員）只有標題、摘要等公開資訊，<see cref="DemandResponse.ContentLocked"/> = true
+    /// </summary>
+    private async Task ApplyVisibilityAsync(DemandResponse demand, bool includeAttachments, CancellationToken ct)
     {
-        demand.CompanyId = null;
-        demand.CompanyName = null;
+        var isAdmin = User.IsInRole("Admin");
+        var isEnterpriseMember = User.IsInRole("Supplier") || User.IsInRole("Buyer");
+
+        if (!isAdmin)
+        {
+            demand.CompanyId = null;
+            demand.CompanyName = null;
+        }
+
+        if (isAdmin || isEnterpriseMember)
+        {
+            if (includeAttachments) demand.Attachments = await ResolveAttachmentsAsync(demand.AttachmentFileIds, ct);
+            if (!isAdmin) demand.AttachmentFileIds = new List<Guid>();
+            return;
+        }
+
+        demand.Introduction = null;
+        demand.ContentLocked = true;
+        demand.AttachmentFileIds = new List<Guid>();
+        demand.Attachments = new List<DemandAttachmentDto>();
+    }
+
+    private async Task<FileInfoResponse?> GetUsableAttachmentAsync(Guid fileId, CancellationToken ct)
+    {
+        var info = await _fileService.GetFileByIdAsync(fileId, ct);
+        if (!info.IsSuccess || info.Data == null) return null;
+        var file = info.Data;
+        if (file.IsFolder || file.Status != FileStatus.Active) return null;
+        // 會員申請附件含申請人個資，不能當公開下載檔
+        if (await _fileService.IsApplicationDocumentFileAsync(file.Id, ct)) return null;
+        return file;
+    }
+
+    private async Task<List<DemandAttachmentDto>> ResolveAttachmentsAsync(IEnumerable<Guid> fileIds, CancellationToken ct)
+    {
+        var result = new List<DemandAttachmentDto>();
+        foreach (var id in fileIds)
+        {
+            var file = await GetUsableAttachmentAsync(id, ct);
+            if (file == null) continue;
+            result.Add(new DemandAttachmentDto
+            {
+                FileId = file.Id,
+                FileName = file.OriginalFileName,
+                FormattedFileSize = file.FormattedFileSize,
+                Url = $"/api/FileManagement/{file.Id}/download",
+            });
+        }
+
+        return result;
+    }
+
+    /// <summary>檢查後台送來的附件清單：數量上限、每個檔案都要是檔案管理中可用的檔案（不是資料夾、沒被刪除、不是會員申請附件）</summary>
+    private async Task<string?> ValidateAttachmentsAsync(List<Guid>? fileIds, CancellationToken ct)
+    {
+        if (fileIds == null) return null;
+        if (fileIds.Count > MaxAttachments) return $"附件最多 {MaxAttachments} 個";
+        foreach (var id in fileIds)
+        {
+            if (await GetUsableAttachmentAsync(id, ct) == null) return "附件必須是檔案管理中存在的檔案（不能是資料夾、已刪除的檔案或會員申請附件）";
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -108,6 +177,9 @@ public class DemandController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Create([FromBody] CreateDemandRequest req, CancellationToken ct)
     {
+        var attachmentError = await ValidateAttachmentsAsync(req.AttachmentFileIds, ct);
+        if (attachmentError != null) return BadRequest(new { error = attachmentError });
+
         var r = await _demandService.CreateAsync(req, ct);
         return r.IsSuccess ? CreatedAtAction(nameof(GetById), new { id = r.Data!.Id }, r.Data) : BadRequest(new { error = r.Error });
     }
@@ -132,6 +204,9 @@ public class DemandController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateDemandRequest req, CancellationToken ct)
     {
+        var attachmentError = await ValidateAttachmentsAsync(req.AttachmentFileIds, ct);
+        if (attachmentError != null) return BadRequest(new { error = attachmentError });
+
         string? publisherEmail = null;
         if (req.Published == true)
         {

@@ -1,14 +1,14 @@
 import type { DemandItem } from "@/lib/types";
 import { formatIsoDate } from "@/lib/content-list-utils";
+import type { AttachmentLink } from "@/components/ui/AttachmentsPanel";
 
 /**
  * 「媒合對接」（`/matching`）的需求，對應設計稿 `page/matching/index.html`（列表）／
  * `show2.html`（詳情，提供解方頁）。資料來自後台「需求張貼管理」維護的 `Demand`
  * （`GET /api/Demand`，見 `fetchDemands`），這裡只負責把後端形狀轉成畫面用的樣子。
  *
- * 設計稿有、但後端的需求目前沒有對應欄位的部分——地點、公開摘要、附件下載——前台不顯示，
- * 等後端補上欄位再接；狀態標籤固定為「徵求中」（前台只看得到已發布的需求）。
- * 設計稿的應用情境／應用範疇／智慧技術三種篩選，需求沒有這幾個欄位，所以搜尋列只有關鍵字有作用。
+ * 地點、公開摘要、附件由後台「需求張貼管理」填寫；完整內容與附件只有登入的企業會員看得到
+ * （設計稿的「企業會員可見完整內容」），其他人只看得到公開摘要。狀態標籤固定為「徵求中」（前台只看得到已發布的需求）。
  */
 export interface MatchingNeed {
   id: string;
@@ -20,23 +20,27 @@ export interface MatchingNeed {
   needCode: string;
   /** 需求的標籤（後台「需求張貼管理」勾選），點進去看有同樣標籤的需求 */
   tags: { id: number; name: string }[];
-  /** 詳情頁內文（純文字，換行分段） */
+  /** 詳情頁內文（純文字，換行分段）；沒有權限看完整內容時是空字串 */
   body: string;
+  location: string;
+  /** 沒有權限（匿名、個人會員）看完整內容與附件，詳情頁顯示登入提示 */
+  contentLocked: boolean;
+  attachments: AttachmentLink[];
 }
 
-const DESCRIPTION_LENGTH = 120;
-
 export function demandToNeed(demand: DemandItem): MatchingNeed {
-  const body = (demand.introduction ?? "").trim();
-  const flat = body.replace(/\s+/g, " ");
   return {
     id: String(demand.id),
     statusLabel: "徵求中",
     title: demand.name,
-    description: flat.length > DESCRIPTION_LENGTH ? `${flat.slice(0, DESCRIPTION_LENGTH)}…` : flat,
+    // 摘要由後端決定（公開摘要，沒填就取內容開頭），匿名也看得到
+    description: demand.summary ?? "",
     publishedDate: formatIsoDate(demand.createdTime),
     needCode: demand.number,
     tags: (demand.tagIds ?? []).map((id, index) => ({ id, name: demand.tagNames?.[index] ?? "" })).filter((t) => t.name),
-    body,
+    body: (demand.introduction ?? "").trim(),
+    location: (demand.location ?? "").trim(),
+    contentLocked: demand.contentLocked,
+    attachments: (demand.attachments ?? []).map((a) => ({ name: `${a.fileName}（${a.formattedFileSize}）`, href: a.url })),
   };
 }

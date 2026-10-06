@@ -1,9 +1,22 @@
 // 需求張貼相關類型定義
 
+export interface DemandAttachment {
+  fileId: string;
+  fileName: string;
+  formattedFileSize: string;
+  url: string;
+}
+
 export interface Demand {
   id: string;
   name: string;
   introduction?: string;
+  /** 地點（前台列表與詳情顯示） */
+  location?: string;
+  /** 公開摘要：所有訪客都看得到；完整內容與附件只有企業會員看得到 */
+  publicSummary?: string;
+  /** 附件（檔案管理中的檔案），詳情 API 回傳 */
+  attachments?: DemandAttachment[];
   companyId?: string;
   companyName?: string;
   published: boolean;
@@ -25,6 +38,10 @@ export interface DemandTagsResponse {
 export interface CreateDemandRequest {
   name: string;
   introduction?: string;
+  location?: string;
+  publicSummary?: string;
+  /** 附件的檔案 Id（依顯示順序，最多 10 個） */
+  attachmentFileIds?: string[];
   companyId?: string;
   published: boolean;
 }
@@ -32,6 +49,11 @@ export interface CreateDemandRequest {
 export interface UpdateDemandRequest {
   name?: string;
   introduction?: string;
+  /** 沒帶＝不更新；空字串＝清除 */
+  location?: string;
+  publicSummary?: string;
+  /** 沒帶＝不更新；空陣列＝清除全部附件 */
+  attachmentFileIds?: string[];
   published?: boolean;
   /** 發布時要寄送媒合通知的供給端業者 Id 清單；未提供則沿用預設規則（重疊度 ≥30% 全部寄送） */
   notifyCompanyIds?: string[];

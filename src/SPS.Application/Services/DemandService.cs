@@ -53,6 +53,10 @@ public class DemandService : IDemandService
                     Number = d.Number,
                     Name = d.Name,
                     Introduction = d.Description,
+                    Location = d.Location,
+                    PublicSummary = d.PublicSummary,
+                    Summary = BuildSummary(d),
+                    AttachmentFileIds = d.AttachmentFileIds,
                     CompanyId = d.CompanyId,
                     CompanyName = d.Company?.Name,
                     Published = d.Status == Status.Active,
@@ -82,6 +86,9 @@ public class DemandService : IDemandService
             Number = $"D{DateTime.UtcNow:yyyyMMddHHmmss}",
             Name = request.Name,
             Description = request.Introduction,
+            Location = NullIfBlank(request.Location),
+            PublicSummary = NullIfBlank(request.PublicSummary),
+            AttachmentFileIds = request.AttachmentFileIds?.Distinct().ToList() ?? new List<Guid>(),
             CompanyId = request.CompanyId,
             Status = request.Published ? Status.Active : Status.Inactive,
             DataMode = DataMode.Normal,
@@ -105,6 +112,9 @@ public class DemandService : IDemandService
 
         if (request.Name != null) demand.Name = request.Name;
         if (request.Introduction != null) demand.Description = request.Introduction;
+        if (request.Location != null) demand.Location = NullIfBlank(request.Location);
+        if (request.PublicSummary != null) demand.PublicSummary = NullIfBlank(request.PublicSummary);
+        if (request.AttachmentFileIds != null) demand.AttachmentFileIds = request.AttachmentFileIds.Distinct().ToList();
         if (request.Published.HasValue) demand.Status = request.Published.Value ? Status.Active : Status.Inactive;
         demand.UpdatedTime = DateTime.UtcNow;
 
@@ -246,12 +256,28 @@ public class DemandService : IDemandService
         };
     }
 
+    private const int SummaryLength = 120;
+
+    private static string? BuildSummary(Demand d)
+    {
+        if (!string.IsNullOrWhiteSpace(d.PublicSummary)) return d.PublicSummary.Trim();
+        var flat = string.Join(' ', (d.Description ?? string.Empty).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        if (flat.Length == 0) return null;
+        return flat.Length > SummaryLength ? flat[..SummaryLength] + "…" : flat;
+    }
+
+    private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
     private static DemandResponse MapToResponse(Demand d, List<int> tagIds, List<string> tagNames) => new()
     {
         Id = d.Id,
         Number = d.Number,
         Name = d.Name,
         Introduction = d.Description,
+        Location = d.Location,
+        PublicSummary = d.PublicSummary,
+        Summary = BuildSummary(d),
+        AttachmentFileIds = d.AttachmentFileIds,
         CompanyId = d.CompanyId,
         CompanyName = d.Company?.Name,
         Published = d.Status == Status.Active,

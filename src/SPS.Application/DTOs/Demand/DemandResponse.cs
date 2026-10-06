@@ -5,7 +5,24 @@ public class DemandResponse
     public int Id { get; set; }
     public string Number { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
+    /// <summary>完整內容；匿名與非企業會員呼叫時為 null（<see cref="ContentLocked"/> = true）</summary>
     public string? Introduction { get; set; }
+    public string? Location { get; set; }
+
+    /// <summary>公開摘要（後台輸入）；沒填時前台用 <see cref="Summary"/></summary>
+    public string? PublicSummary { get; set; }
+
+    /// <summary>給所有訪客看的摘要：有填公開摘要就用，沒填就取完整內容開頭</summary>
+    public string? Summary { get; set; }
+
+    /// <summary>true = 呼叫者沒有權限看完整內容與附件（要登入企業會員）</summary>
+    public bool ContentLocked { get; set; }
+
+    /// <summary>附件的檔案 Id（只有後台使用者會拿到，編輯表單用）</summary>
+    public List<Guid> AttachmentFileIds { get; set; } = new();
+
+    /// <summary>附件下載資訊（只在詳情回傳，且只有企業會員與後台看得到）</summary>
+    public List<DemandAttachmentDto> Attachments { get; set; } = new();
     public Guid? CompanyId { get; set; }
     public string? CompanyName { get; set; }
     public bool Published { get; set; }
@@ -32,10 +49,21 @@ public class SetDemandTagsRequest
     public List<int> TagIds { get; set; } = new();
 }
 
+public class DemandAttachmentDto
+{
+    public Guid FileId { get; set; }
+    public string FileName { get; set; } = string.Empty;
+    public string FormattedFileSize { get; set; } = string.Empty;
+    public string Url { get; set; } = string.Empty;
+}
+
 public class CreateDemandRequest
 {
     public string Name { get; set; } = string.Empty;
     public string? Introduction { get; set; }
+    public string? Location { get; set; }
+    public string? PublicSummary { get; set; }
+    public List<Guid>? AttachmentFileIds { get; set; }
     public Guid? CompanyId { get; set; }
     public bool Published { get; set; }
 }
@@ -44,6 +72,13 @@ public class UpdateDemandRequest
 {
     public string? Name { get; set; }
     public string? Introduction { get; set; }
+
+    /// <summary>沒帶（null）= 不更新；空字串 = 清除</summary>
+    public string? Location { get; set; }
+    public string? PublicSummary { get; set; }
+
+    /// <summary>沒帶（null）= 不更新；空陣列 = 清除全部附件</summary>
+    public List<Guid>? AttachmentFileIds { get; set; }
     public bool? Published { get; set; }
 
     /// <summary>

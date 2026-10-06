@@ -50,6 +50,15 @@ export default function RelatedNeeds({ id, needs }: { id: string; needs: Matchin
                 </div>
 
                 <ul className="nav d-block">
+                  {need.location && (
+                    <li className="mb-2">
+                      <i className="bi bi-geo-alt me-1" />
+                      <span>
+                        <b>地點 : </b>
+                        {need.location}
+                      </span>
+                    </li>
+                  )}
                   <li className="mb-2">
                     <i className="bi bi-calendar4-week me-1" />
                     <span>

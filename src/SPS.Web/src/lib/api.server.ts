@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import {
     BannerItem,
     SearchResult,
@@ -441,11 +441,19 @@ export async function fetchDemands(options?: { search?: string }): Promise<{ ite
     }
 }
 
-/** 取得單筆媒合需求；未發布或不存在回 null */
+/**
+ * 取得單筆媒合需求；未發布或不存在回 null。完整內容與附件只有登入的企業會員看得到，
+ * Server Component 打後端時瀏覽器的 cookie 不會自動帶，所以要把會員的 `accessToken` 手動轉傳。
+ */
 export async function fetchDemandDetail(id: string): Promise<DemandItem | null> {
     try {
-        const response = await apiClient.get<DemandItem>(`/api/Demand/${id}`);
-        return response.data.published ? response.data : null;
+        const token = (await cookies()).get("accessToken");
+        const response = await apiClient.get<DemandItem>(`/api/Demand/${id}`, {
+            headers: token ? { Cookie: `${token.name}=${token.value}` } : undefined,
+        });
+        const demand = response.data;
+        if (!demand.published) return null;
+        return { ...demand, attachments: (demand.attachments ?? []).map((a) => ({ ...a, url: resolveBackendAssetUrl(a.url) ?? a.url })) };
     } catch {
         return null;
     }
