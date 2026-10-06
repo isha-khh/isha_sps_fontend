@@ -263,7 +263,7 @@ public class MemberProfileService : IMemberProfileService
     /// </summary>
     public async Task<Result<CompanyResponse>> UpdateCompanyAsync(
         Guid memberId,
-        UpdateCompanyRequest request,
+        MemberUpdateCompanyRequest request,
         CancellationToken cancellationToken = default)
     {
         var member = await _unitOfWork.Members.GetByIdAsync(memberId, cancellationToken);
@@ -283,55 +283,60 @@ public class MemberProfileService : IMemberProfileService
             return Result<CompanyResponse>.Failure("公司不存在");
         }
 
-        // 更新公司資料
-        if (request.Name != null) company.Name = request.Name;
-        if (request.EnglishName != null) company.EnglishName = request.EnglishName;
-        if (request.Phone != null) company.Phone = request.Phone;
-        if (request.Fax != null) company.Fax = request.Fax;
-        if (request.Type.HasValue) company.Type = request.Type.Value;
+        static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+        // 只有 MemberUpdateCompanyRequest 列出的欄位會員可以改；公司名稱、統編、類型、等級、狀態、審核狀態、內部備註只有後台能改
+        if (request.EnglishName != null) company.EnglishName = Clean(request.EnglishName);
+        if (request.Phone != null) company.Phone = Clean(request.Phone);
+        if (request.Fax != null) company.Fax = Clean(request.Fax);
         if (request.Revenue.HasValue) company.Revenue = request.Revenue;
         if (request.Employees.HasValue) company.Employees = request.Employees;
-        if (request.Subject != null) company.Subject = request.Subject;
-        if (request.Introduction != null) company.Introduction = request.Introduction;
-        if (request.IntroductionEnglish != null) company.IntroductionEnglish = request.IntroductionEnglish;
-        if (request.OrgUrl != null) company.OrgUrl = request.OrgUrl;
-        if (request.VideoUrl != null) company.VideoUrl = request.VideoUrl;
-        if (request.Charge != null) company.Charge = request.Charge;
-        if (request.ChargeEmail != null) company.ChargeEmail = request.ChargeEmail;
-        if (request.ChargePhone != null) company.ChargePhone = request.ChargePhone;
-        if (request.ChargeMobile != null) company.ChargeMobile = request.ChargeMobile;
-        if (request.ChargeJobTitle != null) company.ChargeJobTitle = request.ChargeJobTitle;
-        if (request.EstablishmentDate != null) company.EstablishmentDate = request.EstablishmentDate;
-        if (request.Remark != null) company.Remark = request.Remark;
-        if (request.PhotoId.HasValue) company.PhotoId = request.PhotoId;
-        if (request.BannerId.HasValue) company.BannerId = request.BannerId;
+        if (request.Subject != null) company.Subject = Clean(request.Subject);
+        if (request.Introduction != null) company.Introduction = Clean(request.Introduction);
+        if (request.IntroductionEnglish != null) company.IntroductionEnglish = Clean(request.IntroductionEnglish);
+        if (request.OrgUrl != null) company.OrgUrl = Clean(request.OrgUrl);
+        if (request.VideoUrl != null) company.VideoUrl = Clean(request.VideoUrl);
+        if (request.EstablishmentDate != null) company.EstablishmentDate = Clean(request.EstablishmentDate);
+        if (request.Charge != null) company.Charge = Clean(request.Charge);
+        if (request.ChargeEmail != null) company.ChargeEmail = Clean(request.ChargeEmail);
+        if (request.ChargePhone != null) company.ChargePhone = Clean(request.ChargePhone);
+        if (request.ChargeMobile != null) company.ChargeMobile = Clean(request.ChargeMobile);
+        if (request.ChargeJobTitle != null) company.ChargeJobTitle = Clean(request.ChargeJobTitle);
+        if (request.CooperationNote != null) company.CooperationNote = Clean(request.CooperationNote);
+        if (request.FactoryName != null) company.FactoryName = Clean(request.FactoryName);
+        if (request.FactoryAddress != null) company.FactoryAddress = Clean(request.FactoryAddress);
+        if (request.ProductImageFileIds != null) company.ProductImageFileIds = request.ProductImageFileIds.Distinct().ToList();
+        if (request.AwardImageFileIds != null) company.AwardImageFileIds = request.AwardImageFileIds.Distinct().ToList();
 
-        // 更新地址
+        // LOGO：上傳後的圖片檔案建立成公司的圖片紀錄
+        if (request.RemoveLogo)
+        {
+            company.PhotoId = null;
+            company.Photo = null;
+        }
+        else if (request.LogoFileId.HasValue)
+        {
+            company.Photo = new Domain.Entities.Picture
+            {
+                Name = "公司 LOGO",
+                Type = 0,
+                Uri = $"/api/FileManagement/{request.LogoFileId.Value}/download",
+                Published = true,
+                CreatedTime = DateTime.UtcNow
+            };
+        }
+
+        // 更新地址（整份取代）
         if (request.Address != null)
         {
-            if (company.Address == null)
-            {
-                company.Address = new Domain.Entities.Address
-                {
-                    Type = request.Address.Type,
-                    PostalCode = request.Address.PostalCode,
-                    Region = request.Address.Region,
-                    City = request.Address.City,
-                    District = request.Address.District,
-                    Line = request.Address.Line,
-                    Description = request.Address.Description
-                };
-            }
-            else
-            {
-                company.Address.Type = request.Address.Type;
-                company.Address.PostalCode = request.Address.PostalCode;
-                company.Address.Region = request.Address.Region;
-                company.Address.City = request.Address.City;
-                company.Address.District = request.Address.District;
-                company.Address.Line = request.Address.Line;
-                company.Address.Description = request.Address.Description;
-            }
+            company.Address ??= new Domain.Entities.Address();
+            company.Address.Type = request.Address.Type;
+            company.Address.PostalCode = request.Address.PostalCode;
+            company.Address.Region = request.Address.Region;
+            company.Address.City = request.Address.City;
+            company.Address.District = request.Address.District;
+            company.Address.Line = request.Address.Line;
+            company.Address.Description = request.Address.Description;
         }
 
         company.UpdatedTime = DateTime.UtcNow;
@@ -636,7 +641,12 @@ public class MemberProfileService : IMemberProfileService
             ChargeMobile = company.ChargeMobile,
             ChargeJobTitle = company.ChargeJobTitle,
             EstablishmentDate = company.EstablishmentDate,
-            Remark = company.Remark,
+            CooperationNote = company.CooperationNote,
+            FactoryName = company.FactoryName,
+            FactoryAddress = company.FactoryAddress,
+            ProductImageFileIds = company.ProductImageFileIds,
+            AwardImageFileIds = company.AwardImageFileIds,
+            Remark = null, // 內部備註不給會員看
             Status = company.Status,
             IsVerified = company.IsVerified,
             VerifiedAt = company.VerifiedAt,

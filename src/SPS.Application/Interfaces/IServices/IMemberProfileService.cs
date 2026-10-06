@@ -43,7 +43,7 @@ public interface IMemberProfileService
     /// <summary>
     /// 更新公司資料（需 EditCompany 權限）
     /// </summary>
-    Task<Result<CompanyResponse>> UpdateCompanyAsync(Guid memberId, UpdateCompanyRequest request, CancellationToken cancellationToken = default);
+    Task<Result<CompanyResponse>> UpdateCompanyAsync(Guid memberId, MemberUpdateCompanyRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 取得公司成員列表（需 EditCompany 權限）

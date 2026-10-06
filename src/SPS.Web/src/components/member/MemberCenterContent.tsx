@@ -8,6 +8,8 @@ import { authApi } from "@/lib/api/auth";
 import MemberCenterNav, { MEMBER_CENTER_NAV_GROUPS, type MemberCenterSection } from "@/components/member/MemberCenterNav";
 import ProfilePanel from "@/components/member/panels/ProfilePanel";
 import UpgradePanel from "@/components/member/panels/UpgradePanel";
+import CompanyPanel from "@/components/member/panels/CompanyPanel";
+import ProductPanel from "@/components/member/panels/ProductPanel";
 
 /**
  * 積木元件：會員中心（`/member`）主要內容——這是全新頁面，舊站
@@ -90,6 +92,10 @@ export default function MemberCenterContent() {
             <ProfilePanel />
           ) : active === "upgrade" ? (
             <UpgradePanel />
+          ) : active === "company" ? (
+            <CompanyPanel />
+          ) : active === "product" ? (
+            <ProductPanel />
           ) : (
             <p className="text-muted">
               <i className="bi bi-info-circle-fill me-1" aria-hidden="true"></i>
