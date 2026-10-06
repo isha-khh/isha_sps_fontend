@@ -9,6 +9,8 @@ import {
     PromotionCaseDetail,
     PagedResult,
     CompanyList,
+    DemandItem,
+    PublicCompanyDetail,
     VideoItem,
     FooterLinks,
     ContributePage,
@@ -310,10 +312,10 @@ export async function fetchPromotionCaseDetail(id: string): Promise<PromotionCas
  * `status`（`Status` enum）不是 Active(1) 的企業（停權/鎖定/待審/
  * 婉拒），避免刊登已停用的企業。
  */
-async function tryBackendCompanies(): Promise<CompanyList[] | null> {
+async function tryBackendCompanies(search?: string): Promise<CompanyList[] | null> {
     try {
         const response = await apiClient.get<PagedResult<CompanyList>>(
-            "/api/Company", { params: { page: 1, pageSize: 100 } }
+            "/api/Company", { params: { page: 1, pageSize: 100, search: search || undefined } }
         );
         const visible = response.data.items?.filter((c) => c.isVerified && c.status === 1) ?? [];
         // photo 是相對於後端 API 的路徑，要轉成完整網址瀏覽器才載得到，
@@ -327,9 +329,70 @@ async function tryBackendCompanies(): Promise<CompanyList[] | null> {
 /**
  * 取得企業刊登列表，`backendAvailable` 語意同 `fetchNews`。
  */
-export async function fetchCompanies(): Promise<{ items: CompanyList[]; backendAvailable: boolean }> {
-    const backendItems = await tryBackendCompanies();
+export async function fetchCompanies(options?: { search?: string }): Promise<{ items: CompanyList[]; backendAvailable: boolean }> {
+    const backendItems = await tryBackendCompanies(options?.search);
     return { items: backendItems ?? [], backendAvailable: backendItems !== null };
+}
+
+/**
+ * 取得單一企業的公開詳情（`GET /api/Company/{id}`）。沒審核通過／已停用的企業後端會回 404，
+ * 這裡回 null（呼叫端轉成 404 頁）。負責人、窗口等內部欄位後端對匿名呼叫已清掉。
+ */
+export async function fetchCompanyDetail(id: string): Promise<PublicCompanyDetail | null> {
+    try {
+        const response = await apiClient.get<{
+            id: string; number: string; name: string; unifiedSocialCreditCode: string; phone?: string | null;
+            type: number; employees?: number | null; subject?: string | null; introduction?: string | null;
+            orgUrl?: string | null; establishmentDate?: string | null; charge?: string | null; chargePhone?: string | null;
+            address?: { region?: string | null; city?: string | null; district?: string | null; line?: string | null } | null;
+            photo?: { uri?: string | null } | null;
+        }>(`/api/Company/${id}`);
+        const c = response.data;
+        let tagNames: string[] = [];
+        try {
+            const tags = await apiClient.get<{ tagNames?: string[] }>(`/api/Company/${id}/tags`);
+            tagNames = tags.data.tagNames ?? [];
+        } catch {
+            // 標籤載不到不影響詳情頁
+        }
+        const address = [c.address?.region, c.address?.city, c.address?.district, c.address?.line].filter(Boolean).join("");
+        return {
+            id: c.id, number: c.number, name: c.name, unifiedSocialCreditCode: c.unifiedSocialCreditCode, phone: c.phone,
+            type: c.type, employees: c.employees, subject: c.subject, introduction: c.introduction, orgUrl: c.orgUrl,
+            establishmentDate: c.establishmentDate, charge: c.charge, chargePhone: c.chargePhone,
+            photoUrl: resolveBackendAssetUrl(c.photo?.uri),
+            address: address || undefined,
+            tagNames,
+        };
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * 取得已發布的媒合需求（後台「需求張貼管理」維護，`GET /api/Demand`，後端對匿名呼叫只回已發布、
+ * 並清掉刊登企業的身分）。`backendAvailable` 語意同 `fetchNews`。
+ */
+export async function fetchDemands(options?: { search?: string }): Promise<{ items: DemandItem[]; backendAvailable: boolean }> {
+    try {
+        const response = await apiClient.get<PagedResult<DemandItem>>(
+            "/api/Demand", { params: { page: 1, pageSize: 100, search: options?.search || undefined } }
+        );
+        const items = (response.data.items ?? []).filter((d) => d.published);
+        return { items, backendAvailable: true };
+    } catch {
+        return { items: [], backendAvailable: false };
+    }
+}
+
+/** 取得單筆媒合需求；未發布或不存在回 null */
+export async function fetchDemandDetail(id: string): Promise<DemandItem | null> {
+    try {
+        const response = await apiClient.get<DemandItem>(`/api/Demand/${id}`);
+        return response.data.published ? response.data : null;
+    } catch {
+        return null;
+    }
 }
 
 /**

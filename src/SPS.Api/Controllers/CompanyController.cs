@@ -44,6 +44,13 @@ public class CompanyController : ControllerBase
     {
         _logger.LogInformation("Getting paged companies");
 
+        // 匿名可呼叫的公開名錄：只回已審核通過且狀態為啟用的企業，其他（待審、停權、鎖定…）只有後台看得到
+        if (!User.IsInRole("Admin"))
+        {
+            parameters.IsVerified = true;
+            parameters.Status = Status.Active;
+        }
+
         var result = await _companyService.GetPagedAsync(parameters, cancellationToken);
 
         if (!result.IsSuccess)
@@ -77,6 +84,12 @@ public class CompanyController : ControllerBase
             return NotFound(new { error = result.Error });
         }
 
+        // 還沒審核通過或已停用的企業，對非後台使用者視同不存在（不洩漏存在與否）
+        if (!IsPubliclyVisible(result.Data!))
+        {
+            return NotFound(new { error = "企業不存在" });
+        }
+
         return Ok(HideInternalFields(result.Data!));
     }
 
@@ -101,6 +114,11 @@ public class CompanyController : ControllerBase
         if (!result.IsSuccess)
         {
             return NotFound(new { error = result.Error });
+        }
+
+        if (!IsPubliclyVisible(result.Data!))
+        {
+            return NotFound(new { error = "企業不存在" });
         }
 
         return Ok(HideInternalFields(result.Data!));
@@ -314,6 +332,10 @@ public class CompanyController : ControllerBase
     /// 負責人姓名／信箱／電話／手機、窗口名單、內部備註、營收、驗證時間都不該給匿名者或一般會員。
     /// 非後台使用者（Admin 角色）一律清掉這些欄位；後台照舊回完整資料。
     /// </summary>
+    /// <summary>後台使用者看得到全部；其他人只看得到已審核通過且啟用的企業</summary>
+    private bool IsPubliclyVisible(CompanyResponse company) =>
+        User.IsInRole("Admin") || (company.IsVerified && company.Status == Status.Active);
+
     private CompanyResponse HideInternalFields(CompanyResponse company)
     {
         if (User.IsInRole("Admin"))

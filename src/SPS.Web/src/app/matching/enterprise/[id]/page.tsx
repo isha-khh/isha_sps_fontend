@@ -3,52 +3,67 @@ import { notFound } from "next/navigation";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MoreLink from "@/components/ui/MoreLink";
-import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
-import EnterpriseContactModal from "@/components/matching/EnterpriseContactModal";
-import { ENTERPRISE_DETAILS, TECH_ATTRIBUTE_GROUPS, getCompanyTypeLabels, getEnterpriseDetail } from "@/lib/matching-data";
+import { getCompanyTypeLabels } from "@/lib/matching-data";
+import { fetchCompanyDetail } from "@/lib/api.server";
 import { withBasePath } from "@/lib/api-client";
-
-export function generateStaticParams() {
-  return ENTERPRISE_DETAILS.map((item) => ({ id: item.id }));
-}
-
-// 說明見 news/[id]/page.tsx 同一行的註解：現在是固定假資料，不在名單裡
-// 的 id 直接在路由層級當 404。
-export const dynamicParams = false;
 
 export async function generateMetadata({ params }: PageProps<"/matching/enterprise/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const item = getEnterpriseDetail(id);
-  return { title: item?.name ?? "找不到頁面" };
+  const company = await fetchCompanyDetail(id);
+  return { title: company?.name ?? "找不到頁面" };
 }
 
 /**
- * 企業名錄詳情頁，對應設計稿 `page/matching/show.html`。目前純畫面
- * （假資料），見 `../page.tsx` 開頭的說明。
+ * 企業名錄詳情頁，對應設計稿 `page/matching/show.html`。資料來自後台「公司管理」已審核通過且啟用的企業
+ * （`fetchCompanyDetail`，2026-10-06 從假資料改接真後端）。
  *
- * 沒有 `sidebar`／`aside`：設計稿這頁 `side1` 內容是空的（子選單
- * `.side1_serve` 的載入呼叫本身就被註解掉），`side2` 直接是
- * `d-none`，兩邊都不顯示裝飾用的側欄，`.content` 自動撐滿（跟
- * `/promotion/contribute` 同樣的處理）。
+ * 設計稿有、但後端目前沒有對應欄位的區塊——主要產品暨服務的示意圖、應用情境／應用範疇／智慧技術、
+ * 獲獎事蹟暨合作案例——前台不顯示，等後端補上欄位再接。負責人姓名與資本總額（營收）後端對匿名呼叫
+ * 一律不給（個資），所以「公司負責人」「資本總額」只有後端有給時才顯示；
+ * 設計稿的「聯繫窗口」（勾選後展開聯絡人）會把聯絡人放進網頁原始碼、等於公開，所以改成顯示公司電話；
+ * 之後要做「會員登入後才看得到聯絡窗口」得另外做會員專用的端點。
  *
- * 「智慧技術」這塊設計稿原始碼裡項目是 `<a>` 標籤（`ul.nav.ul-key`），
- * 不是核取方塊——照字面判讀，這裡是給使用者瀏覽/導覽完整技術分類用
- * 的清單，不是「這家公司勾選了哪些」的呈現方式（那樣的話應該只列出
- * 該公司有的項目，不會把所有選項都印出來）。`EnterpriseDetail.
- * selectedTechValues` 這個假資料欄位目前沒有實際用在畫面上，先留著
- * 是因為之後如果客戶回饋這裡其實應該「只顯示該公司有的技術」，資料
- * 形狀已經準備好，不用重新設計。
+ * 沒有 `sidebar`／`aside`：設計稿這頁兩側都是空的，`.content` 自動撐滿。
  */
 export default async function MatchingEnterpriseDetailPage({ params }: PageProps<"/matching/enterprise/[id]">) {
   const { id } = await params;
-  const company = getEnterpriseDetail(id);
+  const company = await fetchCompanyDetail(id);
 
   if (!company) {
     notFound();
   }
 
-  const modalId = `enterprise-contact-${company.id}`;
   const typeLabels = getCompanyTypeLabels(company.type);
+  const phoneDial = company.phone ? company.phone.split("#")[0].replace(/[^0-9+]/g, "") : "";
+
+  // 六格資訊：沒有資料的格子整格不顯示
+  const facts: { icon: string; label: string; content: React.ReactNode }[] = [];
+  if (company.charge) facts.push({ icon: "bi-person-circle", label: "公司負責人", content: <span>{company.charge}</span> });
+  if (company.establishmentDate) facts.push({ icon: "bi-calendar4-week", label: "成立日期", content: <span>{company.establishmentDate.slice(0, 10)}</span> });
+  facts.push({ icon: "bi-person-vcard", label: "統一編號", content: <span>{company.unifiedSocialCreditCode}</span> });
+  if (company.employees) facts.push({ icon: "bi-people", label: "員工人數", content: <span>{company.employees.toLocaleString()}人</span> });
+  if (company.phone) {
+    facts.push({
+      icon: "bi-telephone",
+      label: "公司電話",
+      content: (
+        <a href={`tel:${phoneDial}`} title={`撥打電話至 ${company.phone}`} className="blue">
+          {company.phone}
+        </a>
+      ),
+    });
+  }
+  facts.push({
+    icon: "bi-globe",
+    label: "公司網址",
+    content: company.orgUrl ? (
+      <a href={company.orgUrl} title={`${company.orgUrl}（另開視窗）`} className="blue" target="_blank" rel="noopener noreferrer">
+        {company.orgUrl.replace(/^https?:\/\//, "")}
+      </a>
+    ) : (
+      <span>未提供</span>
+    ),
+  });
 
   return (
     <>
@@ -58,7 +73,7 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
           <div className="item_box d-flex mb-4">
             <div className="pic">
               <div className="ratio ratio-4x3">
-                <img className="img-fluid d-block" src={company.photo || withBasePath("/images/all/new_logo.jpg")} alt={`${company.name} 公司標誌`} />
+                <img className="img-fluid d-block" src={company.photoUrl || withBasePath("/images/all/new_logo.jpg")} alt={`${company.name} 公司標誌`} />
               </div>
             </div>
 
@@ -82,178 +97,67 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
           </div>
 
           <div className="item_box_six d-flex">
-            <div className="item_box_six_1">
-              <div className="pic">
-                <i className="bi bi-person-circle"></i>
-              </div>
-              <div className="tit">
-                <div className="tit_dt">
-                  <label>公司負責人</label>
-                  <span>{company.charge}</span>
+            {facts.map((fact) => (
+              <div className="item_box_six_1" key={fact.label}>
+                <div className="pic">
+                  <i className={`bi ${fact.icon}`}></i>
                 </div>
-              </div>
-            </div>
-
-            <div className="item_box_six_1">
-              <div className="pic">
-                <i className="bi bi-calendar4-week"></i>
-              </div>
-              <div className="tit">
-                <div className="tit_dt">
-                  <label>成立日期</label>
-                  <span>{company.establishmentDate}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="item_box_six_1">
-              <div className="pic">
-                <i className="bi bi-person-vcard"></i>
-              </div>
-              <div className="tit">
-                <div className="tit_dt">
-                  <label>統一編號</label>
-                  <span>{company.unifiedSocialCreditCode}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="item_box_six_1">
-              <div className="pic">
-                <i className="bi bi-coin"></i>
-              </div>
-              <div className="tit">
-                <div className="tit_dt">
-                  <label>資本總額</label>
-                  <span>{company.revenue.toLocaleString()}元</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="item_box_six_1">
-              <div className="pic">
-                <i className="bi bi-envelope-at"></i>
-              </div>
-              <div className="tit">
-                <div className="tit_dt">
-                  <label>聯繫窗口</label>
-                  <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target={`#${modalId}`} className="connec_s" title="取得聯絡方式">
-                    取得聯絡方式
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div className="item_box_six_1">
-              <div className="pic">
-                <i className="bi bi-globe"></i>
-              </div>
-              <div className="tit">
-                <div className="tit_dt">
-                  <label>公司網址</label>
-                  {company.orgUrl ? (
-                    <a href={company.orgUrl} title={`${company.orgUrl}（另開視窗）`} className="blue" target="_blank" rel="noopener noreferrer">
-                      {company.orgUrl.replace(/^https?:\/\//, "")}
-                    </a>
-                  ) : (
-                    <span>未提供</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="item_box_two d-flex">
-          <div className="item_box_two_1">
-            <div className="dow-name">
-              <i className="bi bi-buildings"></i>
-              <span>公司簡介</span>
-            </div>
-            <div className="txt editor">{company.introduction}</div>
-          </div>
-
-          <div className="item_box_two_1">
-            <div className="dow-name">
-              <i className="bi bi-file-earmark-text"></i>
-              <span>主要產品暨服務</span>
-            </div>
-
-            <p>{company.subject}</p>
-
-            <div className="mat_prod_box d-flex mb-4">
-              {company.products.map((product, index) => (
-                <div className="pic" key={index}>
-                  <div className="ratio ratio-4x3">
-                    <img className="img-fluid d-block" src={product.image} alt={`${company.name} 產品或服務示意圖`} />
+                <div className="tit">
+                  <div className="tit_dt">
+                    <label>{fact.label}</label>
+                    {fact.content}
                   </div>
-                </div>
-              ))}
-            </div>
-
-            <h5 className="mb-3">
-              <i className="bi bi-caret-right-fill me-1 blue"></i>應用情境
-            </h5>
-            <ul className="nav ul-key mb-4">
-              {company.applicationScenarios.map((scenario) => (
-                <li key={scenario}>
-                  <a href="#" title={scenario}>
-                    {scenario}
-                  </a>
-                </li>
-              ))}
-            </ul>
-
-            <h5 className="mb-3">
-              <i className="bi bi-caret-right-fill me-1 blue"></i>應用範疇
-            </h5>
-            <ul className="nav ul-key mb-4">
-              {company.applicationScopes.map((scope) => (
-                <li key={scope}>
-                  <a href="#" title={scope}>
-                    {scope}
-                  </a>
-                </li>
-              ))}
-            </ul>
-
-            <h5 className="mb-3">
-              <i className="bi bi-caret-right-fill me-1 blue"></i>智慧技術
-            </h5>
-            <div className="menb_inp_tit form-group w-100">
-              <TechAttributeSelector groups={TECH_ATTRIBUTE_GROUPS} name={`detail-${company.id}`} variant="tags" />
-            </div>
-          </div>
-        </div>
-
-        <div className="item_box_two_1">
-          <div className="dow-name">
-            <i className="bi bi-award"></i>
-            <span>獲獎事蹟暨重要合作案例</span>
-          </div>
-
-          <p>{company.cooperationNote}</p>
-
-          <div className="mat_Award_box d-flex mb-4">
-            {company.awards.map((award, index) => (
-              <div className="pic" key={index}>
-                <div className="ratio ratio-4x3">
-                  <img className="img-fluid d-block" src={award.image} alt={`${company.name} 獲獎或合作案例示意圖`} />
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          <div className="mat_cooperate_box">
-            <h5 className="blue">合作案例</h5>
-            <p>{company.cooperationNote}</p>
-          </div>
+        <div className="item_box_two d-flex">
+          {company.introduction && (
+            <div className="item_box_two_1">
+              <div className="dow-name">
+                <i className="bi bi-buildings"></i>
+                <span>公司簡介</span>
+              </div>
+              {/* 後台輸入的純文字，不當 HTML 輸出；換行分段 */}
+              <div className="txt editor">
+                {company.introduction
+                  .split(/\n+/)
+                  .filter(Boolean)
+                  .map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {(company.subject || company.tagNames.length > 0) && (
+            <div className="item_box_two_1">
+              <div className="dow-name">
+                <i className="bi bi-file-earmark-text"></i>
+                <span>主要產品暨服務</span>
+              </div>
+
+              {company.subject && <p>{company.subject}</p>}
+
+              {company.tagNames.length > 0 && (
+                <ul className="nav ul-key mb-4">
+                  {company.tagNames.map((tag) => (
+                    <li key={tag}>
+                      <a href="#" title={tag}>
+                        {tag}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
 
         <MoreLink href="/matching/enterprise" label="返回" title="返回" />
       </InnerPageShell>
-
-      <EnterpriseContactModal id={modalId} contactName={company.charge ?? ""} contactPhone={company.chargePhone ?? ""} />
     </>
   );
 }

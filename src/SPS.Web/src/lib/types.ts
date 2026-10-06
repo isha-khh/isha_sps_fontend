@@ -283,6 +283,41 @@ export type CompanyList = {
     createdTime: string;
 }
 
+/** 對到真後端 `DemandResponse`（`GET /api/Demand`）；匿名呼叫時 `companyId`／`companyName` 已被後端清掉 */
+export type DemandItem = {
+    id: number;
+    number: string;
+    name: string;
+    introduction?: string | null;
+    published: boolean;
+    createdTime: string;
+    tagIds: number[];
+    tagNames: string[];
+};
+
+/**
+ * 對到真後端 `CompanyResponse`（`GET /api/Company/{id}`）的公開版：匿名呼叫時負責人、窗口、營收、備註
+ * 都已被後端清成 null，沒有的欄位前台不顯示。`tagNames` 另外由 `/api/Company/{id}/tags` 補進來。
+ */
+export type PublicCompanyDetail = {
+    id: string;
+    number: string;
+    name: string;
+    unifiedSocialCreditCode: string;
+    phone?: string | null;
+    type: number;
+    employees?: number | null;
+    subject?: string | null;
+    introduction?: string | null;
+    orgUrl?: string | null;
+    establishmentDate?: string | null;
+    charge?: string | null;
+    chargePhone?: string | null;
+    photoUrl?: string;
+    address?: string;
+    tagNames: string[];
+};
+
 export type CompanyRequest = {
     unifiedSocialCreditCode: string;
 };

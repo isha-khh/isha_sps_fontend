@@ -3,27 +3,17 @@ import { notFound } from "next/navigation";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MoreLink from "@/components/ui/MoreLink";
-import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import RelatedNeeds from "@/components/matching/RelatedNeeds";
 import ProposeSolutionModal from "@/components/matching/ProposeSolutionModal";
-import { MATCHING_NEEDS, getMatchingNeed } from "@/lib/matching-need-data";
+import { demandToNeed } from "@/lib/matching-need-data";
 import { withBasePath } from "@/lib/api-client";
-import { fetchBanners } from "@/lib/api.server";
-
-// 說明見 talent/[id]/page.tsx 同一份假資料的註解
-export function generateStaticParams() {
-  return MATCHING_NEEDS.map((need) => ({ id: need.id }));
-}
-
-// 說明見 news/[id]/page.tsx 同一行的註解：現在是固定假資料，不在名單
-// 裡的 id 直接在路由層級當 404。
-export const dynamicParams = false;
+import { fetchBanners, fetchDemandDetail, fetchDemands } from "@/lib/api.server";
 
 export async function generateMetadata({ params }: PageProps<"/matching/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const need = getMatchingNeed(id);
-  return { title: need?.title ?? "找不到頁面" };
+  const demand = await fetchDemandDetail(id);
+  return { title: demand?.name ?? "找不到頁面" };
 }
 
 /**
@@ -37,13 +27,18 @@ export async function generateMetadata({ params }: PageProps<"/matching/[id]">):
 export default async function MatchingNeedDetailPage({ params }: PageProps<"/matching/[id]">) {
   const sidebarBanners = await fetchBanners("sidebar-matching");
   const { id } = await params;
-  const need = getMatchingNeed(id);
+  const demand = await fetchDemandDetail(id);
 
-  if (!need) {
+  if (!demand) {
     notFound();
   }
 
-  const relatedNeeds = MATCHING_NEEDS.filter((item) => item.id !== need.id);
+  const need = demandToNeed(demand);
+  const { items: allDemands } = await fetchDemands();
+  const relatedNeeds = allDemands
+    .filter((item) => item.id !== demand.id)
+    .slice(0, 6)
+    .map(demandToNeed);
   const modalId = `propose-solution-${need.id}`;
 
   return (
@@ -84,13 +79,6 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
 
               <ul className="nav mb-4">
                 <li className="mb-2">
-                  <i className="bi bi-geo-alt me-1" />
-                  <span>
-                    <b>地點 : </b>
-                    {need.location}
-                  </span>
-                </li>
-                <li className="mb-2">
                   <i className="bi bi-calendar4-week me-1" />
                   <span>
                     <b>發布日期 : </b>
@@ -118,19 +106,13 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
                 ))}
               </ul>
             )}
-
-            <div className="public_box mt-3">
-              <div className="h4 blue">
-                <span>公開摘要</span>
-              </div>
-              <div className="txt editor">{need.summary}</div>
-            </div>
           </div>
 
-          <div className="txt editor mb-md-5 mb-4" dangerouslySetInnerHTML={{ __html: need.bodyHtml }} />
-
-          <div className="dk_conbo mb-md-5 mb-4">
-            <AttachmentsPanel attachments={need.attachments} />
+          {/* 內文是後台輸入的純文字，不當 HTML 輸出（避免後台內容夾帶腳本）；換行分段 */}
+          <div className="txt editor mb-md-5 mb-4">
+            {need.body.split(/\n+/).filter(Boolean).map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
           </div>
 
           <div className="dk_conbo mb-md-5 mb-4">

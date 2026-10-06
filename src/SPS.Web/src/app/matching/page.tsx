@@ -8,9 +8,9 @@ import PublishNeedModal from "@/components/matching/PublishNeedModal";
 import SubscribeSolutionModal from "@/components/matching/SubscribeSolutionModal";
 import Pagination from "@/components/ui/Pagination";
 import SidebarBanner from "@/components/layout/SidebarBanner";
-import { MATCHING_NEEDS } from "@/lib/matching-need-data";
+import { demandToNeed } from "@/lib/matching-need-data";
 import { withBasePath } from "@/lib/api-client";
-import { fetchBanners } from "@/lib/api.server";
+import { fetchBanners, fetchDemands } from "@/lib/api.server";
 
 export const metadata: Metadata = {
   title: "媒合對接",
@@ -25,8 +25,8 @@ const NEED_PAGE_SIZE = 8;
  * 個子頁面，共用同一顆 `MatchingSubNav`／`MatchingSearchBar`，但列表
  * 項目版型完全不同（見 `NeedListItem.tsx` 的說明），另外開元件。
  *
- * 目前純畫面（假資料），分頁邏輯照抄 `/matching/enterprise` 的純前端
- * 假分頁做法，等接上真後端再一起處理。
+ * 資料來自後台「需求張貼管理」已發布的需求（`fetchDemands`），2026-10-06 從假資料改接真後端；
+ * 關鍵字搜尋（`?q=`）交給後端比對，分頁照抄 `/matching/enterprise` 的前端分頁做法。
  *
  * `.searchma_tching` 搜尋列放在 `topBar`，不是 `children`——對照設計稿
  * 原始 HTML，這塊跟 `.side1`／`.content`／`.side2` 是同一層的手足
@@ -37,12 +37,16 @@ const NEED_PAGE_SIZE = 8;
  */
 export default async function MatchingPage({ searchParams }: PageProps<"/matching">) {
   const sidebarBanners = await fetchBanners("sidebar-matching");
-  const { page: rawPage } = await searchParams;
+  const { page: rawPage, q: rawQuery } = await searchParams;
+  const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
 
-  const totalPages = Math.max(1, Math.ceil(MATCHING_NEEDS.length / NEED_PAGE_SIZE));
+  const { items: demands } = await fetchDemands({ search: query });
+  const needs = demands.map(demandToNeed);
+
+  const totalPages = Math.max(1, Math.ceil(needs.length / NEED_PAGE_SIZE));
   const requestedPage = typeof rawPage === "string" ? Number(rawPage) : 1;
   const currentPage = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.min(requestedPage, totalPages) : 1;
-  const pagedNeeds = MATCHING_NEEDS.slice((currentPage - 1) * NEED_PAGE_SIZE, currentPage * NEED_PAGE_SIZE);
+  const pagedNeeds = needs.slice((currentPage - 1) * NEED_PAGE_SIZE, currentPage * NEED_PAGE_SIZE);
 
   return (
     <>
@@ -56,7 +60,7 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
         breadcrumb={[{ label: "媒合對接" }]}
         topBar={
           <div className="searchma_tching mb-5">
-            <MatchingSearchBar />
+            <MatchingSearchBar defaultKeyword={query} />
           </div>
         }
         aside={
@@ -89,13 +93,20 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
         }
       >
         <div className="column_box">
-          {pagedNeeds.length === 0 && <p>目前沒有符合的需求。</p>}
+          {pagedNeeds.length === 0 && <p>{query ? "沒有符合的需求。" : "目前沒有刊登中的需求。"}</p>}
           {pagedNeeds.map((need) => (
             <NeedListItem key={need.id} need={need} />
           ))}
         </div>
 
-        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(page) => (page > 1 ? `/matching?page=${page}` : "/matching")} />
+        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(page) => {
+            const params = new URLSearchParams();
+            if (query) params.set("q", query);
+            if (page > 1) params.set("page", String(page));
+            const qs = params.toString();
+            return qs ? `/matching?${qs}` : "/matching";
+          }}
+        />
       </InnerPageShell>
     </>
   );

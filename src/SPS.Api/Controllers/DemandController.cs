@@ -50,6 +50,12 @@ public class DemandController : ControllerBase
         }
 
         var r = await _demandService.GetPagedAsync(p, ct);
+        if (r.IsSuccess && !User.IsInRole("Admin"))
+        {
+            // 前台需求列表不公開刊登需求的企業身分（「企業會員可見完整內容」）
+            foreach (var item in r.Data!.Items) HideCompany(item);
+        }
+
         return r.IsSuccess ? Ok(r.Data) : BadRequest(new { error = r.Error });
     }
 
@@ -74,7 +80,15 @@ public class DemandController : ControllerBase
             return NotFound(new { error = "資料不存在" });
         }
 
+        if (r.IsSuccess && !User.IsInRole("Admin")) HideCompany(r.Data!);
+
         return r.IsSuccess ? Ok(r.Data) : NotFound(new { error = r.Error });
+    }
+
+    private static void HideCompany(DemandResponse demand)
+    {
+        demand.CompanyId = null;
+        demand.CompanyName = null;
     }
 
     /// <summary>

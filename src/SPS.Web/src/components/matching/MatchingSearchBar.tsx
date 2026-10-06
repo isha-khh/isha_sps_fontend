@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
 import { APPLICATION_SCENARIOS, APPLICATION_SCOPES, TECH_ATTRIBUTE_GROUPS } from "@/lib/matching-data";
 
@@ -17,12 +18,20 @@ type PanelId = "scenario" | "scope" | "tech";
  * jQuery 插件搶控制權的情況，直接用這個專案比較新的元件（如
  * MarqueeTrack）偏好的寫法，不用另外掛 jQuery 事件代理。
  *
- * 查詢按鈕跟 checkbox 目前都只是畫面互動，沒有接任何篩選/送出邏輯
- * ——跟 `DownloadRequestForm` 一樣，先把畫面做出來，真的要接資料時
- * 再處理「查詢」要怎麼把這些勾選狀態送出去（回傳網址 query string，
- * 還是純前端篩選，要看那時候資料量/後端 API 的設計）。
+ * 2026-10-06：「查詢」按鈕與 Enter 會把關鍵字放進目前頁面網址的 `?q=`（企業名錄、媒合需求兩頁共用，
+ * 由各頁的 Server Component 交給後端搜尋）。三個勾選面板（應用情境／應用範疇／智慧技術）後端的企業與需求
+ * 目前沒有對應欄位，所以仍然只是畫面互動，沒有篩選作用。
  */
-export default function MatchingSearchBar() {
+export default function MatchingSearchBar({ defaultKeyword = "" }: { defaultKeyword?: string }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [keyword, setKeyword] = useState(defaultKeyword);
+
+  function submitSearch() {
+    const trimmed = keyword.trim();
+    router.push(trimmed ? `${pathname}?q=${encodeURIComponent(trimmed)}` : pathname);
+  }
+
   const [openPanel, setOpenPanel] = useState<PanelId | null>(null);
   const [checkedScenarios, setCheckedScenarios] = useState<Record<string, boolean>>({});
   const [checkedScopes, setCheckedScopes] = useState<Record<string, boolean>>({});
@@ -62,7 +71,20 @@ export default function MatchingSearchBar() {
   return (
     <div className="matching_sear d-flex position-relative" ref={containerRef}>
       <div className="input-group mt-2 mt-md-0">
-        <input type="text" className="form-control" placeholder="請輸入關鍵字" aria-label="請輸入關鍵字" />
+        <input
+          type="text"
+          className="form-control"
+          placeholder="請輸入關鍵字"
+          aria-label="請輸入關鍵字"
+          value={keyword}
+          onChange={(event) => setKeyword(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              submitSearch();
+            }
+          }}
+        />
       </div>
 
       <div className="matching_sear_mid">
@@ -85,7 +107,7 @@ export default function MatchingSearchBar() {
         </ul>
       </div>
 
-      <button type="button" className="btn_a" title="查詢">
+      <button type="button" className="btn_a" title="查詢" onClick={submitSearch}>
         <i className="bi bi-search me-1"></i>
         <span>查詢</span>
       </button>
