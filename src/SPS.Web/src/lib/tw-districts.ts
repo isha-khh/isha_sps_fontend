@@ -37,3 +37,12 @@ export function getDistricts(county: string): [string, string][] {
 export function getPostalCode(county: string, district: string): string | undefined {
   return getDistricts(county).find(([name]) => name === district)?.[1];
 }
+
+/** 用 3 碼郵遞區號反查縣市與鄉鎮區（輸入郵遞區號自動帶出縣市、鄉鎮區用） */
+export function findByPostalCode(zip: string): { county: string; district: string } | undefined {
+  for (const c of TW_DISTRICTS) {
+    const hit = c.districts.find(([, z]) => z === zip);
+    if (hit) return { county: c.county, district: hit[0] };
+  }
+  return undefined;
+}
