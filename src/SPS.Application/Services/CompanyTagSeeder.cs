@@ -60,6 +60,10 @@ public class CompanyTagSeeder
 
         if (roots == null || roots.Count == 0) return;
 
+        // 整批匯入放在同一個交易裡：中途失敗（例如磁碟滿了）就全部復原，不會留下只有前幾層的「部分匯入」——
+        // 部分匯入的資料庫之後每次啟動都會因為「已經有標籤」而略過，永遠補不齊（2026-10-06 伺服器磁碟滿時真的發生過）
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
         var created = 0;
         // 一層一層建：先建好上一層才拿得到 ParentId
         var level = roots.Select(n => (Node: n, ParentId: (int?)null)).ToList();
@@ -92,6 +96,8 @@ public class CompanyTagSeeder
                 .SelectMany(e => (e.Node.Children ?? new List<TagNode>()).Select(child => (Node: child, ParentId: (int?)e.Entity.Id)))
                 .ToList();
         }
+
+        await transaction.CommitAsync(cancellationToken);
 
         _logger.LogInformation("資料庫沒有任何企業標籤，已匯入內建的企業標籤 {Count} 筆（應用情境、應用範疇、智慧技術）", created);
     }
