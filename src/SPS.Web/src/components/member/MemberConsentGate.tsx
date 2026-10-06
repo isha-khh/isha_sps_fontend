@@ -22,7 +22,7 @@ export default function MemberConsentGate() {
       <div className="peer_box">
         <div className="mb-3">
           <p>
-            <i className="bi bi-exclamation-circle-fill me-1"></i>請確認您已詳閱並同意以下事項
+            <i className="bi bi-exclamation-circle-fill me-1"></i>個人資料之同意提供：請確認您已詳閱並同意以下事項
           </p>
         </div>
 
@@ -45,13 +45,13 @@ export default function MemberConsentGate() {
             <input
               type="checkbox"
               aria-label="同意個人資料蒐集處理利用"
-              title="本人同意貴署蒐集、處理、利用本人之個人資料"
+              title="本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料"
               className="form-check-input peer me-1"
               checked={agreedCollection}
               onChange={(e) => setAgreedCollection(e.target.checked)}
             />
           </label>
-          <span>本人同意貴署蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</span>
+          <span>本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</span>
         </div>
       </div>
 
