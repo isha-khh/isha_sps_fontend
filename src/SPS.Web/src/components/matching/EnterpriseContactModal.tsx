@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
+import { apiClient } from "@/lib/api-client";
 
 const SCOPE_OPTIONS = ["感測端點", "系統部署", "通訊方式", "作業輔助", "模擬決策", "未指定"];
 
@@ -16,9 +17,9 @@ const SCOPE_OPTIONS = ["感測端點", "系統部署", "通訊方式", "作業�
  * `TechAttributeSelector`／`MatchingSearchBar` 同樣的理由，全新元件
  * 沒有舊頁面依賴這段 jQuery，直接用這個專案新元件慣用的寫法。
  *
- * 目前「送出」只是顯示畫面上寫死的聯絡人資訊，沒有真的送出勾選結果
- * 到任何地方——這頁本來就還在「先把畫面做出來」的階段，之後接資料時
- * 才需要決定這裡要送去哪支 API。
+ * 2026-10-06：「送出」會呼叫 `POST /api/Company/{id}/contact-request` 取得聯繫窗口——聯絡人與電話是個資，
+ * 不放在公開的企業詳情裡，後端只給登入的企業會員（沒登入時請求會被導去登入頁）。
+ * 勾選的範疇會一併送給後端記錄（平台了解大家想找什麼技術），不影響回傳內容。
  *
  * 「送出」用 `<a>` 不是 `<button>`：`.btn-theme`（漸層底色）這個 class
  * 在 `css/style.css` 裡只定義在 `.card-footer a.btn-theme`，是綁
@@ -27,9 +28,35 @@ const SCOPE_OPTIONS = ["感測端點", "系統部署", "通訊方式", "作業�
  * 灰色，不是設計稿的藍色漸層）。跟旁邊「取消」（本來就是 `<a>`）維持
  * 同樣的標籤，兩顆按鈕才會有一致的圓角/漸層樣式。
  */
-export default function EnterpriseContactModal({ id, contactName, contactPhone }: { id: string; contactName: string; contactPhone: string }) {
+export default function EnterpriseContactModal({ id, companyId }: { id: string; companyId: string }) {
   const [checked, setChecked] = useState<Record<string, boolean>>({ 感測端點: true });
-  const [revealed, setRevealed] = useState(false);
+  const [contact, setContact] = useState<{ name: string; phone: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function requestContact() {
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await apiClient.post<{ contactName: string; contactPhone: string }>(`/api/Company/${companyId}/contact-request`, {
+        scopes: SCOPE_OPTIONS.filter((option) => checked[option]),
+      });
+      setContact({ name: response.data.contactName, phone: response.data.contactPhone });
+    } catch (err) {
+      const status = (err as { response?: { status?: number; data?: { error?: string } } }).response?.status;
+      const serverMessage = (err as { response?: { data?: { error?: string } } }).response?.data?.error;
+      setError(
+        status === 403
+          ? "僅企業會員可以取得聯絡窗口。"
+          : status === 429
+            ? "查詢次數過多，請稍後再試。"
+            : serverMessage ?? "暫時無法取得聯絡窗口，請稍後再試。",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function toggle(option: string) {
     setChecked((prev) => ({ ...prev, [option]: !prev[option] }));
@@ -66,29 +93,36 @@ export default function EnterpriseContactModal({ id, contactName, contactPhone }
         <a
           href="javascript:void(0)"
           className="btn-theme mat_Send"
-          aria-expanded={revealed}
+          aria-expanded={contact !== null}
           aria-controls={`${id}-contact-info`}
-          onClick={() => setRevealed(true)}
+          aria-disabled={loading}
+          onClick={() => void requestContact()}
         >
-          送出
+          {loading ? "送出中…" : "送出"}
         </a>
       </div>
 
-      <div className="co_m_botom" id={`${id}-contact-info`} style={revealed ? undefined : { display: "none" }}>
+      {error && (
+        <p className="text-center mt-3" role="alert" style={{ color: "#c0392b" }}>
+          {error}
+        </p>
+      )}
+
+      <div className="co_m_botom" id={`${id}-contact-info`} style={contact ? undefined : { display: "none" }}>
         <h4>連系窗口資訊</h4>
         <ul className="nav">
           <li>
             <span className="label">
               <i className="bi bi-person"></i>聯絡人：
             </span>
-            <p className="mb-0">{contactName}</p>
+            <p className="mb-0">{contact?.name}</p>
           </li>
           <li>
             <span className="label">
               <i className="bi bi-telephone me-1"></i>電話：
             </span>
-            <a href={`tel:${contactPhone}`} title={`撥打電話至 ${contactPhone}`}>
-              {contactPhone}
+            <a href={`tel:${(contact?.phone ?? "").split("#")[0].replace(/[^0-9+]/g, "")}`} title={`撥打電話至 ${contact?.phone ?? ""}`}>
+              {contact?.phone}
             </a>
           </li>
         </ul>

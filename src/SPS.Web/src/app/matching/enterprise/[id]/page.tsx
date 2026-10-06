@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MoreLink from "@/components/ui/MoreLink";
+import EnterpriseContactModal from "@/components/matching/EnterpriseContactModal";
 import { getCompanyTypeLabels } from "@/lib/matching-data";
 import { fetchCompanyDetail, fetchTagTaxonomy } from "@/lib/api.server";
 import { splitTagsByKind } from "@/lib/company-tags";
@@ -22,8 +23,8 @@ export async function generateMetadata({ params }: PageProps<"/matching/enterpri
  * 主要產品暨服務的示意圖、獲獎事蹟暨合作案例（圖片與說明）由後台「公司管理 → 前台展示內容」維護，沒填的區塊不顯示；
  * 應用情境／應用範疇／智慧技術來自企業標籤。負責人姓名與資本總額（營收）後端對匿名呼叫
  * 一律不給（個資），所以「公司負責人」「資本總額」只有後端有給時才顯示；
- * 設計稿的「聯繫窗口」（勾選後展開聯絡人）會把聯絡人放進網頁原始碼、等於公開，所以改成顯示公司電話；
- * 之後要做「會員登入後才看得到聯絡窗口」得另外做會員專用的端點。
+ * 設計稿的「聯繫窗口」（勾選後展開聯絡人）：聯絡人與電話是個資，不放在網頁裡，按「送出」時才向後端
+ * 取得，後端只給登入的企業會員（`EnterpriseContactModal`）。
  *
  * 沒有 `sidebar`／`aside`：設計稿這頁兩側都是空的，`.content` 自動撐滿。
  */
@@ -43,6 +44,7 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
     { label: "智慧技術", items: tags.tech },
   ].filter((section) => section.items.length > 0);
   const typeLabels = getCompanyTypeLabels(company.type);
+  const modalId = `enterprise-contact-${company.id}`;
   const phoneDial = company.phone ? company.phone.split("#")[0].replace(/[^0-9+]/g, "") : "";
 
   // 六格資訊：沒有資料的格子整格不顯示
@@ -62,6 +64,16 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
       ),
     });
   }
+  // 聯繫窗口（聯絡人與電話是個資）：登入的企業會員按下去才向後端取得
+  facts.push({
+    icon: "bi-envelope-at",
+    label: "聯繫窗口",
+    content: (
+      <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target={`#${modalId}`} className="connec_s" title="取得聯絡方式">
+        取得聯絡方式
+      </a>
+    ),
+  });
   facts.push({
     icon: "bi-globe",
     label: "公司網址",
@@ -219,6 +231,8 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
 
         <MoreLink href="/matching/enterprise" label="返回" title="返回" />
       </InnerPageShell>
+
+      <EnterpriseContactModal id={modalId} companyId={company.id} />
     </>
   );
 }

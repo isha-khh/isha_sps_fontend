@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SPS.Application.DTOs.Company;
 using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.File;
@@ -22,17 +23,21 @@ public class CompanyController : ControllerBase
     private readonly ICompanyService _companyService;
     private readonly ILogger<CompanyController> _logger;
     private readonly IFileManagementService _fileService;
+    private readonly IMemoryCache _cache;
 
     private const int MaxShowcaseImages = 12;
+    private const int ContactRequestsPerHour = 30;
 
     public CompanyController(
         ICompanyService companyService,
         ILogger<CompanyController> logger,
-        IFileManagementService fileService)
+        IFileManagementService fileService,
+        IMemoryCache cache)
     {
         _companyService = companyService;
         _logger = logger;
         _fileService = fileService;
+        _cache = cache;
     }
 
     /// <summary>檔案管理中可當公開圖片用的檔案：存在、不是資料夾、沒被刪除、是圖片、不是會員申請附件</summary>
@@ -144,6 +149,61 @@ public class CompanyController : ControllerBase
 
         await ResolveShowcaseImagesAsync(result.Data!, cancellationToken);
         return Ok(HideInternalFields(result.Data!));
+    }
+
+    /// <summary>
+    /// 取得企業的聯繫窗口（企業名錄「取得聯繫窗口」）。只有登入的企業會員（Supplier／Buyer）與後台使用者可以呼叫；
+    /// 聯絡人姓名與電話是個資，不放在公開的企業詳情裡。每個帳號每小時最多 30 次，並記錄是誰查了哪家企業。
+    /// </summary>
+    [HttpPost("{id}/contact-request")]
+    [Authorize]
+    [ProducesResponseType(typeof(CompanyContactResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> RequestContact(Guid id, [FromBody] CompanyContactRequest? request, CancellationToken cancellationToken)
+    {
+        var isAdmin = User.IsInRole("Admin");
+        if (!isAdmin && !User.IsInRole("Supplier") && !User.IsInRole("Buyer"))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "僅企業會員可以取得聯絡窗口" });
+        }
+
+        var who = User.FindFirst("MemberId")?.Value ?? User.FindFirst("UserId")?.Value ?? "unknown";
+        var key = $"company-contact:{who}";
+        var count = _cache.GetOrCreate(key, entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+            return new int[1];
+        })!;
+        if (Interlocked.Increment(ref count[0]) > ContactRequestsPerHour)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, new { error = "查詢次數過多，請稍後再試" });
+        }
+
+        var result = await _companyService.GetByIdAsync(id, cancellationToken);
+        if (!result.IsSuccess || !IsPubliclyVisible(result.Data!))
+        {
+            return NotFound(new { error = "企業不存在" });
+        }
+
+        var company = result.Data!;
+        // 優先用後台指定的聯絡窗口，沒有就用公司負責人
+        var designated = company.DesignatedContacts?.FirstOrDefault();
+        var name = designated?.Name ?? company.Charge;
+        var phone = designated != null
+            ? (string.IsNullOrWhiteSpace(designated.MobilePhone) ? designated.Phone : designated.MobilePhone)
+            : (string.IsNullOrWhiteSpace(company.ChargePhone) ? company.ChargeMobile : company.ChargePhone);
+        if (string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(phone))
+        {
+            return NotFound(new { error = "這家企業尚未提供聯絡窗口，請洽平台承辦單位" });
+        }
+
+        var scopes = (request?.Scopes ?? new List<string>())
+            .Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).Where(s => s.Length <= 50).Take(20).ToList();
+        _logger.LogInformation("Company contact requested: caller={Caller} company={CompanyId} scopes={Scopes}", who, id, string.Join(",", scopes));
+
+        return Ok(new CompanyContactResponse { ContactName = name ?? string.Empty, ContactPhone = phone ?? string.Empty });
     }
 
     /// <summary>
