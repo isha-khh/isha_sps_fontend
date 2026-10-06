@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<ICompanyService, CompanyService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IDemandService, DemandService>();
+        services.AddScoped<IInquiryService, InquiryService>();
         services.AddScoped<IContentIndexingService, ContentIndexingService>();
         services.AddScoped<INewsService, NewsService>();
         services.AddScoped<IPopupAnnouncementService, PopupAnnouncementService>();

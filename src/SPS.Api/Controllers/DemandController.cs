@@ -185,6 +185,31 @@ public class DemandController : ControllerBase
     }
 
     /// <summary>
+    /// 會員從前台「我要刊登」送出需求。只有企業會員（Supplier／Buyer）可以；送出後是未發布狀態，
+    /// 後台「需求張貼管理」審核（可以修改內容）後才上架。每個會員 24 小時內最多 5 筆。
+    /// </summary>
+    [HttpPost("submit")]
+    [Authorize]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> Submit([FromBody] SubmitDemandRequest req, CancellationToken ct)
+    {
+        if (!Guid.TryParse(User.FindFirst("MemberId")?.Value, out var memberId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "僅會員可以刊登需求" });
+        }
+
+        if (!User.IsInRole("Supplier") && !User.IsInRole("Buyer"))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "僅企業會員可以刊登需求" });
+        }
+
+        var r = await _demandService.SubmitByMemberAsync(memberId, req, ct);
+        return r.IsSuccess ? Ok(new { number = r.Data }) : BadRequest(new { error = r.Error });
+    }
+
+    /// <summary>
     /// 更新需求
     /// </summary>
     /// <param name="id">需求 ID</param>

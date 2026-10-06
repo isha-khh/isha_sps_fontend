@@ -134,7 +134,7 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
                   </div>
                 </div>
 
-                <SupportRequestModal id={modalId} resourceTitle={resource.title} />
+                <SupportRequestModal id={modalId} resourceId={resource.id} resourceTitle={resource.title} />
               </div>
             );
           })}

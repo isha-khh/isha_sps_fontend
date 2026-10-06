@@ -60,6 +60,7 @@ public class DemandService : IDemandService
                     CompanyId = d.CompanyId,
                     CompanyName = d.Company?.Name,
                     Published = d.Status == Status.Active,
+                    MemberSubmitted = d.SubmittedByMemberId != null,
                     CreatedTime = d.CreatedTime,
                     TagIds = tagIds,
                     TagNames = tagIds.Where(tagNamesMap.ContainsKey).Select(i => tagNamesMap[i]).ToList()
@@ -101,6 +102,53 @@ public class DemandService : IDemandService
         TriggerDemandIndexing(demand.Id);
 
         return Result<DemandResponse>.Success(MapToResponse(demand, new List<int>(), new List<string>()));
+    }
+
+    private const int MaxSubmissionsPerDay = 5;
+
+    public async Task<Result<string>> SubmitByMemberAsync(Guid memberId, SubmitDemandRequest request, CancellationToken ct = default)
+    {
+        if (!request.Agreed) return Result<string>.Failure("請先同意免責聲明");
+        var name = request.Name?.Trim();
+        if (string.IsNullOrEmpty(name)) return Result<string>.Failure("請輸入需求標題");
+        if (name.Length > 200) return Result<string>.Failure("需求標題最多 200 字");
+        var introduction = NullIfBlank(request.Introduction);
+        if (introduction != null && introduction.Length > 5000) return Result<string>.Failure("需求內容最多 5000 字");
+
+        var tagIds = (request.TagIds ?? new List<int>()).Distinct().ToList();
+        if (tagIds.Count == 0) return Result<string>.Failure("請至少選擇一個應用情境、應用範疇與智慧技術");
+        var validIds = await GetExistingCompanyTagCategoryIdsAsync(tagIds, ct);
+        var invalidIds = tagIds.Except(validIds).ToList();
+        if (invalidIds.Count > 0) return Result<string>.Failure("選擇的標籤已不存在，請重新整理後再試");
+
+        var member = await _unitOfWork.Members.GetByIdAsync(memberId, ct);
+        if (member == null) return Result<string>.Failure("找不到會員資料");
+
+        // 每個會員每天最多送出幾筆，避免洗版；後台審核通過前都不會公開
+        var since = DateTime.UtcNow.AddDays(-1);
+        var recent = await _unitOfWork.Demands.GetQueryable().CountAsync(d => d.SubmittedByMemberId == memberId && d.CreatedTime >= since, ct);
+        if (recent >= MaxSubmissionsPerDay) return Result<string>.Failure($"24 小時內最多刊登 {MaxSubmissionsPerDay} 筆需求，請稍後再試");
+
+        var demand = new Demand
+        {
+            Number = $"D{DateTime.UtcNow:yyyyMMddHHmmss}{Random.Shared.Next(100, 1000)}",
+            Name = name,
+            Description = introduction,
+            CompanyId = member.CompanyId,
+            SubmittedByMemberId = memberId,
+            Status = Status.Inactive,
+            DataMode = DataMode.Normal,
+            CreatedTime = DateTime.UtcNow,
+            UpdatedTime = DateTime.UtcNow
+        };
+        await _unitOfWork.Demands.AddAsync(demand, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        await ReplaceDemandTagCategoriesAsync(demand.Id, tagIds, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+        TriggerDemandIndexing(demand.Id);
+
+        return Result<string>.Success(demand.Number);
     }
 
     public async Task<Result<DemandResponse>> UpdateAsync(int id, UpdateDemandRequest request, string? publisherEmail = null, CancellationToken ct = default)
@@ -281,6 +329,7 @@ public class DemandService : IDemandService
         CompanyId = d.CompanyId,
         CompanyName = d.Company?.Name,
         Published = d.Status == Status.Active,
+        MemberSubmitted = d.SubmittedByMemberId != null,
         CreatedTime = d.CreatedTime,
         TagIds = tagIds,
         TagNames = tagNames

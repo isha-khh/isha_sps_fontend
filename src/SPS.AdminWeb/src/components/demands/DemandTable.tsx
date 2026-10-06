@@ -19,7 +19,10 @@ export const DemandTable = ({ demands, isLoading, onTogglePublish, onDelete }: D
       title: '需求名稱',
       render: (demand) => (
         <div>
-          <div className="font-semibold">{demand.name}</div>
+          <div className="font-semibold">
+            {demand.name}
+            {demand.memberSubmitted && <span className="badge badge-outline badge-sm ml-2">會員刊登</span>}
+          </div>
           {demand.introduction && (
             <div className="text-sm text-base-content/60 line-clamp-2 max-w-md">
               {demand.introduction}
@@ -50,7 +53,12 @@ export const DemandTable = ({ demands, isLoading, onTogglePublish, onDelete }: D
       key: 'published',
       title: '狀態',
       render: (demand) =>
-        demand.published ? (
+        !demand.published && demand.memberSubmitted ? (
+          <span className="badge badge-info whitespace-nowrap">
+            <span className="iconify lucide--user-check size-3 mr-1" />
+            待審核
+          </span>
+        ) : demand.published ? (
           <span className="badge badge-success">
             <span className="iconify lucide--eye size-3 mr-1" />
             已發布
@@ -66,7 +74,7 @@ export const DemandTable = ({ demands, isLoading, onTogglePublish, onDelete }: D
       key: 'createdAt',
       title: '建立時間',
       className: 'text-sm text-base-content/70',
-      render: (demand) => formatDate(demand.createdAt),
+      render: (demand) => formatDate(demand.createdAt ?? demand.createdTime),
     },
   ];
 

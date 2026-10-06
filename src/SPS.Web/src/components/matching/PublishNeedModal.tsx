@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
-import { APPLICATION_SCENARIOS, APPLICATION_SCOPES, TECH_ATTRIBUTE_GROUPS } from "@/lib/matching-data";
+import { apiClient } from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/error-utils";
+import type { TagTaxonomy } from "@/lib/company-tags";
 
 /**
  * 積木元件：「媒合對接」列表頁「我要刊登」彈窗，對應設計稿
@@ -11,11 +13,10 @@ import { APPLICATION_SCENARIOS, APPLICATION_SCOPES, TECH_ATTRIBUTE_GROUPS } from
  * 內容兩個文字欄位，加上 `page/matching/_uc/publish_s.html`（應用情境／
  * 應用範疇／智慧技術，可多選）。
  *
- * 這三組多選標籤跟企業名錄篩選面板、`MatchingSearchBar` 是同一份分類
- * 資料（`matching-data.ts`），故意共用而不是照 `member-registration-data.ts`
- * 那份會員註冊表單的版本另外接——雖然選項文字剛好大致對得上，但這裡
- * 是「媒合對接」模組自己的資料來源，跟企業/會員註冊資料模型無關，混用
- * 兩邊會讓之後其中一邊改分類時忘記同步更新另一邊。
+ * 2026-10-06 接上真後端：送出呼叫 `POST /api/Demand/submit`（只有登入的企業會員可以；沒登入時 axios 攔截器
+ * 會導去登入頁）。送出的需求是未發布狀態，後台「需求張貼管理」審核（可修改內容）後才上架，所以成功訊息是
+ * 「審核後上架」。三組標籤跟企業名錄篩選面板是同一份後台企業標籤（`fetchTagTaxonomy`，由頁面傳進來），
+ * 後端用標籤 id 存。每個會員 24 小時內最多 5 筆。
  *
  * 這三組 checkbox 外面包一層 `.publish_s`：CSS 裡
  * `.matching .publish_s .project_fx .form-check` 專門把每個選項
@@ -29,26 +30,80 @@ import { APPLICATION_SCENARIOS, APPLICATION_SCOPES, TECH_ATTRIBUTE_GROUPS } from
  * 的選擇器），`<button class="btn-theme">` 完全吃不到，會變成瀏覽器
  * 預設的裸按鈕樣式，見 `EnterpriseContactModal.tsx` 同一段說明。
  */
-export default function PublishNeedModal({ id }: { id: string }) {
-  const [checkedScenarios, setCheckedScenarios] = useState<Record<string, boolean>>({});
-  const [checkedScopes, setCheckedScopes] = useState<Record<string, boolean>>({});
+export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonomy: TagTaxonomy }) {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  // 三組標籤共用同一份勾選狀態，key 是標籤 id（字串）
+  const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [agreed, setAgreed] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submittedNumber, setSubmittedNumber] = useState<string | null>(null);
 
-  function toggle(setter: typeof setCheckedScenarios, value: string) {
-    setter((prev) => ({ ...prev, [value]: !prev[value] }));
+  function toggle(value: string) {
+    setChecked((prev) => ({ ...prev, [value]: !prev[value] }));
+  }
+
+  const hasAny = (ids: string[]) => ids.some((tagId) => checked[tagId]);
+  const techIds = taxonomy.techGroups.flatMap((group) => group.sections.flatMap((section) => section.options.map((option) => option.value)));
+
+  async function submit() {
+    if (submitting) return;
+    setError(null);
+    if (!title.trim()) return setError("請輸入需求標題");
+    if (!hasAny(taxonomy.scenarios.map((tag) => String(tag.id)))) return setError("請至少選擇一個應用情境");
+    if (!hasAny(taxonomy.scopes.map((tag) => String(tag.id)))) return setError("請至少選擇一個應用範疇");
+    if (!hasAny(techIds)) return setError("請至少選擇一個智慧技術");
+    if (!agreed) return setError("請勾選同意免責聲明");
+
+    setSubmitting(true);
+    try {
+      const response = await apiClient.post<{ number: string }>("/api/Demand/submit", {
+        name: title.trim(),
+        introduction: content.trim() || null,
+        tagIds: Object.entries(checked)
+          .filter(([, on]) => on)
+          .map(([tagId]) => Number(tagId)),
+        agreed: true,
+      });
+      setSubmittedNumber(response.data.number);
+      setTitle("");
+      setContent("");
+      setChecked({});
+      setAgreed(false);
+    } catch (err) {
+      const status = (err as { response?: { status?: number } }).response?.status;
+      setError(status === 403 ? "僅企業會員可以刊登需求。" : getApiErrorMessage(err, "刊登失敗，請稍後再試"));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <Modal id={id} title="我要刊登" dialogClassName="modal-dialog_w7">
       <div className="form-group">
-        <label className="mb-2">需求標題</label>
-        <input type="text" className="form-control" title="請輸入需求標題" placeholder="請輸入需求標題" required aria-required="true" />
+        <label className="mb-2" htmlFor={`${id}-title`}>
+          需求標題
+        </label>
+        <input
+          id={`${id}-title`}
+          type="text"
+          className="form-control"
+          title="請輸入需求標題"
+          placeholder="請輸入需求標題"
+          maxLength={200}
+          required
+          aria-required="true"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+        />
       </div>
 
       <div className="form-group">
-        <label className="mb-2">需求內容</label>
-        <textarea className="form-control" rows={5} />
+        <label className="mb-2" htmlFor={`${id}-content`}>
+          需求內容
+        </label>
+        <textarea id={`${id}-content`} className="form-control" rows={5} maxLength={5000} value={content} onChange={(event) => setContent(event.target.value)} />
       </div>
 
       <div className="publish_s">
@@ -57,19 +112,13 @@ export default function PublishNeedModal({ id }: { id: string }) {
             <span className="red me-1">*</span>應用情境(可多選)
           </label>
           <div className="project_fx project_three d-flex flex-wrap">
-            {APPLICATION_SCENARIOS.map((scenario) => {
-              const checkboxId = `${id}-scenario-${scenario}`;
+            {taxonomy.scenarios.map((tag) => {
+              const checkboxId = `${id}-scenario-${tag.id}`;
               return (
-                <div className="form-check" key={scenario}>
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id={checkboxId}
-                    checked={Boolean(checkedScenarios[scenario])}
-                    onChange={() => toggle(setCheckedScenarios, scenario)}
-                  />
+                <div className="form-check" key={tag.id}>
+                  <input className="form-check-input" type="checkbox" id={checkboxId} checked={Boolean(checked[String(tag.id)])} onChange={() => toggle(String(tag.id))} />
                   <label className="form-check-label" htmlFor={checkboxId}>
-                    {scenario}
+                    {tag.name}
                   </label>
                 </div>
               );
@@ -82,19 +131,13 @@ export default function PublishNeedModal({ id }: { id: string }) {
             <span className="red me-1">*</span>應用範疇(可多選)
           </label>
           <div className="project_fx d-flex flex-wrap">
-            {APPLICATION_SCOPES.map((scope) => {
-              const checkboxId = `${id}-scope-${scope}`;
+            {taxonomy.scopes.map((tag) => {
+              const checkboxId = `${id}-scope-${tag.id}`;
               return (
-                <div className="form-check" key={scope}>
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id={checkboxId}
-                    checked={Boolean(checkedScopes[scope])}
-                    onChange={() => toggle(setCheckedScopes, scope)}
-                  />
+                <div className="form-check" key={tag.id}>
+                  <input className="form-check-input" type="checkbox" id={checkboxId} checked={Boolean(checked[String(tag.id)])} onChange={() => toggle(String(tag.id))} />
                   <label className="form-check-label" htmlFor={checkboxId}>
-                    {scope}
+                    {tag.name}
                   </label>
                 </div>
               );
@@ -106,7 +149,7 @@ export default function PublishNeedModal({ id }: { id: string }) {
           <label className="mb-2">
             <span className="red me-1">*</span>智慧技術(可多選)
           </label>
-          <TechAttributeSelector groups={TECH_ATTRIBUTE_GROUPS} name={`${id}-tech`} variant="checkboxes" />
+          <TechAttributeSelector groups={taxonomy.techGroups} name={`${id}-tech`} variant="checkboxes" checked={checked} onToggle={toggle} />
         </div>
       </div>
 
@@ -130,14 +173,19 @@ export default function PublishNeedModal({ id }: { id: string }) {
         </label>
       </div>
 
-      {submitted && <p className="text-success mb-3">已收到您的刊登需求，將於審核後上架。</p>}
+      {error && (
+        <p className="mb-3" role="alert" style={{ color: "#c0392b" }}>
+          {error}
+        </p>
+      )}
+      {submittedNumber && <p className="text-success mb-3">已收到您的刊登需求（編號 {submittedNumber}），將於審核後上架。</p>}
 
       <div className="card-footer d-flex justify-content-center">
         <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
           取消
         </a>
-        <a href="javascript:void(0)" className="btn-theme mat_Send" onClick={() => setSubmitted(true)}>
-          刊登
+        <a href="javascript:void(0)" className="btn-theme mat_Send" aria-disabled={submitting} onClick={() => void submit()}>
+          {submitting ? "送出中…" : "刊登"}
         </a>
       </div>
     </Modal>

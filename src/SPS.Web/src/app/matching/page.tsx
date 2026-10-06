@@ -56,7 +56,7 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
   return (
     <>
       <BodyClass className="matching index" />
-      <PublishNeedModal id="staticmembership2" />
+      <PublishNeedModal id="staticmembership2" taxonomy={taxonomy} />
       <SubscribeSolutionModal id="staticmembership" />
 
       <InnerPageShell

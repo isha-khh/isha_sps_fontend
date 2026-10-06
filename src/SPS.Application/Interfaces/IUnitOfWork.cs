@@ -67,6 +67,11 @@ public interface IUnitOfWork : IDisposable
     IDemandNotificationRepository DemandNotifications { get; }
 
     /// <summary>
+    /// 詢問單倉儲
+    /// </summary>
+    IInquiryRepository Inquiries { get; }
+
+    /// <summary>
     /// 新聞倉儲
     /// </summary>
     INewsRepository News { get; }

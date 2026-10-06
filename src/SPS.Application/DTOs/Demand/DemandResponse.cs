@@ -26,6 +26,9 @@ public class DemandResponse
     public Guid? CompanyId { get; set; }
     public string? CompanyName { get; set; }
     public bool Published { get; set; }
+
+    /// <summary>true = 會員從前台「我要刊登」送出的（未發布時就是待後台審核）</summary>
+    public bool MemberSubmitted { get; set; }
     public DateTime CreatedTime { get; set; }
 
     /// <summary>已綁定的標籤分類 ID（CategoryType.CompanyTag）</summary>
@@ -66,6 +69,22 @@ public class CreateDemandRequest
     public List<Guid>? AttachmentFileIds { get; set; }
     public Guid? CompanyId { get; set; }
     public bool Published { get; set; }
+}
+
+/// <summary>會員從前台「我要刊登」送出的需求。送出後是未發布狀態，後台審核（可修改內容）後才上架</summary>
+public class SubmitDemandRequest
+{
+    [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.MaxLength(200)]
+    public string Name { get; set; } = string.Empty;
+
+    [System.ComponentModel.DataAnnotations.MaxLength(5000)]
+    public string? Introduction { get; set; }
+
+    /// <summary>應用情境／應用範疇／智慧技術的企業標籤 Id</summary>
+    public List<int> TagIds { get; set; } = new();
+
+    /// <summary>已閱讀並同意免責聲明</summary>
+    public bool Agreed { get; set; }
 }
 
 public class UpdateDemandRequest

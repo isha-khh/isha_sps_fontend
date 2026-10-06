@@ -1,3 +1,4 @@
+import NewsletterForm from "@/components/layout/NewsletterForm";
 import Link from "next/link";
 import { withBasePath } from "@/lib/api-client";
 import { fetchFooterLinks, fetchSiteVisitorCount } from "@/lib/api.server";
@@ -62,31 +63,11 @@ export default async function Footer() {
             </div>
             <div className="tit">
               <div className="h3">訂閱電子報，掌握第一手動態</div>
-              <p className="mb-0">每月為您彙整最新產業實績、技術趨勢與補助開放通知。</p>
+              <p className="mb-0">每月為您彙整最新產業實績、技術趨勢與補助開放通知。訂閱即表示同意本平台蒐集您的電子郵件，僅用於寄送電子報。</p>
             </div>
           </div>
 
-          <div className="footer_right d-flex">
-            <div className="form-group mb-md-0">
-              <select className="form-select" aria-label="請選擇產業代碼">
-                <option value="">請選擇產業代碼</option>
-              </select>
-            </div>
-
-            <div className="input-group mt-2 mt-md-0">
-              <input
-                type="email"
-                className="form-control"
-                placeholder="你的電子郵件位置"
-                aria-label="請輸入您的電子郵件信箱"
-                autoComplete="email"
-                required
-              />
-            </div>
-            <button type="submit" className="btn_a" title="送出訂閱電子報">
-              立即訂閱
-            </button>
-          </div>
+          <NewsletterForm />
         </div>
 
         <div className="footer_bg3" aria-hidden="true">

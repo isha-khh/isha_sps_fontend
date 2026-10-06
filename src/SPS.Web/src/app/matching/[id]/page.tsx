@@ -165,7 +165,7 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
         </div>
       </InnerPageShell>
 
-      <ProposeSolutionModal id={modalId} />
+      <ProposeSolutionModal id={modalId} demandId={need.id} demandTitle={need.title} />
     </>
   );
 }

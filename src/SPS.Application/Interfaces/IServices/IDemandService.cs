@@ -9,6 +9,9 @@ public interface IDemandService
     Task<Result<PagedResult<DemandResponse>>> GetPagedAsync(DemandQueryParameters parameters, CancellationToken ct = default);
     Task<Result<DemandResponse>> GetByIdAsync(int id, CancellationToken ct = default);
     Task<Result<DemandResponse>> CreateAsync(CreateDemandRequest request, CancellationToken ct = default);
+
+    /// <summary>會員從前台刊登需求：建立成未發布的需求（待後台審核），回傳需求編號</summary>
+    Task<Result<string>> SubmitByMemberAsync(Guid memberId, SubmitDemandRequest request, CancellationToken ct = default);
     Task<Result<DemandResponse>> UpdateAsync(int id, UpdateDemandRequest request, string? publisherEmail = null, CancellationToken ct = default);
     Task<Result<bool>> DeleteAsync(int id, CancellationToken ct = default);
     Task<Result<DemandStatisticsDto>> GetStatisticsAsync(CancellationToken ct = default);

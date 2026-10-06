@@ -20,7 +20,11 @@ export interface Demand {
   companyId?: string;
   companyName?: string;
   published: boolean;
+  /** 會員從前台「我要刊登」送出的（未發布時就是待審核） */
+  memberSubmitted?: boolean;
   createdAt: string;
+  /** 後端實際回傳的欄位名稱（列表用它顯示建立時間） */
+  createdTime?: string;
   updatedAt?: string;
   createdBy?: string;
   createdByName?: string;

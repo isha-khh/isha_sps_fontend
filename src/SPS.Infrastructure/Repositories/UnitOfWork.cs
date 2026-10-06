@@ -24,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
     private IProductRepository? _products;
     private IDemandRepository? _demands;
     private IDemandNotificationRepository? _demandNotifications;
+    private IInquiryRepository? _inquiries;
     private INewsRepository? _news;
     private ICategoryRepository? _categories;
     private IAttributeRepository? _attributes;
@@ -155,6 +156,15 @@ public class UnitOfWork : IUnitOfWork
         {
             _demandNotifications ??= new DemandNotificationRepository(_context);
             return _demandNotifications;
+        }
+    }
+
+    public IInquiryRepository Inquiries
+    {
+        get
+        {
+            _inquiries ??= new InquiryRepository(_context);
+            return _inquiries;
         }
     }
 

@@ -100,7 +100,7 @@ export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">
           <div className="txt editor mb-md-5 mb-4" dangerouslySetInnerHTML={{ __html: item.bodyHtml }} />
 
           <div className="dk_conbo mb-md-5 mb-4">
-            <DownloadRequestForm />
+            <DownloadRequestForm itemId={item.id} itemTitle={item.title} />
           </div>
 
           <MoreLink href="/serve" label="返回" title="返回" />

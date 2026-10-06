@@ -24,6 +24,9 @@ public class Demand : BaseEntity<int>
     /// <summary>附件：檔案管理中的檔案 Id（依顯示順序）</summary>
     public List<Guid> AttachmentFileIds { get; set; } = new();
 
+    /// <summary>會員從前台「我要刊登」送出的需求：記錄送出的會員。這類需求送出時是未發布，後台審核後才會上架；後台自己建立的為空</summary>
+    public Guid? SubmittedByMemberId { get; set; }
+
     // Navigation properties
     public Picture? Picture { get; set; }
     public Category? Category { get; set; }

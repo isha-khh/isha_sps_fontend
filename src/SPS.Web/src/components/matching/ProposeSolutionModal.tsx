@@ -2,54 +2,79 @@
 
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
-import DocumentUploadField from "@/components/member/DocumentUploadField";
+import { InquiryType, submitInquiry } from "@/lib/api/inquiries";
 
 /**
  * 積木元件：需求詳情頁「我要提案」彈窗，對應設計稿
  * `page/matching/show2.html` 的 `#staticmembership2`——公司名稱／姓名／
- * 聯絡電話／信箱四個文字欄位＋公司登記證明文件上傳，跟列表頁「我要
- * 刊登」彈窗（`PublishNeedModal`）雖然 id 同名 `staticmembership2`，
- * 但欄位完全不同（這裡是「提供解方」的廠商在填寫聯絡資料，不是刊登
- * 需求），設計稿本來就是兩份獨立的彈窗定義，只是剛好沿用同一個 id，
- * 不會衝突——因為兩者位在不同頁面（`/matching` 列表頁 vs
- * `/matching/[id]` 詳情頁），同一時間只會有一個掛載。
+ * 聯絡電話／信箱四個文字欄位，跟列表頁「我要刊登」彈窗（`PublishNeedModal`）
+ * 雖然 id 同名 `staticmembership2`，但欄位完全不同（這裡是「提供解方」的廠商
+ * 在填寫聯絡資料，不是刊登需求），設計稿本來就是兩份獨立的彈窗定義，
+ * 不會衝突——因為兩者位在不同頁面（`/matching` 列表頁 vs `/matching/[id]` 詳情頁），
+ * 同一時間只會有一個掛載。
  *
- * 檔案上傳沿用 `DocumentUploadField`（純展示，沒有真的上傳行為）——
- * 跟該元件本身、`DownloadRequestForm` 同樣的「先求畫面一致」階段。
+ * 2026-10-06 接上真後端：送出呼叫 `POST /api/Inquiry`（種類＝提案，只有登入的企業會員可以；沒登入會被導去登入頁），
+ * 存進後台「詢問單」收件匣，記錄是針對哪一筆需求（`demandId`／`demandTitle`）。
+ * 設計稿的「附件」上傳欄位這次沒做：要讓會員上傳檔案需要另外做受保護的上傳端點（不能放進公開的檔案管理），
+ * 之後有需要再補；目前請提案者在送出後由承辦單位聯繫再補件。
  *
  * 「送出」用 `<a>` 不是 `<button>`：`.btn-theme` 這個 class 在
  * `css/style.css` 只定義在 `.card-footer a.btn-theme`（綁 `<a>` 標籤
  * 的選擇器），`<button class="btn-theme">` 完全吃不到，會變成瀏覽器
  * 預設的裸按鈕樣式，見 `EnterpriseContactModal.tsx` 同一段說明。
  */
-export default function ProposeSolutionModal({ id }: { id: string }) {
+export default function ProposeSolutionModal({ id, demandId, demandTitle }: { id: string; demandId: string; demandTitle: string }) {
+  const [companyName, setCompanyName] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+
+  async function submit() {
+    if (submitting) return;
+    setError(null);
+    if (!companyName.trim() || !name.trim() || !phone.trim() || !email.trim()) return setError("請填寫公司名稱、姓名、聯絡電話與信箱");
+    if (!agreed) return setError("請勾選同意免責聲明");
+
+    setSubmitting(true);
+    const message = await submitInquiry({
+      type: InquiryType.ProposeSolution,
+      companyName: companyName.trim(),
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      targetType: "Demand",
+      targetKey: demandId,
+      targetTitle: demandTitle,
+    });
+    setSubmitting(false);
+    if (message) return setError(message);
+    setSubmitted(true);
+  }
 
   return (
     <Modal id={id} title="我要提案">
       <div className="form-group">
-        <label className="mb-2">公司名稱</label>
-        <input type="text" className="form-control" title="請輸入公司名稱" placeholder="請輸入公司名稱" required aria-required="true" />
+        <label className="mb-2" htmlFor={`${id}-company`}>公司名稱</label>
+        <input id={`${id}-company`} type="text" className="form-control" title="請輸入公司名稱" placeholder="請輸入公司名稱" maxLength={200} required aria-required="true" value={companyName} onChange={(event) => setCompanyName(event.target.value)} />
       </div>
 
       <div className="form-group">
-        <label className="mb-2">姓名</label>
-        <input type="text" className="form-control" title="請輸入姓名" placeholder="請輸入姓名" required aria-required="true" />
+        <label className="mb-2" htmlFor={`${id}-name`}>姓名</label>
+        <input id={`${id}-name`} type="text" className="form-control" title="請輸入姓名" placeholder="請輸入姓名" maxLength={100} required aria-required="true" value={name} onChange={(event) => setName(event.target.value)} />
       </div>
 
       <div className="form-group">
-        <label className="mb-2">聯絡電話</label>
-        <input type="text" className="form-control" title="請輸入聯絡電話" placeholder="請輸入聯絡電話" required aria-required="true" />
+        <label className="mb-2" htmlFor={`${id}-phone`}>聯絡電話</label>
+        <input id={`${id}-phone`} type="tel" className="form-control" title="請輸入聯絡電話" placeholder="請輸入聯絡電話" maxLength={50} required aria-required="true" value={phone} onChange={(event) => setPhone(event.target.value)} />
       </div>
 
       <div className="form-group">
-        <label className="mb-2">信箱</label>
-        <input type="text" className="form-control" title="請輸入信箱" placeholder="請輸入信箱" required aria-required="true" />
-      </div>
-
-      <div className="form-group">
-        <DocumentUploadField label="附件" mode="edit" hint="上傳格式支援PDF、影像檔，最大上限10MB。" />
+        <label className="mb-2" htmlFor={`${id}-email`}>信箱</label>
+        <input id={`${id}-email`} type="email" className="form-control" title="請輸入信箱" placeholder="請輸入信箱" maxLength={320} required aria-required="true" value={email} onChange={(event) => setEmail(event.target.value)} />
       </div>
 
       <div className="Disclaimer">
@@ -72,14 +97,19 @@ export default function ProposeSolutionModal({ id }: { id: string }) {
         </label>
       </div>
 
-      {submitted && <p className="text-success mb-3">已收到您的提案，將由需求刊登單位主動與您聯繫。</p>}
+      {error && (
+        <p className="mb-3" role="alert" style={{ color: "#c0392b" }}>
+          {error}
+        </p>
+      )}
+      {submitted && <p className="text-success mb-3">已收到您的提案，將由承辦單位與您聯繫。</p>}
 
       <div className="card-footer d-flex justify-content-center">
         <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
           取消
         </a>
-        <a href="javascript:void(0)" className="btn-theme mat_Send" onClick={() => setSubmitted(true)}>
-          送出
+        <a href="javascript:void(0)" className="btn-theme mat_Send" aria-disabled={submitting} onClick={() => void submit()}>
+          {submitting ? "送出中…" : "送出"}
         </a>
       </div>
     </Modal>

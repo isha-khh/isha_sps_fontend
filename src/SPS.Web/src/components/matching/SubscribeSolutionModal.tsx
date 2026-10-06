@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
+import { InquiryType, submitInquiry } from "@/lib/api/inquiries";
 
 /**
  * 積木元件：「媒合對接」列表頁「訂閱解方」彈窗，對應設計稿
@@ -9,9 +10,9 @@ import Modal from "@/components/ui/Modal";
  * 聲明後送出，沒有任何額外欄位（比企業名錄的 `EnterpriseContactModal`
  * 更簡單，不用勾選智慧技術範疇，也不會展開顯示聯絡資訊）。
  *
- * 「送出」目前只切換一段確認文字顯示/隱藏，沒有真的送出到任何地方
- * ——跟這個專案其他還沒接資料的表單（`DownloadRequestForm`／
- * `EnterpriseContactModal`）同樣的階段。
+ * 2026-10-06 接上真後端：送出呼叫 `POST /api/Inquiry`（種類＝訂閱解方，要登入會員；沒登入會被導去登入頁），
+ * 存進後台「詢問單」收件匣，信箱與電話用會員資料；已經訂閱還沒結案的不會重複建立。
+ * 注意：目前只是「登記訂閱」，有新解方時的信件與站內通知還沒有自動寄送機制，由承辦單位依收件匣名單處理。
  *
  * 「送出」用 `<a>` 不是 `<button>`：`.btn-theme` 這個 class 在
  * `css/style.css` 只定義在 `.card-footer a.btn-theme`（綁 `<a>` 標籤
@@ -21,6 +22,19 @@ import Modal from "@/components/ui/Modal";
 export default function SubscribeSolutionModal({ id }: { id: string }) {
   const [agreed, setAgreed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit() {
+    if (submitting) return;
+    setError(null);
+    if (!agreed) return setError("請勾選同意免責聲明");
+    setSubmitting(true);
+    const message = await submitInquiry({ type: InquiryType.SubscribeSolution });
+    setSubmitting(false);
+    if (message) return setError(message);
+    setSubmitted(true);
+  }
 
   return (
     <Modal id={id} title="訂閱解方">
@@ -44,14 +58,19 @@ export default function SubscribeSolutionModal({ id }: { id: string }) {
         </label>
       </div>
 
+      {error && (
+        <p className="mb-3" role="alert" style={{ color: "#c0392b" }}>
+          {error}
+        </p>
+      )}
       {submitted && <p className="text-success mb-3">已收到您的訂閱，相關解方將同步以信件及通知提供給您。</p>}
 
       <div className="card-footer d-flex justify-content-center">
         <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
           取消
         </a>
-        <a href="javascript:void(0)" className="btn-theme mat_Send" onClick={() => setSubmitted(true)}>
-          送出
+        <a href="javascript:void(0)" className="btn-theme mat_Send" aria-disabled={submitting} onClick={() => void submit()}>
+          {submitting ? "送出中…" : "送出"}
         </a>
       </div>
     </Modal>
