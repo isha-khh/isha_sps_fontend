@@ -8,6 +8,7 @@ using SPS.Application.DTOs.Auth;
 using SPS.Application.Interfaces;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Entities;
+using SPS.Domain.Enums;
 
 namespace SPS.Application.Services;
 
@@ -211,6 +212,13 @@ public class Fido2Service : IFido2Service
             var member = await _unitOfWork.Members.GetByIdAsync(fidoCredential.MemberId!.Value, ct);
             if (member == null)
                 return Result<TokenResponse>.Failure("會員不存在");
+
+            // 跟密碼登入一樣：停用、鎖定、尚未啟用的帳號不能用 Passkey 登入（公司經理在會員中心可以停用成員）
+            if (member.Status != Status.Active || (member.LockedTime.HasValue && member.LockedTime > DateTime.UtcNow))
+            {
+                _logger.LogWarning("FIDO2 login rejected: Member {MemberId} status is {Status}", member.Id, member.Status);
+                return Result<TokenResponse>.Failure($"賬戶狀態異常: {member.Status}");
+            }
 
             var tokenResponse = _tokenService.GenerateToken(member);
 

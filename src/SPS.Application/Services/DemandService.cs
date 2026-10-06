@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SPS.Application.Common;
 using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.Demand;
+using SPS.Application.DTOs.MemberFavorite;
 using SPS.Application.Interfaces;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Entities;
@@ -149,6 +150,86 @@ public class DemandService : IDemandService
         TriggerDemandIndexing(demand.Id);
 
         return Result<string>.Success(demand.Number);
+    }
+
+    public async Task<Result<List<MemberDemandResponse>>> GetMemberDemandsAsync(Guid memberId, CancellationToken ct = default)
+    {
+        var demands = await _unitOfWork.Demands.GetQueryable()
+            .Where(d => d.SubmittedByMemberId == memberId)
+            .OrderByDescending(d => d.CreatedTime)
+            .Take(200)
+            .ToListAsync(ct);
+
+        var tagIdsMap = await GetTagCategoryIdsMapAsync(demands.Select(d => d.Id).ToList(), ct);
+        var namesMap = await GetCategoryNamesAsync(tagIdsMap.Values.SelectMany(ids => ids).Distinct().ToList(), ct);
+        var result = demands.Select(d =>
+        {
+            var tagIds = tagIdsMap.GetValueOrDefault(d.Id) ?? new List<int>();
+            return new MemberDemandResponse
+            {
+                Id = d.Id,
+                Number = d.Number,
+                Name = d.Name,
+                Introduction = d.Description,
+                TagIds = tagIds,
+                TagNames = tagIds.Where(namesMap.ContainsKey).Select(i => namesMap[i]).ToList(),
+                Published = d.Status == Status.Active,
+                CreatedTime = d.CreatedTime,
+            };
+        }).ToList();
+        return Result<List<MemberDemandResponse>>.Success(result);
+    }
+
+    public async Task<Result<MemberDemandResponse>> UpdateByMemberAsync(Guid memberId, int id, UpdateMemberDemandRequest request, CancellationToken ct = default)
+    {
+        var demand = await _unitOfWork.Demands.GetByIdAsync(id, ct);
+        // 不是自己刊登的一律當作不存在，不洩漏別人的需求
+        if (demand == null || demand.SubmittedByMemberId != memberId) return Result<MemberDemandResponse>.Failure("需求不存在");
+        if (demand.Status == Status.Active) return Result<MemberDemandResponse>.Failure("需求已上架，無法修改，請聯絡承辦單位");
+
+        var name = request.Name?.Trim();
+        if (string.IsNullOrEmpty(name)) return Result<MemberDemandResponse>.Failure("請輸入需求標題");
+        if (name.Length > 200) return Result<MemberDemandResponse>.Failure("需求標題最多 200 字");
+        var introduction = NullIfBlank(request.Introduction);
+        if (introduction != null && introduction.Length > 5000) return Result<MemberDemandResponse>.Failure("需求內容最多 5000 字");
+
+        var tagIds = (request.TagIds ?? new List<int>()).Distinct().ToList();
+        if (tagIds.Count == 0) return Result<MemberDemandResponse>.Failure("請至少選擇一個標籤");
+        var validIds = await GetExistingCompanyTagCategoryIdsAsync(tagIds, ct);
+        if (tagIds.Except(validIds).Any()) return Result<MemberDemandResponse>.Failure("選擇的標籤已不存在，請重新整理後再試");
+
+        demand.Name = name;
+        demand.Description = introduction;
+        demand.UpdatedTime = DateTime.UtcNow;
+        await _unitOfWork.Demands.UpdateAsync(demand, ct);
+        await ReplaceDemandTagCategoriesAsync(id, tagIds, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+        TriggerDemandIndexing(id);
+
+        var namesMap = await GetCategoryNamesAsync(tagIds, ct);
+        return Result<MemberDemandResponse>.Success(new MemberDemandResponse
+        {
+            Id = demand.Id,
+            Number = demand.Number,
+            Name = demand.Name,
+            Introduction = demand.Description,
+            TagIds = tagIds,
+            TagNames = tagIds.Where(namesMap.ContainsKey).Select(i => namesMap[i]).ToList(),
+            Published = false,
+            CreatedTime = demand.CreatedTime,
+        });
+    }
+
+    public async Task<Result<bool>> DeleteByMemberAsync(Guid memberId, int id, CancellationToken ct = default)
+    {
+        var demand = await _unitOfWork.Demands.GetByIdAsync(id, ct);
+        if (demand == null || demand.SubmittedByMemberId != memberId) return Result<bool>.Failure("需求不存在");
+        if (demand.Status == Status.Active) return Result<bool>.Failure("需求已上架，無法撤回，請聯絡承辦單位");
+
+        await ReplaceDemandTagCategoriesAsync(id, new List<int>(), ct);
+        await _unitOfWork.Demands.DeleteAsync(demand, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+        return Result<bool>.Success(true);
     }
 
     public async Task<Result<DemandResponse>> UpdateAsync(int id, UpdateDemandRequest request, string? publisherEmail = null, CancellationToken ct = default)

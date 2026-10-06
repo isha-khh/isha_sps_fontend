@@ -400,8 +400,8 @@ public class MemberProfileService : IMemberProfileService
             return Result.Failure("目標會員不存在");
         }
 
-        // 確認是同一公司
-        if (manager.CompanyId != targetMember.CompanyId)
+        // 確認是同一公司（沒有公司的會員不算同公司，避免兩個都沒有公司的個人會員互相操作）
+        if (!manager.CompanyId.HasValue || manager.CompanyId != targetMember.CompanyId)
         {
             return Result.Failure("只能重置同公司成員的密碼");
         }
@@ -504,8 +504,17 @@ public class MemberProfileService : IMemberProfileService
         if (target == null)
             return Result<MemberListItemResponse>.Failure("目標會員不存在");
 
-        if (manager.CompanyId != target.CompanyId)
+        if (!manager.CompanyId.HasValue || manager.CompanyId != target.CompanyId)
             return Result<MemberListItemResponse>.Failure("只能更新同公司成員");
+
+        // 帳號狀態只能在啟用與停用之間切換（鎖定、待審核等狀態由後台管理），也不能停用自己
+        if (request.Status.HasValue)
+        {
+            if (request.Status.Value != Status.Active && request.Status.Value != Status.Inactive)
+                return Result<MemberListItemResponse>.Failure("帳號狀態只能設為啟用或停用");
+            if (managerId == targetMemberId && request.Status.Value != Status.Active)
+                return Result<MemberListItemResponse>.Failure("不能停用自己的帳號");
+        }
 
         if (request.Nickname != null) target.Nickname = request.Nickname;
         if (request.Phone != null) target.Phone = request.Phone;
@@ -546,7 +555,7 @@ public class MemberProfileService : IMemberProfileService
         if (target == null)
             return Result<bool>.Failure("目標會員不存在");
 
-        if (manager.CompanyId != target.CompanyId)
+        if (!manager.CompanyId.HasValue || manager.CompanyId != target.CompanyId)
             return Result<bool>.Failure("只能刪除同公司成員");
 
         await _unitOfWork.Members.DeleteAsync(target, cancellationToken);
@@ -577,7 +586,7 @@ public class MemberProfileService : IMemberProfileService
         if (target == null)
             return Result<MemberListItemResponse>.Failure("目標會員不存在");
 
-        if (manager.CompanyId != target.CompanyId)
+        if (!manager.CompanyId.HasValue || manager.CompanyId != target.CompanyId)
             return Result<MemberListItemResponse>.Failure("只能操作同公司成員");
 
         target.IsDesignatedContact = isDesignatedContact;

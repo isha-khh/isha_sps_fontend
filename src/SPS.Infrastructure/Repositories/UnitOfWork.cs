@@ -25,6 +25,7 @@ public class UnitOfWork : IUnitOfWork
     private IDemandRepository? _demands;
     private IDemandNotificationRepository? _demandNotifications;
     private IInquiryRepository? _inquiries;
+    private IMemberFavoriteRepository? _favorites;
     private INewsRepository? _news;
     private ICategoryRepository? _categories;
     private IAttributeRepository? _attributes;
@@ -156,6 +157,15 @@ public class UnitOfWork : IUnitOfWork
         {
             _demandNotifications ??= new DemandNotificationRepository(_context);
             return _demandNotifications;
+        }
+    }
+
+    public IMemberFavoriteRepository Favorites
+    {
+        get
+        {
+            _favorites ??= new MemberFavoriteRepository(_context);
+            return _favorites;
         }
     }
 

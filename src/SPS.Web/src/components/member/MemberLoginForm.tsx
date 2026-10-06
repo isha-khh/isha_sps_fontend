@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PasswordField from "@/components/member/PasswordField";
@@ -8,6 +8,7 @@ import CaptchaField, { type CaptchaFieldHandle } from "@/components/member/Captc
 import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { getApiErrorMessage } from "@/lib/error-utils";
+import { fromAssertionResponse, toRequestOptions } from "@/lib/webauthn";
 
 /**
  * 積木元件：會員登入表單本體，對應舊站 login.html 的 `.melo_box_left`。
@@ -27,6 +28,9 @@ import { getApiErrorMessage } from "@/lib/error-utils";
  *   （`AuthController.Login`），用 `getApiErrorMessage()` 取出來顯示；
  *   失敗後強制換一組新的驗證碼圖（`captchaRef.refresh()`）——圖片驗證碼
  *   後端驗證過一次就失效，沿用舊的一定會再錯一次。
+ * - 2026-10-06 加上「使用 Passkey 登入」：後台系統設定開啟 FIDO2（`GET /api/Auth/fido2/status`）且瀏覽器支援
+ *   WebAuthn 才會出現。不帶帳號直接呼叫（讓瀏覽器列出這個網站已存的 Passkey 選一個），成功後跟密碼登入一樣
+ *   存會員資料並導去會員中心；Passkey 本身防釣魚，所以不需要圖片驗證碼。會員在會員中心「Passkey 管理」註冊。
  */
 export default function MemberLoginForm() {
   const router = useRouter();
@@ -36,6 +40,38 @@ export default function MemberLoginForm() {
   const [error, setError] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
   const setMember = useAuthStore((s) => s.setMember);
+  const [passkeyAvailable, setPasskeyAvailable] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("PublicKeyCredential" in window) || !navigator.credentials) return;
+    let cancelled = false;
+    authApi
+      .fido2GetStatus()
+      .then((status) => !cancelled && setPasskeyAvailable(status.enabled))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handlePasskeyLogin() {
+    setError(undefined);
+    setSubmitting(true);
+    try {
+      const options = await authApi.fido2AuthenticateStart();
+      const credential = (await navigator.credentials.get({ publicKey: toRequestOptions(options) })) as PublicKeyCredential | null;
+      if (!credential) throw new Error("cancelled");
+      const { member } = await authApi.fido2AuthenticateComplete({ assertionResponse: fromAssertionResponse(credential) });
+      setMember(member);
+      router.push("/member");
+    } catch (err) {
+      const name = (err as { name?: string }).name;
+      if (name === "NotAllowedError" || (err as Error).message === "cancelled") setError("已取消 Passkey 登入。");
+      else setError(getApiErrorMessage(err, "Passkey 登入失敗，請改用帳號密碼登入"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -111,6 +147,15 @@ export default function MemberLoginForm() {
         <span>{submitting ? "登入中…" : "登入"}</span>
         <i className="bi bi-arrow-right" aria-hidden="true"></i>
       </button>
+
+      {passkeyAvailable && (
+        <div className="text-center mt-3">
+          <button type="button" className="tier-reset-btn" onClick={() => void handlePasskeyLogin()} disabled={submitting}>
+            <i className="bi bi-fingerprint me-1" aria-hidden="true"></i>
+            使用 Passkey 登入
+          </button>
+        </div>
+      )}
     </form>
   );
 }

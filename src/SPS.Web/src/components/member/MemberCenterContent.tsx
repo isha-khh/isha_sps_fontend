@@ -10,12 +10,20 @@ import ProfilePanel from "@/components/member/panels/ProfilePanel";
 import UpgradePanel from "@/components/member/panels/UpgradePanel";
 import CompanyPanel from "@/components/member/panels/CompanyPanel";
 import ProductPanel from "@/components/member/panels/ProductPanel";
+import PasswordPanel from "@/components/member/panels/PasswordPanel";
+import PasskeyPanel from "@/components/member/panels/PasskeyPanel";
+import MembersPanel from "@/components/member/panels/MembersPanel";
+import MatchDataPanel from "@/components/member/panels/MatchDataPanel";
+import FavoritesPanel from "@/components/member/panels/FavoritesPanel";
 
 /**
  * 積木元件：會員中心（`/member`）主要內容——這是全新頁面，舊站
  * legacy 參考（`page/member/*.html`）完全沒有對應設計（查過
  * `nav.html`／`footer.html`，「會員中心」的連結一路都只指到
  * `login.html`），版面照現有站內既有 class 拼，不是照抄舊站畫面。
+ *
+ * 2026-10-06 起側邊欄的項目全部做完（基本資料、變更密碼、Passkey 管理、權益升級、公司資料、成員管理、
+ * 產品相關資訊、媒合資料維護、我的最愛），下面「即將推出」的佔位只是保險。
  *
  * 2026-09-10 先做最小可用版本：掛載時用 `fetchProfile()`（打
  * `GET /api/Auth/profile`，Cookie 認證）確認登入狀態；只有「基本
@@ -96,6 +104,16 @@ export default function MemberCenterContent() {
             <CompanyPanel />
           ) : active === "product" ? (
             <ProductPanel />
+          ) : active === "password" ? (
+            <PasswordPanel />
+          ) : active === "passkey" ? (
+            <PasskeyPanel />
+          ) : active === "contact" ? (
+            <MembersPanel />
+          ) : active === "match_data" ? (
+            <MatchDataPanel />
+          ) : active === "favorite" ? (
+            <FavoritesPanel />
           ) : (
             <p className="text-muted">
               <i className="bi bi-info-circle-fill me-1" aria-hidden="true"></i>

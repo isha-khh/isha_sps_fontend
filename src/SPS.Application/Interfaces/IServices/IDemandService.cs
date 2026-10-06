@@ -1,6 +1,7 @@
 using SPS.Application.Common;
 using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.Demand;
+using SPS.Application.DTOs.MemberFavorite;
 
 namespace SPS.Application.Interfaces.IServices;
 
@@ -12,6 +13,15 @@ public interface IDemandService
 
     /// <summary>會員從前台刊登需求：建立成未發布的需求（待後台審核），回傳需求編號</summary>
     Task<Result<string>> SubmitByMemberAsync(Guid memberId, SubmitDemandRequest request, CancellationToken ct = default);
+    /// <summary>會員自己從前台刊登的需求（媒合資料維護）</summary>
+    Task<Result<List<MemberDemandResponse>>> GetMemberDemandsAsync(Guid memberId, CancellationToken ct = default);
+
+    /// <summary>會員修改自己刊登、還沒上架的需求；已上架或別人的需求不能改</summary>
+    Task<Result<MemberDemandResponse>> UpdateByMemberAsync(Guid memberId, int id, UpdateMemberDemandRequest request, CancellationToken ct = default);
+
+    /// <summary>會員撤回自己刊登、還沒上架的需求</summary>
+    Task<Result<bool>> DeleteByMemberAsync(Guid memberId, int id, CancellationToken ct = default);
+
     Task<Result<DemandResponse>> UpdateAsync(int id, UpdateDemandRequest request, string? publisherEmail = null, CancellationToken ct = default);
     Task<Result<bool>> DeleteAsync(int id, CancellationToken ct = default);
     Task<Result<DemandStatisticsDto>> GetStatisticsAsync(CancellationToken ct = default);

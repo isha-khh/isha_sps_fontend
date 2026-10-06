@@ -21,7 +21,7 @@ public class CreateCompanyMemberRequest
     public MemberPosition MemberPosition { get; set; } = MemberPosition.Employee;
 
     [Required]
-    [MinLength(6)]
+    [MinLength(8)]
     public string Password { get; set; } = string.Empty;
 
     public bool IsDesignatedContact { get; set; }

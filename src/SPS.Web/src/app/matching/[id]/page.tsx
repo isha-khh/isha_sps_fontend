@@ -8,6 +8,7 @@ import Link from "next/link";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import RelatedNeeds from "@/components/matching/RelatedNeeds";
 import ProposeSolutionModal from "@/components/matching/ProposeSolutionModal";
+import FavoriteButton from "@/components/matching/FavoriteButton";
 import { demandToNeed } from "@/lib/matching-need-data";
 import { withBasePath } from "@/lib/api-client";
 import { fetchBanners, fetchDemandDetail, fetchDemands } from "@/lib/api.server";
@@ -55,6 +56,10 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
               <span>我要提案</span>
               <i className="bi bi-pencil-square" aria-hidden="true" />
             </a>
+
+            <div className="mb-4 text-center">
+              <FavoriteButton kind="demand" id={need.id} />
+            </div>
 
             <SidebarBanner banners={sidebarBanners} />
           </>

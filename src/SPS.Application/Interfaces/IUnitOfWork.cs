@@ -72,6 +72,11 @@ public interface IUnitOfWork : IDisposable
     IInquiryRepository Inquiries { get; }
 
     /// <summary>
+    /// 會員最愛（收藏的企業與需求）倉儲
+    /// </summary>
+    IMemberFavoriteRepository Favorites { get; }
+
+    /// <summary>
     /// 新聞倉儲
     /// </summary>
     INewsRepository News { get; }

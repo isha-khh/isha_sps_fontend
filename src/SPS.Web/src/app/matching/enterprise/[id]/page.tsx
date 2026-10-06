@@ -4,6 +4,7 @@ import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MoreLink from "@/components/ui/MoreLink";
 import EnterpriseContactModal from "@/components/matching/EnterpriseContactModal";
+import FavoriteButton from "@/components/matching/FavoriteButton";
 import { getCompanyTypeLabels } from "@/lib/matching-data";
 import { fetchCompanyDetail, fetchTagTaxonomy } from "@/lib/api.server";
 import { splitTagsByKind } from "@/lib/company-tags";
@@ -73,6 +74,11 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
         取得聯絡方式
       </a>
     ),
+  });
+  facts.push({
+    icon: "bi-heart",
+    label: "我的最愛",
+    content: <FavoriteButton kind="company" id={company.id} />,
   });
   facts.push({
     icon: "bi-globe",
