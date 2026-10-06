@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/PageTitle';
 import { ApplicationStatusBadge } from '@/components/applications/ApplicationStatusBadge';
 import { adminApplicationsApi } from '@/lib/api/admin-applications.ts';
+import { companiesApi } from '@/lib/api/companies';
 import { ExpertScoringSection } from '@/components/applications/ExpertScoringSection';
 import { ResendEmailModal } from '@/components/applications/ResendEmailModal';
 import { usePermission, Permission } from '@/hooks/usePermission';
@@ -23,6 +24,7 @@ const DocumentTypeLabels: Record<number, string> = {
   5: '數位服務機構證明',
   6: '一般申請書',
   7: '其他佐證文件',
+  8: '公司 LOGO',
 };
 
 const MemberRoleLabels: Record<number, string> = {
@@ -83,6 +85,14 @@ export const ApplicationDetailPage = () => {
   const [downloadingAll, setDownloadingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadDocType, setUploadDocType] = useState<number>(1);
+  // 申請裡勾選的標籤只存 id，顯示時要對照企業標籤名稱
+  const [tagNameById, setTagNameById] = useState<Record<number, string>>({});
+  useEffect(() => {
+    companiesApi
+      .getCompanyTagOptions()
+      .then((options) => setTagNameById(Object.fromEntries(options.map((o) => [o.id, o.name]))))
+      .catch(() => {});
+  }, []);
   const [isResendOpen, setIsResendOpen] = useState(false);
   const { has: hasPerm } = usePermission();
 
@@ -312,6 +322,52 @@ export const ApplicationDetailPage = () => {
                 </>
               )}
             </div>
+
+            {/* 申請時填寫的公司專頁資料：審核通過後會帶進公司資料（企業名錄顯示的就是這些） */}
+            {!isIndividual && application.profile && (
+              <div className="mt-6">
+                <h4 className="font-medium mb-3 text-base-content/80">公司專頁資料（核准後帶入公司）</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    ['公司電話', application.profile.phone],
+                    ['公司地址（縣市／鄉鎮區）', [application.profile.city, application.profile.district].filter(Boolean).join(' ')],
+                    ['成立日期', application.profile.establishmentDate],
+                    ['資本總額', application.profile.revenue != null ? `${application.profile.revenue.toLocaleString()} 元` : ''],
+                    ['公司網址', application.profile.orgUrl],
+                    ['主要產品暨服務', application.profile.subject],
+                    ['工廠名稱', application.profile.factoryName],
+                    ['工廠地址', [application.profile.factoryCity, application.profile.factoryDistrict, application.profile.factoryAddress].filter(Boolean).join('')],
+                  ].map(([label, value]) => (
+                    <div className="form-control" key={label}>
+                      <label className="label"><span className="label-text font-medium">{label}</span></label>
+                      <p className="text-base-content break-all">{value || '-'}</p>
+                    </div>
+                  ))}
+                  <div className="form-control md:col-span-2">
+                    <label className="label"><span className="label-text font-medium">公司簡介</span></label>
+                    <p className="text-base-content whitespace-pre-wrap">{application.profile.introduction || '-'}</p>
+                  </div>
+                  <div className="form-control md:col-span-2">
+                    <label className="label"><span className="label-text font-medium">標籤（應用情境／應用範疇／智慧技術）</span></label>
+                    <div className="flex flex-wrap gap-2">
+                      {application.profile.tagIds.length > 0 ? (
+                        application.profile.tagIds.map((tagId) => (
+                          <span className="badge badge-outline" key={tagId}>
+                            {tagNameById[tagId] ?? `#${tagId}`}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-base-content">-</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="form-control md:col-span-2">
+                    <label className="label"><span className="label-text font-medium">獲獎事蹟暨重要合作案例</span></label>
+                    <p className="text-base-content whitespace-pre-wrap">{application.profile.awardNote || '-'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="divider" />

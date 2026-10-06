@@ -81,6 +81,12 @@ public class CreateCompanyRequest
     /// <summary>合作案例說明；沒帶（null）= 不更新，空字串 = 清除</summary>
     public string? CooperationNote { get; set; }
 
+    /// <summary>工廠名稱（需求端企業）；更新時沒帶（null）= 不更新，空字串 = 清除</summary>
+    public string? FactoryName { get; set; }
+
+    /// <summary>工廠地址（需求端企業）；更新時沒帶（null）= 不更新，空字串 = 清除</summary>
+    public string? FactoryAddress { get; set; }
+
     /// <summary>主要產品暨服務示意圖的檔案 Id（最多 12 個）；沒帶（null）= 不更新，空陣列 = 清除</summary>
     public List<Guid>? ProductImageFileIds { get; set; }
 

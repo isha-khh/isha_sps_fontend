@@ -4,14 +4,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import PasswordField from "@/components/member/PasswordField";
-import ChecklistGroup from "@/components/member/ChecklistGroup";
-import SmartTechSelector from "@/components/member/SmartTechSelector";
 import DocumentUploadField from "@/components/member/DocumentUploadField";
 import RegisterDownloadList from "@/components/member/RegisterDownloadList";
 import type { DownloadResources } from "@/lib/types";
-import { APPLICATION_SCENARIOS, APPLICATION_SCOPES } from "@/lib/member-registration-data";
-import { withBasePath } from "@/lib/api-client";
 import { applicationsApi } from "@/lib/api/applications";
+import CompanyProfileFields from "@/components/member/CompanyProfileFields";
+import { emptyProfile, profileFromApplication, profileToRequest, validateProfile, type ProfileState } from "@/lib/company-profile";
+import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { DocumentType } from "@/types/api";
 import { ApplicantType as ApplicantTypeEnum, CompanyLevel, MemberRole, type ApplicationResponse, type CreateApplicationRequest } from "@/types/application";
@@ -77,15 +76,9 @@ interface DocumentSlots {
  *   成功才跳出「完成註冊」彈窗（用 `window.bootstrap.Modal` 手動
  *   觸發，因為這個跳出時機現在取決於 API 呼叫結果，不能再用純
  *   `data-bs-toggle` 靜態觸發）。
- * - LOGO／成立日期／資本總額／公司網址／公司簡介／主要產品／標籤／
- *   應用情境／應用範疇／智慧技術／獲獎事蹟／工廠名稱／工廠地址／
- *   公司電話這些欄位，目前後端 `CreateApplicationRequest`／
- *   `MemberApplication` 完全沒有對應欄位可以承接（它們屬於審核通過
- *   後才編輯的「公司專頁」資料，或者根本還沒有後端欄位，例如工廠
- *   名稱/地址）——這裡維持畫面存在但不接真資料，等後端補欄位再回來
- *   接，不是忘記做。公司地址的「縣市／鄉鎮市區」兩個下拉也只是
- *   還沒換真的行政區清單的假選項，一樣先不送出，只送「地址」那欄
- *   自由文字。
+ * - 2026-10-06：LOGO／成立日期／資本總額／公司網址／公司簡介／公司電話／縣市與鄉鎮區／主要產品／標籤（應用情境、
+ *   應用範疇、智慧技術）／獲獎事蹟／工廠名稱與地址，原本是「暫不送出」的灰色假欄位，現在由共用的
+ *   `CompanyProfileFields` 負責（跟申請一起存進後端，審核通過後帶進公司資料）。
  * - 「產業別」原本是一個只有 2 個假選項（value="1"/"2"）的下拉選單，
  *   後端欄位其實是自由文字——改成文字輸入框，不然送出去的資料會是
  *   毫無意義的 "1"/"2" 字串。
@@ -138,7 +131,8 @@ export default function MemberDetailsForm({
   const [position, setPosition] = useState("");
   const [contactPerson, setContactPerson] = useState("");
   const [unifiedSocialCreditCode, setUnifiedSocialCreditCode] = useState("");
-  const [companyAddress, setCompanyAddress] = useState("");
+  const [profile, setProfile] = useState<ProfileState>(() => (mode === "review" ? profileFromApplication(application?.profile, application?.companyAddress) : emptyProfile()));
+  const { taxonomy } = useTagTaxonomy();
   const [consentChecked, setConsentChecked] = useState(false);
   const [docs, setDocs] = useState<DocumentSlots>({ companyRegistration: null, capability: null, application: null, other: null });
   const [submitting, setSubmitting] = useState(false);
@@ -156,9 +150,13 @@ export default function MemberDetailsForm({
       return "兩次密碼輸入不一致";
     }
     if (isCompany) {
-      if (!contactPerson || !unifiedSocialCreditCode || !companyAddress) {
+      if (!contactPerson || !unifiedSocialCreditCode) {
         return "請完整填寫公司資料必填欄位";
       }
+      const profileError = validateProfile(profile, { isSupplier, isDemand }, {
+        hasKind: (id, kind) => taxonomy.kindById[id] === kind,
+      });
+      if (profileError) return profileError;
       if (isDemand && !docs.companyRegistration) {
         return "請上傳工廠登記證明文件";
       }
@@ -196,7 +194,8 @@ export default function MemberDetailsForm({
         contactPerson: isCompany ? contactPerson : undefined,
         companyName,
         industry,
-        companyAddress: isCompany ? companyAddress : undefined,
+        companyAddress: isCompany ? profile.address.trim() : undefined,
+        profile: isCompany ? profileToRequest(profile, { isSupplier, isDemand }) : undefined,
         members: [
           {
             contactName,
@@ -224,6 +223,7 @@ export default function MemberDetailsForm({
           uploads.push({ type: DocumentType.Application, file: docs.application });
         }
       }
+      if (isSupplier && profile.logo) uploads.push({ type: DocumentType.CompanyLogo, file: profile.logo });
       if (docs.other) uploads.push({ type: DocumentType.Other, file: docs.other });
       uploads.push({ type: DocumentType.PersonalDataConsent, file: buildConsentAcknowledgementFile(contactName) });
 
@@ -409,152 +409,14 @@ export default function MemberDetailsForm({
               />
             </div>
 
-            <div className="menb_inp_tit form-group">
-              <label className="mb-2">公司電話</label>
-              <input type="text" className="form-control" placeholder="公司電話（暫不送出，等公司專頁功能開放後再編輯）" disabled />
-            </div>
-
-            <div className="menb_inp_tit form-group w-100">
-              <label className="mb-2">{requiredMark}公司地址</label>
-              <div className="col-12 col-sm">
-                <div className="row g-2">
-                  <div className="col-6 mb-md-0 mb-2">
-                    <select className="form-select" aria-label="縣市" disabled defaultValue="縣/市">
-                      <option>縣/市</option>
-                      <option value="1">基隆市</option>
-                      <option value="2">台北市</option>
-                    </select>
-                  </div>
-                  <div className="col-6 mb-md-0 mb-2">
-                    <select className="form-select" aria-label="鄉鎮市區" disabled defaultValue="鄉/鎮/區">
-                      <option>鄉/鎮/區</option>
-                      <option value="1">中正區</option>
-                      <option value="2">信義區</option>
-                    </select>
-                  </div>
-                  <div className="col-12">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="請輸入完整地址"
-                      value={disabled ? reviewValue(application?.companyAddress) : companyAddress}
-                      onChange={(e) => setCompanyAddress(e.target.value)}
-                      disabled={disabled}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2026-09-10：LOGO／成立日期／資本總額／公司網址／公司
-                簡介——需求端、供給端都顯示，差別只在必填星號
-                （`profileMark`：供給端必填、需求端選填）。這批欄位屬於
-                「公司專頁」資料，後端審核通過後才有 Company 記錄可以
-                編輯，註冊申請階段還沒有地方可以存，暫不送出。 */}
-            <div className="menb_inp_tit form-group w-100">
-              <label className="mb-2">{profileMark}LOGO圖像</label>
-              {disabled ? (
-                <div className="menb_logo">
-                  <img className="img-fluid d-block" src={withBasePath("/images/all/menb_logo.jpg")} alt="" style={{ width: 200, height: 200 }} />
-                </div>
-              ) : (
-                <DocumentUploadField label="LOGO" mode="edit" hint="上傳格式支援影像檔，最大上限10MB。（暫不送出，等公司專頁功能開放後再編輯）" />
-              )}
-            </div>
-
-            <div className="menb_inp_tit form-group">
-              <label className="mb-2">{profileMark}成立日期</label>
-              <input type="text" placeholder="開始日期（暫不送出）" id="startDate" className="form-control areadrp sideByside" disabled />
-            </div>
-
-            <div className="menb_inp_tit form-group">
-              <label className="mb-2">{profileMark}資本總額</label>
-              <input type="text" className="form-control" placeholder="資本總額（暫不送出）" disabled />
-            </div>
-
-            <div className="menb_inp_tit form-group w-100">
-              <label className="mb-2">{profileMark}公司網址</label>
-              <input type="text" className="form-control" placeholder="公司網址（暫不送出）" disabled />
-            </div>
-
-            <div className="menb_inp_tit form-group w-100">
-              <label className="mb-2">{profileMark}公司簡介</label>
-              <textarea className="form-control" rows={5} disabled placeholder="公司簡介（暫不送出）" />
-            </div>
-
-            {/* 2026-09-10：這一段（主要產品／標籤／應用情境/範疇／
-                智慧技術／獲獎事蹟）只有供給端才顯示——需求端在總表裡
-                這幾列全部是「—」，不是選填，是整段都不用出現。同樣
-                屬於「公司專頁」資料，暫不送出。 */}
-            {isSupplier && (
-              <>
-                <div className="menb_inp_tit form-group w-100">
-                  <label className="mb-2">{requiredMark}主要產品暨服務</label>
-                  <select className="form-select" aria-label="請選擇" disabled defaultValue="請選擇">
-                    <option>請選擇</option>
-                  </select>
-                </div>
-
-                <div className="menb_inp_tit form-group w-100">
-                  <label className="mb-2">{requiredMark}標籤</label>
-                  <input type="text" className="form-control" placeholder="請輸入標籤，多個標籤請以逗號分隔（暫不送出）" disabled />
-                </div>
-
-                <div className="menb_inp_tit form-group w-100">
-                  <label className="mb-2">{REQUIRED}應用情境(可多選)</label>
-                  <ChecklistGroup idPrefix="fxContext" options={APPLICATION_SCENARIOS} disabled threeColumn />
-                </div>
-
-                <div className="menb_inp_tit form-group w-100">
-                  <label className="mb-2">{REQUIRED}應用範疇(可多選)</label>
-                  <ChecklistGroup idPrefix="fxScope" options={APPLICATION_SCOPES} disabled />
-                </div>
-
-                <div className="menb_inp_tit form-group w-100">
-                  <label className="mb-2">{REQUIRED}智慧技術(可多選)</label>
-                  <SmartTechSelector disabled />
-                </div>
-
-                <div className="menb_inp_tit form-group w-100">
-                  <label className="mb-2">獲獎事蹟暨重要合作案例</label>
-                  <input type="text" className="form-control" placeholder="請輸入獲獎事蹟暨重要合作案例（暫不送出）" disabled />
-                </div>
-              </>
-            )}
-
-            {isDemand && (
-              <>
-                <div className="menb_inp_tit form-group w-100">
-                  <label className="mb-2">{requiredMark}工廠名稱</label>
-                  <input type="text" className="form-control" placeholder="請輸入工廠名稱（暫不送出，後端尚未提供對應欄位）" disabled />
-                </div>
-
-                <div className="menb_inp_tit form-group w-100">
-                  <label className="mb-2">{requiredMark}工廠地址</label>
-                  <div className="col-12 col-sm">
-                    <div className="row g-2">
-                      <div className="col-6 mb-md-0 mb-2">
-                        <select className="form-select" aria-label="縣市" disabled defaultValue="縣/市">
-                          <option>縣/市</option>
-                          <option value="1">基隆市</option>
-                          <option value="2">台北市</option>
-                        </select>
-                      </div>
-                      <div className="col-6 mb-md-0 mb-2">
-                        <select className="form-select" aria-label="鄉鎮市區" disabled defaultValue="鄉/鎮/區">
-                          <option>鄉/鎮/區</option>
-                          <option value="1">中正區</option>
-                          <option value="2">信義區</option>
-                        </select>
-                      </div>
-                      <div className="col-12">
-                        <input type="text" className="form-control" placeholder="地址（暫不送出，後端尚未提供對應欄位）" disabled />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
+            <CompanyProfileFields
+              value={profile}
+              onChange={(patch) => setProfile((prev) => ({ ...prev, ...patch }))}
+              readOnly={disabled}
+              isSupplier={isSupplier}
+              isDemand={isDemand}
+              taxonomy={taxonomy}
+            />
           </div>
         </>
       )}

@@ -15,6 +15,24 @@ export interface ApplicationMemberDto {
   orderIndex: number;
 }
 
+/** 申請時填寫的公司專頁資料（對應後端 `CompanyProfileDto`），審核通過後帶進公司資料 */
+export interface CompanyProfile {
+  phone?: string;
+  city?: string;
+  district?: string;
+  establishmentDate?: string;
+  revenue?: number;
+  orgUrl?: string;
+  introduction?: string;
+  subject?: string;
+  awardNote?: string;
+  tagIds: number[];
+  factoryName?: string;
+  factoryCity?: string;
+  factoryDistrict?: string;
+  factoryAddress?: string;
+}
+
 export interface CreateApplicationRequest {
   applicantType: ApplicantType;
   existingMemberId?: string;
@@ -26,6 +44,7 @@ export interface CreateApplicationRequest {
   industry?: string;
   companyAddress?: string;
   businessScope?: string;
+  profile?: CompanyProfile;
   reason?: string;
   members: ApplicationMemberDto[];
 }
@@ -182,6 +201,7 @@ export interface ApplicationResponse {
   isManualInput: boolean;
   businessScope?: string;
   companyAddress?: string;
+  profile?: CompanyProfile;
   reason?: string;
   remark?: string;
   reviewerId?: string;

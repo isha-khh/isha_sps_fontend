@@ -118,6 +118,8 @@ export interface Application {
   isManualInput: boolean;
   businessScope?: string;
   companyAddress?: string;
+  /** 申請時填寫的公司專頁資料（核准時帶進公司資料） */
+  profile?: ApplicationCompanyProfile;
 
   // 申請說明
   reason?: string;
@@ -157,6 +159,24 @@ export interface ApplicationStatistics {
   todayApplications: number;
 }
 
+/** 申請時填寫的公司專頁資料（對應後端 `CompanyProfileDto`） */
+export interface ApplicationCompanyProfile {
+  phone?: string;
+  city?: string;
+  district?: string;
+  establishmentDate?: string;
+  revenue?: number;
+  orgUrl?: string;
+  introduction?: string;
+  subject?: string;
+  awardNote?: string;
+  tagIds: number[];
+  factoryName?: string;
+  factoryCity?: string;
+  factoryDistrict?: string;
+  factoryAddress?: string;
+}
+
 // 文檔類型
 export const DocumentType = {
   CompanyRegistration: 1,
@@ -167,6 +187,8 @@ export const DocumentType = {
   Application: 6,
   /** 其他佐證文件（選填） */
   Other: 7,
+  /** 公司 LOGO（註冊申請時上傳，審核通過後複製成公司標誌） */
+  CompanyLogo: 8,
 } as const;
 
 export type DocumentType = typeof DocumentType[keyof typeof DocumentType];

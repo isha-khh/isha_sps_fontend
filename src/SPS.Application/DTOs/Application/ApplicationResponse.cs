@@ -47,6 +47,9 @@ public class ApplicationResponse
     public string? BusinessScope { get; set; }
     public string? CompanyAddress { get; set; }
 
+    /// <summary>公司專頁資料（電話、縣市／鄉鎮區、簡介、標籤、工廠…）</summary>
+    public CompanyProfileDto Profile { get; set; } = new();
+
     // 申請說明
     public string? Reason { get; set; }
     public string? Remark { get; set; }

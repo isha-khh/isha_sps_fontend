@@ -26,6 +26,8 @@ public class CompanyResponse
     public string? OrgUrl { get; set; }
     public string? VideoUrl { get; set; }
     public string? CooperationNote { get; set; }
+    public string? FactoryName { get; set; }
+    public string? FactoryAddress { get; set; }
 
     /// <summary>圖片的檔案 Id（原始設定；控制器會依檔案是否可用解析成 <see cref="ProductImages"/>／<see cref="AwardImages"/>）</summary>
     public List<Guid> ProductImageFileIds { get; set; } = new();

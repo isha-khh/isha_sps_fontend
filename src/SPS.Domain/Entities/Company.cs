@@ -132,6 +132,12 @@ public class Company : BaseEntity<Guid>
     /// <summary>合作案例說明（前台企業詳情「獲獎事蹟暨重要合作案例」）</summary>
     public string? CooperationNote { get; set; }
 
+    /// <summary>工廠名稱（需求端企業）</summary>
+    public string? FactoryName { get; set; }
+
+    /// <summary>工廠地址（需求端企業，縣市＋鄉鎮區＋詳細地址串成一行）</summary>
+    public string? FactoryAddress { get; set; }
+
     /// <summary>主要產品暨服務的示意圖：檔案管理中的圖片檔案 Id（依顯示順序）</summary>
     public List<Guid> ProductImageFileIds { get; set; } = new();
 

@@ -38,6 +38,8 @@ export const CompanyFormPage = () => {
     orgUrl: '',
     videoUrl: '',
     cooperationNote: '',
+    factoryName: '',
+    factoryAddress: '',
     charge: '',
     chargeEmail: '',
     chargePhone: '',
@@ -103,6 +105,8 @@ export const CompanyFormPage = () => {
           orgUrl: data.orgUrl || '',
           videoUrl: data.videoUrl || '',
           cooperationNote: data.cooperationNote || '',
+          factoryName: data.factoryName || '',
+          factoryAddress: data.factoryAddress || '',
           charge: data.charge || '',
           chargeEmail: data.chargeEmail || '',
           chargePhone: data.chargePhone || '',
@@ -765,6 +769,21 @@ export const CompanyFormPage = () => {
                       value={formData.cooperationNote ?? ''}
                       onChange={(e) => setFormData({ ...formData, cooperationNote: e.target.value })}
                     />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text font-medium">工廠名稱（需求端）</span>
+                      </label>
+                      <input type="text" className="input input-bordered" value={formData.factoryName ?? ''} onChange={(e) => setFormData({ ...formData, factoryName: e.target.value })} />
+                    </div>
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text font-medium">工廠地址（需求端）</span>
+                      </label>
+                      <input type="text" className="input input-bordered" value={formData.factoryAddress ?? ''} onChange={(e) => setFormData({ ...formData, factoryAddress: e.target.value })} />
+                    </div>
                   </div>
                 </div>
               </div>

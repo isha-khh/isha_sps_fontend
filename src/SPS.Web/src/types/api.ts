@@ -145,6 +145,8 @@ export const DocumentType = {
   Application: 6,
   /** 其他佐證文件（所有申請類型共用 - 選填） */
   Other: 7,
+  /** 公司 LOGO（供給端註冊必填；審核通過後複製成公司標誌） */
+  CompanyLogo: 8,
 } as const;
 
 export type DocumentType = typeof DocumentType[keyof typeof DocumentType];

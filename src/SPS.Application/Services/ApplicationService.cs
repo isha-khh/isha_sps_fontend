@@ -129,6 +129,7 @@ public class ApplicationService : IApplicationService
                 Reason = request.Reason,
                 CreatedTime = DateTime.UtcNow
             };
+            ApplicationProfileMapper.Apply(application, request.Profile);
 
             await _unitOfWork.Applications.AddAsync(application, cancellationToken);
 
@@ -232,6 +233,9 @@ public class ApplicationService : IApplicationService
 
             if (request.BusinessScope.IsSet)
                 application.BusinessScope = request.BusinessScope.Value;
+
+            if (request.Profile != null)
+                ApplicationProfileMapper.Apply(application, request.Profile);
 
             if (request.Reason.IsSet)
                 application.Reason = request.Reason.Value;
@@ -759,6 +763,38 @@ public class ApplicationService : IApplicationService
         }
     }
 
+    private static string? ValidateCompanyProfile(MemberApplication application)
+    {
+        if (string.IsNullOrWhiteSpace(application.CompanyPhone))
+            return "請填寫公司電話";
+
+        if (string.IsNullOrWhiteSpace(application.CompanyCity) ||
+            string.IsNullOrWhiteSpace(application.CompanyDistrict) ||
+            string.IsNullOrWhiteSpace(application.CompanyAddress))
+            return "請填寫完整的公司地址（縣市、鄉鎮區、詳細地址）";
+
+        if (application.MemberRole == MemberRole.Supplier)
+        {
+            if (string.IsNullOrWhiteSpace(application.EstablishmentDate)) return "請填寫成立日期";
+            if (application.Revenue == null) return "請填寫資本總額";
+            if (string.IsNullOrWhiteSpace(application.OrgUrl)) return "請填寫公司網址";
+            if (string.IsNullOrWhiteSpace(application.Introduction)) return "請填寫公司簡介";
+            if (string.IsNullOrWhiteSpace(application.Subject)) return "請填寫主要產品暨服務";
+            if (application.TagIds.Count == 0) return "請至少勾選一個標籤（應用情境、應用範疇、智慧技術）";
+            if (!application.Documents.Any(d => d.Type == DocumentType.CompanyLogo)) return "請上傳公司 LOGO 圖像";
+        }
+        else if (application.MemberRole == MemberRole.Buyer)
+        {
+            if (string.IsNullOrWhiteSpace(application.FactoryName)) return "請填寫工廠名稱";
+            if (string.IsNullOrWhiteSpace(application.FactoryCity) ||
+                string.IsNullOrWhiteSpace(application.FactoryDistrict) ||
+                string.IsNullOrWhiteSpace(application.FactoryAddress))
+                return "請填寫完整的工廠地址（縣市、鄉鎮區、詳細地址）";
+        }
+
+        return null;
+    }
+
     public async Task<Result<bool>> ValidateApplicationForSubmitAsync(
         Guid applicationId,
         CancellationToken cancellationToken = default)
@@ -805,6 +841,14 @@ public class ApplicationService : IApplicationService
                 string.IsNullOrEmpty(application.Industry))
             {
                 return Result<bool>.Failure("請填寫完整的公司信息");
+            }
+
+            // 公司專頁資料（對應改版規劃.md 欄位總表）：所有企業都要有電話與完整地址；
+            // 供給端要有成立日期、資本總額、網址、簡介、主要產品、標籤與 LOGO；需求端要有工廠名稱與地址
+            var profileError = ValidateCompanyProfile(application);
+            if (profileError != null)
+            {
+                return Result<bool>.Failure(profileError);
             }
 
             // 驗證文件上傳
@@ -967,6 +1011,7 @@ public class ApplicationService : IApplicationService
             IsManualInput = application.IsManualInput,
             BusinessScope = application.BusinessScope,
             CompanyAddress = application.CompanyAddress,
+            Profile = ApplicationProfileMapper.ToDto(application),
             Reason = application.Reason,
             Remark = application.Remark,
             ReviewerId = application.ReviewerId,

@@ -60,6 +60,9 @@ public class UpdateApplicationRequest
     /// </summary>
     public Optional<string> BusinessScope { get; set; }
 
+    /// <summary>公司專頁資料；沒帶（null）= 不更新，有帶 = 整份取代</summary>
+    public CompanyProfileDto? Profile { get; set; }
+
     /// <summary>
     /// 申請理由（可選欄位，使用 Optional 以支援清除）
     /// 未提供 = 不更新，提供 null = 清除，提供值 = 更新

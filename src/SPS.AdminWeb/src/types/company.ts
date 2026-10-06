@@ -42,6 +42,9 @@ export interface CreateCompanyRequest {
   videoUrl?: string;
   /** 合作案例說明（前台企業詳情）；更新時沒帶＝不更新、空字串＝清除 */
   cooperationNote?: string;
+  /** 工廠名稱／地址（需求端企業）；更新時沒帶＝不更新、空字串＝清除 */
+  factoryName?: string;
+  factoryAddress?: string;
   /** 主要產品暨服務示意圖的檔案 Id（最多 12 個）；更新時沒帶＝不更新、空陣列＝清除 */
   productImageFileIds?: string[];
   /** 獲獎事蹟暨重要合作案例圖片的檔案 Id（最多 12 個） */
@@ -76,6 +79,9 @@ export interface UpdateCompanyRequest {
   videoUrl?: string;
   /** 合作案例說明（前台企業詳情）；更新時沒帶＝不更新、空字串＝清除 */
   cooperationNote?: string;
+  /** 工廠名稱／地址（需求端企業）；更新時沒帶＝不更新、空字串＝清除 */
+  factoryName?: string;
+  factoryAddress?: string;
   /** 主要產品暨服務示意圖的檔案 Id（最多 12 個）；更新時沒帶＝不更新、空陣列＝清除 */
   productImageFileIds?: string[];
   /** 獲獎事蹟暨重要合作案例圖片的檔案 Id（最多 12 個） */
@@ -186,6 +192,8 @@ export interface Company {
   photo?: PictureResponse;
   banner?: PictureResponse;
   cooperationNote?: string;
+  factoryName?: string;
+  factoryAddress?: string;
   productImages?: CompanyImage[];
   awardImages?: CompanyImage[];
   designatedContacts?: DesignatedContact[];

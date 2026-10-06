@@ -38,5 +38,8 @@ public enum DocumentType
     /// <summary>
     /// 其他佐證文件（所有申請類型共用 - 選填）
     /// </summary>
-    Other = 7
+    Other = 7,
+
+    /// <summary>公司 LOGO（註冊申請時上傳；審核通過後複製成公開檔案當公司標誌）</summary>
+    CompanyLogo = 8
 }

@@ -21,6 +21,7 @@ public class ApplicationReviewService : IApplicationReviewService
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
     private readonly IScoringService _scoringService;
+    private readonly IFileManagementService _fileManagementService;
     private readonly ILogger<ApplicationReviewService> _logger;
 
     public ApplicationReviewService(
@@ -29,6 +30,7 @@ public class ApplicationReviewService : IApplicationReviewService
         IEmailService emailService,
         IConfiguration configuration,
         IScoringService scoringService,
+        IFileManagementService fileManagementService,
         ILogger<ApplicationReviewService> logger)
     {
         _unitOfWork = unitOfWork;
@@ -36,6 +38,7 @@ public class ApplicationReviewService : IApplicationReviewService
         _emailService = emailService;
         _configuration = configuration;
         _scoringService = scoringService;
+        _fileManagementService = fileManagementService;
         _logger = logger;
     }
 
@@ -372,6 +375,84 @@ public class ApplicationReviewService : IApplicationReviewService
         }
     }
 
+    /// <summary>
+    /// 把申請裡的公司專頁資料（電話、地址、簡介、網址、成立日期、資本額、主要產品、獲獎事蹟、工廠、標籤、LOGO）
+    /// 帶進公司。公司原本就有值的欄位不覆蓋（例如同統編的既有公司，由後台維護的資料優先）。
+    /// </summary>
+    private async Task ApplyProfileToCompanyAsync(MemberApplication application, Company company, CancellationToken cancellationToken)
+    {
+        company.Phone ??= application.CompanyPhone;
+        company.Introduction ??= application.Introduction;
+        company.OrgUrl ??= application.OrgUrl;
+        company.EstablishmentDate ??= application.EstablishmentDate;
+        company.Revenue ??= application.Revenue;
+        company.Subject ??= application.Subject;
+        company.CooperationNote ??= application.AwardNote;
+        company.FactoryName ??= application.FactoryName;
+        if (company.FactoryAddress == null && !string.IsNullOrWhiteSpace(application.FactoryAddress))
+        {
+            company.FactoryAddress = string.Concat(application.FactoryCity, application.FactoryDistrict, application.FactoryAddress);
+        }
+
+        if (company.Address == null && company.AddressId == null &&
+            (!string.IsNullOrWhiteSpace(application.CompanyCity) || !string.IsNullOrWhiteSpace(application.CompanyAddress)))
+        {
+            company.Address = new Address
+            {
+                Type = 0,
+                City = application.CompanyCity,
+                District = application.CompanyDistrict,
+                Line = application.CompanyAddress,
+                CreatedTime = DateTime.UtcNow
+            };
+        }
+
+        // 標籤（企業標籤分類）：只新增還沒綁定的
+        if (application.TagIds.Count > 0)
+        {
+            var db = _unitOfWork.GetDbContext();
+            var existing = await db.Set<CompanyTagCategory>()
+                .Where(t => t.CompanyId == company.Id)
+                .Select(t => t.CategoryId)
+                .ToListAsync(cancellationToken);
+            var validIds = await db.Set<Category>()
+                .Where(c => application.TagIds.Contains(c.Id) && c.Type == CategoryType.CompanyTag)
+                .Select(c => c.Id)
+                .ToListAsync(cancellationToken);
+            foreach (var tagId in validIds.Except(existing))
+            {
+                db.Set<CompanyTagCategory>().Add(new CompanyTagCategory { CompanyId = company.Id, CategoryId = tagId });
+            }
+        }
+
+        // LOGO：申請附件不能公開下載，複製成一般檔案後再建立公司的圖片紀錄
+        if (company.PhotoId == null && company.Photo == null)
+        {
+            var documents = await _unitOfWork.ApplicationDocuments.GetByApplicationIdAsync(application.Id, cancellationToken);
+            var logo = documents.FirstOrDefault(d => d.Type == DocumentType.CompanyLogo && d.UploadedFileId.HasValue);
+            if (logo != null)
+            {
+                var copy = await _fileManagementService.CopyFileAsync(logo.UploadedFileId!.Value, null, Guid.Empty, cancellationToken);
+                if (copy.IsSuccess && copy.Data != null)
+                {
+                    company.Photo = new Picture
+                    {
+                        Name = copy.Data.OriginalFileName,
+                        Type = 0,
+                        ContentType = copy.Data.ContentType,
+                        Uri = $"/api/FileManagement/{copy.Data.Id}/download",
+                        Published = true,
+                        CreatedTime = DateTime.UtcNow
+                    };
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to copy logo for application {ApplicationNumber}: {Error}", application.ApplicationNumber, copy.Error);
+                }
+            }
+        }
+    }
+
     // Helper method to create member and company after approval
     private async Task<Result<bool>> CreateMemberAndCompanyAsync(
         MemberApplication application,
@@ -453,6 +534,9 @@ public class ApplicationReviewService : IApplicationReviewService
                         await _unitOfWork.Companies.UpdateAsync(company, cancellationToken);
                     }
                 }
+
+                // 申請時填的公司專頁資料帶進公司（新公司全部帶入；既有公司只補空白欄位，不覆蓋已有的資料）
+                await ApplyProfileToCompanyAsync(application, company, cancellationToken);
 
                 application.CompanyId = company.Id;
             }
@@ -701,6 +785,7 @@ public class ApplicationReviewService : IApplicationReviewService
             IsManualInput = application.IsManualInput,
             BusinessScope = application.BusinessScope,
             CompanyAddress = application.CompanyAddress,
+            Profile = ApplicationProfileMapper.ToDto(application),
             Reason = application.Reason,
             Remark = application.Remark,
             ReviewerId = application.ReviewerId,

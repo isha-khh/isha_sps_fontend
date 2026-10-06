@@ -121,6 +121,22 @@ public class MemberApplication : BaseEntity<Guid>
     /// </summary>
     public string? CompanyAddress { get; set; }
 
+    // 公司專頁資料（申請時填寫，核准時帶進 Company；見 CompanyProfileDto）
+    public string? CompanyPhone { get; set; }
+    public string? CompanyCity { get; set; }
+    public string? CompanyDistrict { get; set; }
+    public string? EstablishmentDate { get; set; }
+    public decimal? Revenue { get; set; }
+    public string? OrgUrl { get; set; }
+    public string? Introduction { get; set; }
+    public string? Subject { get; set; }
+    public string? AwardNote { get; set; }
+    public List<int> TagIds { get; set; } = new();
+    public string? FactoryName { get; set; }
+    public string? FactoryCity { get; set; }
+    public string? FactoryDistrict { get; set; }
+    public string? FactoryAddress { get; set; }
+
     // ==================== 申請說明 ====================
 
     /// <summary>

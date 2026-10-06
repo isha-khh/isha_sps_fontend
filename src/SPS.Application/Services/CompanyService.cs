@@ -113,6 +113,8 @@ public class CompanyService : ICompanyService
             OrgUrl = request.OrgUrl,
             VideoUrl = request.VideoUrl,
             CooperationNote = string.IsNullOrWhiteSpace(request.CooperationNote) ? null : request.CooperationNote.Trim(),
+            FactoryName = string.IsNullOrWhiteSpace(request.FactoryName) ? null : request.FactoryName.Trim(),
+            FactoryAddress = string.IsNullOrWhiteSpace(request.FactoryAddress) ? null : request.FactoryAddress.Trim(),
             ProductImageFileIds = request.ProductImageFileIds?.Distinct().ToList() ?? new List<Guid>(),
             AwardImageFileIds = request.AwardImageFileIds?.Distinct().ToList() ?? new List<Guid>(),
             Charge = request.Charge,
@@ -213,6 +215,12 @@ public class CompanyService : ICompanyService
 
         if (request.CooperationNote != null)
             company.CooperationNote = string.IsNullOrWhiteSpace(request.CooperationNote) ? null : request.CooperationNote.Trim();
+
+        if (request.FactoryName != null)
+            company.FactoryName = string.IsNullOrWhiteSpace(request.FactoryName) ? null : request.FactoryName.Trim();
+
+        if (request.FactoryAddress != null)
+            company.FactoryAddress = string.IsNullOrWhiteSpace(request.FactoryAddress) ? null : request.FactoryAddress.Trim();
 
         if (request.ProductImageFileIds != null)
             company.ProductImageFileIds = request.ProductImageFileIds.Distinct().ToList();
@@ -512,6 +520,8 @@ public class CompanyService : ICompanyService
             OrgUrl = company.OrgUrl,
             VideoUrl = company.VideoUrl,
             CooperationNote = company.CooperationNote,
+            FactoryName = company.FactoryName,
+            FactoryAddress = company.FactoryAddress,
             ProductImageFileIds = company.ProductImageFileIds,
             AwardImageFileIds = company.AwardImageFileIds,
             Charge = company.Charge,

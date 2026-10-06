@@ -1,5 +1,8 @@
 "use client";
 
+import CompanyProfileFields from "@/components/member/CompanyProfileFields";
+import { emptyProfile, profileToRequest, validateProfile, type ProfileState } from "@/lib/company-profile";
+import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
 import { useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
 import { applicationsApi } from "@/lib/api/applications";
@@ -68,7 +71,8 @@ export default function UpgradePanel() {
   const [position, setPosition] = useState("");
   const [contactPerson, setContactPerson] = useState("");
   const [unifiedSocialCreditCode, setUnifiedSocialCreditCode] = useState("");
-  const [companyAddress, setCompanyAddress] = useState("");
+  const [profile, setProfile] = useState<ProfileState>(emptyProfile);
+  const { taxonomy } = useTagTaxonomy();
   const [consentChecked, setConsentChecked] = useState(false);
   const [docs, setDocs] = useState<DocumentSlots>({ companyRegistration: null, capability: null, application: null, other: null });
   const [submitting, setSubmitting] = useState(false);
@@ -110,9 +114,11 @@ export default function UpgradePanel() {
       return "請完整填寫必填欄位";
     }
     if (password !== confirmPassword) return "兩次密碼輸入不一致";
-    if (!contactPerson || !unifiedSocialCreditCode || !companyAddress) {
+    if (!contactPerson || !unifiedSocialCreditCode) {
       return "請完整填寫公司資料必填欄位";
     }
+    const profileError = validateProfile(profile, { isSupplier, isDemand }, { hasKind: (id, kind) => taxonomy.kindById[id] === kind });
+    if (profileError) return profileError;
     if (isDemand && !docs.companyRegistration) return "請上傳工廠登記證明文件";
     if (isSupplier && !docs.companyRegistration) return "請上傳公司登記證明文件";
     if (isSupplier && tier === "excellent" && !docs.capability) return "請上傳技術服務能量/相關登錄證明";
@@ -140,7 +146,8 @@ export default function UpgradePanel() {
         contactPerson,
         companyName,
         industry,
-        companyAddress,
+        companyAddress: profile.address.trim(),
+        profile: profileToRequest(profile, { isSupplier, isDemand }),
         members: [
           {
             contactName: member!.name,
@@ -162,6 +169,7 @@ export default function UpgradePanel() {
       if (docs.companyRegistration) uploads.push({ type: DocumentType.CompanyRegistration, file: docs.companyRegistration });
       if (isSupplier && tier === "excellent" && docs.capability) uploads.push({ type: DocumentType.TechnicalCapability, file: docs.capability });
       if (isSupplier && tier === "emerging" && docs.application) uploads.push({ type: DocumentType.Application, file: docs.application });
+      if (isSupplier && profile.logo) uploads.push({ type: DocumentType.CompanyLogo, file: profile.logo });
       if (docs.other) uploads.push({ type: DocumentType.Other, file: docs.other });
       uploads.push({ type: DocumentType.PersonalDataConsent, file: buildConsentAcknowledgementFile() });
 
@@ -243,10 +251,13 @@ export default function UpgradePanel() {
               <label className="mb-2">{REQUIRED}統一編號</label>
               <input type="text" className="form-control" value={unifiedSocialCreditCode} onChange={(e) => setUnifiedSocialCreditCode(e.target.value)} />
             </div>
-            <div className="menb_inp_tit form-group w-100">
-              <label className="mb-2">{REQUIRED}公司地址</label>
-              <input type="text" className="form-control" placeholder="請輸入完整地址" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} />
-            </div>
+            <CompanyProfileFields
+              value={profile}
+              onChange={(patch) => setProfile((prev) => ({ ...prev, ...patch }))}
+              isSupplier={isSupplier}
+              isDemand={isDemand}
+              taxonomy={taxonomy}
+            />
           </div>
 
           <h3 className="mb-4 me_sho mt-md-5 mt-4">

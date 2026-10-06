@@ -68,6 +68,9 @@ public class CreateApplicationRequest
     [MaxLength(1000, ErrorMessage = "營業範圍長度不能超過1000個字符")]
     public string? BusinessScope { get; set; }
 
+    /// <summary>公司專頁資料（電話、縣市／鄉鎮區、簡介、標籤、工廠…）</summary>
+    public CompanyProfileDto? Profile { get; set; }
+
     /// <summary>
     /// 申請理由
     /// </summary>
