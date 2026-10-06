@@ -256,9 +256,14 @@ public class LocalFileStorageProvider : IFileStorageProvider
         try
         {
             var webRootPath = GetWebRootPath();
-            var fullPath = Path.Combine(webRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+            // 防禦：就算資料庫裡有舊的紀錄指到不該公開的路徑，也不讀
+            if (SPS.Application.Common.StaticFileExclusions.IsExcluded(relativePath))
+            {
+                throw new FileNotFoundException($"Static file not available: {relativePath}");
+            }
 
-            if (!File.Exists(fullPath))
+            var fullPath = Path.GetFullPath(Path.Combine(webRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString())));
+            if (!fullPath.StartsWith(Path.GetFullPath(webRootPath), StringComparison.Ordinal) || !File.Exists(fullPath))
             {
                 throw new FileNotFoundException($"Static file not found: {relativePath}");
             }
@@ -295,7 +300,14 @@ public class LocalFileStorageProvider : IFileStorageProvider
             return result;
         }
 
-        var files = Directory.GetFiles(webRootPath, "*.*", SearchOption.AllDirectories);
+        // 不跟隨符號連結（部署機的 src 是 symlink，跟進去會把原始碼整棵掃進來）、略過隱藏與系統目錄
+        var enumerationOptions = new EnumerationOptions
+        {
+            RecurseSubdirectories = true,
+            IgnoreInaccessible = true,
+            AttributesToSkip = FileAttributes.Hidden | FileAttributes.System | FileAttributes.ReparsePoint,
+        };
+        var files = Directory.EnumerateFiles(webRootPath, "*", enumerationOptions);
 
         foreach (var filePath in files)
         {
@@ -311,6 +323,11 @@ public class LocalFileStorageProvider : IFileStorageProvider
                     continue;
 
                 var relativePath = Path.GetRelativePath(webRootPath, filePath).Replace("\\", "/");
+
+                // 原始碼、設定檔、使用者上傳目錄等不能變成公開檔案（見 StaticFileExclusions）
+                if (SPS.Application.Common.StaticFileExclusions.IsExcluded(relativePath))
+                    continue;
+
                 var extension = fileInfo.Extension.ToLowerInvariant();
                 var contentType = GetContentType(extension);
 

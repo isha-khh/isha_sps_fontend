@@ -462,6 +462,12 @@ public class FileManagementService : IFileManagementService
             Stream stream;
             if (file.IsStaticFile && !string.IsNullOrEmpty(file.StaticFilePath))
             {
+                // 不該公開的路徑（舊紀錄）一律當作不存在
+                if (SPS.Application.Common.StaticFileExclusions.IsExcluded(file.StaticFilePath))
+                {
+                    return Result<(Stream, string, string)>.Failure("文件不可用");
+                }
+
                 // 靜態檔案從 wwwroot 讀取
                 stream = await _storageProvider.ReadStaticFileAsync(file.StaticFilePath, cancellationToken);
             }
@@ -1271,7 +1277,26 @@ public class FileManagementService : IFileManagementService
                 }
             }
 
+            // 清掉以前掃進來、但現在規則不該公開的紀錄（原始碼、設定檔、使用者上傳目錄…）：標成已刪除，之後下載一律失敗。
+            // 這些檔案是 WebRoot 指到部署目錄時連同網站內容一起被登錄成公開檔案的，見 StaticFileExclusions
+            var hidden = 0;
+            foreach (var record in existingFiles.Values)
+            {
+                if (record.Status == FileStatus.Deleted || record.StaticFilePath == null) continue;
+                if (!SPS.Application.Common.StaticFileExclusions.IsExcluded(record.StaticFilePath)) continue;
+
+                record.Status = FileStatus.Deleted;
+                record.DeletedAt = DateTime.UtcNow;
+                record.UpdatedTime = DateTime.UtcNow;
+                hidden++;
+            }
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            if (hidden > 0)
+            {
+                _logger.LogWarning("已把 {Count} 筆不該公開的靜態檔案紀錄（原始碼、設定檔、使用者上傳目錄等）標成已刪除", hidden);
+            }
 
             _logger.LogInformation("Static files scan completed: Scanned={Scanned}, Added={Added}, Existing={Existing}, Failed={Failed}",
                 response.ScannedCount, response.AddedCount, response.ExistingCount, response.FailedItems.Count);
