@@ -125,6 +125,7 @@ public class MemberApplication : BaseEntity<Guid>
     public string? CompanyPhone { get; set; }
     public string? CompanyCity { get; set; }
     public string? CompanyDistrict { get; set; }
+    public string? CompanyPostalCode { get; set; }
     public string? EstablishmentDate { get; set; }
     public decimal? Revenue { get; set; }
     public string? OrgUrl { get; set; }
@@ -135,6 +136,7 @@ public class MemberApplication : BaseEntity<Guid>
     public string? FactoryName { get; set; }
     public string? FactoryCity { get; set; }
     public string? FactoryDistrict { get; set; }
+    public string? FactoryPostalCode { get; set; }
     public string? FactoryAddress { get; set; }
 
     // ==================== 申請說明 ====================

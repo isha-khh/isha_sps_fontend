@@ -330,13 +330,13 @@ export const ApplicationDetailPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[
                     ['公司電話', application.profile.phone],
-                    ['公司地址（縣市／鄉鎮區）', [application.profile.city, application.profile.district].filter(Boolean).join(' ')],
+                    ['公司地址（郵遞區號／縣市／鄉鎮區）', [application.profile.postalCode, application.profile.city, application.profile.district].filter(Boolean).join(' ')],
                     ['成立日期', application.profile.establishmentDate],
                     ['資本總額', application.profile.revenue != null ? `${application.profile.revenue.toLocaleString()} 元` : ''],
                     ['公司網址', application.profile.orgUrl],
                     ['主要產品暨服務', application.profile.subject],
                     ['工廠名稱', application.profile.factoryName],
-                    ['工廠地址', [application.profile.factoryCity, application.profile.factoryDistrict, application.profile.factoryAddress].filter(Boolean).join('')],
+                    ['工廠地址', [application.profile.factoryPostalCode, application.profile.factoryCity, application.profile.factoryDistrict, application.profile.factoryAddress].filter(Boolean).join('')],
                   ].map(([label, value]) => (
                     <div className="form-control" key={label}>
                       <label className="label"><span className="label-text font-medium">{label}</span></label>

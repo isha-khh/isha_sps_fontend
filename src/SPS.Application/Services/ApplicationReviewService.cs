@@ -391,7 +391,7 @@ public class ApplicationReviewService : IApplicationReviewService
         company.FactoryName ??= application.FactoryName;
         if (company.FactoryAddress == null && !string.IsNullOrWhiteSpace(application.FactoryAddress))
         {
-            company.FactoryAddress = string.Concat(application.FactoryCity, application.FactoryDistrict, application.FactoryAddress);
+            company.FactoryAddress = string.Concat(application.FactoryPostalCode, application.FactoryCity, application.FactoryDistrict, application.FactoryAddress);
         }
 
         if (company.Address == null && company.AddressId == null &&
@@ -400,6 +400,7 @@ public class ApplicationReviewService : IApplicationReviewService
             company.Address = new Address
             {
                 Type = 0,
+                PostalCode = application.CompanyPostalCode,
                 City = application.CompanyCity,
                 District = application.CompanyDistrict,
                 Line = application.CompanyAddress,

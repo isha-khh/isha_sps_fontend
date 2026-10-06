@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import DocumentUploadField from "@/components/member/DocumentUploadField";
 import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
 import { splitTagsByKind, type TagTaxonomy } from "@/lib/company-tags";
 import { withBasePath } from "@/lib/api-client";
-import { TW_DISTRICTS, findByPostalCode, getDistricts, getPostalCode } from "@/lib/tw-districts";
+import TaiwanAddressSelector from "@/components/ui/TaiwanAddressSelector";
 import type { ProfileState } from "@/lib/company-profile";
 
 const REQUIRED = (
@@ -13,151 +13,6 @@ const REQUIRED = (
     *
   </span>
 );
-
-/** 各郵遞區號的路名清單（`public/data/tw-roads/{zip}.json`，來自郵局路名資料），選到鄉鎮區才載入，載過的留在記憶體 */
-const roadCache = new Map<string, string[]>();
-
-function useRoads(zip: string | undefined): string[] {
-  const [roads, setRoads] = useState<string[]>(() => (zip ? roadCache.get(zip) ?? [] : []));
-  useEffect(() => {
-    if (!zip) {
-      setRoads([]);
-      return;
-    }
-    const cached = roadCache.get(zip);
-    if (cached) {
-      setRoads(cached);
-      return;
-    }
-    let cancelled = false;
-    fetch(withBasePath(`/data/tw-roads/${zip}.json`))
-      .then((response) => (response.ok ? (response.json() as Promise<string[]>) : []))
-      .then((list) => {
-        roadCache.set(zip, list);
-        if (!cancelled) setRoads(list);
-      })
-      .catch(() => {
-        if (!cancelled) setRoads([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [zip]);
-  return roads;
-}
-
-/**
- * 地址欄位組：郵遞區號（輸入 3 碼自動帶出縣市與鄉鎮區）＋縣市＋鄉鎮區下拉＋詳細地址
- * （選好鄉鎮區後，輸入框有該區的路名建議）。縣市、鄉鎮區的資料在 `tw-districts.ts`，路名建議在
- * `public/data/tw-roads/`，都是 2026-10-06 從郵局資料轉出來的。
- */
-function AddressFields({
-  city,
-  district,
-  line,
-  onCityDistrict,
-  onLine,
-  disabled,
-  idPrefix,
-  linePlaceholder,
-}: {
-  city: string;
-  district: string;
-  line: string;
-  onCityDistrict: (city: string, district: string) => void;
-  onLine: (line: string) => void;
-  disabled?: boolean;
-  idPrefix: string;
-  linePlaceholder: string;
-}) {
-  const zip = city && district ? getPostalCode(city, district) : undefined;
-  // 郵遞區號輸入框：打字中的內容自己管理，縣市與鄉鎮區變動時以對應的郵遞區號覆蓋
-  const [typedZip, setTypedZip] = useState(zip ?? "");
-  useEffect(() => {
-    setTypedZip(zip ?? "");
-  }, [zip]);
-  const roads = useRoads(zip);
-  const listId = `${idPrefix}-roads`;
-
-  function handleZip(raw: string) {
-    const cleaned = raw.replace(/\D/g, "").slice(0, 3);
-    setTypedZip(cleaned);
-    if (cleaned.length === 3) {
-      const found = findByPostalCode(cleaned);
-      if (found) onCityDistrict(found.county, found.district);
-    }
-  }
-
-  return (
-    <div className="row g-2">
-      <div className="col-12 col-md-3 mb-md-0 mb-2">
-        <input
-          id={`${idPrefix}-zip`}
-          type="text"
-          inputMode="numeric"
-          maxLength={3}
-          className="form-control"
-          aria-label="郵遞區號"
-          placeholder="郵遞區號"
-          value={typedZip}
-          disabled={disabled}
-          onChange={(e) => handleZip(e.target.value)}
-        />
-      </div>
-      <div className="col-6 col-md-4 mb-md-0 mb-2">
-        <select
-          id={`${idPrefix}-county`}
-          className="form-select"
-          aria-label="縣市"
-          value={city}
-          disabled={disabled}
-          onChange={(e) => onCityDistrict(e.target.value, "")}
-        >
-          <option value="">縣/市</option>
-          {TW_DISTRICTS.map((c) => (
-            <option key={c.county} value={c.county}>
-              {c.county}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="col-6 col-md-5 mb-md-0 mb-2">
-        <select
-          id={`${idPrefix}-district`}
-          className="form-select"
-          aria-label="鄉鎮市區"
-          value={district}
-          disabled={disabled || !city}
-          onChange={(e) => onCityDistrict(city, e.target.value)}
-        >
-          <option value="">鄉/鎮/區</option>
-          {getDistricts(city).map(([name]) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="col-12">
-        <input
-          type="text"
-          className="form-control"
-          placeholder={linePlaceholder}
-          list={listId}
-          autoComplete="off"
-          value={line}
-          onChange={(e) => onLine(e.target.value)}
-          disabled={disabled}
-        />
-        <datalist id={listId}>
-          {roads.map((road) => (
-            <option key={road} value={road} />
-          ))}
-        </datalist>
-      </div>
-    </div>
-  );
-}
 
 /**
  * 積木元件：註冊（`MemberDetailsForm`）與權益升級（`UpgradePanel`）共用的「公司專頁資料」欄位——
@@ -235,15 +90,18 @@ export default function CompanyProfileFields({
       <div className="menb_inp_tit form-group w-100">
         <label className="mb-2">{requiredMark}公司地址</label>
         <div className="col-12 col-sm">
-          <AddressFields
-            city={value.city}
-            district={value.district}
-            line={value.address}
-            onCityDistrict={(city, district) => onChange({ city, district })}
-            onLine={(address) => onChange({ address })}
-            disabled={readOnly}
+          <TaiwanAddressSelector
             idPrefix="company"
-            linePlaceholder="請輸入詳細地址（路名、門牌、樓層）"
+            postalCodeValue={value.postalCode}
+            cityValue={value.city}
+            districtValue={value.district}
+            addressLine1Value={value.address}
+            onPostalCodeChange={(postalCode, city, district) => onChange({ postalCode, city, district })}
+            onCityChange={(city) => onChange({ city, district: "", postalCode: "" })}
+            onDistrictChange={(district, postalCode) => onChange({ district, postalCode })}
+            onAddressLine1Change={(address) => onChange({ address })}
+            addressPlaceholder="請輸入詳細地址（路名、門牌、樓層）"
+            disabled={readOnly}
           />
         </div>
       </div>
@@ -337,15 +195,18 @@ export default function CompanyProfileFields({
           <div className="menb_inp_tit form-group w-100">
             <label className="mb-2">{requiredMark}工廠地址</label>
             <div className="col-12 col-sm">
-              <AddressFields
-                city={value.factoryCity}
-                district={value.factoryDistrict}
-                line={value.factoryAddress}
-                onCityDistrict={(factoryCity, factoryDistrict) => onChange({ factoryCity, factoryDistrict })}
-                onLine={(factoryAddress) => onChange({ factoryAddress })}
-                disabled={readOnly}
+              <TaiwanAddressSelector
                 idPrefix="factory"
-                linePlaceholder="請輸入詳細地址（路名、門牌）"
+                postalCodeValue={value.factoryPostalCode}
+                cityValue={value.factoryCity}
+                districtValue={value.factoryDistrict}
+                addressLine1Value={value.factoryAddress}
+                onPostalCodeChange={(factoryPostalCode, factoryCity, factoryDistrict) => onChange({ factoryPostalCode, factoryCity, factoryDistrict })}
+                onCityChange={(factoryCity) => onChange({ factoryCity, factoryDistrict: "", factoryPostalCode: "" })}
+                onDistrictChange={(factoryDistrict, factoryPostalCode) => onChange({ factoryDistrict, factoryPostalCode })}
+                onAddressLine1Change={(factoryAddress) => onChange({ factoryAddress })}
+                addressPlaceholder="請輸入詳細地址（路名、門牌）"
+                disabled={readOnly}
               />
             </div>
           </div>

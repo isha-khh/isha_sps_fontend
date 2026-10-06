@@ -14,6 +14,7 @@ public static class ApplicationProfileMapper
         application.CompanyPhone = Clean(profile.Phone);
         application.CompanyCity = Clean(profile.City);
         application.CompanyDistrict = Clean(profile.District);
+        application.CompanyPostalCode = Clean(profile.PostalCode);
         application.EstablishmentDate = Clean(profile.EstablishmentDate);
         application.Revenue = profile.Revenue;
         application.OrgUrl = Clean(profile.OrgUrl);
@@ -24,6 +25,7 @@ public static class ApplicationProfileMapper
         application.FactoryName = Clean(profile.FactoryName);
         application.FactoryCity = Clean(profile.FactoryCity);
         application.FactoryDistrict = Clean(profile.FactoryDistrict);
+        application.FactoryPostalCode = Clean(profile.FactoryPostalCode);
         application.FactoryAddress = Clean(profile.FactoryAddress);
     }
 
@@ -32,6 +34,7 @@ public static class ApplicationProfileMapper
         Phone = application.CompanyPhone,
         City = application.CompanyCity,
         District = application.CompanyDistrict,
+        PostalCode = application.CompanyPostalCode,
         EstablishmentDate = application.EstablishmentDate,
         Revenue = application.Revenue,
         OrgUrl = application.OrgUrl,
@@ -42,6 +45,7 @@ public static class ApplicationProfileMapper
         FactoryName = application.FactoryName,
         FactoryCity = application.FactoryCity,
         FactoryDistrict = application.FactoryDistrict,
+        FactoryPostalCode = application.FactoryPostalCode,
         FactoryAddress = application.FactoryAddress,
     };
 }

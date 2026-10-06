@@ -20,6 +20,7 @@ export interface CompanyProfile {
   phone?: string;
   city?: string;
   district?: string;
+  postalCode?: string;
   establishmentDate?: string;
   revenue?: number;
   orgUrl?: string;
@@ -30,6 +31,7 @@ export interface CompanyProfile {
   factoryName?: string;
   factoryCity?: string;
   factoryDistrict?: string;
+  factoryPostalCode?: string;
   factoryAddress?: string;
 }
 

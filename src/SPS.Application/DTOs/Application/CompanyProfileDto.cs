@@ -17,6 +17,9 @@ public class CompanyProfileDto
     /// <summary>公司地址的鄉鎮市區（例如「前鎮區」）</summary>
     [MaxLength(20)] public string? District { get; set; }
 
+    /// <summary>公司地址的 3 碼郵遞區號</summary>
+    [MaxLength(5)] public string? PostalCode { get; set; }
+
     /// <summary>成立日期（yyyy-MM-dd）</summary>
     [MaxLength(10)] public string? EstablishmentDate { get; set; }
 
@@ -39,5 +42,6 @@ public class CompanyProfileDto
     [MaxLength(200)] public string? FactoryName { get; set; }
     [MaxLength(20)] public string? FactoryCity { get; set; }
     [MaxLength(20)] public string? FactoryDistrict { get; set; }
+    [MaxLength(5)] public string? FactoryPostalCode { get; set; }
     [MaxLength(300)] public string? FactoryAddress { get; set; }
 }

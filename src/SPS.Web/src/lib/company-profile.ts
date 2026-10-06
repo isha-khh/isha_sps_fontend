@@ -9,6 +9,8 @@ export interface ProfileState {
   phone: string;
   city: string;
   district: string;
+  /** 3 碼郵遞區號（選好鄉鎮區自動帶出，也可以直接輸入） */
+  postalCode: string;
   /** 詳細地址（對應後端原有的 `companyAddress`） */
   address: string;
   establishmentDate: string;
@@ -21,6 +23,7 @@ export interface ProfileState {
   factoryName: string;
   factoryCity: string;
   factoryDistrict: string;
+  factoryPostalCode: string;
   factoryAddress: string;
   logo: File | null;
 }
@@ -29,6 +32,7 @@ export const emptyProfile = (): ProfileState => ({
   phone: "",
   city: "",
   district: "",
+  postalCode: "",
   address: "",
   establishmentDate: "",
   revenue: "",
@@ -40,6 +44,7 @@ export const emptyProfile = (): ProfileState => ({
   factoryName: "",
   factoryCity: "",
   factoryDistrict: "",
+  factoryPostalCode: "",
   factoryAddress: "",
   logo: null,
 });
@@ -50,6 +55,7 @@ export function profileFromApplication(profile: CompanyProfile | undefined, addr
     phone: profile?.phone ?? "",
     city: profile?.city ?? "",
     district: profile?.district ?? "",
+    postalCode: profile?.postalCode ?? "",
     address: address ?? "",
     establishmentDate: profile?.establishmentDate ?? "",
     revenue: profile?.revenue != null ? String(profile.revenue) : "",
@@ -61,6 +67,7 @@ export function profileFromApplication(profile: CompanyProfile | undefined, addr
     factoryName: profile?.factoryName ?? "",
     factoryCity: profile?.factoryCity ?? "",
     factoryDistrict: profile?.factoryDistrict ?? "",
+    factoryPostalCode: profile?.factoryPostalCode ?? "",
     factoryAddress: profile?.factoryAddress ?? "",
   };
 }
@@ -73,6 +80,7 @@ export function profileToRequest(state: ProfileState, role: { isSupplier: boolea
     phone: text(state.phone),
     city: text(state.city),
     district: text(state.district),
+    postalCode: text(state.postalCode),
     establishmentDate: text(state.establishmentDate),
     revenue: revenue != null && Number.isFinite(revenue) ? revenue : undefined,
     orgUrl: text(state.orgUrl),
@@ -83,6 +91,7 @@ export function profileToRequest(state: ProfileState, role: { isSupplier: boolea
     factoryName: role.isDemand ? text(state.factoryName) : undefined,
     factoryCity: role.isDemand ? text(state.factoryCity) : undefined,
     factoryDistrict: role.isDemand ? text(state.factoryDistrict) : undefined,
+    factoryPostalCode: role.isDemand ? text(state.factoryPostalCode) : undefined,
     factoryAddress: role.isDemand ? text(state.factoryAddress) : undefined,
   };
 }
