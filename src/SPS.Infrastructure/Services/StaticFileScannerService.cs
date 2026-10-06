@@ -107,7 +107,18 @@ public class StaticFileScannerService : IHostedService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "靜態檔案掃描時發生錯誤");
+            _logger.LogError(ex, "靜態檔案掃描或 seed 時發生錯誤");
+        }
+
+        try
+        {
+            // 企業標籤的初始資料（資料庫沒有任何企業標籤時才匯入）；跟檔案無關，但這裡是目前唯一的啟動 seed 入口
+            using var tagScope = _serviceProvider.CreateScope();
+            await tagScope.ServiceProvider.GetRequiredService<CompanyTagSeeder>().SeedAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "匯入內建企業標籤時發生錯誤");
         }
     }
 

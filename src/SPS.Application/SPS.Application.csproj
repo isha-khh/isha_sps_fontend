@@ -29,4 +29,9 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- 企業標籤的初始資料（CompanyTagSeeder 讀取） -->
+    <EmbeddedResource Include="Resources\company-tags.json" />
+  </ItemGroup>
+
 </Project>

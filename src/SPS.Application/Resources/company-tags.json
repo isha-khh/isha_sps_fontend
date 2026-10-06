@@ -1,0 +1,720 @@
+[
+ {
+  "name": "人員、車輛與作業環境影像辨識與風險預警",
+  "remark": "應用情境",
+  "ordinal": 101,
+  "published": true
+ },
+ {
+  "name": "有害氣體監測與暴露風險預警",
+  "remark": "應用情境",
+  "ordinal": 102,
+  "published": true
+ },
+ {
+  "name": "人員、作業場所安全動態即時監測",
+  "remark": "應用情境",
+  "ordinal": 103,
+  "published": true
+ },
+ {
+  "name": "設備與管線即時監控與風險預警",
+  "remark": "應用情境",
+  "ordinal": 104,
+  "published": true
+ },
+ {
+  "name": "工廠營運數據整合與化學品整合監控管理",
+  "remark": "應用情境",
+  "ordinal": 105,
+  "published": true
+ },
+ {
+  "name": "巡檢系統提升異常發現與即時應變效能",
+  "remark": "應用情境",
+  "ordinal": 106,
+  "published": true
+ },
+ {
+  "name": "人員",
+  "remark": "應用範疇",
+  "ordinal": 201,
+  "published": true
+ },
+ {
+  "name": "環境",
+  "remark": "應用範疇",
+  "ordinal": 202,
+  "published": true
+ },
+ {
+  "name": "設備",
+  "remark": "應用範疇",
+  "ordinal": 203,
+  "published": true
+ },
+ {
+  "name": "生管",
+  "remark": "應用範疇",
+  "ordinal": 204,
+  "published": true
+ },
+ {
+  "name": "能源",
+  "remark": "應用範疇",
+  "ordinal": 205,
+  "published": true
+ },
+ {
+  "name": "倉儲",
+  "remark": "應用範疇",
+  "ordinal": 206,
+  "published": true
+ },
+ {
+  "name": "運輸",
+  "remark": "應用範疇",
+  "ordinal": 207,
+  "published": true
+ },
+ {
+  "name": "消防應變",
+  "remark": "應用範疇",
+  "ordinal": 208,
+  "published": true
+ },
+ {
+  "name": "感測端點",
+  "remark": "智慧技術",
+  "ordinal": 3000,
+  "published": true,
+  "children": [
+   {
+    "name": "感測裝置",
+    "remark": "智慧技術",
+    "ordinal": 3100,
+    "published": true,
+    "children": [
+     {
+      "name": "溫度",
+      "remark": "智慧技術",
+      "ordinal": 3101,
+      "published": true
+     },
+     {
+      "name": "壓力",
+      "remark": "智慧技術",
+      "ordinal": 3102,
+      "published": true
+     },
+     {
+      "name": "流量",
+      "remark": "智慧技術",
+      "ordinal": 3103,
+      "published": true
+     },
+     {
+      "name": "流速",
+      "remark": "智慧技術",
+      "ordinal": 3104,
+      "published": true
+     },
+     {
+      "name": "液位",
+      "remark": "智慧技術",
+      "ordinal": 3105,
+      "published": true
+     },
+     {
+      "name": "重量",
+      "remark": "智慧技術",
+      "ordinal": 3106,
+      "published": true
+     },
+     {
+      "name": "pH值",
+      "remark": "智慧技術",
+      "ordinal": 3107,
+      "published": true
+     },
+     {
+      "name": "水質",
+      "remark": "智慧技術",
+      "ordinal": 3108,
+      "published": true
+     },
+     {
+      "name": "導電度",
+      "remark": "智慧技術",
+      "ordinal": 3109,
+      "published": true
+     },
+     {
+      "name": "氣體濃度",
+      "remark": "智慧技術",
+      "ordinal": 3110,
+      "published": true
+     },
+     {
+      "name": "FTIR",
+      "remark": "智慧技術",
+      "ordinal": 3111,
+      "published": true
+     },
+     {
+      "name": "風速",
+      "remark": "智慧技術",
+      "ordinal": 3112,
+      "published": true
+     },
+     {
+      "name": "功率",
+      "remark": "智慧技術",
+      "ordinal": 3113,
+      "published": true
+     },
+     {
+      "name": "電流",
+      "remark": "智慧技術",
+      "ordinal": 3114,
+      "published": true
+     },
+     {
+      "name": "振動",
+      "remark": "智慧技術",
+      "ordinal": 3115,
+      "published": true
+     },
+     {
+      "name": "厚度",
+      "remark": "智慧技術",
+      "ordinal": 3116,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 3117,
+      "published": true
+     }
+    ]
+   },
+   {
+    "name": "視覺裝置",
+    "remark": "智慧技術",
+    "ordinal": 3200,
+    "published": true,
+    "children": [
+     {
+      "name": "可見光",
+      "remark": "智慧技術",
+      "ordinal": 3201,
+      "published": true
+     },
+     {
+      "name": "不可見光",
+      "remark": "智慧技術",
+      "ordinal": 3202,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 3203,
+      "published": true
+     }
+    ]
+   },
+   {
+    "name": "生物表徵",
+    "remark": "智慧系統",
+    "ordinal": 3300,
+    "published": true,
+    "children": [
+     {
+      "name": "血氧",
+      "remark": "智慧技術",
+      "ordinal": 3301,
+      "published": true
+     },
+     {
+      "name": "血壓",
+      "remark": "智慧技術",
+      "ordinal": 3302,
+      "published": true
+     },
+     {
+      "name": "脈博",
+      "remark": "智慧技術",
+      "ordinal": 3303,
+      "published": true
+     },
+     {
+      "name": "呼吸",
+      "remark": "智慧技術",
+      "ordinal": 3304,
+      "published": true
+     },
+     {
+      "name": "體溫",
+      "remark": "智慧技術",
+      "ordinal": 3305,
+      "published": true
+     },
+     {
+      "name": "倒臥",
+      "remark": "智慧技術",
+      "ordinal": 3306,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 3307,
+      "published": true
+     }
+    ]
+   },
+   {
+    "name": "定位方式",
+    "remark": "智慧技術",
+    "ordinal": 3400,
+    "published": true,
+    "children": [
+     {
+      "name": "GPS",
+      "remark": "智慧技術",
+      "ordinal": 3401,
+      "published": true
+     },
+     {
+      "name": "UWB",
+      "remark": "智慧技術",
+      "ordinal": 3402,
+      "published": true
+     },
+     {
+      "name": "LoRa",
+      "remark": "智慧技術",
+      "ordinal": 3403,
+      "published": true
+     },
+     {
+      "name": "藍芽",
+      "remark": "智慧技術",
+      "ordinal": 3404,
+      "published": true
+     },
+     {
+      "name": "Zigbee",
+      "remark": "智慧技術",
+      "ordinal": 3405,
+      "published": true
+     },
+     {
+      "name": "陀螺儀",
+      "remark": "智慧技術",
+      "ordinal": 3406,
+      "published": true
+     },
+     {
+      "name": "RFID",
+      "remark": "智慧技術",
+      "ordinal": 3407,
+      "published": true
+     },
+     {
+      "name": "Barcode/QRcode",
+      "remark": "智慧技術",
+      "ordinal": 3408,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 3409,
+      "published": true
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "name": "系統部署",
+  "remark": "智慧技術",
+  "ordinal": 4000,
+  "published": true,
+  "children": [
+   {
+    "name": "運算技術",
+    "remark": "智慧技術",
+    "ordinal": 4100,
+    "published": true,
+    "children": [
+     {
+      "name": "雲端運算",
+      "remark": "智慧技術",
+      "ordinal": 4101,
+      "published": true
+     },
+     {
+      "name": "邊緣運算",
+      "remark": "智慧技術",
+      "ordinal": 4102,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 4103,
+      "published": true
+     }
+    ]
+   },
+   {
+    "name": "數據儲存",
+    "remark": "智慧技術",
+    "ordinal": 4200,
+    "published": true,
+    "children": [
+     {
+      "name": "地端資料庫",
+      "remark": "智慧技術",
+      "ordinal": 4201,
+      "published": true
+     },
+     {
+      "name": "雲端資料庫",
+      "remark": "智慧技術",
+      "ordinal": 4202,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 4203,
+      "published": true
+     }
+    ]
+   },
+   {
+    "name": "演算法",
+    "remark": "智慧技術",
+    "ordinal": 4300,
+    "published": true,
+    "children": [
+     {
+      "name": "機器學習",
+      "remark": "智慧技術",
+      "ordinal": 4301,
+      "published": true
+     },
+     {
+      "name": "深度學習",
+      "remark": "智慧技術",
+      "ordinal": 4302,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 4303,
+      "published": true
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "name": "生成式AI",
+  "remark": "智慧技術",
+  "ordinal": 4400,
+  "published": true,
+  "children": [
+   {
+    "name": "SLM",
+    "remark": "智慧技術",
+    "ordinal": 4401,
+    "published": true
+   },
+   {
+    "name": "LLM",
+    "remark": "智慧技術",
+    "ordinal": 4402,
+    "published": true
+   },
+   {
+    "name": "VLM",
+    "remark": "智慧技術",
+    "ordinal": 4403,
+    "published": true
+   },
+   {
+    "name": "Rag",
+    "remark": "智慧技術",
+    "ordinal": 4404,
+    "published": true
+   },
+   {
+    "name": "Agent",
+    "remark": "智慧技術",
+    "ordinal": 4405,
+    "published": true
+   },
+   {
+    "name": "其他",
+    "remark": "智慧技術",
+    "ordinal": 4406,
+    "published": true
+   }
+  ]
+ },
+ {
+  "name": "通訊方式",
+  "remark": "智慧技術",
+  "ordinal": 5000,
+  "published": true,
+  "children": [
+   {
+    "name": "無線通訊",
+    "remark": "智慧技術",
+    "ordinal": 5200,
+    "published": true,
+    "children": [
+     {
+      "name": "Wi-Fi",
+      "remark": "智慧技術",
+      "ordinal": 5201,
+      "published": true
+     },
+     {
+      "name": "4G",
+      "remark": "智慧技術",
+      "ordinal": 5202,
+      "published": true
+     },
+     {
+      "name": "5G",
+      "remark": "智慧技術",
+      "ordinal": 5203,
+      "published": true
+     },
+     {
+      "name": "藍芽",
+      "remark": "智慧技術",
+      "ordinal": 5204,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 5205,
+      "published": true
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "name": "光通訊(含有線通訊)",
+  "remark": "智慧技術",
+  "ordinal": 5100,
+  "published": true,
+  "children": [
+   {
+    "name": "光纖",
+    "remark": "智慧技術",
+    "ordinal": 5101,
+    "published": true
+   },
+   {
+    "name": "工業網路",
+    "remark": "智慧技術",
+    "ordinal": 5102,
+    "published": true
+   },
+   {
+    "name": "其他",
+    "remark": "智慧技術",
+    "ordinal": 5103,
+    "published": true
+   }
+  ]
+ },
+ {
+  "name": "作業輔助",
+  "remark": "智慧技術",
+  "ordinal": 6000,
+  "published": true,
+  "children": [
+   {
+    "name": "智慧巡檢",
+    "remark": "智慧技術",
+    "ordinal": 6100,
+    "published": true,
+    "children": [
+     {
+      "name": "手持裝置",
+      "remark": "智慧技術",
+      "ordinal": 6101,
+      "published": true
+     },
+     {
+      "name": "穿戴裝置",
+      "remark": "智慧技術",
+      "ordinal": 6102,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 6103,
+      "published": true
+     }
+    ]
+   },
+   {
+    "name": "無人載具",
+    "remark": "智慧技術",
+    "ordinal": 6200,
+    "published": true,
+    "children": [
+     {
+      "name": "陸面型",
+      "remark": "智慧技術",
+      "ordinal": 6201,
+      "published": true
+     },
+     {
+      "name": "空中型",
+      "remark": "智慧技術",
+      "ordinal": 6202,
+      "published": true
+     },
+     {
+      "name": "水上型",
+      "remark": "智慧技術",
+      "ordinal": 6203,
+      "published": true
+     },
+     {
+      "name": "軌道型",
+      "remark": "智慧技術",
+      "ordinal": 6204,
+      "published": true
+     },
+     {
+      "name": "機械手臂",
+      "remark": "智慧技術",
+      "ordinal": 6205,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 6206,
+      "published": true
+     }
+    ]
+   },
+   {
+    "name": "XR虛擬實境",
+    "remark": "智慧技術",
+    "ordinal": 6300,
+    "published": true,
+    "children": [
+     {
+      "name": "MR",
+      "remark": "智慧技術",
+      "ordinal": 6301,
+      "published": true
+     },
+     {
+      "name": "VR",
+      "remark": "智慧技術",
+      "ordinal": 6302,
+      "published": true
+     },
+     {
+      "name": "AR",
+      "remark": "智慧技術",
+      "ordinal": 6303,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 6304,
+      "published": true
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "name": "模擬決策",
+  "remark": "智慧技術",
+  "ordinal": 7000,
+  "published": true,
+  "children": [
+   {
+    "name": "數位孿生",
+    "remark": "智慧技術",
+    "ordinal": 7100,
+    "published": true,
+    "children": [
+     {
+      "name": "3D模型",
+      "remark": "智慧技術",
+      "ordinal": 7101,
+      "published": true
+     },
+     {
+      "name": "數據、影像串接",
+      "remark": "智慧技術",
+      "ordinal": 7102,
+      "published": true
+     },
+     {
+      "name": "預測模擬",
+      "remark": "智慧技術",
+      "ordinal": 7103,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 7104,
+      "published": true
+     }
+    ]
+   },
+   {
+    "name": "參數最佳化",
+    "remark": "智慧技術",
+    "ordinal": 7200,
+    "published": true,
+    "children": [
+     {
+      "name": "最適化操作參數建議",
+      "remark": "智慧技術",
+      "ordinal": 7201,
+      "published": true
+     },
+     {
+      "name": "最適化自動控制",
+      "remark": "智慧技術",
+      "ordinal": 7202,
+      "published": true
+     },
+     {
+      "name": "其他",
+      "remark": "智慧技術",
+      "ordinal": 7203,
+      "published": true
+     }
+    ]
+   }
+  ]
+ }
+]
