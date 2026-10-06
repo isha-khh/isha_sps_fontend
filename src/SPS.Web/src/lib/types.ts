@@ -322,6 +322,9 @@ export type PublicCompanyDetail = {
     chargePhone?: string | null;
     photoUrl?: string;
     address?: string;
+    cooperationNote?: string | null;
+    productImages: string[];
+    awardImages: string[];
     tagIds: number[];
     tagNames: string[];
 };

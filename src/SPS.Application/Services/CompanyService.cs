@@ -112,6 +112,9 @@ public class CompanyService : ICompanyService
             IntroductionEnglish = request.IntroductionEnglish,
             OrgUrl = request.OrgUrl,
             VideoUrl = request.VideoUrl,
+            CooperationNote = string.IsNullOrWhiteSpace(request.CooperationNote) ? null : request.CooperationNote.Trim(),
+            ProductImageFileIds = request.ProductImageFileIds?.Distinct().ToList() ?? new List<Guid>(),
+            AwardImageFileIds = request.AwardImageFileIds?.Distinct().ToList() ?? new List<Guid>(),
             Charge = request.Charge,
             ChargeEmail = request.ChargeEmail,
             ChargePhone = request.ChargePhone,
@@ -207,6 +210,15 @@ public class CompanyService : ICompanyService
 
         if (request.VideoUrl != null)
             company.VideoUrl = request.VideoUrl;
+
+        if (request.CooperationNote != null)
+            company.CooperationNote = string.IsNullOrWhiteSpace(request.CooperationNote) ? null : request.CooperationNote.Trim();
+
+        if (request.ProductImageFileIds != null)
+            company.ProductImageFileIds = request.ProductImageFileIds.Distinct().ToList();
+
+        if (request.AwardImageFileIds != null)
+            company.AwardImageFileIds = request.AwardImageFileIds.Distinct().ToList();
 
         if (request.Charge != null)
             company.Charge = request.Charge;
@@ -499,6 +511,9 @@ public class CompanyService : ICompanyService
             IntroductionEnglish = company.IntroductionEnglish,
             OrgUrl = company.OrgUrl,
             VideoUrl = company.VideoUrl,
+            CooperationNote = company.CooperationNote,
+            ProductImageFileIds = company.ProductImageFileIds,
+            AwardImageFileIds = company.AwardImageFileIds,
             Charge = company.Charge,
             ChargeEmail = company.ChargeEmail,
             ChargePhone = company.ChargePhone,

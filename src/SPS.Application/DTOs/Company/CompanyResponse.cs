@@ -25,6 +25,17 @@ public class CompanyResponse
     public string? IntroductionEnglish { get; set; }
     public string? OrgUrl { get; set; }
     public string? VideoUrl { get; set; }
+    public string? CooperationNote { get; set; }
+
+    /// <summary>圖片的檔案 Id（原始設定；控制器會依檔案是否可用解析成 <see cref="ProductImages"/>／<see cref="AwardImages"/>）</summary>
+    public List<Guid> ProductImageFileIds { get; set; } = new();
+    public List<Guid> AwardImageFileIds { get; set; } = new();
+
+    /// <summary>主要產品暨服務示意圖（只有詳情會解析；檔案不存在或不是圖片就略過）</summary>
+    public List<CompanyImageDto> ProductImages { get; set; } = new();
+
+    /// <summary>獲獎事蹟暨重要合作案例圖片</summary>
+    public List<CompanyImageDto> AwardImages { get; set; } = new();
     public string? Charge { get; set; }
     public string? ChargeEmail { get; set; }
     public string? ChargePhone { get; set; }
@@ -44,4 +55,12 @@ public class CompanyResponse
 
     public DateTime CreatedTime { get; set; }
     public DateTime? UpdatedTime { get; set; }
+}
+
+/// <summary>企業詳情的圖片（來自檔案管理）</summary>
+public class CompanyImageDto
+{
+    public Guid FileId { get; set; }
+    public string FileName { get; set; } = string.Empty;
+    public string Url { get; set; } = string.Empty;
 }

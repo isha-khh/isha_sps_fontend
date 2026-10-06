@@ -5,7 +5,7 @@ import { companiesApi } from '@/lib/api/companies';
 import { picturesApi } from '@/lib/api/pictures';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import { TagCategoryTreeSelect } from '@/components/shared/TagCategoryTreeSelect';
-import {CompanyType, CompanyLevel, Status, type CreateCompanyRequest, type UpdateCompanyRequest, type AddressDto, type CompanyTagOption} from '@/types/company';
+import {CompanyType, CompanyLevel, Status, type CreateCompanyRequest, type UpdateCompanyRequest, type AddressDto, type CompanyTagOption, type CompanyImage} from '@/types/company';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
 import { useNotify } from '@/hooks/useNotify';
 import {formatApiPath} from "@/lib/fix-weburl.ts";
@@ -37,6 +37,7 @@ export const CompanyFormPage = () => {
     introductionEnglish: '',
     orgUrl: '',
     videoUrl: '',
+    cooperationNote: '',
     charge: '',
     chargeEmail: '',
     chargePhone: '',
@@ -45,6 +46,11 @@ export const CompanyFormPage = () => {
     establishmentDate: '',
     remark: '',
   });
+
+  // 前台企業詳情的展示圖片（檔案管理中的圖片，最多 12 張）
+  const [productImages, setProductImages] = useState<CompanyImage[]>([]);
+  const [awardImages, setAwardImages] = useState<CompanyImage[]>([]);
+  const [showcasePicker, setShowcasePicker] = useState<'product' | 'award' | null>(null);
 
   const [address, setAddress] = useState<AddressDto>({
     type: 0,
@@ -96,6 +102,7 @@ export const CompanyFormPage = () => {
           introductionEnglish: data.introductionEnglish || '',
           orgUrl: data.orgUrl || '',
           videoUrl: data.videoUrl || '',
+          cooperationNote: data.cooperationNote || '',
           charge: data.charge || '',
           chargeEmail: data.chargeEmail || '',
           chargePhone: data.chargePhone || '',
@@ -105,6 +112,8 @@ export const CompanyFormPage = () => {
           remark: data.remark || '',
         });
         setStatus(data.status);
+        setProductImages(data.productImages ?? []);
+        setAwardImages(data.awardImages ?? []);
         if (data.photo) setExistingPhoto(data.photo);
         if (data.banner) setExistingBanner(data.banner);
         if (data.address) {
@@ -202,6 +211,55 @@ export const CompanyFormPage = () => {
     setIsBannerPickerOpen(false);
   };
 
+  const handleShowcasePick = async (file: FileListItem | FileUploadResponse) => {
+    const kind = showcasePicker;
+    setShowcasePicker(null);
+    if (!kind) return;
+    const picked: CompanyImage =
+      'fileId' in file
+        ? { fileId: file.fileId, fileName: file.fileName, url: `/api/FileManagement/${file.fileId}/download` }
+        : { fileId: file.id, fileName: file.originalFileName, url: `/api/FileManagement/${file.id}/download` };
+    const list = kind === 'product' ? productImages : awardImages;
+    if (list.some((i) => i.fileId === picked.fileId)) return;
+    if (list.length >= 12) {
+      await notify.warning('圖片最多 12 張');
+      return;
+    }
+    (kind === 'product' ? setProductImages : setAwardImages)([...list, picked]);
+  };
+
+  const renderShowcaseImages = (label: string, hint: string, images: CompanyImage[], setImages: (v: CompanyImage[]) => void, kind: 'product' | 'award') => (
+    <div className="form-control">
+      <label className="label">
+        <span className="label-text font-medium">{label}</span>
+        <span className="label-text-alt text-base-content/60">{hint}</span>
+      </label>
+      {images.length > 0 && (
+        <div className="mb-2 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {images.map((image) => (
+            <div className="relative overflow-hidden rounded-box border border-base-300" key={image.fileId}>
+              <img src={formatApiPath(image.url)} alt={image.fileName} className="aspect-[4/3] w-full object-cover" />
+              <button
+                type="button"
+                className="btn btn-circle btn-error btn-xs absolute right-1 top-1"
+                title="移除"
+                onClick={() => setImages(images.filter((i) => i.fileId !== image.fileId))}
+              >
+                <span className="iconify lucide--x size-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div>
+        <button type="button" className="btn btn-sm btn-neutral" onClick={() => setShowcasePicker(kind)}>
+          <span className="iconify lucide--image-plus size-4" />
+          從檔案系統新增圖片
+        </button>
+      </div>
+    </div>
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -224,6 +282,8 @@ export const CompanyFormPage = () => {
       if (isEditMode) {
         const updateData: UpdateCompanyRequest = {
           ...formData,
+          productImageFileIds: productImages.map((i) => i.fileId),
+          awardImageFileIds: awardImages.map((i) => i.fileId),
           status: status,
           address: hasAddress ? address : undefined,
           photoId,
@@ -236,6 +296,8 @@ export const CompanyFormPage = () => {
       } else {
         const createData: CreateCompanyRequest = {
           ...formData,
+          productImageFileIds: productImages.map((i) => i.fileId),
+          awardImageFileIds: awardImages.map((i) => i.fileId),
           address: hasAddress ? address : undefined,
           photoId,
           bannerId,
@@ -684,6 +746,33 @@ export const CompanyFormPage = () => {
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
                 <h2 className="card-title mb-6">
+                  <span className="iconify lucide--presentation size-6" />
+                  前台展示內容
+                </h2>
+                <p className="mb-4 text-sm text-base-content/60">顯示在前台企業名錄的企業詳情頁（「主要產品暨服務」「獲獎事蹟暨重要合作案例」）；沒填的區塊前台不顯示。</p>
+
+                <div className="space-y-4">
+                  {renderShowcaseImages('主要產品暨服務示意圖', '最多 12 張，4:3 比例最佳', productImages, setProductImages, 'product')}
+                  {renderShowcaseImages('獲獎事蹟暨重要合作案例圖片', '最多 12 張，4:3 比例最佳', awardImages, setAwardImages, 'award')}
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">合作案例說明</span>
+                    </label>
+                    <textarea
+                      className="textarea textarea-bordered h-28"
+                      placeholder="例如：與多家製造與化工產業企業合作，提供整合型智慧工安平台…"
+                      value={formData.cooperationNote ?? ''}
+                      onChange={(e) => setFormData({ ...formData, cooperationNote: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <h2 className="card-title mb-6">
                   <span className="iconify lucide--sticky-note size-6" />
                   備註
                 </h2>
@@ -829,6 +918,14 @@ export const CompanyFormPage = () => {
         onSelect={handlePhotoSelect}
         fileType="image"
         title="選擇公司 Logo"
+      />
+
+      <FilePickerModal
+        isOpen={showcasePicker !== null}
+        onClose={() => setShowcasePicker(null)}
+        onSelect={(file) => void handleShowcasePick(file)}
+        fileType="image"
+        title={showcasePicker === 'award' ? '選擇獲獎事蹟／合作案例圖片' : '選擇主要產品暨服務示意圖'}
       />
 
       <FilePickerModal

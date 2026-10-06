@@ -129,6 +129,15 @@ public class Company : BaseEntity<Guid>
     /// </summary>
     public string? VideoUrl { get; set; }
 
+    /// <summary>合作案例說明（前台企業詳情「獲獎事蹟暨重要合作案例」）</summary>
+    public string? CooperationNote { get; set; }
+
+    /// <summary>主要產品暨服務的示意圖：檔案管理中的圖片檔案 Id（依顯示順序）</summary>
+    public List<Guid> ProductImageFileIds { get; set; } = new();
+
+    /// <summary>獲獎事蹟暨重要合作案例的圖片：檔案管理中的圖片檔案 Id（依顯示順序）</summary>
+    public List<Guid> AwardImageFileIds { get; set; } = new();
+
     /// <summary>
     /// 負責人/聯絡人姓名
     /// </summary>

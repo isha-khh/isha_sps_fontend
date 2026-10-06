@@ -73,6 +73,15 @@ public class UpdateCompanyRequest
     /// </summary>
     public string? VideoUrl { get; set; }
 
+    /// <summary>合作案例說明；沒帶（null）= 不更新，空字串 = 清除</summary>
+    public string? CooperationNote { get; set; }
+
+    /// <summary>主要產品暨服務示意圖的檔案 Id（最多 12 個）；沒帶（null）= 不更新，空陣列 = 清除</summary>
+    public List<Guid>? ProductImageFileIds { get; set; }
+
+    /// <summary>獲獎事蹟暨重要合作案例圖片的檔案 Id（最多 12 個）；沒帶（null）= 不更新，空陣列 = 清除</summary>
+    public List<Guid>? AwardImageFileIds { get; set; }
+
     /// <summary>
     /// 負責人
     /// </summary>

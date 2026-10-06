@@ -399,6 +399,9 @@ export async function fetchCompanyDetail(id: string): Promise<PublicCompanyDetai
             orgUrl?: string | null; establishmentDate?: string | null; charge?: string | null; chargePhone?: string | null;
             address?: { region?: string | null; city?: string | null; district?: string | null; line?: string | null } | null;
             photo?: { uri?: string | null } | null;
+            cooperationNote?: string | null;
+            productImages?: { url: string }[];
+            awardImages?: { url: string }[];
         }>(`/api/Company/${id}`);
         const c = response.data;
         let tagIds: number[] = [];
@@ -417,6 +420,9 @@ export async function fetchCompanyDetail(id: string): Promise<PublicCompanyDetai
             establishmentDate: c.establishmentDate, charge: c.charge, chargePhone: c.chargePhone,
             photoUrl: resolveBackendAssetUrl(c.photo?.uri),
             address: address || undefined,
+            cooperationNote: c.cooperationNote,
+            productImages: (c.productImages ?? []).map((i) => resolveBackendAssetUrl(stripBasePath(i.url)) ?? i.url),
+            awardImages: (c.awardImages ?? []).map((i) => resolveBackendAssetUrl(stripBasePath(i.url)) ?? i.url),
             tagIds,
             tagNames,
         };
@@ -453,7 +459,7 @@ export async function fetchDemandDetail(id: string): Promise<DemandItem | null> 
         });
         const demand = response.data;
         if (!demand.published) return null;
-        return { ...demand, attachments: (demand.attachments ?? []).map((a) => ({ ...a, url: resolveBackendAssetUrl(a.url) ?? a.url })) };
+        return { ...demand, attachments: (demand.attachments ?? []).map((a) => ({ ...a, url: resolveBackendAssetUrl(stripBasePath(a.url)) ?? a.url })) };
     } catch {
         return null;
     }

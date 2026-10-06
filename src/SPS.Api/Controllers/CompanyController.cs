@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.Company;
 using SPS.Application.DTOs.Common;
+using SPS.Application.DTOs.File;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
 using SPS.Api.Attributes;
@@ -20,13 +21,64 @@ public class CompanyController : ControllerBase
 {
     private readonly ICompanyService _companyService;
     private readonly ILogger<CompanyController> _logger;
+    private readonly IFileManagementService _fileService;
+
+    private const int MaxShowcaseImages = 12;
 
     public CompanyController(
         ICompanyService companyService,
-        ILogger<CompanyController> logger)
+        ILogger<CompanyController> logger,
+        IFileManagementService fileService)
     {
         _companyService = companyService;
         _logger = logger;
+        _fileService = fileService;
+    }
+
+    /// <summary>檔案管理中可當公開圖片用的檔案：存在、不是資料夾、沒被刪除、是圖片、不是會員申請附件</summary>
+    private async Task<FileInfoResponse?> GetUsableImageAsync(Guid fileId, CancellationToken ct)
+    {
+        var info = await _fileService.GetFileByIdAsync(fileId, ct);
+        if (!info.IsSuccess || info.Data == null) return null;
+        var file = info.Data;
+        if (file.IsFolder || file.Status != FileStatus.Active) return null;
+        if (file.ContentType == null || !file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) return null;
+        if (await _fileService.IsApplicationDocumentFileAsync(file.Id, ct)) return null;
+        return file;
+    }
+
+    private async Task<List<CompanyImageDto>> ResolveImagesAsync(IEnumerable<Guid> fileIds, CancellationToken ct)
+    {
+        var images = new List<CompanyImageDto>();
+        foreach (var id in fileIds)
+        {
+            var file = await GetUsableImageAsync(id, ct);
+            if (file == null) continue;
+            images.Add(new CompanyImageDto { FileId = file.Id, FileName = file.OriginalFileName, Url = $"/api/FileManagement/{file.Id}/download" });
+        }
+
+        return images;
+    }
+
+    private async Task ResolveShowcaseImagesAsync(CompanyResponse company, CancellationToken ct)
+    {
+        company.ProductImages = await ResolveImagesAsync(company.ProductImageFileIds, ct);
+        company.AwardImages = await ResolveImagesAsync(company.AwardImageFileIds, ct);
+    }
+
+    private async Task<string?> ValidateShowcaseImagesAsync(List<Guid>? productIds, List<Guid>? awardIds, CancellationToken ct)
+    {
+        foreach (var ids in new[] { productIds, awardIds })
+        {
+            if (ids == null) continue;
+            if (ids.Count > MaxShowcaseImages) return $"圖片最多 {MaxShowcaseImages} 張";
+            foreach (var id in ids)
+            {
+                if (await GetUsableImageAsync(id, ct) == null) return "圖片必須是檔案管理中存在的圖片檔案（不能是資料夾、已刪除的檔案或會員申請附件）";
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -90,6 +142,7 @@ public class CompanyController : ControllerBase
             return NotFound(new { error = "企業不存在" });
         }
 
+        await ResolveShowcaseImagesAsync(result.Data!, cancellationToken);
         return Ok(HideInternalFields(result.Data!));
     }
 
@@ -121,6 +174,7 @@ public class CompanyController : ControllerBase
             return NotFound(new { error = "企業不存在" });
         }
 
+        await ResolveShowcaseImagesAsync(result.Data!, cancellationToken);
         return Ok(HideInternalFields(result.Data!));
     }
 
@@ -141,6 +195,9 @@ public class CompanyController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating company: {CompanyName}", request.Name);
+
+        var imageError = await ValidateShowcaseImagesAsync(request.ProductImageFileIds, request.AwardImageFileIds, cancellationToken);
+        if (imageError != null) return BadRequest(new { error = imageError });
 
         var result = await _companyService.CreateAsync(request, cancellationToken);
 
@@ -175,6 +232,9 @@ public class CompanyController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Updating company: {CompanyId}", id);
+
+        var imageError = await ValidateShowcaseImagesAsync(request.ProductImageFileIds, request.AwardImageFileIds, cancellationToken);
+        if (imageError != null) return BadRequest(new { error = imageError });
 
         var result = await _companyService.UpdateAsync(id, request, cancellationToken);
 

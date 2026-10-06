@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: PageProps<"/matching/enterpri
  * 企業名錄詳情頁，對應設計稿 `page/matching/show.html`。資料來自後台「公司管理」已審核通過且啟用的企業
  * （`fetchCompanyDetail`，2026-10-06 從假資料改接真後端）。
  *
- * 設計稿有、但後端目前沒有對應欄位的區塊——主要產品暨服務的示意圖、應用情境／應用範疇／智慧技術、
- * 獲獎事蹟暨合作案例——前台不顯示，等後端補上欄位再接。負責人姓名與資本總額（營收）後端對匿名呼叫
+ * 主要產品暨服務的示意圖、獲獎事蹟暨合作案例（圖片與說明）由後台「公司管理 → 前台展示內容」維護，沒填的區塊不顯示；
+ * 應用情境／應用範疇／智慧技術來自企業標籤。負責人姓名與資本總額（營收）後端對匿名呼叫
  * 一律不給（個資），所以「公司負責人」「資本總額」只有後端有給時才顯示；
  * 設計稿的「聯繫窗口」（勾選後展開聯絡人）會把聯絡人放進網頁原始碼、等於公開，所以改成顯示公司電話；
  * 之後要做「會員登入後才看得到聯絡窗口」得另外做會員專用的端點。
@@ -141,7 +141,7 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
             </div>
           )}
 
-          {(company.subject || tagSections.length > 0) && (
+          {(company.subject || company.productImages.length > 0 || tagSections.length > 0) && (
             <div className="item_box_two_1">
               <div className="dow-name">
                 <i className="bi bi-file-earmark-text"></i>
@@ -149,6 +149,18 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
               </div>
 
               {company.subject && <p>{company.subject}</p>}
+
+              {company.productImages.length > 0 && (
+                <div className="mat_prod_box d-flex mb-4">
+                  {company.productImages.map((src, index) => (
+                    <div className="pic" key={`${src}-${index}`}>
+                      <div className="ratio ratio-4x3">
+                        <img className="img-fluid d-block" src={src} alt={`${company.name} 產品或服務示意圖 ${index + 1}`} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* 應用情境／應用範疇／智慧技術：公司在後台勾選的標籤，點進去看有同樣標籤的其他企業 */}
               {tagSections.map((section) => (
@@ -171,6 +183,39 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
             </div>
           )}
         </div>
+
+        {(company.awardImages.length > 0 || company.cooperationNote) && (
+          <div className="item_box_two_1">
+            <div className="dow-name">
+              <i className="bi bi-award"></i>
+              <span>獲獎事蹟暨重要合作案例</span>
+            </div>
+
+            {company.awardImages.length > 0 && (
+              <div className="mat_Award_box d-flex mb-4">
+                {company.awardImages.map((src, index) => (
+                  <div className="pic" key={`${src}-${index}`}>
+                    <div className="ratio ratio-4x3">
+                      <img className="img-fluid d-block" src={src} alt={`${company.name} 獲獎或合作案例示意圖 ${index + 1}`} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {company.cooperationNote && (
+              <div className="mat_cooperate_box">
+                <h5 className="blue">合作案例</h5>
+                {company.cooperationNote
+                  .split(/\n+/)
+                  .filter(Boolean)
+                  .map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <MoreLink href="/matching/enterprise" label="返回" title="返回" />
       </InnerPageShell>

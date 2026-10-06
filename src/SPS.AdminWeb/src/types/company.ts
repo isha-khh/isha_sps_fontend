@@ -11,6 +11,13 @@ export interface AddressDto {
   description?: string;
 }
 
+/** 企業詳情的圖片（來自檔案管理） */
+export interface CompanyImage {
+  fileId: string;
+  fileName: string;
+  url: string;
+}
+
 export interface PictureResponse {
   id: number;
   name?: string;
@@ -33,6 +40,12 @@ export interface CreateCompanyRequest {
   introductionEnglish?: string;
   orgUrl?: string;
   videoUrl?: string;
+  /** 合作案例說明（前台企業詳情）；更新時沒帶＝不更新、空字串＝清除 */
+  cooperationNote?: string;
+  /** 主要產品暨服務示意圖的檔案 Id（最多 12 個）；更新時沒帶＝不更新、空陣列＝清除 */
+  productImageFileIds?: string[];
+  /** 獲獎事蹟暨重要合作案例圖片的檔案 Id（最多 12 個） */
+  awardImageFileIds?: string[];
   charge?: string;
   chargeEmail?: string;
   chargePhone?: string;
@@ -61,6 +74,12 @@ export interface UpdateCompanyRequest {
   introductionEnglish?: string;
   orgUrl?: string;
   videoUrl?: string;
+  /** 合作案例說明（前台企業詳情）；更新時沒帶＝不更新、空字串＝清除 */
+  cooperationNote?: string;
+  /** 主要產品暨服務示意圖的檔案 Id（最多 12 個）；更新時沒帶＝不更新、空陣列＝清除 */
+  productImageFileIds?: string[];
+  /** 獲獎事蹟暨重要合作案例圖片的檔案 Id（最多 12 個） */
+  awardImageFileIds?: string[];
   charge?: string;
   chargeEmail?: string;
   chargePhone?: string;
@@ -166,6 +185,9 @@ export interface Company {
   address?: AddressDto;
   photo?: PictureResponse;
   banner?: PictureResponse;
+  cooperationNote?: string;
+  productImages?: CompanyImage[];
+  awardImages?: CompanyImage[];
   designatedContacts?: DesignatedContact[];
   createdTime: string;
   updatedTime?: string;
