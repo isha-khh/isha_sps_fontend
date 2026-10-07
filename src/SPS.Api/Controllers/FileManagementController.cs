@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs;
 using SPS.Application.DTOs.File;
@@ -202,14 +203,15 @@ public class FileManagementController : ControllerBase
     /// </remarks>
     [HttpGet("{id:guid}/download")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status304NotModified)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadFile(
         Guid id,
         CancellationToken cancellationToken)
     {
-        if (await _fileManagementService.IsApplicationDocumentFileAsync(id, cancellationToken)
-            && !User.GetAdminPermissions().HasAny(UserPermission.ViewApplications))
+        var isApplicationDocument = await _fileManagementService.IsApplicationDocumentFileAsync(id, cancellationToken);
+        if (isApplicationDocument && !User.GetAdminPermissions().HasAny(UserPermission.ViewApplications))
         {
             // 未登入也回 404：不讓匿名者確認某個 GUID 是不是申請附件
             return User.Identity?.IsAuthenticated == true
@@ -217,16 +219,41 @@ public class FileManagementController : ControllerBase
                 : NotFound(new { message = "文件不存在" });
         }
 
+        // 快取：一般檔案讓瀏覽器與中間的 nginx／CDN 快取一天，並帶 ETag；瀏覽器之後帶 If-None-Match 來問，沒變就直接回 304，
+        // 不讀檔也不累計下載次數。申請附件含個資，一律不准快取。
+        EntityTagHeaderValue? etag = null;
+        if (isApplicationDocument)
+        {
+            Response.Headers.CacheControl = "private, no-store";
+        }
+        else
+        {
+            var info = await _fileManagementService.GetFileByIdAsync(id, cancellationToken);
+            if (info.IsSuccess && info.Data is { IsFolder: false, Status: FileStatus.Active } file
+                && !(file.ExpiresAt.HasValue && file.ExpiresAt.Value < DateTime.UtcNow))
+            {
+                var tag = string.IsNullOrEmpty(file.FileHash) ? id.ToString("N") : $"{id:N}-{file.FileHash[..Math.Min(16, file.FileHash.Length)]}";
+                etag = new EntityTagHeaderValue($"\"{tag}\"");
+                Response.Headers.CacheControl = "public, max-age=86400";
+                if (Request.Headers.IfNoneMatch.Any(value => value != null && value.Split(',').Select(v => v.Trim().Replace("W/", string.Empty)).Contains(etag.Tag.Value)))
+                {
+                    Response.Headers.ETag = etag.ToString();
+                    return StatusCode(StatusCodes.Status304NotModified);
+                }
+            }
+        }
+
         var result = await _fileManagementService.DownloadFileAsync(id, cancellationToken);
 
         if (!result.IsSuccess)
         {
+            Response.Headers.Remove("Cache-Control");
             return NotFound(new { message = result.Error });
         }
 
         var (fileStream, fileName, contentType) = result.Data;
 
-        return File(fileStream, contentType, fileName);
+        return File(fileStream, contentType, fileName, lastModified: null, entityTag: etag);
     }
 
     /// <summary>

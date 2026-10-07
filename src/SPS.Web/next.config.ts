@@ -27,6 +27,18 @@ const nextConfig: NextConfig = {
   // `withBasePath()`（api-client.ts）讀的 `NEXT_PUBLIC_BASE_PATH` 在
   // Vercel 上本來就不會被設定，兩邊天然一致，不用額外處理。
   basePath: process.env.VERCEL ? undefined : "/sps",
+  // 2026-10-07：`public/` 底下的圖片與資料檔（`/images`、`/data`）原本是 Next 預設的 `max-age=0`（每次換頁瀏覽器都要問一次
+  // 伺服器有沒有更新），改成快取一天。檔名沒有雜湊，所以不能用一年 `immutable`：換圖後使用者最多一天才看到新的；
+  // `stale-while-revalidate` 讓過期後先用舊的、背景更新。`/css`、`/js` 刻意不加——那是整份複製過來的舊站樣式與腳本，
+  // 改了要馬上生效（見 docs 的 public/css 同步說明）。`/_next/static` 本來就是一年 immutable。
+  // 後台上傳的圖片走 API 的 `/api/FileManagement/{id}/download`，快取標頭在後端那邊設。
+  async headers() {
+    const oneDay = "public, max-age=86400, stale-while-revalidate=604800";
+    return [
+      { source: "/images/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
+      { source: "/data/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
+    ];
+  },
 };
 
 export default nextConfig;
