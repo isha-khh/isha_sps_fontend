@@ -67,6 +67,7 @@ export default function MemberLoginForm() {
     } catch (err) {
       const name = (err as { name?: string }).name;
       if (name === "NotAllowedError" || (err as Error).message === "cancelled") setError("已取消 Passkey 登入。");
+      else if (name === "SecurityError") setError("Passkey 的網域設定與目前網站網址不一致，請改用帳號密碼登入，並通知管理員檢查 FIDO2 設定。");
       else setError(getApiErrorMessage(err, "Passkey 登入失敗，請改用帳號密碼登入"));
     } finally {
       setSubmitting(false);

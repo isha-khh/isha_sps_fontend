@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { authApi } from "@/lib/api/auth";
 import { fromAttestationResponse, toCreationOptions } from "@/lib/webauthn";
 import type { Fido2CredentialInfo } from "@/types/fido2";
@@ -22,28 +22,35 @@ function formatDateTime(value?: string) {
  */
 export default function PasskeyPanel() {
   const [enabled, setEnabled] = useState<boolean>();
-  const [supported, setSupported] = useState(true);
+  // 這個面板只在登入後的會員中心（瀏覽器端）渲染，不會在伺服器端渲染，所以可以直接讀瀏覽器能力
+  const [supported] = useState(() => typeof window !== "undefined" && "PublicKeyCredential" in window && Boolean(navigator.credentials));
   const [credentials, setCredentials] = useState<Fido2CredentialInfo[]>([]);
   const [deviceName, setDeviceName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
 
-  const load = useCallback(async () => {
-    try {
-      const status = await authApi.fido2GetStatus();
-      setEnabled(status.enabled);
-      if (status.enabled) setCredentials(await authApi.fido2GetCredentials());
-    } catch (err) {
-      setEnabled(false);
-      setError(getApiErrorMessage(err, "載入 Passkey 失敗"));
-    }
-  }, []);
-
   useEffect(() => {
-    setSupported(typeof window !== "undefined" && "PublicKeyCredential" in window && Boolean(navigator.credentials));
-    void load();
-  }, [load]);
+    let active = true;
+    authApi
+      .fido2GetStatus()
+      .then(async (status) => {
+        if (!active) return;
+        setEnabled(status.enabled);
+        if (status.enabled) {
+          const list = await authApi.fido2GetCredentials();
+          if (active) setCredentials(list);
+        }
+      })
+      .catch((err) => {
+        if (!active) return;
+        setEnabled(false);
+        setError(getApiErrorMessage(err, "載入 Passkey 失敗"));
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function register() {
     if (busy) return;
@@ -62,6 +69,7 @@ export default function PasskeyPanel() {
       const name = (err as { name?: string }).name;
       if (name === "NotAllowedError" || (err as Error).message === "cancelled") setError("已取消，或裝置沒有完成驗證。");
       else if (name === "InvalidStateError") setError("這個裝置已經註冊過 Passkey。");
+      else if (name === "SecurityError") setError("Passkey 的網域設定與目前網站網址不一致，無法註冊，請通知管理員檢查系統設定中的 FIDO2 伺服器網域。");
       else setError(getApiErrorMessage(err, "新增 Passkey 失敗，請稍後再試"));
     } finally {
       setBusy(false);

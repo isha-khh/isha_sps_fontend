@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import PasswordField from "@/components/member/PasswordField";
-import DocumentUploadField from "@/components/member/DocumentUploadField";
+import DocumentUploadField, { type DocumentPreviewData } from "@/components/member/DocumentUploadField";
 import RegisterDownloadList from "@/components/member/RegisterDownloadList";
 import type { DownloadResources } from "@/lib/types";
-import { applicationsApi } from "@/lib/api/applications";
+import { applicationDocumentUrl, applicationsApi } from "@/lib/api/applications";
 import CompanyProfileFields from "@/components/member/CompanyProfileFields";
 import { emptyProfile, profileFromApplication, profileToRequest, validateProfile, type ProfileState } from "@/lib/company-profile";
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
@@ -262,6 +262,11 @@ export default function MemberDetailsForm({
   // 沒有（例如直接訪問網址、沒帶 applicationId）就留空，不再用假資料
   // 假裝「這是你剛剛填的」。
   const reviewMember = application?.members?.[0];
+  // mode="review"：各欄位使用者實際上傳的文件（每種類型只會有一份，重傳會取代舊的）
+  const previewOf = (type: number): DocumentPreviewData | null => {
+    const doc = application?.documents?.find((d) => d.type === type);
+    return doc && application ? { url: applicationDocumentUrl(application.id, doc.id), fileName: doc.fileName, contentType: doc.contentType } : null;
+  };
   const reviewValue = (value: string | number | undefined | null) => (value === undefined || value === null ? "" : String(value));
 
   return (
@@ -416,6 +421,7 @@ export default function MemberDetailsForm({
               isSupplier={isSupplier}
               isDemand={isDemand}
               taxonomy={taxonomy}
+              logoPreview={previewOf(DocumentType.CompanyLogo)}
             />
           </div>
         </>
@@ -450,6 +456,7 @@ export default function MemberDetailsForm({
                   label="工廠登記證明文件"
                   required
                   mode={mode}
+                  preview={previewOf(DocumentType.CompanyRegistration)}
                   selectedFileName={docs.companyRegistration?.name}
                   onFileSelected={(file) => setDocs((prev) => ({ ...prev, companyRegistration: file }))}
                 />
@@ -459,6 +466,7 @@ export default function MemberDetailsForm({
                   label="公司登記證明文件"
                   required
                   mode={mode}
+                  preview={previewOf(DocumentType.CompanyRegistration)}
                   selectedFileName={docs.companyRegistration?.name}
                   onFileSelected={(file) => setDocs((prev) => ({ ...prev, companyRegistration: file }))}
                 />
@@ -468,6 +476,7 @@ export default function MemberDetailsForm({
                   label="技術服務能量/相關登錄證明"
                   required
                   mode={mode}
+                  preview={previewOf(DocumentType.TechnicalCapability)}
                   selectedFileName={docs.capability?.name}
                   onFileSelected={(file) => setDocs((prev) => ({ ...prev, capability: file }))}
                 />
@@ -477,6 +486,7 @@ export default function MemberDetailsForm({
                   label="智慧工安技術產業資訊暨媒合平台登錄申請書"
                   required
                   mode={mode}
+                  preview={previewOf(DocumentType.Application)}
                   selectedFileName={docs.application?.name}
                   onFileSelected={(file) => setDocs((prev) => ({ ...prev, application: file }))}
                 />
@@ -493,6 +503,7 @@ export default function MemberDetailsForm({
           <DocumentUploadField
             label="如營業登記證明、證書等"
             mode={mode}
+                  preview={previewOf(DocumentType.Other)}
             selectedFileName={docs.other?.name}
             onFileSelected={(file) => setDocs((prev) => ({ ...prev, other: file }))}
           />

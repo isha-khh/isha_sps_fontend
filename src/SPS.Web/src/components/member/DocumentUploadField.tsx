@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useRef } from "react";
-import { withBasePath } from "@/lib/api-client";
 
 /**
  * 積木元件：單一份文件上傳欄位，對應 p02.html 的 `.tit_dow` +
@@ -14,9 +13,45 @@ import { withBasePath } from "@/lib/api-client";
  * `applicationId`，而草稿申請要等表單送出那一刻才會被建立），這個
  * 元件本身只負責「選檔＋顯示已選檔名」，不自己打 API。
  *
- * `mode="review"` 對應 p03.html（Step 4 完成註冊）唯讀檢視，直接顯示
- * 一張示範縮圖，不是可互動的上傳按鈕。
+ * `mode="review"` 對應 p03.html（Step 4 完成註冊）唯讀檢視。2026-10-07 起顯示使用者**真正上傳的檔案**
+ * （原本是寫死的示範縮圖，不管上傳什麼都顯示同一張）：JPG／PNG／GIF／WebP 顯示圖片縮圖（點一下另開視窗看原圖）、
+ * PDF 顯示檔名與「開啟預覽」連結、其他檔案顯示檔名與下載連結、沒上傳的顯示「未上傳」。檔案由
+ * `GET /api/Applications/{id}/documents/{documentId}/file` 提供（要持有這份申請的存取密鑰），後端依檔案內容
+ * 判斷能不能直接顯示，不能的一律當成附件下載。
  */
+/** 已上傳文件的預覽資料（由 `ApplicationResponse.documents` 組出） */
+export interface DocumentPreviewData {
+  url: string;
+  fileName: string;
+  contentType: string;
+}
+
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+/** 已上傳文件的唯讀預覽：圖片顯示縮圖、PDF 與其他檔案顯示檔名與連結、沒上傳顯示「未上傳」 */
+export function DocumentPreview({ data, alt, size = 200 }: { data?: DocumentPreviewData | null; alt: string; size?: number }) {
+  if (!data) return <p className="text-muted mb-0">未上傳</p>;
+  const type = data.contentType.toLowerCase();
+  if (IMAGE_TYPES.includes(type)) {
+    return (
+      <a href={data.url} target="_blank" rel="noopener noreferrer" title={`${data.fileName}（另開視窗看原圖）`}>
+        <img className="img-fluid d-block" src={data.url} alt={alt} style={{ maxWidth: size, maxHeight: size, objectFit: "contain" }} />
+        <span className="d-block small text-muted mt-1">{data.fileName}</span>
+      </a>
+    );
+  }
+  const isPdf = type === "application/pdf";
+  return (
+    <a href={data.url} target="_blank" rel="noopener noreferrer" title={isPdf ? `${data.fileName}（另開視窗預覽）` : `下載 ${data.fileName}`} className="d-inline-flex align-items-center gap-2">
+      <i className={`bi ${isPdf ? "bi-file-earmark-pdf" : "bi-file-earmark"} fs-2`} aria-hidden="true"></i>
+      <span>
+        <span className="d-block">{data.fileName}</span>
+        <span className="d-block small text-muted">{isPdf ? "開啟預覽" : "下載檔案"}</span>
+      </span>
+    </a>
+  );
+}
+
 export default function DocumentUploadField({
   label,
   required,
@@ -25,6 +60,7 @@ export default function DocumentUploadField({
   previewAlt,
   selectedFileName,
   onFileSelected,
+  preview,
 }: {
   label: string;
   required?: boolean;
@@ -35,6 +71,8 @@ export default function DocumentUploadField({
   selectedFileName?: string;
   /** 使用者選檔（或清空選擇）時呼叫，`null` 代表取消選擇 */
   onFileSelected?: (file: File | null) => void;
+  /** `mode="review"` 專用：這個欄位已上傳的文件；沒有就是沒上傳 */
+  preview?: DocumentPreviewData | null;
 }) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -44,7 +82,7 @@ export default function DocumentUploadField({
       <div className="tit_dow">
         <label className="mb-2">{label}</label>
         <div className="pt-2">
-          <img className="img-fluid d-block" src={withBasePath("/images/all/menb_logo2.jpg")} alt={previewAlt ?? label} />
+          <DocumentPreview data={preview} alt={previewAlt ?? label} />
         </div>
       </div>
     );

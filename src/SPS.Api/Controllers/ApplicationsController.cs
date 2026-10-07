@@ -457,6 +457,67 @@ public class ApplicationsController : ControllerBase
     }
 
     /// <summary>
+    /// 預覽自己申請的已上傳文件（註冊第 4 步「完成註冊」的唯讀檢視用）。跟讀取申請一樣要持有存取密鑰（或是後台使用者／升級的會員本人），
+    /// 不符一律回 404。為了避免上傳的檔案在 API 網域上執行腳本：**只有依檔案內容（不是依檔名或上傳時宣告的類型）判斷為
+    /// JPG、PNG、GIF、WebP 圖片或 PDF 的檔案才會直接在瀏覽器顯示**，其他一律以附件下載（`application/octet-stream`），
+    /// 並加上 `nosniff`（除了交給瀏覽器內建檢視器的 PDF，其餘還加沙盒的 CSP）。
+    /// </summary>
+    [HttpGet("{id}/documents/{documentId}/file")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetDocumentFile(Guid id, Guid documentId, CancellationToken cancellationToken)
+    {
+        var denied = await DenyUnlessCanAccessAsync(id, write: false, cancellationToken);
+        if (denied != null) return denied;
+
+        var owner = await _applicationService.GetApplicationIdByDocumentIdAsync(documentId, cancellationToken);
+        if (owner != id) return NotFound(new { error = "文件不存在" });
+
+        var result = await _applicationService.DownloadDocumentAsync(documentId, cancellationToken);
+        if (!result.IsSuccess) return NotFound(new { error = "文件不存在或已過期" });
+
+        var (fileStream, fileName, _) = result.Data;
+        Stream stream = fileStream;
+        if (!stream.CanSeek)
+        {
+            var buffer = new MemoryStream();
+            await fileStream.CopyToAsync(buffer, cancellationToken);
+            await fileStream.DisposeAsync();
+            buffer.Position = 0;
+            stream = buffer;
+        }
+
+        var header = new byte[12];
+        var read = await stream.ReadAsync(header.AsMemory(0, header.Length), cancellationToken);
+        stream.Position = 0;
+        var safeType = DetectInlineType(header, read);
+
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
+        // PDF 要交給瀏覽器內建的檢視器，加沙盒 CSP 會讓 Chrome 的 PDF 檢視器載入失敗；其他內容一律沙盒
+        if (safeType != "application/pdf") Response.Headers["Content-Security-Policy"] = "default-src 'none'; sandbox";
+        Response.Headers["Cache-Control"] = "private, no-store";
+
+        if (safeType == null)
+        {
+            return File(stream, "application/octet-stream", fileName);
+        }
+
+        Response.Headers["Content-Disposition"] = $"inline; filename*=UTF-8''{Uri.EscapeDataString(fileName)}";
+        return File(stream, safeType);
+    }
+
+    private static string? DetectInlineType(byte[] h, int length)
+    {
+        if (length >= 3 && h[0] == 0xFF && h[1] == 0xD8 && h[2] == 0xFF) return "image/jpeg";
+        if (length >= 4 && h[0] == 0x89 && h[1] == 0x50 && h[2] == 0x4E && h[3] == 0x47) return "image/png";
+        if (length >= 4 && h[0] == 0x47 && h[1] == 0x49 && h[2] == 0x46 && h[3] == 0x38) return "image/gif";
+        if (length >= 12 && h[0] == 0x52 && h[1] == 0x49 && h[2] == 0x46 && h[3] == 0x46 && h[8] == 0x57 && h[9] == 0x45 && h[10] == 0x42 && h[11] == 0x50) return "image/webp";
+        if (length >= 5 && h[0] == 0x25 && h[1] == 0x50 && h[2] == 0x44 && h[3] == 0x46 && h[4] == 0x2D) return "application/pdf";
+        return null;
+    }
+
+    /// <summary>
     /// 刪除文件
     /// </summary>
     /// <param name="documentId">文件ID</param>

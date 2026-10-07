@@ -1,3 +1,4 @@
+import { memberAssetUrl } from '@/lib/api/member-company';
 import { isAxiosError } from 'axios';
 import { apiClient } from '@/lib/api-client';
 import type {
@@ -211,3 +212,11 @@ export const applicationsApi = {
     }
   },
 };
+
+/**
+ * 申請文件的預覽網址（註冊第 4 步唯讀檢視用，`<img>`／連結由瀏覽器直接載入，所以要用瀏覽器連得到的後端位址；
+ * 申請的存取密鑰在 HttpOnly cookie，瀏覽器會自動帶）。
+ */
+export function applicationDocumentUrl(applicationId: string, documentId: string): string {
+  return memberAssetUrl(`/api/Applications/${applicationId}/documents/${documentId}/file`) ?? "";
+}

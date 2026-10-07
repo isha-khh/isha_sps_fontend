@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import DocumentUploadField from "@/components/member/DocumentUploadField";
+import DocumentUploadField, { DocumentPreview, type DocumentPreviewData } from "@/components/member/DocumentUploadField";
 import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
 import { splitTagsByKind, type TagTaxonomy } from "@/lib/company-tags";
 import { withBasePath } from "@/lib/api-client";
@@ -33,12 +33,15 @@ export default function CompanyProfileFields({
   isSupplier,
   isDemand,
   taxonomy,
+  logoPreview,
 }: {
   value: ProfileState;
   onChange: (patch: Partial<ProfileState>) => void;
   readOnly?: boolean;
   isSupplier: boolean;
   isDemand: boolean;
+  /** 唯讀檢視（註冊第 4 步）時顯示的已上傳 LOGO；沒有代表沒上傳 */
+  logoPreview?: DocumentPreviewData | null;
   taxonomy: TagTaxonomy;
 }) {
   const requiredMark = readOnly ? null : REQUIRED;
@@ -110,7 +113,7 @@ export default function CompanyProfileFields({
         <label className="mb-2">{profileMark}LOGO圖像</label>
         {readOnly ? (
           <div className="menb_logo">
-            <img className="img-fluid d-block" src={withBasePath("/images/all/menb_logo.jpg")} alt="" style={{ width: 200, height: 200 }} />
+            <DocumentPreview data={logoPreview} alt="公司 LOGO" />
           </div>
         ) : (
           <DocumentUploadField

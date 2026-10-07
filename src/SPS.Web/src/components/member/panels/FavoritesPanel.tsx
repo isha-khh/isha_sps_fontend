@@ -23,8 +23,15 @@ export default function FavoritesPanel() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let active = true;
+    memberFavoritesApi
+      .getFavorites()
+      .then((data) => active && setFavorites(data))
+      .catch((err) => active && setError(getApiErrorMessage(err, "載入我的最愛失敗")));
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function remove(action: () => Promise<void>) {
     if (busy) return;

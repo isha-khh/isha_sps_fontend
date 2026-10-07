@@ -76,8 +76,25 @@ export default function MembersPanel() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let active = true;
+    memberprofileApi
+      .getMembersList()
+      .then((data) => {
+        if (!active) return;
+        setMembers(data);
+        setForbidden(false);
+      })
+      .catch((err) => {
+        if (!active) return;
+        const status = (err as { response?: { status?: number } }).response?.status;
+        if (status === 403) setForbidden(true);
+        else setError(getApiErrorMessage(err, "載入成員失敗"));
+      })
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function openNew() {
     setEditing("new");

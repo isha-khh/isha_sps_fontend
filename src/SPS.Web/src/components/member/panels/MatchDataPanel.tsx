@@ -40,8 +40,16 @@ export default function MatchDataPanel() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let active = true;
+    memberFavoritesApi
+      .getMyDemands()
+      .then((data) => active && setDemands(data))
+      .catch((err) => active && setError(getApiErrorMessage(err, "載入需求失敗")))
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function openEdit(demand: MemberDemand) {
     setEditing(demand.id);
