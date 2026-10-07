@@ -300,6 +300,38 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// 目前有沒有會員登入——給網站頁首與登入、註冊頁判斷顯示用。**沒登入也會回 200**（`loggedIn: false`），
+    /// 不像 <c>profile</c> 回 401：前端對 401 會嘗試刷新 token 並導去登入頁，每個匿名訪客都不能這樣處理。
+    /// </summary>
+    [HttpGet("session")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult GetSession()
+    {
+        if (!Guid.TryParse(User.FindFirst("MemberId")?.Value, out var memberId))
+        {
+            return Ok(new { loggedIn = false });
+        }
+
+        var companyId = User.FindFirst("CompanyId")?.Value;
+        return Ok(new
+        {
+            loggedIn = true,
+            member = new MemberInfo
+            {
+                Id = memberId,
+                Email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty,
+                Name = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? string.Empty,
+                Phone = User.FindFirst("Phone")?.Value ?? string.Empty,
+                Extension = User.FindFirst("Extension")?.Value,
+                MobilePhone = User.FindFirst("MobilePhone")?.Value,
+                CompanyId = Guid.TryParse(companyId, out var cid) ? cid : null,
+                CompanyName = User.FindFirst("CompanyName")?.Value
+            }
+        });
+    }
+
+    /// <summary>
     /// 刷新令牌
     /// </summary>
     /// <param name="cancellationToken">取消令牌</param>

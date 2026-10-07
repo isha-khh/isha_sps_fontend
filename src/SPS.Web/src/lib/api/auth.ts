@@ -55,6 +55,15 @@ export const authApi = {
   },
 
   /**
+   * 目前有沒有會員登入（頁首與登入、註冊頁判斷用）
+   * GET /api/Auth/session——沒登入也回 200（`member: null`），所以匿名訪客不會被當成 401 導去登入頁
+   */
+  async getSession(): Promise<MemberInfo | null> {
+    const response = await apiClient.get<{ loggedIn: boolean; member?: MemberInfo }>('/api/Auth/session');
+    return response.data.loggedIn ? (response.data.member ?? null) : null;
+  },
+
+  /**
    * 獲取當前會員信息
    * GET /api/Auth/profile
    */

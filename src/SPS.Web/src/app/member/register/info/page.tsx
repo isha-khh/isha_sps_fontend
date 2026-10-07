@@ -5,6 +5,7 @@ import StepProgress from "@/components/member/StepProgress";
 import MemberDetailsForm from "@/components/member/MemberDetailsForm";
 import { fetchDownloadResources } from "@/lib/api.server";
 import PersonalDataConsentNotice from "@/components/member/PersonalDataConsentNotice";
+import RedirectIfLoggedIn from "@/components/member/RedirectIfLoggedIn";
 
 export const metadata: Metadata = {
   title: "會員註冊 - 填寫資料",
@@ -47,6 +48,7 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
   return (
     <>
       <BodyClass className="member register p02" />
+      <RedirectIfLoggedIn />
 
       <div className="modal fade" id="staticmembership" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex={-1} aria-labelledby="staticmembership" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered">

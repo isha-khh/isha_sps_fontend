@@ -26,16 +26,33 @@ interface AuthState {
    * 就先當作「沒登入」而誤導使用者。 */
   loading: boolean;
   setMember: (member: MemberInfo | null) => void;
+  /** 頁首、登入與註冊頁是否已經問過後端「有沒有人登入」（避免畫面先閃一下「我要登入」） */
+  sessionChecked: boolean;
+  /** 呼叫 `GET /api/Auth/session`（沒登入也回 200）確認登入狀態，同時間只會發一次請求；整頁共用一份結果 */
+  checkSession: () => Promise<void>;
   /** 呼叫 `GET /api/Auth/profile`（Cookie 認證）確認目前是否登入，
    * 成功就把 `member` 填回來，401/其他錯誤就清空。 */
   fetchProfile: () => Promise<void>;
   clear: () => void;
 }
 
+let sessionRequest: Promise<void> | null = null;
+
 export const useAuthStore = create<AuthState>()((set) => ({
   member: null,
   loading: false,
-  setMember: (member) => set({ member }),
+  sessionChecked: false,
+  checkSession: () => {
+    sessionRequest ??= authApi
+      .getSession()
+      .then((member) => set({ member, sessionChecked: true }))
+      .catch(() => set({ sessionChecked: true }))
+      .finally(() => {
+        sessionRequest = null;
+      });
+    return sessionRequest;
+  },
+  setMember: (member) => set({ member, sessionChecked: true }),
   fetchProfile: async () => {
     set({ loading: true });
     try {

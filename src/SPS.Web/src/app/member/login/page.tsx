@@ -3,6 +3,7 @@ import Link from "next/link";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MemberLoginForm from "@/components/member/MemberLoginForm";
+import RedirectIfLoggedIn from "@/components/member/RedirectIfLoggedIn";
 
 export const metadata: Metadata = {
   title: "會員登入",
@@ -27,6 +28,7 @@ export default function MemberLoginPage() {
   return (
     <>
       <BodyClass className="member login" />
+      <RedirectIfLoggedIn />
       <InnerPageShell title="會員登入" breadcrumb={[{ label: "會員登入" }]}>
         <div className="frame-small-box">
           <div className="melo_box d-flex">

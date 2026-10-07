@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { withBasePath } from "@/lib/api-client";
+import { authApi } from "@/lib/api/auth";
+import { useAuthStore } from "@/store/auth-store";
 import HeaderSearch from "@/components/layout/HeaderSearch";
 
 /**
@@ -34,6 +37,75 @@ import HeaderSearch from "@/components/layout/HeaderSearch";
  * JSX 裡呼叫一次**，兩份都是 React 自己創造、自己管理的真實節點，
  * 不會有上面那些指令式操作 DOM 才會踩到的問題。
  */
+/**
+ * 「會員中心」選單：沒登入是「我要登入／註冊會員」，登入後換成「會員中心／登出」（已登入的人不需要再看到登入與註冊）。
+ * 登入狀態用 `GET /api/Auth/session` 查（沒登入也回 200，不會因為 401 被導去登入頁），整個網站共用同一份結果；
+ * 桌機與手機版選單各渲染一次，兩份都吃同一個狀態。查完之前先顯示未登入的版本。
+ */
+function MemberNavItem() {
+  const router = useRouter();
+  const member = useAuthStore((state) => state.member);
+  const checkSession = useAuthStore((state) => state.checkSession);
+  const clear = useAuthStore((state) => state.clear);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  useEffect(() => {
+    void checkSession();
+  }, [checkSession]);
+
+  async function handleLogout(event: React.MouseEvent) {
+    event.preventDefault();
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await authApi.logout();
+    } catch {
+      // 登出 API 失敗時 cookie 到期也會失效，本地狀態照樣清掉
+    } finally {
+      clear();
+      setLoggingOut(false);
+      router.push("/");
+    }
+  }
+
+  return (
+    <li className="nav-item dropdown dropdown-left fadeup">
+      <Link href={member ? "/member" : "/member/login"} className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+        <span className="title-main">會員中心</span>
+      </Link>
+      <ul className="dropdown-menu">
+        {member ? (
+          <>
+            <li className="hover_r_sider dropdown-submenu">
+              <Link className="dropdown-item dropdown-toggle" href="/member" title="前往會員中心">
+                會員中心
+              </Link>
+            </li>
+            <li className="hover_r_sider dropdown-submenu">
+              <a className="dropdown-item dropdown-toggle" href="#" title="登出" onClick={handleLogout}>
+                {loggingOut ? "登出中…" : "登出"}
+              </a>
+            </li>
+          </>
+        ) : (
+          <>
+            <li className="hover_r_sider dropdown-submenu">
+              <Link className="dropdown-item dropdown-toggle" href="/member/login" title="我要登入">
+                我要登入
+              </Link>
+            </li>
+            <li className="hover_r_sider dropdown-submenu">
+              <Link className="dropdown-item dropdown-toggle" href="/member/register" title="註冊會員">
+                註冊會員
+              </Link>
+            </li>
+          </>
+        )}
+      </ul>
+    </li>
+  );
+}
+
 function NavLinks() {
   return (
     <>
@@ -206,24 +278,7 @@ function NavLinks() {
         </Link>
       </li>
 
-      {/* 會員中心 */}
-      <li className="nav-item dropdown dropdown-left fadeup">
-        <Link href="/member/login" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
-          <span className="title-main">會員中心</span>
-        </Link>
-        <ul className="dropdown-menu">
-          <li className="hover_r_sider dropdown-submenu">
-            <Link className="dropdown-item dropdown-toggle" href="/member/login" title="我要登入">
-              我要登入
-            </Link>
-          </li>
-          <li className="hover_r_sider dropdown-submenu">
-            <Link className="dropdown-item dropdown-toggle" href="/member/register" title="註冊會員">
-              註冊會員
-            </Link>
-          </li>
-        </ul>
-      </li>
+      <MemberNavItem />
     </>
   );
 }

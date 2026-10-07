@@ -6,6 +6,7 @@ import MemberConsentGate from "@/components/member/MemberConsentGate";
 import PersonalDataConsentNotice from "@/components/member/PersonalDataConsentNotice";
 import RegisterDownloadList from "@/components/member/RegisterDownloadList";
 import { fetchDownloadResources } from "@/lib/api.server";
+import RedirectIfLoggedIn from "@/components/member/RedirectIfLoggedIn";
 
 export const metadata: Metadata = {
   title: "會員註冊",
@@ -29,6 +30,7 @@ export default async function MemberRegisterPage() {
   return (
     <>
       <BodyClass className="member register" />
+      <RedirectIfLoggedIn />
       <InnerPageShell title="會員註冊" breadcrumb={[{ label: "會員註冊" }]}>
         <div className="frame-small-box">
           <StepProgress activeStep={1} />
