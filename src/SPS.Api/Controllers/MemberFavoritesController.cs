@@ -25,6 +25,11 @@ public class MemberFavoritesController : ControllerBase
         _demands = demands;
     }
 
+    private bool IsEnterpriseMember => User.IsInRole("Supplier") || User.IsInRole("Buyer");
+
+    private IActionResult EnterpriseOnly() =>
+        StatusCode(StatusCodes.Status403Forbidden, new { error = "僅企業會員可以使用我的最愛" });
+
     private Guid? GetMemberId() =>
         Guid.TryParse(User.FindFirst("MemberId")?.Value, out var id) ? id : null;
 
@@ -51,7 +56,9 @@ public class MemberFavoritesController : ControllerBase
     {
         var memberId = GetMemberId();
         if (memberId == null) return Ok(new FavoriteIdsResponse { LoggedIn = false });
-        return Ok(await _favorites.GetIdsAsync(memberId.Value, ct));
+        var ids = await _favorites.GetIdsAsync(memberId.Value, ct);
+        ids.Enterprise = IsEnterpriseMember;
+        return Ok(ids);
     }
 
     [HttpPut("favorites/companies/{companyId:guid}")]
@@ -60,6 +67,7 @@ public class MemberFavoritesController : ControllerBase
     {
         var memberId = GetMemberId();
         if (memberId == null) return Unauthorized(new { error = "Invalid token" });
+        if (!IsEnterpriseMember) return EnterpriseOnly();
         var r = await _favorites.AddCompanyAsync(memberId.Value, companyId, ct);
         return r.IsSuccess ? NoContent() : BadRequest(new { error = r.Error });
     }
@@ -80,6 +88,7 @@ public class MemberFavoritesController : ControllerBase
     {
         var memberId = GetMemberId();
         if (memberId == null) return Unauthorized(new { error = "Invalid token" });
+        if (!IsEnterpriseMember) return EnterpriseOnly();
         var r = await _favorites.AddDemandAsync(memberId.Value, demandId, ct);
         return r.IsSuccess ? NoContent() : BadRequest(new { error = r.Error });
     }

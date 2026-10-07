@@ -11,7 +11,17 @@ export type MemberCenterSection =
 
 export interface MemberCenterNavGroup {
   groupLabel: string;
-  items: { key: MemberCenterSection; label: string }[];
+  items: { key: MemberCenterSection; label: string; /** 只給個人會員（`personal`）或只給企業會員（`enterprise`）；沒寫＝都看得到 */ audience?: "personal" | "enterprise" }[];
+  /** 整個分組只給企業會員（個人會員沒有公司，也不能使用媒合） */
+  enterpriseOnly?: boolean;
+}
+
+/** 依會員類型過濾側邊欄：個人會員只有「個人資料管理」（含權益升級）；企業會員多出「企業會員專屬」與「媒合」，且不再顯示權益升級 */
+export function getNavGroups(isEnterprise: boolean): MemberCenterNavGroup[] {
+  return MEMBER_CENTER_NAV_GROUPS.filter((group) => isEnterprise || !group.enterpriseOnly).map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !item.audience || item.audience === (isEnterprise ? "enterprise" : "personal")),
+  }));
 }
 
 /**
@@ -34,11 +44,12 @@ export const MEMBER_CENTER_NAV_GROUPS: MemberCenterNavGroup[] = [
       { key: "profile", label: "基本資料" },
       { key: "password", label: "變更密碼" },
       { key: "passkey", label: "Passkey 管理" },
-      { key: "upgrade", label: "權益升級" },
+      { key: "upgrade", label: "權益升級", audience: "personal" },
     ],
   },
   {
     groupLabel: "企業會員專屬",
+    enterpriseOnly: true,
     items: [
       { key: "company", label: "公司資料" },
       { key: "contact", label: "成員管理" },
@@ -47,6 +58,7 @@ export const MEMBER_CENTER_NAV_GROUPS: MemberCenterNavGroup[] = [
   },
   {
     groupLabel: "媒合",
+    enterpriseOnly: true,
     items: [
       { key: "match_data", label: "媒合資料維護" },
       { key: "favorite", label: "我的最愛" },
@@ -58,6 +70,9 @@ export const MEMBER_CENTER_NAV_GROUPS: MemberCenterNavGroup[] = [
  * 積木元件：會員中心側邊欄——沿用 `.side1 .nav > li a`（`CategorySidebar`
  * 也是這套，News/Serve 側欄分類選單）的連結外觀，保持全站側欄視覺
  * 一致，不是另外刻一套新樣式。
+ *
+ * 2026-10-07：選單項目的間距由 `globals.css` 的 `.member-center-nav` 負責（這個選單不在 `.side1` 底下，舊站 CSS 的項目樣式
+ * 吃不到，項目擠成一團）；依會員類型顯示不同分組，見 `getNavGroups`。
  *
  * 2026-10-02 修正：原本 `<ul>` 上掛的是 `.wid-cont`，那個 class 其實是
  * `.side1 ul.wid-cont { display:flex }`（給 News/Serve 側欄的「橫向
@@ -78,15 +93,18 @@ export const MEMBER_CENTER_NAV_GROUPS: MemberCenterNavGroup[] = [
 export default function MemberCenterNav({
   active,
   onSelect,
+  isEnterprise,
 }: {
   active: MemberCenterSection;
   onSelect: (section: MemberCenterSection) => void;
+  /** 企業會員（有所屬公司）才有「企業會員專屬」與「媒合」；個人會員只有個人資料管理 */
+  isEnterprise: boolean;
 }) {
   return (
-    <>
-      {MEMBER_CENTER_NAV_GROUPS.map((group) => (
-        <div key={group.groupLabel} className="mb-4">
-          <h4 className="me_sho mb-2">{group.groupLabel}</h4>
+    <nav className="member-center-nav" aria-label="會員中心選單">
+      {getNavGroups(isEnterprise).map((group) => (
+        <div key={group.groupLabel} className="member-center-nav__group">
+          <h4 className="me_sho member-center-nav__title">{group.groupLabel}</h4>
           <ul className="nav flex-column">
             {group.items.map((item) => (
               <li key={item.key}>
@@ -107,6 +125,6 @@ export default function MemberCenterNav({
           </ul>
         </div>
       ))}
-    </>
+    </nav>
   );
 }

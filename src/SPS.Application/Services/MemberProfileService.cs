@@ -695,7 +695,7 @@ public class MemberProfileService : IMemberProfileService
                         ? (!string.IsNullOrEmpty(m.Extension) ? $"{m.Phone}#{m.Extension}" : m.Phone)
                         : null,
                     MobilePhone = m.MobilePhone,
-                    MemberJobTitle = m.MemberJobTitle
+                    MemberJobTitle = string.IsNullOrWhiteSpace(m.Position) ? m.MemberJobTitle : m.Position
                 }).ToList(),
             CreatedTime = company.CreatedTime,
             UpdatedTime = company.UpdatedTime

@@ -11,7 +11,6 @@ interface ProfileForm {
   extension: string;
   mobilePhone: string;
   position: string;
-  memberJobTitle: string;
 }
 
 function toForm(profile: MemberProfileResponse): ProfileForm {
@@ -21,7 +20,6 @@ function toForm(profile: MemberProfileResponse): ProfileForm {
     extension: profile.extension ?? "",
     mobilePhone: profile.mobilePhone ?? "",
     position: profile.position ?? "",
-    memberJobTitle: profile.memberJobTitle ?? "",
   };
 }
 
@@ -35,6 +33,10 @@ function toForm(profile: MemberProfileResponse): ProfileForm {
  * 這次新寫的。畫面本身（表單欄位/按鈕）是這次新做的，照現有站內
  * `.form-group`／`.form-control`／`btn-theme` 這套既有 class，不是
  * 照抄舊專案那份 Tailwind 版本的視覺。
+ *
+ * 2026-10-07 欄位改版（方案 A）：「會員暱稱」改叫「姓名」（存的就是註冊時填的姓名，會對外顯示在企業名錄的聯繫窗口）、
+ * 「公司電話」改叫「聯絡電話」（跟註冊一致，也避免跟公司資料的公司電話搞混）、拿掉重複的「職務抬頭」只留「職稱」
+ * （後端欄位保留不動，更新時不送就不會改到）。
  *
  * Email 唯讀（`disabled`）：跟登入帳號綁在一起，不是這個表單能改的
  * 欄位（後端 `UpdateMemberProfileRequest` 本來就沒有這個欄位）。
@@ -85,7 +87,6 @@ export default function ProfilePanel() {
         extension: form.extension,
         mobilePhone: form.mobilePhone,
         position: form.position,
-        memberJobTitle: form.memberJobTitle,
       };
       const updated = await memberprofileApi.updateMembersProfile(payload);
       setProfile(updated);
@@ -121,33 +122,38 @@ export default function ProfilePanel() {
       </div>
 
       <div className="menb_inp_tit form-group">
-        <label className="mb-2">會員暱稱</label>
-        <input type="text" className="form-control" value={form.nickname} onChange={(e) => updateField("nickname", e.target.value)} />
+        <label className="mb-2" htmlFor="profile-name">
+          姓名
+        </label>
+        <input id="profile-name" type="text" className="form-control" value={form.nickname} onChange={(e) => updateField("nickname", e.target.value)} />
       </div>
 
       <div className="menb_inp_tit form-group">
-        <label className="mb-2">職稱</label>
-        <input type="text" className="form-control" value={form.position} onChange={(e) => updateField("position", e.target.value)} />
+        <label className="mb-2" htmlFor="profile-position">
+          職稱
+        </label>
+        <input id="profile-position" type="text" className="form-control" value={form.position} onChange={(e) => updateField("position", e.target.value)} />
       </div>
 
       <div className="menb_inp_tit form-group">
-        <label className="mb-2">職務抬頭</label>
-        <input type="text" className="form-control" value={form.memberJobTitle} onChange={(e) => updateField("memberJobTitle", e.target.value)} />
+        <label className="mb-2" htmlFor="profile-phone">
+          聯絡電話
+        </label>
+        <input id="profile-phone" type="text" className="form-control" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
       </div>
 
       <div className="menb_inp_tit form-group">
-        <label className="mb-2">公司電話</label>
-        <input type="text" className="form-control" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
+        <label className="mb-2" htmlFor="profile-extension">
+          分機（選填）
+        </label>
+        <input id="profile-extension" type="text" className="form-control" maxLength={20} value={form.extension} onChange={(e) => updateField("extension", e.target.value)} />
       </div>
 
       <div className="menb_inp_tit form-group">
-        <label className="mb-2">分機</label>
-        <input type="text" className="form-control" value={form.extension} onChange={(e) => updateField("extension", e.target.value)} />
-      </div>
-
-      <div className="menb_inp_tit form-group">
-        <label className="mb-2">手機</label>
-        <input type="text" className="form-control" value={form.mobilePhone} onChange={(e) => updateField("mobilePhone", e.target.value)} />
+        <label className="mb-2" htmlFor="profile-mobile">
+          手機
+        </label>
+        <input id="profile-mobile" type="text" className="form-control" value={form.mobilePhone} onChange={(e) => updateField("mobilePhone", e.target.value)} />
       </div>
 
       {message && (

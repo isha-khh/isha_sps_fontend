@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { authApi } from "@/lib/api/auth";
-import MemberCenterNav, { MEMBER_CENTER_NAV_GROUPS, type MemberCenterSection } from "@/components/member/MemberCenterNav";
+import MemberCenterNav, { getNavGroups, type MemberCenterSection } from "@/components/member/MemberCenterNav";
 import ProfilePanel from "@/components/member/panels/ProfilePanel";
 import UpgradePanel from "@/components/member/panels/UpgradePanel";
 import CompanyPanel from "@/components/member/panels/CompanyPanel";
@@ -75,7 +75,9 @@ export default function MemberCenterContent() {
     );
   }
 
-  const activeLabel = MEMBER_CENTER_NAV_GROUPS.flatMap((g) => g.items).find((item) => item.key === active)?.label ?? "";
+  // 有所屬公司＝企業會員：個人會員沒有「企業會員專屬」與「媒合」，已是企業會員的人也不需要「權益升級」
+  const isEnterprise = Boolean(member.companyId);
+  const activeLabel = getNavGroups(isEnterprise).flatMap((g) => g.items).find((item) => item.key === active)?.label ?? "";
 
   return (
     <div className="frame-small-box">
@@ -91,7 +93,7 @@ export default function MemberCenterContent() {
 
       <div className="d-flex flex-wrap gap-4">
         <div style={{ flex: "0 0 220px" }}>
-          <MemberCenterNav active={active} onSelect={setActive} />
+          <MemberCenterNav active={active} onSelect={setActive} isEnterprise={isEnterprise} />
         </div>
 
         <div style={{ flex: "1 1 400px" }}>

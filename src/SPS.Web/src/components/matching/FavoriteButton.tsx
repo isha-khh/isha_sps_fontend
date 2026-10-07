@@ -13,6 +13,8 @@ import { getApiErrorMessage } from "@/lib/error-utils";
 export default function FavoriteButton({ kind, id, className }: { kind: "company" | "demand"; id: string | number; className?: string }) {
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState(false);
+  // 個人會員不能使用我的最愛（跟媒合內容一樣是企業會員功能），已登入但不是企業會員就整顆不顯示
+  const [allowed, setAllowed] = useState(true);
   const [favorited, setFavorited] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
@@ -24,6 +26,7 @@ export default function FavoriteButton({ kind, id, className }: { kind: "company
       .then((ids) => {
         if (cancelled) return;
         setLoggedIn(ids.loggedIn);
+        setAllowed(!ids.loggedIn || ids.enterprise);
         setFavorited(kind === "company" ? ids.companyIds.includes(String(id)) : ids.demandIds.includes(Number(id)));
       })
       .catch(() => {});
@@ -53,6 +56,8 @@ export default function FavoriteButton({ kind, id, className }: { kind: "company
       setBusy(false);
     }
   }
+
+  if (!allowed) return null;
 
   return (
     <span className={className}>

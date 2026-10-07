@@ -23,6 +23,8 @@ export interface MemberFavorites {
 /** 收藏按鈕判斷狀態用；沒登入也能呼叫（`loggedIn` = false），不會被導去登入頁 */
 export interface FavoriteIds {
   loggedIn: boolean;
+  /** 是不是企業會員；只有企業會員可以使用我的最愛 */
+  enterprise: boolean;
   companyIds: string[];
   demandIds: number[];
 }

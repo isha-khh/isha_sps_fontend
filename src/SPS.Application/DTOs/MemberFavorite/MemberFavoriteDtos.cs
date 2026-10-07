@@ -29,6 +29,9 @@ public class MemberFavoritesResponse
 public class FavoriteIdsResponse
 {
     public bool LoggedIn { get; set; }
+
+    /// <summary>true = 企業會員（Supplier／Buyer）；只有企業會員可以使用我的最愛，個人會員前台不顯示收藏按鈕</summary>
+    public bool Enterprise { get; set; }
     public List<Guid> CompanyIds { get; set; } = new();
     public List<int> DemandIds { get; set; } = new();
 }

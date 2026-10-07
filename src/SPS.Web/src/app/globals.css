@@ -371,3 +371,40 @@
 .matching .more_x.me_Publish:focus i {
   transform: none !important;
 }
+
+/*
+ * 會員中心（`/member`）側邊選單：這個選單不在 `.side1` 底下，舊站 CSS 的項目樣式（`.side1 .nav > li a`）套不到，
+ * 原本的項目是沒有間距的純文字連結，擠在一起。這裡自己定義：分組之間留大空隔、標題與項目、項目與項目之間各有固定間距，
+ * 點擊區至少 40px 高；目前所在的項目加粗、變藍。
+ */
+.member-center-nav__group + .member-center-nav__group {
+  margin-top: 28px;
+}
+
+.member-center-nav__title {
+  margin: 0 0 10px;
+}
+
+.member-center-nav ul.nav {
+  gap: 2px;
+}
+
+.member-center-nav ul.nav > li > a {
+  display: block;
+  padding: 8px 0;
+  min-height: 40px;
+  line-height: 1.5;
+  font-size: 1rem;
+  color: #1a1a1a;
+  text-decoration: none;
+}
+
+.member-center-nav ul.nav > li > a:hover,
+.member-center-nav ul.nav > li > a:focus-visible {
+  color: #0052cc;
+}
+
+.member-center-nav ul.nav > li > a.active {
+  color: #0052cc;
+  font-weight: 700;
+}

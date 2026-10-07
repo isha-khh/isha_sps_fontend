@@ -215,7 +215,7 @@ export interface UpdateMemberProfileRequest {
     /** * 會員職務抬頭
      * @example "PM"
      */
-    memberJobTitle: string;
+    memberJobTitle?: string;
 
     /** * 大頭貼照片 ID
      * 若未更改照片可能需傳回原 ID 或 null

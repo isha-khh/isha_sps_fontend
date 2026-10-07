@@ -220,11 +220,10 @@ export default function MembersPanel() {
         <div className="menb_inp_box d-flex mb-4 p-3 border rounded">
           <h4 className="w-100 h5">{editing === "new" ? "新增成員" : "修改成員資料"}</h4>
           {field("email", "Email（登入帳號）", { disabled: editing !== "new", maxLength: 320 })}
-          {field("nickname", "暱稱")}
+          {field("nickname", "姓名")}
           {field("position", "職稱")}
-          {field("memberJobTitle", "職務抬頭")}
-          {field("phone", "公司電話", { maxLength: 50 })}
-          {field("extension", "分機", { maxLength: 20 })}
+          {field("phone", "聯絡電話", { maxLength: 50 })}
+          {field("extension", "分機（選填）", { maxLength: 20 })}
           {field("mobilePhone", "手機", { maxLength: 50 })}
           {editing === "new" && (
             <>
@@ -282,7 +281,7 @@ export default function MembersPanel() {
                     {!active && <span className="badge bg-warning text-dark ms-2">已停用</span>}
                     <div className="small text-muted">{member.email}</div>
                     <div className="small text-muted">
-                      {[member.position, member.memberJobTitle].filter(Boolean).join("／") || "—"}
+                      {member.position || member.memberJobTitle || "—"}
                       {member.phone ? `　${member.phone}${member.extension ? `#${member.extension}` : ""}` : ""}
                       {member.mobilePhone ? `　${member.mobilePhone}` : ""}
                     </div>

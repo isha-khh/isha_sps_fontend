@@ -550,7 +550,8 @@ public class CompanyService : ICompanyService
                         ? (!string.IsNullOrEmpty(m.Extension) ? $"{m.Phone}#{m.Extension}" : m.Phone)
                         : null,
                     MobilePhone = m.MobilePhone,
-                    MemberJobTitle = m.MemberJobTitle
+                    // 會員中心只留「職稱」一格（職務抬頭已併入職稱），聯絡窗口的職稱優先用職稱，舊資料才退回職務抬頭
+                    MemberJobTitle = string.IsNullOrWhiteSpace(m.Position) ? m.MemberJobTitle : m.Position
                 }).ToList(),
 
             CreatedTime = company.CreatedTime,
