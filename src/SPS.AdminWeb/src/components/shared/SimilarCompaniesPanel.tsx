@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { similarCompaniesApi } from '@/lib/api/protrack';
+import { demandsApi } from '@/lib/api/demands';
 import type { SimilarCompanyResult, SimilarCompanyByVectorResult } from '@/types/protrack';
 
 interface Props {
@@ -33,7 +34,14 @@ function aiTier(rank: number): { label: string; badgeClass: string } {
 export const SimilarCompaniesPanel = ({ tagIds, demandId, previewName, previewIntroduction, onSelectionChange }: Props) => {
   const [companies, setCompanies] = useState<SimilarCompanyResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [threshold, setThreshold] = useState(30);
+  // 門檻由系統管理員在「系統設定 → 內容設定」統一設定（預設 70%），這裡只讀，承辦人只能逐一取消勾選業者
+  const [threshold, setThreshold] = useState(70);
+  useEffect(() => {
+    demandsApi
+      .getMatchThreshold()
+      .then(setThreshold)
+      .catch(() => {});
+  }, []);
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
 
   const [aiResults, setAiResults] = useState<SimilarCompanyByVectorResult[]>([]);
@@ -234,17 +242,9 @@ export const SimilarCompaniesPanel = ({ tagIds, demandId, previewName, previewIn
               </div>
             )}
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-base-content/60 whitespace-nowrap">推薦門檻</span>
-              <input
-                type="range"
-                min={10}
-                max={100}
-                step={5}
-                value={threshold}
-                onChange={(e) => setThreshold(Number(e.target.value))}
-                className="range range-primary range-xs w-28"
-              />
-              <span className="font-mono font-semibold w-10 text-right text-primary">{threshold}%</span>
+              <span className="text-base-content/60 whitespace-nowrap" title="由系統管理員在「系統設定 → 內容設定」調整">推薦門檻</span>
+              <span className="font-mono font-semibold text-right text-primary">{threshold}%</span>
+              <span className="iconify lucide--lock size-3.5 text-base-content/40" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -265,7 +265,7 @@ export const SimilarCompaniesPanel = ({ tagIds, demandId, previewName, previewIn
           </div>
         ) : sorted.length === 0 ? (
           <p className="text-center text-base-content/50 text-sm py-4">
-            {merged.length === 0 ? '尚無供給端業者綁定標籤' : `無業者達到 ${threshold}% 門檻，可降低門檻查看更多`}
+            {merged.length === 0 ? '尚無供給端業者綁定標籤' : `無業者達到 ${threshold}% 門檻（由系統管理員設定）`}
           </p>
         ) : (
           <>

@@ -21,12 +21,14 @@ public class DemandController : ControllerBase
     private readonly IDemandService _demandService;
     private readonly IAdminUserService _adminUserService;
     private readonly IFileManagementService _fileService;
+    private readonly IDemandReplyService _replyService;
 
     /// <summary>
     /// 需求控制器建構函數
     /// </summary>
-    public DemandController(IDemandService demandService, IAdminUserService adminUserService, IFileManagementService fileService)
+    public DemandController(IDemandService demandService, IAdminUserService adminUserService, IFileManagementService fileService, IDemandReplyService replyService)
     {
+        _replyService = replyService;
         _demandService = demandService;
         _adminUserService = adminUserService;
         _fileService = fileService;
@@ -84,7 +86,12 @@ public class DemandController : ControllerBase
             return NotFound(new { error = "資料不存在" });
         }
 
-        if (r.IsSuccess) await ApplyVisibilityAsync(r.Data!, includeAttachments: true, ct);
+        if (r.IsSuccess)
+        {
+            await ApplyVisibilityAsync(r.Data!, includeAttachments: true, ct);
+            // 追蹤人數只給供應端會員（回應彈窗提示收件對象）與後台，其他人不公開
+            if (User.IsInRole("Admin") || User.IsInRole("Supplier")) r.Data!.FollowerCount = await _replyService.CountFollowersAsync(r.Data.Id, ct);
+        }
 
         return r.IsSuccess ? Ok(r.Data) : NotFound(new { error = r.Error });
     }
@@ -102,6 +109,8 @@ public class DemandController : ControllerBase
         {
             demand.CompanyId = null;
             demand.CompanyName = null;
+            // 後台填的「公開摘要」原文不外流，前台一律看 Summary（見下面依身分截斷）
+            demand.PublicSummary = null;
         }
 
         if (isAdmin || isEnterpriseMember)
@@ -112,9 +121,20 @@ public class DemandController : ControllerBase
         }
 
         demand.Introduction = null;
+        demand.Summary = TruncateForPublic(demand.Summary);
         demand.ContentLocked = true;
         demand.AttachmentFileIds = new List<Guid>();
         demand.Attachments = new List<DemandAttachmentDto>();
+    }
+
+    /// <summary>匿名與個人會員只看得到內容的前 20 字，其餘要登入企業會員才看得到（在後端截斷，不能只靠前端隱藏）</summary>
+    private const int PublicSummaryLength = 20;
+
+    private static string? TruncateForPublic(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return text;
+        var flat = string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        return flat.Length > PublicSummaryLength ? flat[..PublicSummaryLength] + "…" : flat;
     }
 
     private async Task<FileInfoResponse?> GetUsableAttachmentAsync(Guid fileId, CancellationToken ct)
@@ -183,6 +203,29 @@ public class DemandController : ControllerBase
         var r = await _demandService.CreateAsync(req, ct);
         return r.IsSuccess ? CreatedAtAction(nameof(GetById), new { id = r.Data!.Id }, r.Data) : BadRequest(new { error = r.Error });
     }
+
+    /// <summary>
+    /// 供應業者回應需求。只有供應端企業會員可以；送出後是待審，後台審核通過才會寄給刊登者與追蹤者。
+    /// 同一家供應業者對同一需求可以回應多次，不設上限。
+    /// </summary>
+    [HttpPost("{id:int}/replies")]
+    [Authorize(Roles = "Supplier")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> Reply(int id, [FromBody] CreateDemandReplyRequest req, CancellationToken ct)
+    {
+        if (!Guid.TryParse(User.FindFirst("MemberId")?.Value, out var memberId)) return Unauthorized(new { error = "Invalid token" });
+        var r = await _replyService.CreateAsync(memberId, id, req, ct);
+        return r.IsSuccess ? Ok(new { message = "已收到您的回應，審核通過後會寄給刊登者與追蹤者" }) : BadRequest(new { error = r.Error });
+    }
+
+    /// <summary>後台發布需求時預設勾選的符合度門檻（百分比）。唯讀；只有系統管理員能在「內容設定」修改</summary>
+    [HttpGet("match-threshold")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageDemands)]
+    public async Task<IActionResult> GetMatchThreshold()
+        => Ok(new { thresholdPercent = await _demandService.GetMatchThresholdPercentAsync() });
 
     /// <summary>
     /// 會員從前台「我要刊登」送出需求。只有企業會員（Supplier／Buyer）可以；送出後是未發布狀態，

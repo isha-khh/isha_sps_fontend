@@ -27,6 +27,9 @@ public class Demand : BaseEntity<int>
     /// <summary>會員從前台「我要刊登」送出的需求：記錄送出的會員。這類需求送出時是未發布，後台審核後才會上架；後台自己建立的為空</summary>
     public Guid? SubmittedByMemberId { get; set; }
 
+    /// <summary>上架時間（第一次變成發布狀態的時間）；前台列表依這個時間排序。舊資料遷移時以建立時間補上</summary>
+    public DateTime? PublishedTime { get; set; }
+
     // Navigation properties
     public Picture? Picture { get; set; }
     public Category? Category { get; set; }

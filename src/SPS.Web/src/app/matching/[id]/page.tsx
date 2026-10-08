@@ -7,8 +7,9 @@ import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
 import Link from "next/link";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import RelatedNeeds from "@/components/matching/RelatedNeeds";
-import ProposeSolutionModal from "@/components/matching/ProposeSolutionModal";
-import FavoriteButton from "@/components/matching/FavoriteButton";
+import ReplyNeedModal from "@/components/matching/ReplyNeedModal";
+import ReplyNeedButton from "@/components/matching/ReplyNeedButton";
+import FollowButton from "@/components/matching/FollowButton";
 import { demandToNeed } from "@/lib/matching-need-data";
 import { withBasePath } from "@/lib/api-client";
 import { fetchBanners, fetchDemandDetail, fetchDemands } from "@/lib/api.server";
@@ -21,10 +22,12 @@ export async function generateMetadata({ params }: PageProps<"/matching/[id]">):
 
 /**
  * 「媒合對接」需求詳情頁（提供解方），對應設計稿 `page/matching/show2.html`。
+ * 2026-10-08 改版：右側欄按鈕改為「我要回應」（只有供應端企業會員可以，送出後待後台審核）與「追蹤」（只有需求端企業會員可以），
+ * 見 `docs/媒合對接業務規格-2026-10-08.md`。
  * 跟企業名錄詳情頁（`/matching/enterprise/[id]`，對應 `show.html`）是
  * 完全不同的兩份設計稿——這頁沒有公司資訊區塊，是「需求」本身的內容
  * （公開摘要／內文／附件下載／相關需求輪播），右側欄按鈕也是「我要
- * 提案」而不是「取得聯繫窗口」，彈窗欄位也不同（見 `ProposeSolutionModal`
+ * 回應」而不是「取得聯繫窗口」，彈窗欄位也不同（見 `ReplyNeedModal`
  * 開頭的說明）。
  */
 export default async function MatchingNeedDetailPage({ params }: PageProps<"/matching/[id]">) {
@@ -52,14 +55,9 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
         breadcrumb={[{ label: "媒合對接", href: "/matching" }, { label: need.title }]}
         aside={
           <>
-            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target={`#${modalId}`} className="me_Publish more_x">
-              <span>我要提案</span>
-              <i className="bi bi-pencil-square" aria-hidden="true" />
-            </a>
+            <ReplyNeedButton modalId={modalId} />
 
-            <div className="mb-4 text-center">
-              <FavoriteButton kind="demand" id={need.id} />
-            </div>
+            <FollowButton demandId={Number(need.id)} variant="detail" />
 
             <SidebarBanner banners={sidebarBanners} />
           </>
@@ -170,7 +168,7 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
         </div>
       </InnerPageShell>
 
-      <ProposeSolutionModal id={modalId} demandId={need.id} demandTitle={need.title} />
+      <ReplyNeedModal id={modalId} demandId={need.id} demandTitle={need.title} followerCount={need.followerCount} />
     </>
   );
 }

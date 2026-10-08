@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { authApi } from "@/lib/api/auth";
-import MemberCenterNav, { getNavGroups, type MemberCenterSection } from "@/components/member/MemberCenterNav";
+import MemberCenterNav, { getNavGroups, type MemberCenterRole, type MemberCenterSection } from "@/components/member/MemberCenterNav";
 import ProfilePanel from "@/components/member/panels/ProfilePanel";
 import UpgradePanel from "@/components/member/panels/UpgradePanel";
 import CompanyPanel from "@/components/member/panels/CompanyPanel";
@@ -15,6 +15,8 @@ import PasskeyPanel from "@/components/member/panels/PasskeyPanel";
 import MembersPanel from "@/components/member/panels/MembersPanel";
 import MatchDataPanel from "@/components/member/panels/MatchDataPanel";
 import FavoritesPanel from "@/components/member/panels/FavoritesPanel";
+import RepliesPanel from "@/components/member/panels/RepliesPanel";
+import { memberFavoritesApi } from "@/lib/api/member-favorites";
 
 /**
  * 積木元件：會員中心（`/member`）主要內容——這是全新頁面，舊站
@@ -37,9 +39,15 @@ export default function MemberCenterContent() {
   const { member, loading, fetchProfile, clear } = useAuthStore();
   const [active, setActive] = useState<MemberCenterSection>("profile");
   const [loggingOut, setLoggingOut] = useState(false);
+  // 需求端／供給端：決定側邊欄有沒有「媒合資料維護」（刊登，需求端）與「我的回應」（供給端）
+  const [role, setRole] = useState<MemberCenterRole>("");
 
   useEffect(() => {
     fetchProfile();
+    memberFavoritesApi
+      .getIds()
+      .then((ids) => setRole(ids.role))
+      .catch(() => {});
     // 只在掛載時查一次登入狀態
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -77,7 +85,7 @@ export default function MemberCenterContent() {
 
   // 有所屬公司＝企業會員：個人會員沒有「企業會員專屬」與「媒合」，已是企業會員的人也不需要「權益升級」
   const isEnterprise = Boolean(member.companyId);
-  const activeLabel = getNavGroups(isEnterprise).flatMap((g) => g.items).find((item) => item.key === active)?.label ?? "";
+  const activeLabel = getNavGroups(isEnterprise, role).flatMap((g) => g.items).find((item) => item.key === active)?.label ?? "";
 
   return (
     <div className="frame-small-box">
@@ -93,7 +101,7 @@ export default function MemberCenterContent() {
 
       <div className="d-flex flex-wrap gap-4">
         <div style={{ flex: "0 0 220px" }}>
-          <MemberCenterNav active={active} onSelect={setActive} isEnterprise={isEnterprise} />
+          <MemberCenterNav active={active} onSelect={setActive} isEnterprise={isEnterprise} role={role} />
         </div>
 
         <div style={{ flex: "1 1 400px" }}>
@@ -114,8 +122,10 @@ export default function MemberCenterContent() {
             <MembersPanel />
           ) : active === "match_data" ? (
             <MatchDataPanel />
+          ) : active === "my_replies" ? (
+            <RepliesPanel />
           ) : active === "favorite" ? (
-            <FavoritesPanel />
+            <FavoritesPanel role={role} />
           ) : (
             <p className="text-muted">
               <i className="bi bi-info-circle-fill me-1" aria-hidden="true"></i>

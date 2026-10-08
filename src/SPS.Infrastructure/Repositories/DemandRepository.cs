@@ -33,7 +33,7 @@ public class DemandRepository : Repository<Demand, int>, IDemandRepository
             query = query.Where(d => d.Status == (parameters.Published.Value ? SPS.Domain.Enums.Status.Active : SPS.Domain.Enums.Status.Inactive));
         
         var totalCount = await query.CountAsync(ct);
-        var items = await query.OrderByDescending(d => d.CreatedTime)
+        var items = await query.OrderByDescending(d => d.PublishedTime ?? d.CreatedTime)
             .Skip((parameters.Page - 1) * parameters.PageSize).Take(parameters.PageSize).ToListAsync(ct);
         return new PagedResult<Demand> { Items = items, TotalCount = totalCount, Page = parameters.Page, PageSize = parameters.PageSize };
     }

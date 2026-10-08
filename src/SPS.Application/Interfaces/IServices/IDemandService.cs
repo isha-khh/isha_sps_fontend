@@ -25,6 +25,9 @@ public interface IDemandService
     Task<Result<DemandResponse>> UpdateAsync(int id, UpdateDemandRequest request, string? publisherEmail = null, CancellationToken ct = default);
     Task<Result<bool>> DeleteAsync(int id, CancellationToken ct = default);
     Task<Result<DemandStatisticsDto>> GetStatisticsAsync(CancellationToken ct = default);
+
+    /// <summary>發布需求時，預設勾選通知的供應業者「標籤符合度」門檻（百分比）；系統管理員在「內容設定」調整，預設 70</summary>
+    Task<int> GetMatchThresholdPercentAsync();
     Task<Result<DemandTagsResponse>> GetTagsAsync(int id, CancellationToken ct = default);
     Task<Result<DemandTagsResponse>> SetTagsAsync(int id, SetDemandTagsRequest request, CancellationToken ct = default);
     Task<Result<List<SimilarCompanyResponse>>> GetSimilarCompaniesAsync(List<int> tagIds, CancellationToken ct = default);

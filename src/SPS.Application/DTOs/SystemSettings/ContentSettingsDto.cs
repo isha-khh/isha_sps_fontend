@@ -24,4 +24,9 @@ public class ContentSettingsDto
     /// 企業列表關於我們最大顯示字元數
     /// </summary>
     public int BusinessListIntroductionMaxLength { get; set; } = 100;
+
+    /// <summary>
+    /// 媒合對接：後台發布需求時，預設勾選通知的供應業者「標籤符合度」門檻（百分比，0–100）。只有系統管理員能改。
+    /// </summary>
+    public int DemandMatchThresholdPercent { get; set; } = 70;
 }

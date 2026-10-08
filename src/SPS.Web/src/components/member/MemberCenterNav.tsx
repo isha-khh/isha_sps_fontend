@@ -7,20 +7,26 @@ export type MemberCenterSection =
   | "product"
   | "upgrade"
   | "match_data"
+  | "my_replies"
   | "favorite";
+
+/** 媒合對接的身分：Buyer＝需求端企業會員、Supplier＝供給端企業會員、空字串＝尚未載入或個人會員 */
+export type MemberCenterRole = "Buyer" | "Supplier" | "";
 
 export interface MemberCenterNavGroup {
   groupLabel: string;
-  items: { key: MemberCenterSection; label: string; /** 只給個人會員（`personal`）或只給企業會員（`enterprise`）；沒寫＝都看得到 */ audience?: "personal" | "enterprise" }[];
+  items: { key: MemberCenterSection; label: string; /** 只給個人會員（`personal`）、企業會員（`enterprise`）、需求端（`buyer`）或供給端（`supplier`）；沒寫＝都看得到 */ audience?: "personal" | "enterprise" | "buyer" | "supplier" }[];
   /** 整個分組只給企業會員（個人會員沒有公司，也不能使用媒合） */
   enterpriseOnly?: boolean;
 }
 
 /** 依會員類型過濾側邊欄：個人會員只有「個人資料管理」（含權益升級）；企業會員多出「企業會員專屬」與「媒合」，且不再顯示權益升級 */
-export function getNavGroups(isEnterprise: boolean): MemberCenterNavGroup[] {
+export function getNavGroups(isEnterprise: boolean, role: MemberCenterRole = ""): MemberCenterNavGroup[] {
+  const allowed = (audience: NonNullable<MemberCenterNavGroup["items"][number]["audience"]>) =>
+    audience === "personal" ? !isEnterprise : audience === "enterprise" ? isEnterprise : audience === "buyer" ? role === "Buyer" : role === "Supplier";
   return MEMBER_CENTER_NAV_GROUPS.filter((group) => isEnterprise || !group.enterpriseOnly).map((group) => ({
     ...group,
-    items: group.items.filter((item) => !item.audience || item.audience === (isEnterprise ? "enterprise" : "personal")),
+    items: group.items.filter((item) => !item.audience || allowed(item.audience)),
   }));
 }
 
@@ -60,7 +66,9 @@ export const MEMBER_CENTER_NAV_GROUPS: MemberCenterNavGroup[] = [
     groupLabel: "媒合",
     enterpriseOnly: true,
     items: [
-      { key: "match_data", label: "媒合資料維護" },
+      // 刊登需求只有需求端，回應需求只有供給端；追蹤需求（需求端）併在「我的最愛」
+      { key: "match_data", label: "媒合資料維護", audience: "buyer" },
+      { key: "my_replies", label: "我的回應", audience: "supplier" },
       { key: "favorite", label: "我的最愛" },
     ],
   },
@@ -94,15 +102,17 @@ export default function MemberCenterNav({
   active,
   onSelect,
   isEnterprise,
+  role = "",
 }: {
   active: MemberCenterSection;
   onSelect: (section: MemberCenterSection) => void;
   /** 企業會員（有所屬公司）才有「企業會員專屬」與「媒合」；個人會員只有個人資料管理 */
   isEnterprise: boolean;
+  role?: MemberCenterRole;
 }) {
   return (
     <nav className="member-center-nav" aria-label="會員中心選單">
-      {getNavGroups(isEnterprise).map((group) => (
+      {getNavGroups(isEnterprise, role).map((group) => (
         <div key={group.groupLabel} className="member-center-nav__group">
           <h4 className="me_sho member-center-nav__title">{group.groupLabel}</h4>
           <ul className="nav flex-column">

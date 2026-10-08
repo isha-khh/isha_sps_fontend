@@ -5,7 +5,7 @@ import MatchingSubNav from "@/components/matching/MatchingSubNav";
 import MatchingSearchBar from "@/components/matching/MatchingSearchBar";
 import NeedListItem from "@/components/matching/NeedListItem";
 import PublishNeedModal from "@/components/matching/PublishNeedModal";
-import SubscribeSolutionModal from "@/components/matching/SubscribeSolutionModal";
+import PublishNeedButton from "@/components/matching/PublishNeedButton";
 import Pagination from "@/components/ui/Pagination";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import { demandToNeed } from "@/lib/matching-need-data";
@@ -27,6 +27,8 @@ const NEED_PAGE_SIZE = 8;
  * 項目版型完全不同（見 `NeedListItem.tsx` 的說明），另外開元件。
  *
  * 資料來自後台「需求張貼管理」已發布的需求（`fetchDemands`），2026-10-06 從假資料改接真後端；
+ * 2026-10-08 媒合對接改版（見 `docs/媒合對接業務規格-2026-10-08.md`）：列表依上架時間排序，訪客與個人會員只看得到內容前 20 字（後端截斷），
+ * 「我要刊登」依身分決定狀態（`PublishNeedButton`），原本的「訂閱解方」改為「追蹤」（`FollowButton`，限需求端企業會員）；
  * 關鍵字搜尋（`?q=`）交給後端比對，分頁照抄 `/matching/enterprise` 的前端分頁做法。
  *
  * `.searchma_tching` 搜尋列放在 `topBar`，不是 `children`——對照設計稿
@@ -57,7 +59,6 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
     <>
       <BodyClass className="matching index" />
       <PublishNeedModal id="staticmembership2" taxonomy={taxonomy} />
-      <SubscribeSolutionModal id="staticmembership" />
 
       <InnerPageShell
         title="媒合對接"
@@ -70,10 +71,7 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
         }
         aside={
           <>
-            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#staticmembership2" className="me_Publish more_x">
-              <span>我要刊登</span>
-              <i className="bi bi-pencil-square" aria-hidden="true" />
-            </a>
+            <PublishNeedButton modalId="staticmembership2" />
 
             <SidebarBanner banners={sidebarBanners} />
           </>

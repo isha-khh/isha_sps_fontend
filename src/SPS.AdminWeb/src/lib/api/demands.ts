@@ -17,6 +17,12 @@ import { companiesApi } from '@/lib/api/companies';
 
 // ========== 需求 API (Legacy Compat) ==========
 export const demandsApi = {
+  // 發布需求時預設勾選通知的供應業者「標籤符合度」門檻（百分比）。唯讀；只有系統管理員能在「系統設定 → 內容設定」修改
+  async getMatchThreshold(): Promise<number> {
+    const response = await apiClient.get('/api/Demand/match-threshold');
+    return response.data.thresholdPercent;
+  },
+
   // 獲取需求列表
   async getDemands(
     pageIndex = 1,

@@ -18,11 +18,13 @@ public class MemberFavoritesController : ControllerBase
 {
     private readonly IMemberFavoriteService _favorites;
     private readonly IDemandService _demands;
+    private readonly IDemandReplyService _replies;
 
-    public MemberFavoritesController(IMemberFavoriteService favorites, IDemandService demands)
+    public MemberFavoritesController(IMemberFavoriteService favorites, IDemandService demands, IDemandReplyService replies)
     {
         _favorites = favorites;
         _demands = demands;
+        _replies = replies;
     }
 
     private bool IsEnterpriseMember => User.IsInRole("Supplier") || User.IsInRole("Buyer");
@@ -58,6 +60,7 @@ public class MemberFavoritesController : ControllerBase
         if (memberId == null) return Ok(new FavoriteIdsResponse { LoggedIn = false });
         var ids = await _favorites.GetIdsAsync(memberId.Value, ct);
         ids.Enterprise = IsEnterpriseMember;
+        ids.Role = User.IsInRole("Buyer") ? "Buyer" : User.IsInRole("Supplier") ? "Supplier" : "";
         return Ok(ids);
     }
 
@@ -88,7 +91,8 @@ public class MemberFavoritesController : ControllerBase
     {
         var memberId = GetMemberId();
         if (memberId == null) return Unauthorized(new { error = "Invalid token" });
-        if (!IsEnterpriseMember) return EnterpriseOnly();
+        // 需求的「追蹤」只開放需求端企業會員（追蹤後會收到供應業者的回應）
+        if (!User.IsInRole("Buyer")) return StatusCode(StatusCodes.Status403Forbidden, new { error = "僅需求端企業會員可以追蹤需求" });
         var r = await _favorites.AddDemandAsync(memberId.Value, demandId, ct);
         return r.IsSuccess ? NoContent() : BadRequest(new { error = r.Error });
     }
@@ -101,6 +105,18 @@ public class MemberFavoritesController : ControllerBase
         if (memberId == null) return Unauthorized(new { error = "Invalid token" });
         await _favorites.RemoveDemandAsync(memberId.Value, demandId, ct);
         return NoContent();
+    }
+
+    /// <summary>供應業者查看自己送出的需求回應與審核狀態</summary>
+    [HttpGet("replies")]
+    [Authorize(Roles = "Supplier")]
+    [ProducesResponseType(typeof(List<SPS.Application.DTOs.Demand.MyDemandReplyResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyReplies(CancellationToken ct)
+    {
+        var memberId = GetMemberId();
+        if (memberId == null) return Unauthorized(new { error = "Invalid token" });
+        var r = await _replies.GetMineAsync(memberId.Value, ct);
+        return r.IsSuccess ? Ok(r.Data) : BadRequest(new { error = r.Error });
     }
 
     /// <summary>媒合資料維護：自己從前台「我要刊登」送出的需求（待審核或已上架）</summary>

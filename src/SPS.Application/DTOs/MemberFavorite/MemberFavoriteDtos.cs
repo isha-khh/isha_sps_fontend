@@ -32,6 +32,9 @@ public class FavoriteIdsResponse
 
     /// <summary>true = 企業會員（Supplier／Buyer）；只有企業會員可以使用我的最愛，個人會員前台不顯示收藏按鈕</summary>
     public bool Enterprise { get; set; }
+
+    /// <summary>"Buyer"（需求端）、"Supplier"（供給端）、空字串（訪客或個人會員）；前台依此決定刊登／追蹤／回應按鈕的狀態</summary>
+    public string Role { get; set; } = string.Empty;
     public List<Guid> CompanyIds { get; set; } = new();
     public List<int> DemandIds { get; set; } = new();
 }

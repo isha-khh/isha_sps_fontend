@@ -20,6 +20,7 @@ public class DemandService : IDemandService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IEmbeddingService _embeddingService;
     private readonly IStaffNotifier _staffNotifier;
+    private readonly ISystemSettingService _settingService;
 
     public DemandService(
         IUnitOfWork unitOfWork,
@@ -27,9 +28,11 @@ public class DemandService : IDemandService
         ILogger<DemandService> logger,
         IServiceScopeFactory scopeFactory,
         IEmbeddingService embeddingService,
-        IStaffNotifier staffNotifier)
+        IStaffNotifier staffNotifier,
+        ISystemSettingService settingService)
     {
         _staffNotifier = staffNotifier;
+        _settingService = settingService;
         _unitOfWork = unitOfWork;
         _emailService = emailService;
         _logger = logger;
@@ -66,6 +69,7 @@ public class DemandService : IDemandService
                     Published = d.Status == Status.Active,
                     MemberSubmitted = d.SubmittedByMemberId != null,
                     CreatedTime = d.CreatedTime,
+                    PublishedTime = d.PublishedTime ?? (d.Status == Status.Active ? d.CreatedTime : null),
                     TagIds = tagIds,
                     TagNames = tagIds.Where(tagNamesMap.ContainsKey).Select(i => tagNamesMap[i]).ToList()
                 };
@@ -96,6 +100,7 @@ public class DemandService : IDemandService
             AttachmentFileIds = request.AttachmentFileIds?.Distinct().ToList() ?? new List<Guid>(),
             CompanyId = request.CompanyId,
             Status = request.Published ? Status.Active : Status.Inactive,
+            PublishedTime = request.Published ? DateTime.UtcNow : null,
             DataMode = DataMode.Normal,
             CreatedTime = DateTime.UtcNow,
             UpdatedTime = DateTime.UtcNow
@@ -261,6 +266,8 @@ public class DemandService : IDemandService
         if (request.PublicSummary != null) demand.PublicSummary = NullIfBlank(request.PublicSummary);
         if (request.AttachmentFileIds != null) demand.AttachmentFileIds = request.AttachmentFileIds.Distinct().ToList();
         if (request.Published.HasValue) demand.Status = request.Published.Value ? Status.Active : Status.Inactive;
+        // 上架時間：第一次變成發布狀態時記錄，之後下架再上架不重算（列表排序才不會一直被洗到最前面）
+        if (demand.Status == Status.Active && demand.PublishedTime == null) demand.PublishedTime = DateTime.UtcNow;
         demand.UpdatedTime = DateTime.UtcNow;
 
         await _unitOfWork.Demands.UpdateAsync(demand, ct);
@@ -428,6 +435,7 @@ public class DemandService : IDemandService
         Published = d.Status == Status.Active,
         MemberSubmitted = d.SubmittedByMemberId != null,
         CreatedTime = d.CreatedTime,
+        PublishedTime = d.PublishedTime ?? (d.Status == Status.Active ? d.CreatedTime : null),
         TagIds = tagIds,
         TagNames = tagNames
     };
@@ -690,6 +698,12 @@ public class DemandService : IDemandService
 
     // ===== 發布時寄送媒合通知 =====
 
+    public async Task<int> GetMatchThresholdPercentAsync()
+    {
+        var settings = (await _settingService.GetSettingAsync<SPS.Application.DTOs.SystemSettings.ContentSettingsDto>("Content")).Data;
+        return Math.Clamp(settings?.DemandMatchThresholdPercent ?? 70, 0, 100);
+    }
+
     private async Task<List<int>> PrepareNotificationRecordsAsync(Demand demand, List<Guid>? notifyCompanyIds, CancellationToken ct)
     {
         var tagIdsMap = await GetTagCategoryIdsMapAsync(new[] { demand.Id }, ct);
@@ -699,8 +713,9 @@ public class DemandService : IDemandService
         var similarResult = await GetSimilarCompaniesAsync(tagIds, ct);
         if (!similarResult.IsSuccess) return new List<int>();
 
+        var threshold = await GetMatchThresholdPercentAsync();
         var targets = similarResult.Data!
-            .Where(c => c.OverlapPercent >= 30)
+            .Where(c => c.OverlapPercent >= threshold)
             .ToList();
 
         if (notifyCompanyIds != null)

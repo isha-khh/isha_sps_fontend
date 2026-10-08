@@ -36,7 +36,7 @@ public class MemberFavoriteService : IMemberFavoriteService
             ? new List<FavoriteDemandDto>()
             : await _unitOfWork.Demands.GetQueryable()
                 .Where(d => demandIds.Contains(d.Id) && d.Status == Status.Active)
-                .OrderByDescending(d => d.CreatedTime)
+                .OrderByDescending(d => d.PublishedTime ?? d.CreatedTime)
                 .Select(d => new FavoriteDemandDto { Id = d.Id, Number = d.Number, Name = d.Name, Location = d.Location })
                 .ToListAsync(ct);
 

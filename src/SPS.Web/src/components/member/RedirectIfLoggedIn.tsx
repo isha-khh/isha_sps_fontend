@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
+import { readNextFromLocation } from "@/lib/login-next";
 
 /**
  * 登入、忘記密碼、註冊這幾頁是給「還沒登入」的人用的：已經登入的會員進來沒有意義（也容易搞混），
@@ -19,7 +20,7 @@ export default function RedirectIfLoggedIn({ to = "/member" }: { to?: string }) 
   }, [checkSession]);
 
   useEffect(() => {
-    if (member) router.replace(to);
+    if (member) router.replace(readNextFromLocation() ?? to);
   }, [member, router, to]);
 
   return null;

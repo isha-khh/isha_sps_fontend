@@ -162,6 +162,8 @@ export interface ContentSettings {
   showBusinessListIntroduction: boolean;
   /** 企業列表關於我們最大顯示字元數 */
   businessListIntroductionMaxLength: number;
+  /** 媒合對接：後台發布需求時預設勾選通知的供應業者標籤符合度門檻（0–100，預設 70）；只有系統管理員能改 */
+  demandMatchThresholdPercent: number;
 }
 
 // ==================== 會員申請須知設定 ====================

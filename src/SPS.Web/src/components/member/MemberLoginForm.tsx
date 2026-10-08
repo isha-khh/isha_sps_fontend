@@ -9,6 +9,7 @@ import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { fromAssertionResponse, toRequestOptions } from "@/lib/webauthn";
+import { readNextFromLocation } from "@/lib/login-next";
 
 /**
  * 積木元件：會員登入表單本體，對應舊站 login.html 的 `.melo_box_left`。
@@ -63,7 +64,7 @@ export default function MemberLoginForm() {
       if (!credential) throw new Error("cancelled");
       const { member } = await authApi.fido2AuthenticateComplete({ assertionResponse: fromAssertionResponse(credential) });
       setMember(member);
-      router.push("/member");
+      router.push(readNextFromLocation() ?? "/member");
     } catch (err) {
       const name = (err as { name?: string }).name;
       if (name === "NotAllowedError" || (err as Error).message === "cancelled") setError("已取消 Passkey 登入。");
@@ -88,7 +89,7 @@ export default function MemberLoginForm() {
     try {
       const { member } = await authApi.login({ email: account, password, captcha });
       setMember(member);
-      router.push("/member");
+      router.push(readNextFromLocation() ?? "/member");
     } catch (err) {
       setError(getApiErrorMessage(err, "登入失敗，請確認帳號密碼是否正確"));
       captchaRef.current?.refresh();

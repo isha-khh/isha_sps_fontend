@@ -58,6 +58,8 @@ public class InquiryService : IInquiryService
         if (!string.IsNullOrWhiteSpace(request.Website)) return Result<bool>.Success(true);
 
         if (!Rules.TryGetValue(request.Type, out var rule)) return Result<bool>.Failure("不支援的表單種類");
+        // 媒合對接改版：提案改為「回應需求」（審核後直接寄給刊登者與追蹤者），訂閱解方改為「追蹤需求」，不再收這兩種詢問單
+        if (request.Type is InquiryType.ProposeSolution or InquiryType.SubscribeSolution) return Result<bool>.Failure("此表單已停用，請改用需求頁的「回應」或「追蹤」");
 
         if (rule.Who != Who.Anyone && memberId == null) return Result<bool>.Failure("請先登入會員");
         if (rule.Who == Who.EnterpriseMember && !isEnterpriseMember) return Result<bool>.Failure("僅企業會員可以使用這個功能");

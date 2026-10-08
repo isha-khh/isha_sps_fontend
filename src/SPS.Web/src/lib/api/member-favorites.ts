@@ -25,6 +25,8 @@ export interface FavoriteIds {
   loggedIn: boolean;
   /** 是不是企業會員；只有企業會員可以使用我的最愛 */
   enterprise: boolean;
+  /** "Buyer"（需求端）／"Supplier"（供給端）／空字串（訪客、個人會員）；媒合對接的刊登、追蹤、回應按鈕依此決定 */
+  role: "Buyer" | "Supplier" | "";
   companyIds: string[];
   demandIds: number[];
 }

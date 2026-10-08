@@ -30,6 +30,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<DemandTagCategory> DemandTagCategories { get; set; } = null!;
     public DbSet<DemandNotification> DemandNotifications { get; set; } = null!;
     public DbSet<Inquiry> Inquiries { get; set; } = null!;
+    public DbSet<DemandReply> DemandReplies { get; set; } = null!;
 
     // Attribute Entities
     public DbSet<SPS.Domain.Entities.Attribute> Attributes { get; set; } = null!;

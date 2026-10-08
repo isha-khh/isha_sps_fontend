@@ -29,6 +29,7 @@ import { DemandsListPage } from '@/pages/demands/DemandsListPage';
 import { DemandDetailPage } from '@/pages/demands/DemandDetailPage';
 import { DemandFormPage } from '@/pages/demands/DemandFormPage';
 import { InquiriesPage } from '@/pages/inquiries/InquiriesPage';
+import { DemandRepliesPage } from '@/pages/demand-replies/DemandRepliesPage';
 
 // News
 import { NewsListPage } from '@/pages/news/NewsListPage';
@@ -195,6 +196,7 @@ function App() {
           <Route path="demands/:id" element={<DemandDetailPage />} />
           <Route path="demands/:id/edit" element={<DemandFormPage />} />
           <Route path="inquiries" element={<InquiriesPage />} />
+          <Route path="demand-replies" element={<DemandRepliesPage />} />
 
           {/* 聊一聊 */}
           <Route path="chat" element={<ChatPage />} />

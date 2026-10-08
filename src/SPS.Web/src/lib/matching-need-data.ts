@@ -18,6 +18,8 @@ export interface MatchingNeed {
   description: string;
   publishedDate: string;
   needCode: string;
+  /** 追蹤此需求的人數；只有供應端會員拿得到，其他人是 null */
+  followerCount: number | null;
   /** 需求的標籤（後台「需求張貼管理」勾選），點進去看有同樣標籤的需求 */
   tags: { id: number; name: string }[];
   /** 詳情頁內文（純文字，換行分段）；沒有權限看完整內容時是空字串 */
@@ -35,8 +37,9 @@ export function demandToNeed(demand: DemandItem): MatchingNeed {
     title: demand.name,
     // 摘要由後端決定（公開摘要，沒填就取內容開頭），匿名也看得到
     description: demand.summary ?? "",
-    publishedDate: formatIsoDate(demand.createdTime),
+    publishedDate: formatIsoDate(demand.publishedTime ?? demand.createdTime),
     needCode: demand.number,
+    followerCount: demand.followerCount ?? null,
     tags: (demand.tagIds ?? []).map((id, index) => ({ id, name: demand.tagNames?.[index] ?? "" })).filter((t) => t.name),
     body: (demand.introduction ?? "").trim(),
     location: (demand.location ?? "").trim(),

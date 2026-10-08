@@ -164,6 +164,7 @@ public class SystemSettingController : ControllerBase
     [SwaggerOperation(Summary = "更新內容設定")]
     public async Task<IActionResult> UpdateContentSettings([FromBody] ContentSettingsDto settings)
     {
+        if (settings.DemandMatchThresholdPercent is < 0 or > 100) return BadRequest(new { error = "媒合通知的符合度門檻必須在 0 到 100 之間" });
         var result = await _settingService.UpdateSettingAsync("Content", settings);
         return result.IsSuccess ? Ok(new { message = "Content settings updated" }) : BadRequest(new { error = result.Error });
     }

@@ -31,6 +31,12 @@ public class DemandResponse
     public bool MemberSubmitted { get; set; }
     public DateTime CreatedTime { get; set; }
 
+    /// <summary>上架時間；前台列表依這個時間排序，舊資料以建立時間補上</summary>
+    public DateTime? PublishedTime { get; set; }
+
+    /// <summary>目前追蹤這筆需求的需求端會員人數；只有供應端會員與後台在詳情看得到（回應彈窗用來提示收件對象）</summary>
+    public int? FollowerCount { get; set; }
+
     /// <summary>已綁定的標籤分類 ID（CategoryType.CompanyTag）</summary>
     public List<int> TagIds { get; set; } = new();
 
@@ -102,7 +108,7 @@ public class UpdateDemandRequest
 
     /// <summary>
     /// 發布時要寄送媒合通知的供給端業者 Id 清單。
-    /// 若為 null，則沿用預設規則（標籤重疊度 ≥30% 的業者全部寄送）。
+    /// 若為 null，則沿用預設規則（標籤重疊度達系統設定門檻的業者全部寄送，預設 70%）。
     /// </summary>
     public List<Guid>? NotifyCompanyIds { get; set; }
 }

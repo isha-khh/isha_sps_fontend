@@ -6,10 +6,11 @@ import { memberFavoritesApi, type MemberFavorites } from "@/lib/api/member-favor
 import { getApiErrorMessage } from "@/lib/error-utils";
 
 /**
- * 積木元件：會員中心「我的最愛」面板——在企業名錄詳情與媒合需求詳情按「加入最愛」收藏的項目。
+ * 積木元件：會員中心「我的最愛」面板——在企業名錄詳情按「加入最愛」收藏的企業，以及（需求端企業會員）在需求詳情「追蹤」的需求。
+ * 2026-10-08：需求的「加入最愛」改為「追蹤」（限需求端，供應業者的回應審核通過後會寄給追蹤者），供給端以前收藏的需求不再顯示。
  * 接 `GET /api/member/favorites`；只列目前公開的（企業要已審核且啟用、需求要已發布），下架的不顯示但收藏紀錄保留。
  */
-export default function FavoritesPanel() {
+export default function FavoritesPanel({ role = "" }: { role?: "Buyer" | "Supplier" | "" }) {
   const [favorites, setFavorites] = useState<MemberFavorites>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -83,10 +84,12 @@ export default function FavoritesPanel() {
             </div>
           )}
 
-          <h4 className="h5 mb-3">收藏的需求</h4>
+          {role !== "Supplier" && (
+            <>
+          <h4 className="h5 mb-3">追蹤中的需求</h4>
           {favorites.demands.length === 0 ? (
             <p className="text-muted">
-              還沒有收藏的需求。到 <Link href="/matching">媒合對接</Link> 的需求頁面按「加入最愛」。
+              還沒有追蹤的需求。到 <Link href="/matching">媒合對接</Link> 的需求頁面按「追蹤」，供應業者的回應（審核通過後）會寄到您的信箱。
             </p>
           ) : (
             <div className="d-grid gap-2">
@@ -102,11 +105,13 @@ export default function FavoritesPanel() {
                     </div>
                   </div>
                   <button type="button" className="tier-reset-btn" disabled={busy} onClick={() => void remove(() => memberFavoritesApi.removeDemand(demand.id))}>
-                    移除
+                    取消追蹤
                   </button>
                 </div>
               ))}
             </div>
+          )}
+            </>
           )}
         </>
       )}

@@ -1,5 +1,6 @@
 import { withBasePath } from "@/lib/api-client";
 import type { MatchingNeed } from "@/lib/matching-need-data";
+import FollowButton from "@/components/matching/FollowButton";
 
 /**
  * 積木元件：「媒合對接」列表頁單一需求項目，對應設計稿
@@ -7,10 +8,9 @@ import type { MatchingNeed } from "@/lib/matching-need-data";
  * `EnterpriseCard` 版型完全不同（不是格狀圖卡，是整列文字項目），
  * 所以另外開一個元件，不勉強共用。
  *
- * 「訂閱解方」開的是同一頁所有項目共用的同一個 `#staticmembership`
- * 彈窗（設計稿原樣如此，彈窗內容跟點的是哪個需求無關，純粹是「同意
- * 免責聲明後送出訂閱」的靜態表單），所以這裡只需要 `data-bs-target`
- * 指過去，不用把彈窗掛在每個項目底下。
+ * 2026-10-08 媒合對接改版：原本的「提供解方」改成「查看需求」（回應要進詳情頁才能操作），
+ * 「訂閱解方」改成「追蹤」（`FollowButton`，限需求端企業會員；訪客點了導去登入，供應業者與個人會員不顯示）。
+ * 訪客與個人會員只看得到內容前 20 字（後端截斷）。
  */
 export default function NeedListItem({ need }: { need: MatchingNeed }) {
   return (
@@ -68,22 +68,13 @@ export default function NeedListItem({ need }: { need: MatchingNeed }) {
 
             <ul className="nav d-md-block d-flex sup_ul_s">
               <li className="mb-3">
-                <a href={withBasePath(`/matching/${need.id}`)} title="提供解方" className="more_x">
-                  <span>提供解方</span>
+                <a href={withBasePath(`/matching/${need.id}`)} title="查看需求" className="more_x">
+                  <span>查看需求</span>
                   <i className="bi bi-arrow-right" aria-hidden="true" />
                 </a>
               </li>
               <li>
-                <a
-                  href="javascript:void(0)"
-                  data-bs-toggle="modal"
-                  data-bs-target="#staticmembership"
-                  title="訂閱解方"
-                  className="connec_s more_x more_x_gu"
-                >
-                  <span>訂閱解方</span>
-                  <i className="bi bi-arrow-right" aria-hidden="true" />
-                </a>
+                <FollowButton demandId={Number(need.id)} variant="list" />
               </li>
             </ul>
           </div>

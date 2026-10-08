@@ -91,6 +91,7 @@ export const SystemConfigPage = () => {
     showBusinessListTags: true,
     showBusinessListIntroduction: false,
     businessListIntroductionMaxLength: 100,
+    demandMatchThresholdPercent: 70,
   });
 
   // Membership Guide settings
@@ -1321,6 +1322,39 @@ export const SystemConfigPage = () => {
                     </label>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+
+          <div className="card bg-base-100 shadow mt-6">
+            <div className="card-body">
+              <h3 className="card-title">
+                <span className="iconify lucide--handshake size-5" />
+                媒合對接
+              </h3>
+              <p className="text-sm text-base-content/60 mb-4">
+                後台發布需求時，標籤符合度達到這個百分比的供應業者會預設勾選為通知對象。承辦人員只能逐一取消勾選，不能調整這個門檻。
+              </p>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">通知符合度門檻（%）</span>
+                </label>
+                <input
+                  type="number"
+                  className="input input-bordered w-40"
+                  min={0}
+                  max={100}
+                  value={contentSettings.demandMatchThresholdPercent}
+                  onChange={(e) =>
+                    setContentSettings({
+                      ...contentSettings,
+                      demandMatchThresholdPercent: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)),
+                    })
+                  }
+                />
+                <label className="label">
+                  <span className="label-text-alt">預設 70。需求的標籤有多少比例也出現在供應業者的標籤裡，達到此比例才會預設通知。</span>
+                </label>
               </div>
             </div>
           </div>
