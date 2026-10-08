@@ -9,6 +9,8 @@ import type { CreateNewsRequest, UpdateNewsRequest } from '@/types/news';
 import type { CategoryResponse } from '@/types/category';
 import { PuckEditor } from '@/components/puck/PuckEditor';
 import { useNotify } from '@/hooks/useNotify';
+import { FilePickerModal } from '@/components/shared/FilePickerModal';
+import type { FileListItem, FileUploadResponse } from '@/types/files';
 
 // 公告分類的 type 值 (對應後端 CategoryType.News = 1)
 const NEWS_CATEGORY_TYPE = 1;
@@ -31,6 +33,12 @@ export const NewsFormPage = () => {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  // 封面圖：從檔案系統挑圖片。`coverUrl` 是目前顯示的預覽（原本的封面或剛挑的圖），
+  // `coverFileId` 只有這次換了新圖才有值，`removeCover` 代表要移除原本的封面
+  const [coverUrl, setCoverUrl] = useState<string | undefined>();
+  const [coverFileId, setCoverFileId] = useState<string | undefined>();
+  const [removeCover, setRemoveCover] = useState(false);
+  const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
 
   // 使用 ref 保存最新的 Puck 內容
   const puckContentRef = useRef<string>('');
@@ -80,6 +88,7 @@ export const NewsFormPage = () => {
           type: data.type,
         };
         setFormData(newsData);
+        setCoverUrl(data.imageUrl || undefined);
         setSelectedTagIds((data.tagItems ?? []).map((t) => t.id));
         // 初始化 ref
         puckContentRef.current = data.content || '';
@@ -95,6 +104,20 @@ export const NewsFormPage = () => {
 
     fetchNews();
   }, [id, isEditMode, navigate]);
+
+  const handleCoverPick = (file: FileListItem | FileUploadResponse) => {
+    const id = 'fileId' in file ? file.fileId : file.id;
+    setCoverFileId(id);
+    setCoverUrl(`/api/FileManagement/${id}/download`);
+    setRemoveCover(false);
+    setIsCoverPickerOpen(false);
+  };
+
+  const handleCoverRemove = () => {
+    setCoverFileId(undefined);
+    setCoverUrl(undefined);
+    setRemoveCover(true);
+  };
 
   const handleSubmit = async (publish: boolean) => {
     if (!formData.title.trim()) {
@@ -123,6 +146,8 @@ export const NewsFormPage = () => {
           categoryId: formData.categoryId,
           type: formData.type,
           tagIds: selectedTagIds,
+          ...(coverFileId ? { coverFileId } : {}),
+          ...(removeCover && !coverFileId ? { removeCover: true } : {}),
         };
         console.log('[NewsFormPage] Updating news with ID:', id);
         await newsApi.updateNews(Number(id), updateData);
@@ -139,6 +164,7 @@ export const NewsFormPage = () => {
           categoryId: formData.categoryId,
           type: formData.type,
           tagIds: selectedTagIds,
+          ...(coverFileId ? { coverFileId } : {}),
         };
         console.log('[NewsFormPage] Creating new news');
         await newsApi.createNews(createData);
@@ -148,7 +174,8 @@ export const NewsFormPage = () => {
       navigate('/announcements');
     } catch (error) {
       console.error('Failed to save news:', error);
-      await notify.error('儲存公告失敗，請稍後再試');
+      const serverMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      await notify.error(serverMessage || '儲存公告失敗，請稍後再試');
     } finally {
       setIsSaving(false);
     }
@@ -270,6 +297,38 @@ export const NewsFormPage = () => {
 
           {/* 側邊欄設定 */}
           <div className="space-y-6">
+            {/* 封面圖 */}
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <h3 className="card-title mb-2">
+                  <span className="iconify lucide--image size-5" />
+                  封面圖
+                </h3>
+                <p className="text-sm text-base-content/60 mb-3">
+                  顯示在前台公告列表、熱門文章與公告內頁最上方；沒有設定就不顯示圖片。建議 4:3 或 16:9 的橫式圖片。
+                </p>
+                {coverUrl ? (
+                  <img src={coverUrl} alt="封面圖預覽" className="w-full rounded-box border border-base-300 object-cover max-h-56" />
+                ) : (
+                  <div className="flex h-32 items-center justify-center rounded-box border border-dashed border-base-300 text-sm text-base-content/50">
+                    尚未設定封面圖
+                  </div>
+                )}
+                <div className="mt-3 flex gap-2">
+                  <button type="button" className="btn btn-sm btn-neutral" onClick={() => setIsCoverPickerOpen(true)}>
+                    <span className="iconify lucide--folder-open size-4" />
+                    {coverUrl ? '更換圖片' : '從檔案系統選擇'}
+                  </button>
+                  {coverUrl && (
+                    <button type="button" className="btn btn-sm btn-ghost text-error" onClick={handleCoverRemove}>
+                      <span className="iconify lucide--x size-4" />
+                      移除
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* 分類與類型 */}
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
@@ -494,6 +553,14 @@ export const NewsFormPage = () => {
           </div>
         </div>
       </div>
+
+      <FilePickerModal
+        isOpen={isCoverPickerOpen}
+        onClose={() => setIsCoverPickerOpen(false)}
+        onSelect={(file) => handleCoverPick(file)}
+        fileType="image"
+        title="選擇公告封面圖"
+      />
     </div>
   );
 };

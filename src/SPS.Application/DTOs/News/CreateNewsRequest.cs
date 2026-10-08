@@ -54,4 +54,7 @@ public class CreateNewsRequest
     /// 標簽ID列表
     /// </summary>
     public List<int>? TagIds { get; set; }
+
+    /// <summary>封面圖：檔案管理中的圖片檔案 Id（Controller 會檢查必須是可用的圖片）</summary>
+    public Guid? CoverFileId { get; set; }
 }

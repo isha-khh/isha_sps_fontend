@@ -118,9 +118,12 @@ public class NewsService : INewsService
             // 保存多語言文本以獲取生成的 ID
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            var coverImage = request.CoverFileId.HasValue ? await CreateCoverImageAsync(request.CoverFileId.Value, cancellationToken) : null;
+
             // 創建新聞實體
             var news = new News
             {
+                PictureId = coverImage?.Id,
                 TitleId = title.Id,
                 IntroductionId = introduction?.Id,
                 ContentId = content?.Id,
@@ -163,7 +166,8 @@ public class NewsService : INewsService
                 Tags = createdTags.Select(t => t.Name).ToList(),
                 TagItems = createdTags,
                 CreatedTime = news.CreatedTime,
-                UpdatedTime = news.UpdatedTime
+                UpdatedTime = news.UpdatedTime,
+                ImageUrl = coverImage?.DefaultImageUri
             });
         }
         catch (Exception ex)
@@ -266,6 +270,19 @@ public class NewsService : INewsService
         if (request.Ordinal.HasValue) news.Ordinal = request.Ordinal.Value;
         if (request.CategoryId.HasValue) news.CategoryId = request.CategoryId;
         if (request.Type.HasValue) news.Type = request.Type.Value;
+        MultilingualImage? newCover = null;
+        if (request.RemoveCover == true)
+        {
+            news.PictureId = null;
+            news.Picture = null;
+        }
+        else if (request.CoverFileId.HasValue)
+        {
+            newCover = await CreateCoverImageAsync(request.CoverFileId.Value, cancellationToken);
+            news.PictureId = newCover.Id;
+            news.Picture = newCover;
+        }
+
         news.UpdatedTime = DateTime.UtcNow;
 
         await _unitOfWork.News.UpdateAsync(news, cancellationToken);
@@ -293,8 +310,19 @@ public class NewsService : INewsService
             Tags = updatedTags.Select(t => t.Name).ToList(),
             TagItems = updatedTags,
             CreatedTime = news.CreatedTime,
-            UpdatedTime = news.UpdatedTime
+            UpdatedTime = news.UpdatedTime,
+            ImageUrl = news.Picture?.DefaultImageUri
         });
+    }
+
+    /// <summary>封面圖：為檔案管理的檔案建立一筆新的圖片紀錄（每次都新建，不改既有的，避免動到別處共用的圖片）</summary>
+    private async Task<MultilingualImage> CreateCoverImageAsync(Guid fileId, CancellationToken cancellationToken)
+    {
+        var db = _unitOfWork.GetDbContext();
+        var image = new MultilingualImage { DefaultImageUri = $"/api/FileManagement/{fileId}/download" };
+        db.Set<MultilingualImage>().Add(image);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return image;
     }
 
     /// <summary>

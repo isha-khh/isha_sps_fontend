@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using SPS.Application.DTOs.Common;
+using SPS.Application.DTOs.File;
 using SPS.Application.DTOs.News;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
@@ -20,6 +21,7 @@ namespace SPS.Api.Controllers;
 public class NewsController : ControllerBase
 {
     private readonly INewsService _newsService;
+    private readonly IFileManagementService _fileService;
     private readonly ILogger<NewsController> _logger;
     private readonly IMemoryCache _cache;
 
@@ -33,10 +35,12 @@ public class NewsController : ControllerBase
     /// <param name="logger">日誌記錄器</param>
     public NewsController(
         INewsService newsService,
+        IFileManagementService fileService,
         ILogger<NewsController> logger,
         IMemoryCache cache)
     {
         _newsService = newsService;
+        _fileService = fileService;
         _logger = logger;
         _cache = cache;
     }
@@ -105,6 +109,19 @@ public class NewsController : ControllerBase
         return Ok(result.Data);
     }
 
+    /// <summary>檢查後台送來的封面圖：必須是檔案管理中可用的圖片（不是資料夾、已刪除的檔案、會員申請附件，也不是圖片以外的檔案）</summary>
+    private async Task<string?> ValidateCoverAsync(Guid? fileId, CancellationToken ct)
+    {
+        if (fileId == null) return null;
+        var info = await _fileService.GetFileByIdAsync(fileId.Value, ct);
+        if (!info.IsSuccess || info.Data == null) return "封面圖必須是檔案管理中存在的圖片";
+        var file = info.Data;
+        if (file.IsFolder || file.Status != FileStatus.Active) return "封面圖必須是檔案管理中存在的圖片";
+        if (await _fileService.IsApplicationDocumentFileAsync(file.Id, ct)) return "封面圖必須是檔案管理中存在的圖片";
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) return "封面圖必須是圖片檔案";
+        return null;
+    }
+
     /// <summary>
     /// 創建新聞
     /// </summary>
@@ -125,6 +142,9 @@ public class NewsController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating news: {Title}", request.Title);
+
+        var coverError = await ValidateCoverAsync(request.CoverFileId, cancellationToken);
+        if (coverError != null) return BadRequest(new { error = coverError });
 
         var result = await _newsService.CreateAsync(request, cancellationToken);
 
@@ -163,6 +183,9 @@ public class NewsController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Updating news: {NewsId}", id);
+
+        var coverError = await ValidateCoverAsync(request.CoverFileId, cancellationToken);
+        if (coverError != null) return BadRequest(new { error = coverError });
 
         var result = await _newsService.UpdateAsync(id, request, cancellationToken);
 

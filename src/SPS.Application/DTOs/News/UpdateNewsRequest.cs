@@ -15,4 +15,10 @@ public class UpdateNewsRequest
     public int? CategoryId { get; set; }
     public short? Type { get; set; }
     public List<int>? TagIds { get; set; }
+
+    /// <summary>換封面圖：檔案管理中的圖片檔案 Id；沒帶（null）= 不更新</summary>
+    public Guid? CoverFileId { get; set; }
+
+    /// <summary>true = 移除封面圖（優先於 <see cref="CoverFileId"/>）</summary>
+    public bool? RemoveCover { get; set; }
 }
