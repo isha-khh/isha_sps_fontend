@@ -527,13 +527,15 @@ export const puckConfig: Config<Props> = {
     // 資料表格
     // ==========================================
     DataTable: {
+      // 2026-10-08：表格的標題、欄位標題、儲存格改成「直接在畫布上點進去打字」（Puck 的 contentEditable 行內編輯），
+      // 不用再到右側欄位面板一格一格改；右側面板仍然用來新增、刪除、排序欄與列。
       fields: {
-        caption: { type: "text", label: "表格標題（無障礙必填）" },
+        caption: { type: "text", label: "表格標題（無障礙必填）", contentEditable: true },
         headers: {
           type: "array",
           label: "欄位標題",
-          arrayFields: { value: { type: "text", label: "標題文字" } },
-          getItemSummary: (item) => item.value || "未命名欄位",
+          arrayFields: { value: { type: "text", label: "標題文字", contentEditable: true } },
+          getItemSummary: (item) => (typeof item.value === "string" && item.value) || "未命名欄位",
         },
         rows: {
           type: "array",
@@ -542,7 +544,7 @@ export const puckConfig: Config<Props> = {
             cells: {
               type: "array",
               label: "儲存格",
-              arrayFields: { value: richField("內容") },
+              arrayFields: { value: { type: "richtext", label: "內容", contentEditable: true } },
             },
           },
         },
@@ -557,7 +559,7 @@ export const puckConfig: Config<Props> = {
       },
       render: ({ caption, headers = [], rows = [] }) => (
         <section style={{ margin: "18px 0" }}>
-          <div style={{ overflowX: "auto" }} role="region" aria-label={caption} tabIndex={0}>
+          <div style={{ overflowX: "auto" }} role="region" aria-label={typeof caption === "string" ? caption : "資料表格"} tabIndex={0}>
             <table style={{ width: "100%", minWidth: 480, borderCollapse: "collapse", fontSize: 15 }}>
               <caption style={{ textAlign: "left", fontWeight: 700, color: C.navy, fontSize: 16, marginBottom: 10 }}>{caption}</caption>
               <thead>
