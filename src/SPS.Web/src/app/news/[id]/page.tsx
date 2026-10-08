@@ -7,10 +7,12 @@ import Badge from "@/components/ui/Badge";
 import MoreLink from "@/components/ui/MoreLink";
 import ShareBox from "@/components/ui/ShareBox";
 import ZoomableImage from "@/components/ui/ZoomableImage";
+import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import { fetchNews, fetchNewsDetail, fetchBanners } from "@/lib/api.server";
+import type { NewsDetail } from "@/lib/types";
 import { NEWS_ARTICLES, NEWS_FALLBACK_IMAGE, getNewsArticle, formatNewsDate, sortNewsByViewCount } from "@/lib/news-data";
 import { withBasePath } from "@/lib/api-client";
 import NewsViewTracker from "@/components/news/NewsViewTracker";
@@ -54,9 +56,9 @@ export async function generateMetadata({ params }: PageProps<"/news/[id]">): Pro
  * 內文改用 `PuckRenderer` 顯示真後端的 `content`（Puck 區塊 JSON，
  * 跟 FAQ 的 `Question.answer` 同一套格式），不再用原本
  * `EditableArticleBody` 那個 localStorage 存檔的 demo 編輯功能——
- * 真後端的 `News` entity 沒有「撰稿人／附件下載／相關連結」這幾個
- * 欄位（只有 Title/Introduction/Content/StartDate/EndDate/Category/
- * Tags/Picture），這幾塊照舊留著也接不到真資料，拿掉。封面圖用
+ * 真後端的 `News` entity 原本沒有「撰稿人／附件下載／相關連結」這幾個
+ * 欄位，這幾塊當時拿掉；2026-10-07 後端補上附件、相關連結與聯絡資訊（沒有「撰稿人」），
+ * 內文下方顯示 `AttachmentsPanel`。封面圖用
  * `article.imageUrl`（2026-09-08 已請後端補上），沒設定圖片的公告
  * 才退回 `NEWS_FALLBACK_IMAGE` 佔位。
  *
@@ -84,6 +86,14 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
     date: formatNewsDate(item.startDate),
     image: item.imageUrl || NEWS_FALLBACK_IMAGE,
   }));
+
+  // 2026-10-07：後端公告有附件、相關連結、聯絡資訊了（後台公告表單維護），沒填的區塊不顯示
+  // 假資料（後端連不到時的退路）沒有這幾個欄位，所以用 Partial 看待
+  const extras = article as Partial<NewsDetail>;
+  const attachments = (extras.attachments ?? []).map((a) => ({ name: `${a.fileName}（${a.formattedFileSize}）`, href: a.url }));
+  const relatedLinks = (extras.relatedLinks ?? []).map((l) => ({ name: l.title, href: l.url }));
+  const hasExtras =
+    attachments.length > 0 || relatedLinks.length > 0 || Boolean(extras.contactName || extras.contactPhone || extras.contactEmail);
 
   return (
     <>
@@ -153,6 +163,16 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
           <ZoomableImage src={article.imageUrl || NEWS_FALLBACK_IMAGE} alt={article.title} caption={article.title} />
 
           <PuckRenderer content={article.content} />
+
+          {hasExtras && (
+            <div className="dk_conbo mb-md-5 mb-4">
+              <AttachmentsPanel
+                attachments={attachments}
+                relatedLinks={relatedLinks}
+                contact={{ name: extras.contactName ?? undefined, phone: extras.contactPhone ?? undefined, email: extras.contactEmail ?? undefined }}
+              />
+            </div>
+          )}
 
           <MoreLink href="/news" label="返回" title="返回" />
         </div>

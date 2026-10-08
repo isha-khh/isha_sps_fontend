@@ -30,6 +30,19 @@ public class NewsResponse
     /// 封面圖網址（來自 News.Picture.DefaultImageUri），沒有設定圖片時為 null
     /// </summary>
     public string? ImageUrl { get; set; }
+
+    /// <summary>附件的檔案 Id（後台編輯表單用）</summary>
+    public List<Guid> AttachmentFileIds { get; set; } = new();
+
+    /// <summary>附件下載資訊（只在詳情回傳，由 Controller 補上）</summary>
+    public List<NewsAttachmentDto> Attachments { get; set; } = new();
+
+    /// <summary>相關連結</summary>
+    public List<NewsLinkItem> RelatedLinks { get; set; } = new();
+
+    public string? ContactName { get; set; }
+    public string? ContactPhone { get; set; }
+    public string? ContactEmail { get; set; }
 }
 
 /// <summary>
