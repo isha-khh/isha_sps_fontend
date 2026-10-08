@@ -91,7 +91,7 @@ const CaretIcon = () => (
 );
 
 /** 公告頁原本設計的藍框區塊（附件下載／相關連結／聯絡資訊共用）：外框＋底線標題 */
-function DocFrame({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
+function DocFrame({ title, icon, children }: { title: ReactNode; icon: ReactNode; children: ReactNode }) {
   return (
     <section style={{ position: "relative", margin: "28px 0", padding: "30px 36px", border: `1px solid ${C.frame}`, borderRadius: 24 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${C.rule}`, paddingBottom: 10, marginBottom: 22, color: C.blue }}>
@@ -122,6 +122,14 @@ const richField = (label: string) => ({
     <RichTextField value={typeof value === "string" ? value : ""} onChange={(html) => onChange(html)} label={label} />
   ),
 });
+
+/**
+ * 行內編輯欄位（2026-10-08）：點選區塊之後直接在畫布上點文字就能改（Puck 的 `contentEditable`）。
+ * 注意：這類 prop 在編輯器裡不是純字串、而是「可編輯的節點」，渲染時只能直接放進畫面的子節點，
+ * 不能拿去做字串運算（`trim`、`join`、`split`）或放進 `aria-label`／`title` 這類屬性。
+ */
+const inlineText = (label: string) => ({ type: "text" as const, label, contentEditable: true });
+const inlineRich = (label: string) => ({ type: "richtext" as const, label, contentEditable: true });
 
 // ==================== 類型定義 ====================
 type Props = {
@@ -263,7 +271,7 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     HeroBlock: {
       fields: {
-        title: { type: "text", label: "標題內容" },
+        title: inlineText("標題內容"),
         titleSize: {
           type: "radio",
           label: "標題大小",
@@ -272,7 +280,7 @@ export const puckConfig: Config<Props> = {
             { label: "小標（深藍單色）", value: "text-3xl" },
           ],
         },
-        subtitle: richField("副標題內容"),
+        subtitle: inlineRich("副標題內容"),
         subtitleSize: {
           type: "radio",
           label: "副標題大小",
@@ -341,7 +349,7 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     ArticleContent: {
       fields: {
-        content: richField("文章內容"),
+        content: inlineRich("文章內容"),
         fontSize: {
           type: "radio",
           label: "文字大小（無障礙考量）",
@@ -378,8 +386,8 @@ export const puckConfig: Config<Props> = {
           render: ({ value, onChange }) => <ImageUploadField value={typeof value === "string" ? value : ""} onChange={(url) => onChange(url)} label="圖片" />,
         },
         alt: { type: "textarea", label: "替代文字（必填）" },
-        imageCaption: { type: "text", label: "圖片說明" },
-        description: richField("詳細描述"),
+        imageCaption: inlineText("圖片說明"),
+        description: inlineRich("詳細描述"),
         layout: {
           type: "radio",
           label: "排版方式",
@@ -437,8 +445,8 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     CallToAction: {
       fields: {
-        heading: { type: "text", label: "標題" },
-        description: richField("說明文字"),
+        heading: inlineText("標題"),
+        description: inlineRich("說明文字"),
         primaryButtonText: { type: "text", label: "主要按鈕文字" },
         primaryButtonUrl: { type: "text", label: "主要按鈕連結" },
         secondaryButtonText: { type: "text", label: "次要按鈕文字（選填）" },
@@ -594,9 +602,9 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     Quote: {
       fields: {
-        text: richField("引言內容"),
-        author: { type: "text", label: "作者姓名" },
-        source: { type: "text", label: "出處（選填）" },
+        text: inlineRich("引言內容"),
+        author: inlineText("作者姓名"),
+        source: inlineText("出處（選填）"),
       },
       defaultProps: {
         text: "導入智慧工安技術之後，現場異常的發現時間縮短了一半。",
@@ -604,14 +612,16 @@ export const puckConfig: Config<Props> = {
         source: "[公司／單位名稱]",
       },
       render: ({ text, author, source }) => (
-        <figure style={{ margin: "18px 0" }}>
+        <figure style={{ margin: "18px 0", width: "100%", boxSizing: "border-box" }}>
           <blockquote style={{ margin: 0, padding: "22px 26px", background: C.panel, borderRadius: 10 }}>
             <div style={{ fontSize: 18, lineHeight: 1.8, color: C.navy, fontWeight: 500 }}>
               <RichTextContent html={text} />
             </div>
             {(author || source) && (
               <figcaption style={{ marginTop: 12, fontSize: 14, color: "#555" }}>
-                {[author, source].filter(Boolean).join("　·　")}
+                {author}
+                {author && source ? "　·　" : null}
+                {source}
               </figcaption>
             )}
           </blockquote>
@@ -692,8 +702,8 @@ export const puckConfig: Config<Props> = {
             { label: "錯誤訊息", value: "error" },
           ],
         },
-        title: { type: "text", label: "標題" },
-        message: richField("訊息內容"),
+        title: inlineText("標題"),
+        message: inlineRich("訊息內容"),
         dismissible: {
           type: "radio",
           label: "可關閉",
@@ -799,8 +809,8 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     TwoColumnLayout: {
       fields: {
-        leftContent: richField("左欄內容"),
-        rightContent: richField("右欄內容"),
+        leftContent: inlineRich("左欄內容"),
+        rightContent: inlineRich("右欄內容"),
         ratio: {
           type: "radio",
           label: "欄寬比例",
@@ -894,7 +904,7 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     FeatureList: {
       fields: {
-        heading: { type: "text", label: "區塊標題" },
+        heading: inlineText("區塊標題"),
         headingLevel: {
           type: "radio",
           label: "標題層級",
@@ -908,8 +918,8 @@ export const puckConfig: Config<Props> = {
           type: "array",
           label: "項目",
           arrayFields: {
-            title: { type: "text", label: "名稱" },
-            description: richField("說明"),
+            title: inlineText("名稱"),
+            description: inlineRich("說明"),
             icon: {
               type: "custom",
               render: ({ value, onChange }) => <IconPicker value={typeof value === "string" ? value : ""} onChange={(next) => onChange(next)} />,
@@ -958,7 +968,7 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     FileDownloads: {
       fields: {
-        heading: { type: "text", label: "標題" },
+        heading: inlineText("標題"),
         description: { type: "textarea", label: "說明（選填）" },
         files: {
           type: "custom",
@@ -1045,7 +1055,7 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     RelatedLinks: {
       fields: {
-        heading: { type: "text", label: "標題" },
+        heading: inlineText("標題"),
         items: {
           type: "array",
           label: "連結清單",
@@ -1102,7 +1112,7 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     ContactInfo: {
       fields: {
-        heading: { type: "text", label: "標題" },
+        heading: inlineText("標題"),
         name: { type: "text", label: "聯絡人" },
         phone: { type: "text", label: "電話（分機用 # 隔開，例如 07-5503115#123）" },
         email: { type: "text", label: "信箱" },
