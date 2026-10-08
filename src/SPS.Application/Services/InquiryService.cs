@@ -18,11 +18,13 @@ public class InquiryService : IInquiryService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<InquiryService> _logger;
+    private readonly IStaffNotifier _notifier;
 
-    public InquiryService(IUnitOfWork unitOfWork, ILogger<InquiryService> logger)
+    public InquiryService(IUnitOfWork unitOfWork, ILogger<InquiryService> logger, IStaffNotifier notifier)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _notifier = notifier;
     }
 
     private enum Who
@@ -118,6 +120,28 @@ public class InquiryService : IInquiryService
         await _unitOfWork.Inquiries.AddAsync(inquiry, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         _logger.LogInformation("Inquiry created: {Id} type={Type} member={MemberId}", inquiry.Id, inquiry.Type, memberId);
+
+        // 要人工回覆的種類才寄信通知承辦人員；訂閱電子報與訂閱解方只是登記名單，不寄
+        if (request.Type is InquiryType.ProposeSolution or InquiryType.DownloadRequest or InquiryType.SupportRequest)
+        {
+            var typeName = TypeNameOf(inquiry.Type);
+            _notifier.Notify(
+                $"【SPS】新的詢問單：{typeName}",
+                $"收到一筆新的「{typeName}」詢問單",
+                new (string, string?)[]
+                {
+                    ("種類", typeName),
+                    ("針對", inquiry.TargetTitle),
+                    ("姓名", inquiry.Name),
+                    ("公司", inquiry.CompanyName),
+                    ("單位／職稱", string.Join(" ／ ", new[] { inquiry.Unit, inquiry.JobTitle }.Where(v => !string.IsNullOrWhiteSpace(v)))),
+                    ("信箱", inquiry.Email),
+                    ("電話", inquiry.Phone),
+                    ("補充說明", inquiry.Message),
+                },
+                "/inquiries");
+        }
+
         return Result<bool>.Success(true);
     }
 

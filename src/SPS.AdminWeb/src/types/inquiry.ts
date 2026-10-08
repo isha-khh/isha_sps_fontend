@@ -55,3 +55,9 @@ export interface InquirySearchParams {
   status?: InquiryStatus;
   search?: string;
 }
+
+/** 承辦人員通知設定：有新的詢問單（提案、下載申請、索取補助資料）或會員刊登需求時寄信給這些信箱 */
+export interface StaffNotificationSettings {
+  enabled: boolean;
+  recipients: string[];
+}

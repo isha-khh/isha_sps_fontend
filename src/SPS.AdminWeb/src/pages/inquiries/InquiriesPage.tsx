@@ -6,7 +6,7 @@ import { DataTable, formatDate } from '@/components/shared/DataTable';
 import type { Column } from '@/components/shared/DataTable';
 import { inquiriesApi } from '@/lib/api/inquiries';
 import { InquiryStatus, InquiryStatusLabels, InquiryTypeLabels } from '@/types/inquiry';
-import type { Inquiry, InquiryCounts, InquirySearchParams } from '@/types/inquiry';
+import type { Inquiry, InquiryCounts, InquirySearchParams, StaffNotificationSettings } from '@/types/inquiry';
 import { useNotify } from '@/hooks/useNotify';
 import { useConfirm } from '@/hooks/useConfirm';
 
@@ -35,6 +35,11 @@ export const InquiriesPage = () => {
   const [status, setStatus] = useState<number>(InquiryStatus.New);
   const [note, setNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  // 通知設定：有新的詢問單或會員刊登需求時寄信給承辦人員
+  const [isNotifyOpen, setIsNotifyOpen] = useState(false);
+  const [notifyEnabled, setNotifyEnabled] = useState(false);
+  const [notifyRecipients, setNotifyRecipients] = useState('');
+  const [isNotifySaving, setIsNotifySaving] = useState(false);
   const pageSize = 20;
 
   const load = useCallback(
@@ -59,6 +64,57 @@ export const InquiriesPage = () => {
   useEffect(() => {
     void load(1, params);
   }, [params, load]);
+
+  const openNotifySettings = async () => {
+    try {
+      const settings: StaffNotificationSettings = await inquiriesApi.getNotificationSettings();
+      setNotifyEnabled(settings.enabled);
+      setNotifyRecipients((settings.recipients ?? []).join('\n'));
+      setIsNotifyOpen(true);
+    } catch {
+      await notify.error('載入通知設定失敗');
+    }
+  };
+
+  const parseRecipients = () =>
+    notifyRecipients
+      .split(/[\n,;，；\s]+/)
+      .map((v) => v.trim())
+      .filter(Boolean);
+
+  const saveNotifySettings = async (): Promise<boolean> => {
+    setIsNotifySaving(true);
+    try {
+      const saved = await inquiriesApi.updateNotificationSettings({ enabled: notifyEnabled, recipients: parseRecipients() });
+      setNotifyEnabled(saved.enabled);
+      setNotifyRecipients(saved.recipients.join('\n'));
+      return true;
+    } catch (error) {
+      const serverMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      await notify.error(serverMessage || '儲存通知設定失敗');
+      return false;
+    } finally {
+      setIsNotifySaving(false);
+    }
+  };
+
+  const handleSaveNotify = async () => {
+    if (await saveNotifySettings()) {
+      setIsNotifyOpen(false);
+      await notify.success('已儲存通知設定');
+    }
+  };
+
+  const handleTestNotify = async () => {
+    if (!(await saveNotifySettings())) return;
+    try {
+      const result = await inquiriesApi.sendTestNotification();
+      await notify.success(`已寄出測試信（${result.sent} 位收件人），請到信箱確認`);
+    } catch (error) {
+      const serverMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      await notify.error(serverMessage || '寄送測試信失敗');
+    }
+  };
 
   const open = (item: Inquiry) => {
     setSelected(item);
@@ -135,7 +191,13 @@ export const InquiriesPage = () => {
   return (
     <div className="space-y-6">
       {notify.NotifyComponent}
-      <PageTitle title="詢問單" items={[{ label: '詢問單', active: true }]} />
+      <div className="flex items-start justify-between gap-4">
+        <PageTitle title="詢問單" items={[{ label: '詢問單', active: true }]} />
+        <button type="button" className="btn btn-sm btn-outline shrink-0" onClick={() => void openNotifySettings()}>
+          <span className="iconify lucide--bell-ring size-4" />
+          通知設定
+        </button>
+      </div>
 
       {counts && (
         <div className="stats shadow bg-base-100">
@@ -269,6 +331,47 @@ export const InquiriesPage = () => {
             </div>
           </div>
           <div className="modal-backdrop" onClick={() => setSelected(null)} />
+        </dialog>
+      )}
+
+      {isNotifyOpen && (
+        <dialog className="modal modal-open">
+          <div className="modal-box max-w-lg space-y-4">
+            <h3 className="text-lg font-bold">承辦人員通知設定</h3>
+            <p className="text-sm text-base-content/70">
+              有新的「我要提案」「下載申請」「索取補助資料」詢問單，或企業會員在前台刊登需求（待審核）時，寄信給下面的信箱。
+              訂閱電子報與訂閱解方只是登記名單，不寄信。為避免被大量送出洗版，全站每小時最多寄 60 封。
+            </p>
+            <label className="label cursor-pointer justify-start gap-3">
+              <input type="checkbox" className="toggle toggle-success" checked={notifyEnabled} onChange={(e) => setNotifyEnabled(e.target.checked)} />
+              <span className="label-text font-medium">啟用寄信通知</span>
+            </label>
+            <div className="form-control">
+              <label className="label" htmlFor="notify-recipients">
+                <span className="label-text font-medium">收件信箱（一行一個，最多 10 個）</span>
+              </label>
+              <textarea
+                id="notify-recipients"
+                className="textarea textarea-bordered"
+                rows={4}
+                placeholder="name@example.com"
+                value={notifyRecipients}
+                onChange={(e) => setNotifyRecipients(e.target.value)}
+              />
+            </div>
+            <div className="modal-action">
+              <button type="button" className="btn btn-ghost" onClick={() => setIsNotifyOpen(false)}>
+                取消
+              </button>
+              <button type="button" className="btn btn-outline" disabled={isNotifySaving} onClick={() => void handleTestNotify()}>
+                儲存並寄測試信
+              </button>
+              <button type="button" className="btn btn-primary" disabled={isNotifySaving} onClick={() => void handleSaveNotify()}>
+                {isNotifySaving ? <span className="loading loading-spinner loading-sm" /> : '儲存'}
+              </button>
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={() => setIsNotifyOpen(false)} />
         </dialog>
       )}
       {ConfirmComponent}

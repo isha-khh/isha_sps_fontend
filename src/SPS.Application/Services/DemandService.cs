@@ -19,14 +19,17 @@ public class DemandService : IDemandService
     private readonly ILogger<DemandService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IEmbeddingService _embeddingService;
+    private readonly IStaffNotifier _staffNotifier;
 
     public DemandService(
         IUnitOfWork unitOfWork,
         IEmailService emailService,
         ILogger<DemandService> logger,
         IServiceScopeFactory scopeFactory,
-        IEmbeddingService embeddingService)
+        IEmbeddingService embeddingService,
+        IStaffNotifier staffNotifier)
     {
+        _staffNotifier = staffNotifier;
         _unitOfWork = unitOfWork;
         _emailService = emailService;
         _logger = logger;
@@ -148,6 +151,19 @@ public class DemandService : IDemandService
         await ReplaceDemandTagCategoriesAsync(demand.Id, tagIds, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         TriggerDemandIndexing(demand.Id);
+
+        _staffNotifier.Notify(
+            "【SPS】會員刊登了新的需求，待審核",
+            "有企業會員刊登了新的需求，審核通過後才會上架",
+            new (string, string?)[]
+            {
+                ("需求編號", demand.Number),
+                ("需求標題", demand.Name),
+                ("刊登會員", member.Email),
+                ("公司", member.CompanyName),
+                ("內容", introduction is { Length: > 300 } ? introduction[..300] + "…" : introduction),
+            },
+            $"/demands/{demand.Id}");
 
         return Result<string>.Success(demand.Number);
     }

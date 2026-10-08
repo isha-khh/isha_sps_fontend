@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using SPS.Api.Attributes;
 using SPS.Application.DTOs.Inquiry;
+using SPS.Application.DTOs.SystemSettings;
 using SPS.Application.Interfaces.IServices;
+using SPS.Application.Services;
 using SPS.Domain.Enums;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -22,13 +24,19 @@ public class InquiryController : ControllerBase
     private const int AnonymousPerHour = 10;
     private const int MemberPerHour = 30;
 
+    private const string NotificationCategory = "StaffNotification";
+
     private readonly IInquiryService _inquiryService;
     private readonly IMemoryCache _cache;
+    private readonly ISystemSettingService _settingService;
+    private readonly IStaffNotifier _notifier;
 
-    public InquiryController(IInquiryService inquiryService, IMemoryCache cache)
+    public InquiryController(IInquiryService inquiryService, IMemoryCache cache, ISystemSettingService settingService, IStaffNotifier notifier)
     {
         _inquiryService = inquiryService;
         _cache = cache;
+        _settingService = settingService;
+        _notifier = notifier;
     }
 
     /// <summary>
@@ -80,6 +88,57 @@ public class InquiryController : ControllerBase
     {
         var r = await _inquiryService.GetCountsAsync(ct);
         return r.IsSuccess ? Ok(r.Data) : BadRequest(new { error = r.Error });
+    }
+
+    /// <summary>後台：承辦人員通知設定（有新的詢問單或會員刊登需求時寄信給哪些信箱）</summary>
+    [HttpGet("notification-settings")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.CustomerService)]
+    [ProducesResponseType(typeof(StaffNotificationSettingsDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetNotificationSettings()
+    {
+        var result = await _settingService.GetSettingAsync<StaffNotificationSettingsDto>(NotificationCategory);
+        return result.IsSuccess ? Ok(result.Data ?? new StaffNotificationSettingsDto()) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>後台：更新承辦人員通知設定。收件信箱最多 10 個，每個都要是有效的信箱</summary>
+    [HttpPut("notification-settings")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.CustomerService)]
+    [ProducesResponseType(typeof(StaffNotificationSettingsDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateNotificationSettings([FromBody] StaffNotificationSettingsDto request)
+    {
+        var emails = new List<string>();
+        foreach (var raw in request.Recipients ?? new List<string>())
+        {
+            var value = raw?.Trim();
+            if (string.IsNullOrEmpty(value)) continue;
+            if (!new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(value) || value.Length > 320)
+                return BadRequest(new { error = $"「{value}」不是有效的信箱" });
+            if (!emails.Contains(value, StringComparer.OrdinalIgnoreCase)) emails.Add(value);
+        }
+
+        if (emails.Count > StaffNotifier.MaxRecipients) return BadRequest(new { error = $"收件信箱最多 {StaffNotifier.MaxRecipients} 個" });
+        if (request.Enabled && emails.Count == 0) return BadRequest(new { error = "要啟用通知，請至少填一個收件信箱" });
+
+        var settings = new StaffNotificationSettingsDto { Enabled = request.Enabled, Recipients = emails };
+        var result = await _settingService.UpdateSettingAsync(NotificationCategory, settings);
+        return result.IsSuccess ? Ok(settings) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>後台：寄一封測試信給目前已儲存的收件信箱，確認信件有寄出（每分鐘最多一次）</summary>
+    [HttpPost("notification-settings/test")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.CustomerService)]
+    public async Task<IActionResult> SendTestNotification(CancellationToken ct)
+    {
+        if (_cache.TryGetValue("staff-notify-test", out _)) return StatusCode(StatusCodes.Status429TooManyRequests, new { error = "請稍後再試（每分鐘最多寄一次測試信）" });
+        _cache.Set("staff-notify-test", true, TimeSpan.FromMinutes(1));
+
+        var sent = await _notifier.SendTestAsync(ct);
+        return sent > 0
+            ? Ok(new { sent })
+            : BadRequest(new { error = "沒有寄出：請先儲存設定並開啟通知，且至少要有一個收件信箱；若已設定，請檢查系統設定的郵件服務是否啟用" });
     }
 
     /// <summary>後台：詢問單詳情</summary>
