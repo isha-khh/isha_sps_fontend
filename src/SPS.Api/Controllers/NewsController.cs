@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using SPS.Application.DTOs.Common;
-using SPS.Application.DTOs.File;
 using SPS.Application.DTOs.News;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
@@ -21,11 +20,8 @@ namespace SPS.Api.Controllers;
 public class NewsController : ControllerBase
 {
     private readonly INewsService _newsService;
-    private readonly IFileManagementService _fileService;
     private readonly ILogger<NewsController> _logger;
     private readonly IMemoryCache _cache;
-
-    private const int MaxAttachments = 10;
 
     /// <summary>同一個來源 IP 對同一篇公告，這段時間內只累計一次瀏覽數</summary>
     private static readonly TimeSpan ViewDedupeWindow = TimeSpan.FromMinutes(30);
@@ -37,12 +33,10 @@ public class NewsController : ControllerBase
     /// <param name="logger">日誌記錄器</param>
     public NewsController(
         INewsService newsService,
-        IFileManagementService fileService,
         ILogger<NewsController> logger,
         IMemoryCache cache)
     {
         _newsService = newsService;
-        _fileService = fileService;
         _logger = logger;
         _cache = cache;
     }
@@ -108,54 +102,7 @@ public class NewsController : ControllerBase
             return NotFound(new { error = result.Error ?? "新聞不存在" });
         }
 
-        // 附件下載資訊：已發布公告的附件任何人都可以下載；檔案 Id 只有後台編輯表單需要，不給匿名者
-        result.Data!.Attachments = await ResolveAttachmentsAsync(result.Data.AttachmentFileIds, cancellationToken);
-        if (!User.IsInRole("Admin")) result.Data.AttachmentFileIds = new List<Guid>();
-
         return Ok(result.Data);
-    }
-
-    private async Task<FileInfoResponse?> GetUsableAttachmentAsync(Guid fileId, CancellationToken ct)
-    {
-        var info = await _fileService.GetFileByIdAsync(fileId, ct);
-        if (!info.IsSuccess || info.Data == null) return null;
-        var file = info.Data;
-        if (file.IsFolder || file.Status != FileStatus.Active) return null;
-        // 會員申請附件含申請人個資，不能當公開下載檔
-        if (await _fileService.IsApplicationDocumentFileAsync(file.Id, ct)) return null;
-        return file;
-    }
-
-    private async Task<List<NewsAttachmentDto>> ResolveAttachmentsAsync(IEnumerable<Guid> fileIds, CancellationToken ct)
-    {
-        var result = new List<NewsAttachmentDto>();
-        foreach (var id in fileIds)
-        {
-            var file = await GetUsableAttachmentAsync(id, ct);
-            if (file == null) continue;
-            result.Add(new NewsAttachmentDto
-            {
-                FileId = file.Id,
-                FileName = file.OriginalFileName,
-                FormattedFileSize = file.FormattedFileSize,
-                Url = $"/api/FileManagement/{file.Id}/download",
-            });
-        }
-
-        return result;
-    }
-
-    /// <summary>檢查後台送來的附件清單：數量上限、每個檔案都要是檔案管理中可用的檔案（不是資料夾、沒被刪除、不是會員申請附件）</summary>
-    private async Task<string?> ValidateAttachmentsAsync(List<Guid>? fileIds, CancellationToken ct)
-    {
-        if (fileIds == null) return null;
-        if (fileIds.Distinct().Count() > MaxAttachments) return $"附件最多 {MaxAttachments} 個";
-        foreach (var id in fileIds.Distinct())
-        {
-            if (await GetUsableAttachmentAsync(id, ct) == null) return "附件必須是檔案管理中存在的檔案（不能是資料夾、已刪除的檔案或會員申請附件）";
-        }
-
-        return null;
     }
 
     /// <summary>
@@ -178,9 +125,6 @@ public class NewsController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating news: {Title}", request.Title);
-
-        var attachmentError = await ValidateAttachmentsAsync(request.AttachmentFileIds, cancellationToken);
-        if (attachmentError != null) return BadRequest(new { error = attachmentError });
 
         var result = await _newsService.CreateAsync(request, cancellationToken);
 
@@ -219,9 +163,6 @@ public class NewsController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Updating news: {NewsId}", id);
-
-        var attachmentError = await ValidateAttachmentsAsync(request.AttachmentFileIds, cancellationToken);
-        if (attachmentError != null) return BadRequest(new { error = attachmentError });
 
         var result = await _newsService.UpdateAsync(id, request, cancellationToken);
 

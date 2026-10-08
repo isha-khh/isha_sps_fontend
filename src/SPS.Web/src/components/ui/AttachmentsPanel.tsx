@@ -17,7 +17,9 @@ export interface ContactInfo {
  * jQuery load 掛載點，內容形狀都一樣，這裡合併成一顆元件，各區塊
  * 沒給資料就不渲染）。
  *
- * `/news` 詳情頁（2026-10-07 起）、`/matching/[id]` 接真資料；`/talent`、`/tutoring`
+ * `/news` 詳情頁沒有用這個——真後端的 `News` entity 沒有附件/相關
+ * 連結/聯繫人這幾個欄位，接了真資料反而顯示不出來，`news/[id]/
+ * page.tsx` 的註解裡有記錄這件事，故意拿掉了。`/talent`、`/tutoring`
  * 目前還是純假資料頁面，先照設計稿補上。
  */
 export default function AttachmentsPanel({

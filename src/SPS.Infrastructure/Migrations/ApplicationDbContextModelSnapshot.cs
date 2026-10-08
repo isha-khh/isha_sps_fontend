@@ -2385,21 +2385,8 @@ namespace SPS.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.PrimitiveCollection<List<Guid>>("AttachmentFileIds")
-                        .IsRequired()
-                        .HasColumnType("uuid[]");
-
                     b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("ContactEmail")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ContactName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ContactPhone")
-                        .HasColumnType("text");
 
                     b.Property<int?>("ContentId")
                         .HasColumnType("integer");
@@ -2421,9 +2408,6 @@ namespace SPS.Infrastructure.Migrations
 
                     b.Property<bool>("Published")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("RelatedLinksJson")
-                        .HasColumnType("text");
 
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("timestamp with time zone");

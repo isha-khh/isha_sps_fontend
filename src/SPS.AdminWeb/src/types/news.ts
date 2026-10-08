@@ -18,19 +18,6 @@ export interface News {
   tagItems?: { id: number; name: string }[];
   createdTime: string;
   updatedTime?: string;
-  /** 附件的檔案 Id（編輯表單用）與下載資訊 */
-  attachmentFileIds?: string[];
-  attachments?: { fileId: string; fileName: string; formattedFileSize: string; url: string }[];
-  /** 相關連結 */
-  relatedLinks?: NewsLink[];
-  contactName?: string;
-  contactPhone?: string;
-  contactEmail?: string;
-}
-
-export interface NewsLink {
-  title: string;
-  url: string;
 }
 
 export interface CreateNewsRequest {
@@ -45,11 +32,6 @@ export interface CreateNewsRequest {
   type: number;
   /** 標籤 ID 清單（公告標籤管理頁維護） */
   tagIds?: number[];
-  attachmentFileIds?: string[];
-  relatedLinks?: NewsLink[];
-  contactName?: string;
-  contactPhone?: string;
-  contactEmail?: string;
 }
 
 export interface UpdateNewsRequest {
@@ -64,13 +46,6 @@ export interface UpdateNewsRequest {
   type?: number;
   /** 沒帶＝不動標籤；帶空陣列＝清空標籤 */
   tagIds?: number[];
-  /** 沒帶＝不更新；空陣列＝清除全部 */
-  attachmentFileIds?: string[];
-  relatedLinks?: NewsLink[];
-  /** 聯絡資訊：沒帶＝不更新；空字串＝清除 */
-  contactName?: string;
-  contactPhone?: string;
-  contactEmail?: string;
 }
 
 export interface NewsSearchParams {

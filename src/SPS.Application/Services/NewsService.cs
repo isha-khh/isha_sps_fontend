@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SPS.Application.Common;
@@ -83,12 +82,7 @@ public class NewsService : INewsService
             TagItems = tags,
             CreatedTime = news.CreatedTime,
             UpdatedTime = news.UpdatedTime,
-            ImageUrl = news.Picture?.DefaultImageUri,
-            AttachmentFileIds = news.AttachmentFileIds,
-            RelatedLinks = ReadLinks(news.RelatedLinksJson),
-            ContactName = news.ContactName,
-            ContactPhone = news.ContactPhone,
-            ContactEmail = news.ContactEmail
+            ImageUrl = news.Picture?.DefaultImageUri
         });
     }
 
@@ -111,10 +105,6 @@ public class NewsService : INewsService
             var (tagIds, tagError) = await ResolveNewsTagIdsAsync(request.TagIds, cancellationToken);
             if (tagError != null)
                 return Result<NewsResponse>.Failure(tagError);
-
-            var (linksJson, linkError) = NormalizeLinks(request.RelatedLinks);
-            if (linkError != null)
-                return Result<NewsResponse>.Failure(linkError);
 
             // 創建多語言文本
             var title = await _unitOfWork.MultilingualTexts.CreateTextAsync(request.Title, cancellationToken);
@@ -140,11 +130,6 @@ public class NewsService : INewsService
                 Ordinal = request.Ordinal,
                 CategoryId = request.CategoryId,
                 Type = request.Type,
-                AttachmentFileIds = request.AttachmentFileIds?.Distinct().ToList() ?? new List<Guid>(),
-                RelatedLinksJson = string.IsNullOrEmpty(linksJson) ? null : linksJson,
-                ContactName = NullIfBlank(request.ContactName),
-                ContactPhone = NullIfBlank(request.ContactPhone),
-                ContactEmail = NullIfBlank(request.ContactEmail),
                 CreatedTime = DateTime.UtcNow,
                 UpdatedTime = DateTime.UtcNow
             };
@@ -178,12 +163,7 @@ public class NewsService : INewsService
                 Tags = createdTags.Select(t => t.Name).ToList(),
                 TagItems = createdTags,
                 CreatedTime = news.CreatedTime,
-                UpdatedTime = news.UpdatedTime,
-                AttachmentFileIds = news.AttachmentFileIds,
-                RelatedLinks = ReadLinks(news.RelatedLinksJson),
-                ContactName = news.ContactName,
-                ContactPhone = news.ContactPhone,
-                ContactEmail = news.ContactEmail
+                UpdatedTime = news.UpdatedTime
             });
         }
         catch (Exception ex)
@@ -219,10 +199,6 @@ public class NewsService : INewsService
                 return Result<NewsResponse>.Failure(tagError);
             newTagIds = resolved;
         }
-
-        var (newLinksJson, updateLinkError) = NormalizeLinks(request.RelatedLinks);
-        if (updateLinkError != null)
-            return Result<NewsResponse>.Failure(updateLinkError);
 
         // 更新 Title (MultilingualText)
         if (!string.IsNullOrEmpty(request.Title))
@@ -290,11 +266,6 @@ public class NewsService : INewsService
         if (request.Ordinal.HasValue) news.Ordinal = request.Ordinal.Value;
         if (request.CategoryId.HasValue) news.CategoryId = request.CategoryId;
         if (request.Type.HasValue) news.Type = request.Type.Value;
-        if (request.AttachmentFileIds != null) news.AttachmentFileIds = request.AttachmentFileIds.Distinct().ToList();
-        if (newLinksJson != null) news.RelatedLinksJson = newLinksJson.Length == 0 ? null : newLinksJson;
-        if (request.ContactName != null) news.ContactName = NullIfBlank(request.ContactName);
-        if (request.ContactPhone != null) news.ContactPhone = NullIfBlank(request.ContactPhone);
-        if (request.ContactEmail != null) news.ContactEmail = NullIfBlank(request.ContactEmail);
         news.UpdatedTime = DateTime.UtcNow;
 
         await _unitOfWork.News.UpdateAsync(news, cancellationToken);
@@ -322,54 +293,9 @@ public class NewsService : INewsService
             Tags = updatedTags.Select(t => t.Name).ToList(),
             TagItems = updatedTags,
             CreatedTime = news.CreatedTime,
-            UpdatedTime = news.UpdatedTime,
-            AttachmentFileIds = news.AttachmentFileIds,
-            RelatedLinks = ReadLinks(news.RelatedLinksJson),
-            ContactName = news.ContactName,
-            ContactPhone = news.ContactPhone,
-            ContactEmail = news.ContactEmail
+            UpdatedTime = news.UpdatedTime
         });
     }
-
-    private const int MaxRelatedLinks = 10;
-    private static readonly JsonSerializerOptions LinkJson = new(JsonSerializerDefaults.Web);
-
-    private static List<NewsLinkItem> ReadLinks(string? json)
-    {
-        if (string.IsNullOrWhiteSpace(json)) return new List<NewsLinkItem>();
-        try
-        {
-            return JsonSerializer.Deserialize<List<NewsLinkItem>>(json, LinkJson) ?? new List<NewsLinkItem>();
-        }
-        catch (JsonException)
-        {
-            return new List<NewsLinkItem>();
-        }
-    }
-
-    /// <summary>整理並驗證相關連結：去掉全空的、標題與網址都要有、網址只接受 http／https、最多 10 筆</summary>
-    private static (string? Json, string? Error) NormalizeLinks(List<NewsLinkItem>? links)
-    {
-        if (links == null) return (null, null);
-        var cleaned = new List<NewsLinkItem>();
-        foreach (var link in links)
-        {
-            var title = link.Title?.Trim() ?? string.Empty;
-            var url = link.Url?.Trim() ?? string.Empty;
-            if (title.Length == 0 && url.Length == 0) continue;
-            if (title.Length == 0 || url.Length == 0) return (null, "相關連結的標題與網址都要填寫");
-            if (title.Length > 100) return (null, "相關連結的標題最多 100 字");
-            if (url.Length > 500) return (null, "相關連結的網址最多 500 字");
-            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-                return (null, $"相關連結「{title}」的網址必須是 http 或 https 開頭");
-            cleaned.Add(new NewsLinkItem { Title = title, Url = url });
-        }
-
-        if (cleaned.Count > MaxRelatedLinks) return (null, $"相關連結最多 {MaxRelatedLinks} 筆");
-        return (cleaned.Count == 0 ? string.Empty : JsonSerializer.Serialize(cleaned, LinkJson), null);
-    }
-
-    private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     /// <summary>
     /// 驗證公告要綁的標籤：去重後必須全部是「公告類型」且實際存在的標籤。

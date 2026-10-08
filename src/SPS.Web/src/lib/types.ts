@@ -242,13 +242,6 @@ export type NewsDetail = {
 
     // 直接存 puck Data
     content: string;
-
-    // 對到真後端 NewsResponse：附件下載、相關連結、聯絡資訊（後台公告表單維護，沒填的區塊前台不顯示）
-    attachments?: { fileId: string; fileName: string; formattedFileSize: string; url: string }[];
-    relatedLinks?: { title: string; url: string }[];
-    contactName?: string | null;
-    contactPhone?: string | null;
-    contactEmail?: string | null;
 };
 
 export type Category = {

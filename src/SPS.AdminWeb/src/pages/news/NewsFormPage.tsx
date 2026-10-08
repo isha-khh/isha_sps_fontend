@@ -9,9 +9,6 @@ import type { CreateNewsRequest, UpdateNewsRequest } from '@/types/news';
 import type { CategoryResponse } from '@/types/category';
 import { PuckEditor } from '@/components/puck/PuckEditor';
 import { useNotify } from '@/hooks/useNotify';
-import { FilePickerModal } from '@/components/shared/FilePickerModal';
-import type { FileListItem, FileUploadResponse } from '@/types/files';
-import type { NewsLink } from '@/types/news';
 
 // 公告分類的 type 值 (對應後端 CategoryType.News = 1)
 const NEWS_CATEGORY_TYPE = 1;
@@ -34,10 +31,6 @@ export const NewsFormPage = () => {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-  // 附件（從檔案管理挑）、相關連結、聯絡資訊：前台公告詳情的「附件下載／相關連結／聯絡資訊」三個區塊
-  const [attachments, setAttachments] = useState<{ fileId: string; name: string }[]>([]);
-  const [relatedLinks, setRelatedLinks] = useState<NewsLink[]>([]);
-  const [isFilePickerOpen, setIsFilePickerOpen] = useState(false);
 
   // 使用 ref 保存最新的 Puck 內容
   const puckContentRef = useRef<string>('');
@@ -85,13 +78,8 @@ export const NewsFormPage = () => {
           ordinal: data.ordinal,
           categoryId: data.categoryId,
           type: data.type,
-          contactName: data.contactName ?? '',
-          contactPhone: data.contactPhone ?? '',
-          contactEmail: data.contactEmail ?? '',
         };
         setFormData(newsData);
-        setAttachments((data.attachments ?? []).map((a) => ({ fileId: a.fileId, name: `${a.fileName}（${a.formattedFileSize}）` })));
-        setRelatedLinks(data.relatedLinks ?? []);
         setSelectedTagIds((data.tagItems ?? []).map((t) => t.id));
         // 初始化 ref
         puckContentRef.current = data.content || '';
@@ -107,17 +95,6 @@ export const NewsFormPage = () => {
 
     fetchNews();
   }, [id, isEditMode, navigate]);
-
-  const handleAttachmentPick = async (file: FileListItem | FileUploadResponse) => {
-    const picked = 'fileId' in file ? { fileId: file.fileId, name: file.fileName } : { fileId: file.id, name: file.originalFileName };
-    setIsFilePickerOpen(false);
-    if (attachments.some((a) => a.fileId === picked.fileId)) return;
-    if (attachments.length >= 10) {
-      await notify.warning('附件最多 10 個');
-      return;
-    }
-    setAttachments((prev) => [...prev, picked]);
-  };
 
   const handleSubmit = async (publish: boolean) => {
     if (!formData.title.trim()) {
@@ -146,11 +123,6 @@ export const NewsFormPage = () => {
           categoryId: formData.categoryId,
           type: formData.type,
           tagIds: selectedTagIds,
-          attachmentFileIds: attachments.map((a) => a.fileId),
-          relatedLinks: relatedLinks.filter((l) => l.title.trim() || l.url.trim()),
-          contactName: formData.contactName ?? '',
-          contactPhone: formData.contactPhone ?? '',
-          contactEmail: formData.contactEmail ?? '',
         };
         console.log('[NewsFormPage] Updating news with ID:', id);
         await newsApi.updateNews(Number(id), updateData);
@@ -167,11 +139,6 @@ export const NewsFormPage = () => {
           categoryId: formData.categoryId,
           type: formData.type,
           tagIds: selectedTagIds,
-          attachmentFileIds: attachments.map((a) => a.fileId),
-          relatedLinks: relatedLinks.filter((l) => l.title.trim() || l.url.trim()),
-          contactName: formData.contactName || undefined,
-          contactPhone: formData.contactPhone || undefined,
-          contactEmail: formData.contactEmail || undefined,
         };
         console.log('[NewsFormPage] Creating new news');
         await newsApi.createNews(createData);
@@ -181,8 +148,7 @@ export const NewsFormPage = () => {
       navigate('/announcements');
     } catch (error) {
       console.error('Failed to save news:', error);
-      const serverMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
-      await notify.error(serverMessage || '儲存公告失敗，請稍後再試');
+      await notify.error('儲存公告失敗，請稍後再試');
     } finally {
       setIsSaving(false);
     }
@@ -296,141 +262,6 @@ export const NewsFormPage = () => {
                         </div>
                       )}
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 附件、相關連結與聯絡資訊：前台公告詳情頁最下方的三個區塊，沒填的區塊不顯示 */}
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body space-y-6">
-                <h2 className="card-title">
-                  <span className="iconify lucide--paperclip size-6" />
-                  附件、相關連結與聯絡資訊
-                </h2>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">附件下載</span>
-                    <span className="label-text-alt text-base-content/60">公告發布後任何人都可以下載；最多 10 個</span>
-                  </label>
-                  {attachments.length > 0 && (
-                    <ul className="mb-2 space-y-1">
-                      {attachments.map((a, index) => (
-                        <li className="flex items-center gap-2 rounded-box border border-base-300 px-3 py-2 text-sm" key={a.fileId}>
-                          <span className="iconify lucide--paperclip size-4" />
-                          <span className="flex-1 break-all">{a.name}</span>
-                          <button
-                            type="button"
-                            className="btn btn-ghost btn-xs"
-                            disabled={index === 0}
-                            onClick={() =>
-                              setAttachments((prev) => {
-                                const next = [...prev];
-                                [next[index - 1], next[index]] = [next[index], next[index - 1]];
-                                return next;
-                              })
-                            }
-                            title="上移"
-                          >
-                            <span className="iconify lucide--arrow-up size-4" />
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-ghost btn-xs text-error"
-                            onClick={() => setAttachments((prev) => prev.filter((x) => x.fileId !== a.fileId))}
-                            title="移除"
-                          >
-                            <span className="iconify lucide--x size-4" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <div>
-                    <button type="button" className="btn btn-sm btn-neutral" onClick={() => setIsFilePickerOpen(true)}>
-                      <span className="iconify lucide--folder-open size-4" />
-                      從檔案系統選擇附件
-                    </button>
-                  </div>
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">相關連結</span>
-                    <span className="label-text-alt text-base-content/60">網址要 http 或 https 開頭；最多 10 筆</span>
-                  </label>
-                  <div className="space-y-2">
-                    {relatedLinks.map((link, index) => (
-                      <div className="flex flex-wrap items-center gap-2" key={index}>
-                        <input
-                          type="text"
-                          className="input input-bordered input-sm flex-1 min-w-40"
-                          placeholder="連結名稱"
-                          maxLength={100}
-                          value={link.title}
-                          onChange={(e) => setRelatedLinks((prev) => prev.map((l, i) => (i === index ? { ...l, title: e.target.value } : l)))}
-                        />
-                        <input
-                          type="url"
-                          className="input input-bordered input-sm flex-[2] min-w-56"
-                          placeholder="https://"
-                          maxLength={500}
-                          value={link.url}
-                          onChange={(e) => setRelatedLinks((prev) => prev.map((l, i) => (i === index ? { ...l, url: e.target.value } : l)))}
-                        />
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-xs text-error"
-                          onClick={() => setRelatedLinks((prev) => prev.filter((_, i) => i !== index))}
-                          title="移除"
-                        >
-                          <span className="iconify lucide--x size-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-neutral"
-                      disabled={relatedLinks.length >= 10}
-                      onClick={() => setRelatedLinks((prev) => [...prev, { title: '', url: '' }])}
-                    >
-                      <span className="iconify lucide--plus size-4" />
-                      新增連結
-                    </button>
-                  </div>
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">聯絡資訊</span>
-                    <span className="label-text-alt text-base-content/60">三格都留空，前台就不顯示這個區塊</span>
-                  </label>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    <input
-                      type="text"
-                      className="input input-bordered"
-                      placeholder="聯絡人"
-                      maxLength={100}
-                      value={formData.contactName ?? ''}
-                      onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-                    />
-                    <input
-                      type="text"
-                      className="input input-bordered"
-                      placeholder="聯絡電話"
-                      maxLength={50}
-                      value={formData.contactPhone ?? ''}
-                      onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                    />
-                    <input
-                      type="email"
-                      className="input input-bordered"
-                      placeholder="聯絡信箱"
-                      maxLength={320}
-                      value={formData.contactEmail ?? ''}
-                      onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                    />
                   </div>
                 </div>
               </div>
@@ -663,14 +494,6 @@ export const NewsFormPage = () => {
           </div>
         </div>
       </div>
-
-      <FilePickerModal
-        isOpen={isFilePickerOpen}
-        onClose={() => setIsFilePickerOpen(false)}
-        onSelect={(file) => void handleAttachmentPick(file)}
-        fileType="all"
-        title="選擇公告附件"
-      />
     </div>
   );
 };

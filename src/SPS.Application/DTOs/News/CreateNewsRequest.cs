@@ -54,14 +54,4 @@ public class CreateNewsRequest
     /// 標簽ID列表
     /// </summary>
     public List<int>? TagIds { get; set; }
-
-    /// <summary>附件（檔案管理中的檔案 Id）</summary>
-    public List<Guid>? AttachmentFileIds { get; set; }
-
-    /// <summary>相關連結</summary>
-    public List<NewsLinkItem>? RelatedLinks { get; set; }
-
-    public string? ContactName { get; set; }
-    public string? ContactPhone { get; set; }
-    public string? ContactEmail { get; set; }
 }
