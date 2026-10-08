@@ -1,4 +1,4 @@
-import { Noto_Sans_TC } from "next/font/google";
+import localFont from "next/font/local";
 
 /**
  * 中文字型改用 `next/font/google` 自架（build time 下載字型檔、自己
@@ -24,9 +24,17 @@ import { Noto_Sans_TC } from "next/font/google";
  * 但一直沒有真的被賦值的 `--font-noto-sans-tc`（之前只有變數名稱，
  * 沒有 next/font 提供實際值，等於白寫）。
  */
-export const notoSansTC = Noto_Sans_TC({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700", "900"],
+/**
+ * 2026-10-08：從 `next/font/google` 改成 `next/font/local`，字型檔直接放在 repo（`src/fonts/`）。
+ * 原本每次 build（包含 Docker build）都要連 fonts.googleapis.com 下載字型，伺服器上連不到的時候整個 frontend build 會失敗
+ * （Turbopack 噴 540 個 `Module not found: @vercel/turbopack-next/internal/font/google/font`），部署就卡住。
+ *
+ * 這個檔案是 Google Fonts 的 Noto Sans TC **拉丁字母子集**（可變字重 100–900，約 25KB，OFL 授權）——原本設定
+ * `subsets: ["latin"]` 本來就只載入拉丁字母，中文字一直是走系統的中文字型，所以畫面不會有任何差別。
+ * 要換版本時從 `https://fonts.googleapis.com/css2?family=Noto+Sans+TC` 裡標示 latin 的區塊取 woff2 網址。
+ */
+export const notoSansTC = localFont({
+  src: [{ path: "../fonts/NotoSansTC-latin-var.woff2", weight: "100 900", style: "normal" }],
   variable: "--font-noto-sans-tc",
   display: "swap",
 });
