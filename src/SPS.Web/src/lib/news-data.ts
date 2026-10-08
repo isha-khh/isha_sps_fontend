@@ -54,9 +54,8 @@ export function deriveNewsCategories(items: NewsItem[]): NewsCategory[] {
  *
  * 封面圖／標簽 2026-09-08 已請後端一併補進 API（`NewsListItemResponse`／
  * `NewsResponse` 的 `ImageUrl`／`Tags`，見 docs/改版規劃.md）——`imageUrl`
- * 沒設定圖片時仍可能是 undefined，卡片圖用 `NEWS_FALLBACK_IMAGE` 佔位。
+ * 沒設定圖片時是 undefined；2026-10-08 起前台不再拿 logo 當假圖佔位，沒有圖就不顯示圖片區塊。
  */
-export const NEWS_FALLBACK_IMAGE = withBasePath("/images/all/new_logo.jpg");
 
 /**
  * 「活動進行中／即將開始／已結束」這個狀態標籤不是後端另外存一個狀態

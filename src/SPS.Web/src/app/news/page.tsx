@@ -12,7 +12,6 @@ import { fetchBanners, fetchNews } from "@/lib/api.server";
 import { withBasePath } from "@/lib/api-client";
 import {
   NEWS_ARTICLES,
-  NEWS_FALLBACK_IMAGE,
   deriveNewsCategories,
   getNewsActivityStatus,
   formatNewsDate,
@@ -47,7 +46,7 @@ const NEWS_PAGE_SIZE = 5;
  *   （`deriveNewsCategories`），理由跟 FAQ 那邊一樣：這樣不管 `items`
  *   是真資料還是假資料，側欄分類永遠跟看得到的文章對得上。
  * - 卡片圖優先用真後端 `NewsListItemResponse.imageUrl`（2026-09-08
- *   已請後端補上），沒有設定圖片的公告才退回 `NEWS_FALLBACK_IMAGE`
+ *   已請後端補上），沒有設定圖片的公告就不顯示圖片區塊（2026-10-08 起不再用 logo 當假圖）
  *   佔位（見 news-data.ts 的說明）。
  * - 「活動進行中」這種狀態標籤是前台自己用 `startDate`／`endDate`
  *   算出來的（`getNewsActivityStatus`），不是後端存的欄位，也不是每篇
@@ -144,7 +143,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
       href: `/news/${item.id}`,
       title: item.title,
       date: formatNewsDate(item.startDate),
-      image: item.imageUrl || NEWS_FALLBACK_IMAGE,
+      image: item.imageUrl || undefined,
     }));
 
   return (
@@ -203,7 +202,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
               key={article.id}
               data={{
                 href: `/news/${article.id}`,
-                image: article.imageUrl || NEWS_FALLBACK_IMAGE,
+                image: article.imageUrl || undefined,
                 category: article.categoryName || "未分類",
                 date: formatNewsDate(article.startDate),
                 status: getNewsActivityStatus(article.startDate, article.endDate),

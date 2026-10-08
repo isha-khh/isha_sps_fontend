@@ -4,7 +4,8 @@ export interface PopularPostData {
   href: string;
   title: string;
   date: string;
-  image: string;
+  /** 縮圖；沒有就不顯示圖片，排名數字改放在標題前面 */
+  image?: string;
 }
 
 /**
@@ -47,18 +48,21 @@ export default function PopularPosts({
         <h4 className="mb-4">{heading}</h4>
 
         {items.map((item, index) => (
-          <div className="item" key={index}>
+          <div className={item.image ? "item" : "item no-pic"} key={index}>
             <div className="d-flex">
-              <a href={withBasePath(item.href)} className="pic" title={item.title}>
-                <div className="ranking">{String(index + 1).padStart(2, "0")}</div>
-                <div className={`ratio ${imageRatio}`}>
-                  <img className="img-fluid d-block" src={item.image} alt="" />
-                </div>
-              </a>
+              {item.image && (
+                <a href={withBasePath(item.href)} className="pic" title={item.title}>
+                  <div className="ranking">{String(index + 1).padStart(2, "0")}</div>
+                  <div className={`ratio ${imageRatio}`}>
+                    <img className="img-fluid d-block" src={item.image} alt="" />
+                  </div>
+                </a>
+              )}
 
               <div className="tit">
                 <a href={withBasePath(item.href)} title={item.title}>
                   <div className="tit_nsl">
+                    {!item.image && <span className="popular-rank-inline">{String(index + 1).padStart(2, "0")}</span>}
                     <h3>{item.title}</h3>
                     <div className="date">{item.date}</div>
                   </div>

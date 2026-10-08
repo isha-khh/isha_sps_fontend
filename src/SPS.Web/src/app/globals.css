@@ -408,3 +408,21 @@
   color: #0052cc;
   font-weight: 700;
 }
+
+/*
+ * 公告列表卡片與右側「熱門文章」沒有封面圖時不再用 logo 當假圖：圖片區塊整個不渲染，
+ * 文字區佔滿整列（舊站 CSS 預設文字區是 70% 寬、左邊留 5%，是配合左邊有 30% 圖片的版型）。
+ * 熱門文章沒有縮圖時，排名數字改成標題前面的藍色粗體數字（原本是疊在縮圖左上角的徽章）。
+ */
+.column_box .item.no-pic .tit {
+  width: 100%;
+  padding-left: 0;
+}
+
+.popular-rank-inline {
+  display: inline-block;
+  margin-right: 8px;
+  font-weight: 700;
+  color: #0052cc;
+}
+

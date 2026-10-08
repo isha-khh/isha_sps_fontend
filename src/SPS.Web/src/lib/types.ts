@@ -202,7 +202,7 @@ export type NewsItem = {
     tagItems?: NewsTagItem[];
     // 對到真後端 NewsListItemResponse.ImageUrl（News.Picture.DefaultImageUri），
     // 2026-09-08 已請後端補上，沒設定圖片時仍可能是 undefined/null，
-    // 畫面上要有 fallback（見 news-data.ts 的 NEWS_FALLBACK_IMAGE）
+    // 沒圖就不顯示圖片區塊（2026-10-08 起不再用假圖佔位）
     imageUrl?: string;
     // 對到真後端 NewsListItemResponse.ViewCount，本來就有這個欄位、
     // 只是先前沒有從後端 DTO 補進來——「熱門文章」側欄要照點閱率排序

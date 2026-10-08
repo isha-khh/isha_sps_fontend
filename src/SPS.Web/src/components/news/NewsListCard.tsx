@@ -8,7 +8,8 @@ export interface NewsListCardMeta {
 
 export interface NewsListCardData {
   href: string;
-  image: string;
+  /** 封面圖；沒有設定就不顯示圖片區塊（不用假圖佔位），文字區佔滿整列 */
+  image?: string;
   category: string;
   date: string;
   /** 例如「活動進行中」，沒有就不顯示那顆時間狀態小標籤 */
@@ -33,13 +34,15 @@ const META_ICON_CLASS: Record<NewsListCardMeta["icon"], string> = {
  */
 export default function NewsListCard({ data }: { data: NewsListCardData }) {
   return (
-    <div className="item">
+    <div className={data.image ? "item" : "item no-pic"}>
       <div className="d-flex">
-        <a href={withBasePath(data.href)} className="pic" title={data.title}>
-          <div className="ratio ratio-4x3">
-            <img className="img-fluid d-block" src={data.image} alt="" />
-          </div>
-        </a>
+        {data.image && (
+          <a href={withBasePath(data.href)} className="pic" title={data.title}>
+            <div className="ratio ratio-4x3">
+              <img className="img-fluid d-block" src={data.image} alt="" />
+            </div>
+          </a>
+        )}
 
         <div className="tit">
           <a href={withBasePath(data.href)} title={data.title}>

@@ -13,7 +13,7 @@ import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import { fetchNews, fetchNewsDetail, fetchBanners } from "@/lib/api.server";
 import type { NewsDetail } from "@/lib/types";
-import { NEWS_ARTICLES, NEWS_FALLBACK_IMAGE, getNewsArticle, formatNewsDate, sortNewsByViewCount } from "@/lib/news-data";
+import { NEWS_ARTICLES, getNewsArticle, formatNewsDate, sortNewsByViewCount } from "@/lib/news-data";
 import { withBasePath } from "@/lib/api-client";
 import NewsViewTracker from "@/components/news/NewsViewTracker";
 
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: PageProps<"/news/[id]">): Pro
  * 欄位，這幾塊當時拿掉；2026-10-07 後端補上附件、相關連結與聯絡資訊（沒有「撰稿人」），
  * 內文下方顯示 `AttachmentsPanel`。封面圖用
  * `article.imageUrl`（2026-09-08 已請後端補上），沒設定圖片的公告
- * 才退回 `NEWS_FALLBACK_IMAGE` 佔位。
+ * 就不顯示封面圖（不再用 logo 當假圖）。
  *
  * 舊站這裡原本還有一段 TweenLite 視差滾動（讓 s_round_6／s_round_3
  * 兩張裝飾圖跟著捲動微微位移），跟首頁那幾個 round_* 裝飾圖是同一套
@@ -84,7 +84,7 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
     href: `/news/${item.id}`,
     title: item.title,
     date: formatNewsDate(item.startDate),
-    image: item.imageUrl || NEWS_FALLBACK_IMAGE,
+    image: item.imageUrl || undefined,
   }));
 
   // 2026-10-07：後端公告有附件、相關連結、聯絡資訊了（後台公告表單維護），沒填的區塊不顯示
@@ -160,7 +160,7 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
             )}
           </div>
 
-          <ZoomableImage src={article.imageUrl || NEWS_FALLBACK_IMAGE} alt={article.title} caption={article.title} />
+          {article.imageUrl && <ZoomableImage src={article.imageUrl} alt={article.title} caption={article.title} />}
 
           <PuckRenderer content={article.content} />
 
