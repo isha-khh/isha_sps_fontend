@@ -1,21 +1,127 @@
 import type { Config } from "@puckeditor/core";
+import type { CSSProperties, ReactNode } from "react";
 import { renderReactIcon } from "@/lib/puck/ionicons";
 import { IconPicker } from "@/components/puck/IconPicker";
 import { ImageUploadField } from "@/components/puck/ImageUploadField";
-import { colors } from "@/components/puck/theme";
-import {Icon} from "@/components/puck/Icon.tsx";
-import {VisuallyHidden} from "@/components/puck/VisuallyHidden.tsx";
-import {FileUploaderField} from "@/components/puck/FileUploaderField.tsx";
-import {RichTextField} from "@/components/puck/RichTextField.tsx";
-import {RichTextContent} from "@/components/puck/RichTextContent.tsx";
-
+import { Icon } from "@/components/puck/Icon";
+import { VisuallyHidden } from "@/components/puck/VisuallyHidden";
+import { FileUploaderField } from "@/components/puck/FileUploaderField";
+import { RichTextField } from "@/components/puck/RichTextField";
+import { RichTextContent } from "@/components/puck/RichTextContent";
 
 /**
- * WCAG AAA 無障礙設計原則：
- * - 對比度至少 7:1（一般文字）或 4.5:1（大型文字）
- * - 所有互動元素可透過鍵盤操作
- * - 提供適當的 ARIA 標籤與語義化 HTML
+ * 公告內容區塊（Puck）。2026-10-08 起 17 個區塊全部改成 SPS 網站的樣式（藍色漸層標題、圓角淺藍底、藍框的
+ * 「附件下載／相關連結／聯絡資訊」等，對照 `public/css/style.css` 的 `.dow-name`、`.dk_conbo`、`ul.ul-key`），
+ * 並新增「相關連結」「聯絡資訊」兩個公告專用區塊、把左側面板分成四組。設計稿見「公告內容區塊設計」。
+ *
+ * **這份檔案在後台（SPS.AdminWeb/src/lib/puck/config.tsx）與前台（SPS.Web/src/lib/puck/live-content-config.tsx）
+ * 是同一份內容，修改時兩邊要一起改**——後台編輯器的預覽與前台公告頁用同一份 `render`，所以兩邊長得一樣。
+ * 樣式全部用行內 style，不依賴 Tailwind／daisyUI／網站 CSS，後台預覽才會跟前台一致。
+ *
+ * 舊內容相容：欄位名稱沒有改（`titleSize` 的 `text-5xl` 舊值當成「大」），已存的公告照常顯示。
  */
+
+// ==================== SPS 網站色票與共用樣式 ====================
+const C = {
+  ink: "#1a1a1a",
+  text: "#434343",
+  blue: "#0052cc",
+  navy: "#0e3f6b",
+  panel: "#e9f0f4",
+  stripe: "#f3f6f9",
+  line: "#bebebe",
+  rule: "#404040",
+  border: "#cfd6dd",
+  frame: "#0393bd",
+  danger: "#c0392b",
+};
+
+const GRADIENT_BTN = "linear-gradient(90deg, #0099ff 0%, #0052cc 100%)";
+
+const headingGradient: CSSProperties = {
+  background: "linear-gradient(to right, #2f6ea7 16%, #0e3f6b 100%)",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  color: "transparent",
+};
+
+/** 只放行 http／https 與站內路徑，避免內容裡塞進 javascript: 之類的網址 */
+function safeUrl(url: unknown): string | undefined {
+  if (typeof url !== "string") return undefined;
+  const value = url.trim();
+  if (/^https?:\/\//i.test(value) || (value.startsWith("/") && !value.startsWith("//")) || value.startsWith("#")) return value;
+  return undefined;
+}
+
+function hostOf(url?: string): string {
+  if (!url) return "";
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+const iconProps = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true, focusable: false } as const;
+
+const FileTitleIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" {...iconProps}>
+    <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z" />
+    <path d="M14 3v5h5M12 11v5M9.5 13.5L12 16l2.5-2.5" />
+  </svg>
+);
+const LinkTitleIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" {...iconProps}>
+    <path d="M10 14a4.5 4.5 0 006.4 0l3-3a4.5 4.5 0 00-6.4-6.4l-1.2 1.2" />
+    <path d="M14 10a4.5 4.5 0 00-6.4 0l-3 3a4.5 4.5 0 006.4 6.4l1.2-1.2" />
+  </svg>
+);
+const ContactTitleIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" {...iconProps}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <circle cx="9" cy="11" r="2.2" />
+    <path d="M5.5 16c.6-1.7 1.9-2.5 3.5-2.5s2.9.8 3.5 2.5M14.5 10h4M14.5 13.5h3" />
+  </svg>
+);
+const CaretIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill={C.blue} aria-hidden="true" focusable="false" style={{ flex: "none" }}>
+    <path d="M9 5l9 7-9 7V5z" />
+  </svg>
+);
+
+/** 公告頁原本設計的藍框區塊（附件下載／相關連結／聯絡資訊共用）：外框＋底線標題 */
+function DocFrame({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
+  return (
+    <section style={{ position: "relative", margin: "28px 0", padding: "30px 36px", border: `1px solid ${C.frame}`, borderRadius: 24 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${C.rule}`, paddingBottom: 10, marginBottom: 22, color: C.blue }}>
+        {icon}
+        <h2 style={{ margin: 0, fontSize: 26, fontWeight: 700, ...headingGradient }}>{title}</h2>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+const rowStyle = (index: number): CSSProperties => ({
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  fontSize: 16,
+  ...(index > 0 ? { borderTop: `1px solid ${C.line}`, paddingTop: 16, marginTop: 16 } : {}),
+});
+
+const badgeStyle: CSSProperties = { fontSize: 11, fontWeight: 700, color: "#fff", background: C.blue, borderRadius: 4, padding: "2px 6px", whiteSpace: "nowrap" };
+const metaStyle: CSSProperties = { marginLeft: "auto", fontSize: 13, color: "#666", whiteSpace: "nowrap" };
+
+/** 自訂欄位：富文字輸入框（多個區塊共用） */
+const richField = (label: string) => ({
+  type: "custom" as const,
+  label,
+  render: ({ value, onChange }: { value: unknown; onChange: (value: string) => void }) => (
+    <RichTextField value={typeof value === "string" ? value : ""} onChange={(html) => onChange(html)} label={label} />
+  ),
+});
 
 // ==================== 類型定義 ====================
 type Props = {
@@ -24,6 +130,7 @@ type Props = {
     subtitle: string;
     alignment: "left" | "center" | "right";
     headingLevel: "h2" | "h3";
+    // `text-5xl` 是舊內容的值，當成「大」
     titleSize: "text-5xl" | "text-4xl" | "text-3xl";
     subtitleSize: "text-2xl" | "text-xl" | "text-base";
   };
@@ -113,70 +220,59 @@ type Props = {
     openInNewTab: boolean;
     enableDownloadAttr: boolean;
   };
+  RelatedLinks: {
+    heading: string;
+    items: { id: string; title: string; url: string }[];
+  };
+  ContactInfo: {
+    heading: string;
+    name: string;
+    phone: string;
+    email: string;
+  };
 };
-
-
-// ============================================
-// 輔助元件
-// ============================================
-
-// 視覺隱藏但螢幕閱讀器可讀的文字
 
 // ==================== Puck 配置 ====================
 export const puckConfig: Config<Props> = {
   categories: {
-    structure: {
-      title: "結構元件",
+    text: {
+      title: "文字與結構",
+      components: ["HeroBlock", "ArticleContent", "TwoColumnLayout", "Divider"],
       defaultExpanded: true,
     },
-    content: {
-      title: "內容元件",
+    emphasis: {
+      title: "內容強調",
+      components: ["Quote", "AlertBanner", "DataTable", "Accordion", "FeatureList"],
       defaultExpanded: true,
-    },
-    navigation: {
-      title: "導覽元件",
     },
     media: {
-      title: "媒體元件",
+      title: "圖片與影片",
+      components: ["ImageFeature", "VideoEmbed"],
+      defaultExpanded: true,
     },
-    interactive: {
-      title: "互動元件",
-    },
-    accessibility: {
-      title: "無障礙輔助元件",
+    announcement: {
+      title: "連結與公告專用",
+      components: ["FileDownloads", "RelatedLinks", "ContactInfo", "CallToAction", "NavigationCard"],
+      defaultExpanded: true,
     },
   },
 
   components: {
     // ==========================================
-    // 大標題區塊
+    // 標題區塊
     // ==========================================
     HeroBlock: {
       fields: {
-        title: {
-          type: "text",
-          label: "主標題內容",
-        },
+        title: { type: "text", label: "標題內容" },
         titleSize: {
-          type: "radio", // 或者用 radio
-          label: "主標題大小",
+          type: "radio",
+          label: "標題大小",
           options: [
-            { label: "大", value: "text-5xl" },
-            { label: "中", value: "text-4xl" },
-            { label: "小", value: "text-3xl" },
+            { label: "大標（藍色粗條＋漸層字）", value: "text-4xl" },
+            { label: "小標（深藍單色）", value: "text-3xl" },
           ],
         },
-        subtitle: {
-          type: "custom",
-          label: "副標題內容",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="副標題內容"
-            />
-          ),
-        },
+        subtitle: richField("副標題內容"),
         subtitleSize: {
           type: "radio",
           label: "副標題大小",
@@ -205,47 +301,39 @@ export const puckConfig: Config<Props> = {
         },
       },
       defaultProps: {
-        title: "歡迎來到我們的網站",
+        title: "計畫重點",
         titleSize: "text-4xl",
-        subtitle: "我們致力於提供最優質的服務與體驗",
-        subtitleSize: "text-xl",
-        alignment: "center",
+        subtitle: "",
+        subtitleSize: "text-base",
+        alignment: "left",
         headingLevel: "h2",
       },
       render: ({ title, titleSize, subtitle, subtitleSize, alignment, headingLevel }) => {
-        const HeadingTag = headingLevel as 'h2' | 'h3';
-
-        // 對齊類名
-        const alignmentClass = {
-          left: "text-left items-start",
-          center: "text-center items-center",
-          right: "text-right items-end",
-        }[alignment];
+        const HeadingTag = headingLevel as "h2" | "h3";
+        const big = titleSize !== "text-3xl";
+        const subSize = { "text-2xl": 20, "text-xl": 18, "text-base": 16 }[subtitleSize] ?? 16;
 
         return (
-          <header className={`py-16 md:py-24 px-6 flex flex-col ${alignmentClass}`}>
-            <div className="max-w-4xl w-full">
-              <HeadingTag
-                className={`${titleSize} font-bold tracking-tight mb-6 leading-tight`}
-                style={{ color: colors.textPrimary }}
-              >
-                {title}
-              </HeadingTag>
-              <div
-                className={`${subtitleSize} leading-relaxed`}
-                style={{
-                  color: colors.textSecondary,
-                  marginLeft: alignment === "center" ? "auto" : undefined,
-                  marginRight: alignment === "center" ? "auto" : undefined,
-                }}
-              >
+          <header style={{ margin: "12px 0 16px", textAlign: alignment }}>
+            <HeadingTag
+              style={
+                big
+                  ? { margin: 0, display: "inline-flex", alignItems: "center", gap: 12, fontSize: 30, fontWeight: 700, lineHeight: 1.35, ...headingGradient }
+                  : { margin: 0, fontSize: 21, fontWeight: 700, lineHeight: 1.4, color: C.navy }
+              }
+            >
+              {big && <span aria-hidden="true" style={{ display: "inline-block", width: 6, height: 30, background: C.blue, borderRadius: 2, flex: "none" }} />}
+              {title}
+            </HeadingTag>
+            {subtitle ? (
+              <div style={{ marginTop: 8, fontSize: subSize, lineHeight: 1.8, color: C.text }}>
                 <RichTextContent html={subtitle} />
               </div>
-            </div>
+            ) : null}
           </header>
         );
       },
-      label: "大標題區塊",
+      label: "標題區塊",
     },
 
     // ==========================================
@@ -253,47 +341,26 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     ArticleContent: {
       fields: {
-        content: {
-          type: "custom",
-          label: "文章內容",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="文章內容"
-            />
-          ),
-        },
+        content: richField("文章內容"),
         fontSize: {
           type: "radio",
           label: "文字大小（無障礙考量）",
           options: [
-            { label: "標準 (18px)", value: "normal" },
-            { label: "大 (20px)", value: "large" },
-            { label: "特大 (22px)", value: "extraLarge" },
+            { label: "標準 (16px)", value: "normal" },
+            { label: "大 (18px)", value: "large" },
+            { label: "特大 (20px)", value: "extraLarge" },
           ],
         },
       },
       defaultProps: {
-        content:
-          "請在此輸入您的文章內容。良好的文章結構包含清晰的段落分隔，每段聚焦於一個主題，並使用適當的過渡詞彙連接各段落。\n\n這是第二段的範例內容。保持每段的長度適中，避免過長的段落影響閱讀體驗。",
+        content: "請在此輸入文章內容。每段聚焦一個主題，段落之間留白，讀起來比較輕鬆。",
         fontSize: "normal",
       },
       render: ({ content, fontSize }) => {
-        const fontSizeClass = {
-          normal: "text-lg", // 18px
-          large: "text-xl", // 20px
-          extraLarge: "text-[22px]", // 22px
-        }[fontSize];
-
+        const size = { normal: 16, large: 18, extraLarge: 20 }[fontSize] ?? 16;
         return (
-          <article className="max-w-3xl mx-auto py-12 px-6">
-            <div
-              className={`${fontSizeClass} leading-[1.8]`}
-              style={{ color: colors.textPrimary }}
-            >
-              <RichTextContent html={content} />
-            </div>
+          <article style={{ margin: "10px 0 18px", fontSize: size, lineHeight: 1.9, color: C.text, letterSpacing: "1px" }}>
+            <RichTextContent html={content} />
           </article>
         );
       },
@@ -308,27 +375,11 @@ export const puckConfig: Config<Props> = {
         imageUrl: {
           type: "custom",
           label: "圖片",
-          render: ({ value, onChange }) => (
-            <ImageUploadField
-              value={typeof value === "string" ? value : ""}
-              onChange={(url) => onChange(url)}
-              label="圖片"
-            />
-          ),
+          render: ({ value, onChange }) => <ImageUploadField value={typeof value === "string" ? value : ""} onChange={(url) => onChange(url)} label="圖片" />,
         },
         alt: { type: "textarea", label: "替代文字（必填）" },
         imageCaption: { type: "text", label: "圖片說明" },
-        description: {
-          type: "custom",
-          label: "詳細描述",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="詳細描述"
-            />
-          ),
-        },
+        description: richField("詳細描述"),
         layout: {
           type: "radio",
           label: "排版方式",
@@ -340,109 +391,95 @@ export const puckConfig: Config<Props> = {
         },
       },
       defaultProps: {
-        imageUrl: "https://placehold.co/800x600/1a1a1a/ffffff?text=範例圖片",
+        imageUrl: "https://placehold.co/800x600/dfe8ef/6b7c8c?text=範例圖片",
         alt: "這是一張範例圖片",
         imageCaption: "圖片說明",
-        description: "這是關於圖片的詳細描述。",
-        layout: "left",
+        description: "",
+        layout: "top",
       },
       render: ({ imageUrl, alt, imageCaption, description, layout }) => {
         const isTop = layout === "top";
-        const isRight = layout === "right";
+        const hasText = typeof description === "string" ? description.trim() !== "" : Boolean(description);
+        const linkable = safeUrl(imageUrl);
+        const image = (
+          <img src={imageUrl} alt={alt} loading="lazy" style={{ display: "block", width: "100%", height: "auto", borderRadius: 20 }} />
+        );
 
         return (
-          <section className="max-w-5xl mx-auto py-12 px-6">
-            <figure
-              className={`flex flex-col gap-8 ${
-                isTop ? "" : isRight ? "lg:flex-row-reverse" : "lg:flex-row"
-              }`}
-            >
-              <div className={`${isTop ? "w-full" : "lg:flex-1"}`}>
-                <img
-                  src={imageUrl}
-                  alt={alt}
-                  className="w-full h-auto rounded-lg shadow-md"
-                  style={{ border: `1px solid ${colors.borderLight}` }}
-                  loading="lazy"
-                />
-                {imageCaption && (
-                  <figcaption className="mt-3 text-base text-center" style={{ color: colors.textSecondary }}>
-                    {imageCaption}
-                  </figcaption>
+          <figure style={{ margin: "18px 0" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "center", flexDirection: layout === "right" ? "row-reverse" : "row" }}>
+              <div style={{ flex: isTop || !hasText ? "1 1 100%" : "1 1 320px", minWidth: 0 }}>
+                {linkable ? (
+                  <a href={linkable} target="_blank" rel="noopener noreferrer" title="點擊另開視窗看原圖">
+                    {image}
+                  </a>
+                ) : (
+                  image
                 )}
+                {imageCaption ? (
+                  <figcaption style={{ marginTop: 8, fontSize: 14, color: "#666", textAlign: "center" }}>{imageCaption}</figcaption>
+                ) : null}
               </div>
-              <div className={`${isTop ? "w-full" : "lg:flex-1"} text-lg leading-relaxed`} style={{ color: colors.textPrimary }}>
-                <RichTextContent html={description} />
-              </div>
-            </figure>
-          </section>
+              {hasText && (
+                <div style={{ flex: isTop ? "1 1 100%" : "1 1 320px", minWidth: 0, fontSize: 16, lineHeight: 1.9, color: C.text }}>
+                  <RichTextContent html={description} />
+                </div>
+              )}
+            </div>
+          </figure>
         );
       },
       label: "圖片區塊",
     },
 
     // ==========================================
-    // 行動呼籲區塊
+    // 行動呼籲
     // ==========================================
     CallToAction: {
       fields: {
         heading: { type: "text", label: "標題" },
-        description: {
-          type: "custom",
-          label: "說明文字",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="說明文字"
-            />
-          ),
-        },
+        description: richField("說明文字"),
         primaryButtonText: { type: "text", label: "主要按鈕文字" },
         primaryButtonUrl: { type: "text", label: "主要按鈕連結" },
         secondaryButtonText: { type: "text", label: "次要按鈕文字（選填）" },
         secondaryButtonUrl: { type: "text", label: "次要按鈕連結（選填）" },
       },
       defaultProps: {
-        heading: "準備好開始了嗎？",
-        description: "立即加入我們，體驗全新的服務。",
-        primaryButtonText: "立即開始",
+        heading: "立即提出申請",
+        description: "申請期間內請先下載申請須知，再依說明填寫。",
+        primaryButtonText: "前往申請",
         primaryButtonUrl: "#",
-        secondaryButtonText: "了解更多",
+        secondaryButtonText: "下載申請須知",
         secondaryButtonUrl: "#",
       },
-      render: ({ heading, description, primaryButtonText, primaryButtonUrl, secondaryButtonText, secondaryButtonUrl }) => (
-        <section className="py-16 px-6" style={{ backgroundColor: colors.bgTertiary }}>
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4" style={{ color: colors.textPrimary }}>
-              {heading}
-            </h2>
-            <div className="text-lg mb-8" style={{ color: colors.textSecondary }}>
+      render: ({ heading, description, primaryButtonText, primaryButtonUrl, secondaryButtonText, secondaryButtonUrl }) => {
+        const primary = safeUrl(primaryButtonUrl);
+        const secondary = safeUrl(secondaryButtonUrl);
+        const base: CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 46, padding: "0 30px", borderRadius: 999, fontWeight: 700, fontSize: 16, textDecoration: "none" };
+        return (
+          <section style={{ margin: "28px 0", padding: "30px 20px", textAlign: "center" }}>
+            <h2 style={{ margin: "0 0 8px", fontSize: 24, fontWeight: 700, color: C.navy }}>{heading}</h2>
+            <div style={{ margin: "0 0 20px", fontSize: 16, lineHeight: 1.8, color: C.text }}>
               <RichTextContent html={description} />
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href={primaryButtonUrl}
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-lg"
-                style={{ backgroundColor: colors.accent, color: colors.bgPrimary }}
-              >
-                {primaryButtonText}
-              </a>
-              {secondaryButtonText && secondaryButtonUrl && (
-                <a
-                  href={secondaryButtonUrl}
-                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-lg"
-                  style={{ backgroundColor: "transparent", color: colors.accent, border: `2px solid ${colors.accent}` }}
-                >
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
+              {primaryButtonText && primary && (
+                <a href={primary} style={{ ...base, background: GRADIENT_BTN, color: "#fff" }}>
+                  {primaryButtonText}
+                </a>
+              )}
+              {secondaryButtonText && secondary && (
+                <a href={secondary} style={{ ...base, border: `1.5px solid ${C.blue}`, color: C.blue, background: "#fff" }}>
                   {secondaryButtonText}
                 </a>
               )}
             </div>
-          </div>
-        </section>
-      ),
+          </section>
+        );
+      },
       label: "行動呼籲",
     },
+
     // ==========================================
     // 手風琴（常見問題）
     // ==========================================
@@ -452,113 +489,50 @@ export const puckConfig: Config<Props> = {
           type: "array",
           label: "問答項目",
           arrayFields: {
-            id: {
-              type: "text",
-              label: "項目 ID（唯一識別碼）",
-            },
-            question: {
-              type: "text",
-              label: "問題",
-            },
-            answer: {
-              type: "custom",
-              label: "答案",
-              render: ({ value, onChange }) => (
-                <RichTextField
-                  value={typeof value === "string" ? value : ""}
-                  onChange={(html) => onChange(html)}
-                  label="答案"
-                />
-              ),
-            },
+            id: { type: "text", label: "項目 ID（唯一識別碼）" },
+            question: { type: "text", label: "問題" },
+            answer: richField("答案"),
           },
         },
       },
       defaultProps: {
         items: [
-          {
-            id: "faq-1",
-            question: "如何建立帳號？",
-            answer:
-              "您可以點擊右上角的「註冊」按鈕，填寫必要資訊後即可完成帳號建立。整個過程約需 2 分鐘。",
-          },
-          {
-            id: "faq-2",
-            question: "忘記密碼怎麼辦？",
-            answer:
-              "請點擊登入頁面的「忘記密碼」連結，輸入您的電子郵件地址，我們會寄送重設密碼的連結給您。",
-          },
-          {
-            id: "faq-3",
-            question: "如何聯繫客服？",
-            answer:
-              "您可以透過以下方式聯繫我們：\n• 電子郵件：support@example.com\n• 客服專線：0800-123-456（週一至週五 9:00-18:00）\n• 線上客服：網站右下角的對話視窗",
-          },
+          { id: "faq-1", question: "誰可以申請？", answer: "依法登記之製造業公司，且於申請時已完成工廠登記。" },
+          { id: "faq-2", question: "需要準備哪些文件？", answer: "請參考申請須知，備齊公司登記證明與計畫書。" },
         ],
       },
       render: ({ items }) => (
-        <section className="max-w-3xl mx-auto py-12 px-6">
-          <div
-            className="divide-y rounded-lg overflow-hidden"
-            style={{
-              borderColor: colors.border,
-              border: `1px solid ${colors.border}`,
-            }}
-          >
-            {items.map((item, index) => (
-              <details
-                key={item.id || index}
-                className="group"
-                style={{ backgroundColor: colors.bgPrimary }}
+        <section style={{ margin: "18px 0", border: `1px solid ${C.border}`, borderRadius: 10, overflow: "hidden" }}>
+          {items.map((item, index) => (
+            <details key={item.id || index} style={index > 0 ? { borderTop: `1px solid ${C.border}` } : undefined}>
+              <summary
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, minHeight: 44, padding: "14px 18px", cursor: "pointer", listStyle: "none", background: C.panel, color: C.navy, fontSize: 16, fontWeight: 700 }}
               >
-                <summary
-                  className="flex items-center justify-between px-6 py-5 cursor-pointer list-none min-h-11 text-lg font-semibold transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-inset"
-                  style={{
-                    color: colors.textPrimary,
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.outlineColor = colors.accent;
-                  }}
-                >
-                  <span className="pr-4">{item.question}</span>
-                  <span
-                    className="shrink-0 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none"
-                    aria-hidden="true"
-                  >
-                    <Icon type="chevronDown" size={24} />
-                  </span>
-                </summary>
-                <div
-                  className="px-6 pb-5 text-base leading-relaxed"
-                  style={{ backgroundColor: colors.bgSecondary, color: colors.textSecondary }}
-                >
-                  <RichTextContent html={item.answer} />
-                </div>
-              </details>
-            ))}
-          </div>
+                <span>{item.question}</span>
+                <span style={{ flex: "none", color: C.blue }} aria-hidden="true">
+                  <Icon type="chevronDown" size={20} />
+                </span>
+              </summary>
+              <div style={{ padding: "14px 18px", fontSize: 15, lineHeight: 1.8, color: C.text, background: "#fff" }}>
+                <RichTextContent html={item.answer} />
+              </div>
+            </details>
+          ))}
         </section>
       ),
       label: "手風琴（常見問題）",
     },
+
     // ==========================================
     // 資料表格
     // ==========================================
     DataTable: {
       fields: {
-        caption: {
-          type: "text",
-          label: "表格標題（無障礙必填）",
-        },
+        caption: { type: "text", label: "表格標題（無障礙必填）" },
         headers: {
           type: "array",
           label: "欄位標題",
-          arrayFields: {
-            value: {
-              type: "text",
-              label: "標題文字",
-            },
-          },
+          arrayFields: { value: { type: "text", label: "標題文字" } },
           getItemSummary: (item) => item.value || "未命名欄位",
         },
         rows: {
@@ -568,85 +542,28 @@ export const puckConfig: Config<Props> = {
             cells: {
               type: "array",
               label: "儲存格",
-              arrayFields: {
-                value: {
-                  type: "custom",
-                  label: "內容",
-                  render: ({ value, onChange }) => (
-                    <RichTextField
-                      value={typeof value === "string" ? value : ""}
-                      onChange={(html) => onChange(html)}
-                      label="內容"
-                    />
-                  ),
-                },
-              },
+              arrayFields: { value: richField("內容") },
             },
           },
         },
       },
       defaultProps: {
-        caption: "2024 年度銷售數據",
-        headers: [
-          { value: "月份" },
-          { value: "營業額" },
-          { value: "成長率" },
-        ],
+        caption: "補助項目與金額",
+        headers: [{ value: "補助類別" }, { value: "補助比例" }, { value: "金額上限" }],
         rows: [
-          {
-            cells: [
-              { value: "一月" },
-              { value: "NT$ 1,200,000" },
-              { value: "+15%" },
-            ],
-          },
-          {
-            cells: [
-              { value: "二月" },
-              { value: "NT$ 980,000" },
-              { value: "-5%" },
-            ],
-          },
-          {
-            cells: [
-              { value: "三月" },
-              { value: "NT$ 1,450,000" },
-              { value: "+22%" },
-            ],
-          },
+          { cells: [{ value: "智慧感測設備" }, { value: "50%" }, { value: "新臺幣 300 萬元" }] },
+          { cells: [{ value: "系統建置與整合" }, { value: "40%" }, { value: "新臺幣 200 萬元" }] },
         ],
       },
       render: ({ caption, headers = [], rows = [] }) => (
-        <section className="max-w-4xl mx-auto py-12 px-6">
-          <div
-            className="overflow-x-auto rounded-lg"
-            style={{ border: `1px solid ${colors.border}` }}
-            role="region"
-            aria-label={caption}
-            tabIndex={0}
-          >
-            <table className="w-full border-collapse min-w-150">
-              <caption
-                className="px-6 py-4 text-left text-lg font-semibold"
-                style={{
-                  backgroundColor: colors.bgTertiary,
-                  color: colors.textPrimary,
-                }}
-              >
-                {caption}
-              </caption>
+        <section style={{ margin: "18px 0" }}>
+          <div style={{ overflowX: "auto" }} role="region" aria-label={caption} tabIndex={0}>
+            <table style={{ width: "100%", minWidth: 480, borderCollapse: "collapse", fontSize: 15 }}>
+              <caption style={{ textAlign: "left", fontWeight: 700, color: C.navy, fontSize: 16, marginBottom: 10 }}>{caption}</caption>
               <thead>
-                <tr style={{ backgroundColor: colors.bgSecondary }}>
+                <tr>
                   {headers.map((header, index) => (
-                    <th
-                      key={index}
-                      scope="col"
-                      className="px-6 py-4 text-left text-base font-bold"
-                      style={{
-                        color: colors.textPrimary,
-                        borderBottom: `2px solid ${colors.border}`,
-                      }}
-                    >
+                    <th key={index} scope="col" style={{ background: C.navy, color: "#fff", textAlign: "left", padding: "11px 14px", fontWeight: 500 }}>
                       {header.value}
                     </th>
                   ))}
@@ -654,24 +571,9 @@ export const puckConfig: Config<Props> = {
               </thead>
               <tbody>
                 {rows.map((row, rowIndex) => (
-                  <tr
-                    key={rowIndex}
-                    style={{
-                      backgroundColor:
-                        rowIndex % 2 === 0
-                          ? colors.bgPrimary
-                          : colors.bgSecondary,
-                    }}
-                  >
+                  <tr key={rowIndex}>
                     {(row.cells ?? []).map((cell, cellIndex) => (
-                      <td
-                        key={cellIndex}
-                        className="px-6 py-4 text-base"
-                        style={{
-                          color: colors.textPrimary,
-                          borderBottom: `1px solid ${colors.borderLight}`,
-                        }}
-                      >
+                      <td key={cellIndex} style={{ padding: "11px 14px", borderBottom: "1px solid #d9dee3", color: "#333", background: rowIndex % 2 === 1 ? C.stripe : "#fff" }}>
                         <RichTextContent html={cell.value} />
                       </td>
                     ))}
@@ -684,95 +586,47 @@ export const puckConfig: Config<Props> = {
       ),
       label: "資料表格",
     },
+
     // ==========================================
     // 引言區塊
     // ==========================================
     Quote: {
       fields: {
-        text: {
-          type: "custom",
-          label: "引言內容",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="引言內容"
-            />
-          ),
-        },
-        author: {
-          type: "text",
-          label: "作者姓名",
-        },
-        source: {
-          type: "text",
-          label: "出處（選填）",
-        },
+        text: richField("引言內容"),
+        author: { type: "text", label: "作者姓名" },
+        source: { type: "text", label: "出處（選填）" },
       },
       defaultProps: {
-        text: "設計不只是外觀和感覺，設計是產品如何運作。",
-        author: "史蒂夫·賈伯斯",
-        source: "《紐約時報》訪談，2003年",
+        text: "導入智慧工安技術之後，現場異常的發現時間縮短了一半。",
+        author: "[受訪者姓名]",
+        source: "[公司／單位名稱]",
       },
       render: ({ text, author, source }) => (
-        <figure className="max-w-3xl mx-auto py-12 px-6">
-          <blockquote
-            className="relative pl-8 text-xl md:text-2xl leading-relaxed italic"
-            style={{
-              color: colors.textPrimary,
-              borderLeft: `4px solid ${colors.accent}`,
-            }}
-          >
-            <div className="mb-4"><RichTextContent html={text} /></div>
+        <figure style={{ margin: "18px 0" }}>
+          <blockquote style={{ margin: 0, padding: "22px 26px", background: C.panel, borderRadius: 10 }}>
+            <div style={{ fontSize: 18, lineHeight: 1.8, color: C.navy, fontWeight: 500 }}>
+              <RichTextContent html={text} />
+            </div>
+            {(author || source) && (
+              <figcaption style={{ marginTop: 12, fontSize: 14, color: "#555" }}>
+                {[author, source].filter(Boolean).join("　·　")}
+              </figcaption>
+            )}
           </blockquote>
-          <figcaption className="pl-8 mt-4">
-            <cite
-              className="not-italic text-lg font-semibold"
-              style={{ color: colors.textSecondary }}
-            >
-              — {author}
-              {source && (
-                <span
-                  className="font-normal block mt-1"
-                  style={{ color: colors.textMuted }}
-                >
-                  {source}
-                </span>
-              )}
-            </cite>
-          </figcaption>
         </figure>
       ),
       label: "引言區塊",
     },
+
     // ==========================================
     // 導覽卡片
     // ==========================================
     NavigationCard: {
       fields: {
-        title: {
-          type: "text",
-          label: "標題",
-        },
-        description: {
-          type: "custom",
-          label: "描述",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="描述"
-            />
-          ),
-        },
-        linkUrl: {
-          type: "text",
-          label: "連結網址",
-        },
-        linkText: {
-          type: "text",
-          label: "連結文字",
-        },
+        title: { type: "text", label: "標題" },
+        description: richField("描述"),
+        linkUrl: { type: "text", label: "連結網址" },
+        linkText: { type: "text", label: "連結文字" },
         iconType: {
           type: "radio",
           label: "圖示類型",
@@ -785,56 +639,42 @@ export const puckConfig: Config<Props> = {
         },
       },
       defaultProps: {
-        title: "開始使用指南",
-        description: "了解如何快速上手我們的產品，包含基本設定與常用功能介紹。",
-        linkUrl: "/getting-started",
-        linkText: "閱讀指南",
+        title: "補助專區",
+        description: "查看目前開放申請的補助計畫與申請方式。",
+        linkUrl: "/support",
+        linkText: "前往查看",
         iconType: "arrow",
       },
       render: ({ title, description, linkUrl, linkText, iconType }) => {
         const isExternal = iconType === "external";
-
-        return (
-          <article
-            className="max-w-md mx-auto my-6 rounded-lg p-6 transition-shadow motion-reduce:transition-none hover:shadow-lg"
-            style={{
-              backgroundColor: colors.bgPrimary,
-              border: `1px solid ${colors.border}`,
-            }}
-          >
-            <h3
-              className="text-xl font-bold mb-3"
-              style={{ color: colors.textPrimary }}
-            >
-              {title}
-            </h3>
-            <div
-              className="text-base mb-4 leading-relaxed"
-              style={{ color: colors.textSecondary }}
-            >
-              <RichTextContent html={description} />
+        const href = safeUrl(linkUrl);
+        const card = (
+          <>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: C.navy, marginBottom: 4 }}>{title}</div>
+              <div style={{ fontSize: 15, lineHeight: 1.7, color: C.text }}>
+                <RichTextContent html={description} />
+              </div>
+              {linkText ? <div style={{ marginTop: 6, fontSize: 14, fontWeight: 700, color: C.blue }}>{linkText}</div> : null}
             </div>
-            <a
-              href={linkUrl}
-              className="inline-flex items-center gap-2 text-lg font-semibold min-h-11 px-1 py-2 rounded transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-offset-2"
-              style={{ color: colors.accent }}
-              target={isExternal ? "_blank" : undefined}
-              rel={isExternal ? "noopener noreferrer" : undefined}
-              onFocus={(e) => {
-                e.currentTarget.style.outlineColor = colors.accent;
-              }}
-            >
-              <span className="underline underline-offset-4">{linkText}</span>
-              <Icon type={iconType} size={20} />
-              {isExternal && (
-                <VisuallyHidden>（在新視窗開啟）</VisuallyHidden>
-              )}
-            </a>
-          </article>
+            <span style={{ flex: "none", color: C.blue }} aria-hidden="true">
+              <Icon type={iconType} size={26} />
+            </span>
+            {isExternal && <VisuallyHidden>（在新視窗開啟）</VisuallyHidden>}
+          </>
+        );
+        const style: CSSProperties = { display: "flex", alignItems: "center", gap: 18, margin: "18px 0", padding: "20px 24px", borderRadius: 14, background: C.panel, textDecoration: "none", color: "inherit" };
+        return href ? (
+          <a href={href} style={style} target={isExternal ? "_blank" : undefined} rel={isExternal ? "noopener noreferrer" : undefined}>
+            {card}
+          </a>
+        ) : (
+          <div style={style}>{card}</div>
         );
       },
       label: "導覽卡片",
     },
+
     // ==========================================
     // 警示橫幅
     // ==========================================
@@ -846,25 +686,12 @@ export const puckConfig: Config<Props> = {
           options: [
             { label: "資訊提示", value: "info" },
             { label: "成功訊息", value: "success" },
-            { label: "警告訊息", value: "warning" },
+            { label: "注意", value: "warning" },
             { label: "錯誤訊息", value: "error" },
           ],
         },
-        title: {
-          type: "text",
-          label: "標題",
-        },
-        message: {
-          type: "custom",
-          label: "訊息內容",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="訊息內容"
-            />
-          ),
-        },
+        title: { type: "text", label: "標題" },
+        message: richField("訊息內容"),
         dismissible: {
           type: "radio",
           label: "可關閉",
@@ -876,89 +703,44 @@ export const puckConfig: Config<Props> = {
       },
       defaultProps: {
         type: "info",
-        title: "系統公告",
-        message: "網站將於 2024 年 12 月 31 日進行例行維護，預計維護時間為 2 小時。",
-        dismissible: true,
+        title: "資訊",
+        message: "說明會將於 11 月 5 日下午 2 點舉行，採線上直播。",
+        dismissible: false,
       },
       render: ({ type, title, message, dismissible }) => {
-        const typeStyles = {
-          info: {
-            bg: "#e8f4fd",
-            border: colors.info,
-            icon: "info",
-          },
-          success: {
-            bg: "#e8f5e9",
-            border: colors.success,
-            icon: "check",
-          },
-          warning: {
-            bg: "#fff8e1",
-            border: colors.warning,
-            icon: "info",
-          },
-          error: {
-            bg: "#ffebee",
-            border: colors.error,
-            icon: "close",
-          },
-        };
+        const styles = {
+          info: { bg: "#e8f3fd", border: "#0474d7", text: "#0b3a66", icon: "info" },
+          success: { bg: "#eaf6ee", border: "#2e8b57", text: "#14452b", icon: "check" },
+          warning: { bg: "#fff5e0", border: "#d98300", text: "#6b3f00", icon: "info" },
+          error: { bg: "#fdeaea", border: C.danger, text: "#6e1a12", icon: "close" },
+        }[type];
 
-        const style = typeStyles[type];
-        const roleType = type === "error" ? "alert" : "status";
-        const isDismissible = dismissible === true ;
         return (
           <div
-            className="max-w-3xl mx-auto my-6 rounded-lg p-5"
-            style={{
-              backgroundColor: style.bg,
-              borderLeft: `4px solid ${style.border}`,
-            }}
-            role={roleType}
+            style={{ display: "flex", alignItems: "flex-start", gap: 12, margin: "14px 0", padding: "14px 16px", borderRadius: 10, border: `1px solid ${styles.border}`, background: styles.bg, color: styles.text }}
+            role={type === "error" ? "alert" : "status"}
             aria-live={type === "error" ? "assertive" : "polite"}
           >
-            <div className="flex items-start gap-4">
-              <span
-                className="shrink-0 mt-0.5"
-                style={{ color: style.border }}
-                aria-hidden="true"
-              >
-                <Icon type={style.icon} size={24} />
-              </span>
-              <div className="flex-1">
-                <h4
-                  className="text-lg font-bold mb-2"
-                  style={{ color: colors.textPrimary }}
-                >
-                  {title}
-                </h4>
-                <div
-                  className="text-base leading-relaxed"
-                  style={{ color: colors.textSecondary }}
-                >
-                  <RichTextContent html={message} />
-                </div>
-              </div>
-              {isDismissible && (
-                <button
-                  type="button"
-                  className="shrink-0 p-2 rounded min-h-11 min-w-11 flex items-center justify-center transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2"
-                  style={{ color: colors.textSecondary }}
-                  aria-label="關閉此訊息"
-                  onClick={(e) => {
-                    const banner = e.currentTarget.closest('[role]');
-                    if (banner) {
-                      (banner as HTMLElement).style.display = 'none';
-                    }
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.outlineColor = colors.accent;
-                  }}
-                >
-                  <Icon type="close" size={20} />
-                </button>
-              )}
+            <span style={{ flex: "none", marginTop: 2, color: styles.border }} aria-hidden="true">
+              <Icon type={styles.icon} size={22} />
+            </span>
+            <div style={{ flex: 1, fontSize: 15, lineHeight: 1.7 }}>
+              {title ? <b style={{ display: "block", marginBottom: 2 }}>{title}</b> : null}
+              <RichTextContent html={message} />
             </div>
+            {dismissible === true && (
+              <button
+                type="button"
+                style={{ flex: "none", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: 0, color: styles.text, cursor: "pointer" }}
+                aria-label="關閉此訊息"
+                onClick={(e) => {
+                  const banner = e.currentTarget.closest("[role]");
+                  if (banner) (banner as HTMLElement).style.display = "none";
+                }}
+              >
+                <Icon type="close" size={20} />
+              </button>
+            )}
           </div>
         );
       },
@@ -970,78 +752,43 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     VideoEmbed: {
       fields: {
-        videoUrl: {
-          type: "text",
-          label: "影片網址（YouTube 或 Vimeo）",
-        },
-        title: {
-          type: "text",
-          label: "影片標題（無障礙必填）",
-        },
-        transcript: {
-          type: "custom",
-          label: "逐字稿（無障礙 AAA 必備）",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="逐字稿（無障礙 AAA 必備）"
-            />
-          ),
-        },
+        videoUrl: { type: "text", label: "影片網址（YouTube 或 Vimeo 的嵌入網址）" },
+        title: { type: "text", label: "影片標題（無障礙必填）" },
+        transcript: richField("逐字稿（無障礙 AAA 必備）"),
       },
       defaultProps: {
         videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        title: "產品介紹影片",
-        transcript:
-          "這是影片的逐字稿內容。完整的逐字稿對於聽障使用者至關重要，也有助於搜尋引擎理解影片內容。\n\n[00:00] 開場白\n[00:30] 產品功能介紹\n[02:00] 使用方式說明\n[03:30] 結語",
+        title: "影片標題",
+        transcript: "",
       },
-      render: ({ videoUrl, title, transcript }) => (
-        <section className="max-w-4xl mx-auto py-12 px-6">
-          <div
-            className="relative w-full rounded-lg overflow-hidden"
-            style={{
-              paddingBottom: "56.25%", // 16:9 aspect ratio
-              backgroundColor: colors.bgTertiary,
-            }}
-          >
-            <iframe
-              src={videoUrl}
-              title={title}
-              className="absolute top-0 left-0 w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              loading="lazy"
-            />
-          </div>
-          {transcript && (
-            <details className="mt-6">
-              <summary
-                className="cursor-pointer text-lg font-semibold px-4 py-3 rounded min-h-11 flex items-center gap-2 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2"
-                style={{
-                  color: colors.accent,
-                  backgroundColor: colors.bgSecondary,
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.outlineColor = colors.accent;
-                }}
-              >
-                <Icon type="chevronDown" size={20} />
-                顯示影片逐字稿
-              </summary>
-              <div
-                className="mt-4 p-6 rounded-lg text-base leading-relaxed"
-                style={{
-                  backgroundColor: colors.bgSecondary,
-                  color: colors.textSecondary,
-                }}
-              >
-                <RichTextContent html={transcript} />
-              </div>
-            </details>
-          )}
-        </section>
-      ),
+      render: ({ videoUrl, title, transcript }) => {
+        const src = safeUrl(videoUrl);
+        const hasTranscript = typeof transcript === "string" ? transcript.trim() !== "" : Boolean(transcript);
+        return (
+          <section style={{ margin: "18px auto", maxWidth: 720 }}>
+            <div style={{ position: "relative", width: "100%", paddingBottom: "56.25%", borderRadius: 20, overflow: "hidden", background: C.navy }}>
+              {src && (
+                <iframe
+                  src={src}
+                  title={title}
+                  style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  loading="lazy"
+                />
+              )}
+            </div>
+            {hasTranscript && (
+              <details style={{ marginTop: 14, fontSize: 14, color: C.text }}>
+                <summary style={{ cursor: "pointer", minHeight: 44, display: "flex", alignItems: "center", color: C.blue, fontWeight: 700 }}>逐字稿（無障礙）</summary>
+                <div style={{ marginTop: 6, lineHeight: 1.8 }}>
+                  <RichTextContent html={transcript} />
+                </div>
+              </details>
+            )}
+          </section>
+        );
+      },
       label: "影片嵌入",
     },
 
@@ -1050,28 +797,8 @@ export const puckConfig: Config<Props> = {
     // ==========================================
     TwoColumnLayout: {
       fields: {
-        leftContent: {
-          type: "custom",
-          label: "左欄內容",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="左欄內容"
-            />
-          ),
-        },
-        rightContent: {
-          type: "custom",
-          label: "右欄內容",
-          render: ({ value, onChange }) => (
-            <RichTextField
-              value={typeof value === "string" ? value : ""}
-              onChange={(html) => onChange(html)}
-              label="右欄內容"
-            />
-          ),
-        },
+        leftContent: richField("左欄內容"),
+        rightContent: richField("右欄內容"),
         ratio: {
           type: "radio",
           label: "欄寬比例",
@@ -1083,32 +810,20 @@ export const puckConfig: Config<Props> = {
         },
       },
       defaultProps: {
-        leftContent: "這是左欄的內容。您可以在此放置文字、說明或其他資訊。",
-        rightContent: "這是右欄的內容。雙欄排版有助於組織資訊，提升閱讀體驗。",
+        leftContent: "左欄內容。",
+        rightContent: "右欄內容。",
         ratio: "50-50",
       },
       render: ({ leftContent, rightContent, ratio }) => {
-        const ratioClasses = {
-          "50-50": "lg:grid-cols-2",
-          "33-67": "lg:grid-cols-[1fr_2fr]",
-          "67-33": "lg:grid-cols-[2fr_1fr]",
-        };
-
+        const grow = { "50-50": [1, 1], "33-67": [1, 2], "67-33": [2, 1] }[ratio] ?? [1, 1];
+        const col = (grown: number): CSSProperties => ({ flex: `${grown} 1 260px`, minWidth: 0, fontSize: 16, lineHeight: 1.9, color: C.text });
         return (
-          <section className="max-w-5xl mx-auto py-12 px-6">
-            <div className={`grid grid-cols-1 gap-8 ${ratioClasses[ratio]}`}>
-              <div
-                className="text-lg leading-relaxed"
-                style={{ color: colors.textPrimary }}
-              >
-                <RichTextContent html={leftContent} />
-              </div>
-              <div
-                className="text-lg leading-relaxed"
-                style={{ color: colors.textPrimary }}
-              >
-                <RichTextContent html={rightContent} />
-              </div>
+          <section style={{ display: "flex", flexWrap: "wrap", gap: 28, margin: "18px 0" }}>
+            <div style={col(grow[0])}>
+              <RichTextContent html={leftContent} />
+            </div>
+            <div style={col(grow[1])}>
+              <RichTextContent html={rightContent} />
             </div>
           </section>
         );
@@ -1127,7 +842,7 @@ export const puckConfig: Config<Props> = {
           options: [
             { label: "實線", value: "solid" },
             { label: "虛線", value: "dashed" },
-            { label: "裝飾性", value: "decorative" },
+            { label: "裝飾線（藍色漸層）", value: "decorative" },
           ],
         },
         spacing: {
@@ -1154,50 +869,18 @@ export const puckConfig: Config<Props> = {
         ariaHidden: true,
       },
       render: ({ style, spacing, ariaHidden }) => {
-        const spacingClasses = {
-          small: "my-6",
-          medium: "my-12",
-          large: "my-20",
-        };
-
-        const styleProps = {
-          solid: {
-            borderTop: `1px solid ${colors.border}`,
-          },
-          dashed: {
-            borderTop: `2px dashed ${colors.borderLight}`,
-          },
-          decorative: {},
-        };
+        const margin = { small: 14, medium: 28, large: 48 }[spacing] ?? 28;
+        const hidden = ariaHidden === true || (ariaHidden as unknown) === "true";
+        const role = hidden ? "presentation" : "separator";
 
         if (style === "decorative") {
-          return (
-            <div
-              className={`max-w-3xl mx-auto px-6 ${spacingClasses[spacing]} flex items-center justify-center gap-4`}
-              role={ariaHidden ? "presentation" : "separator"}
-              aria-hidden={ariaHidden}
-            >
-              <span
-                className="flex-1 h-px"
-                style={{ backgroundColor: colors.borderLight }}
-              />
-              <span style={{ color: colors.textMuted }} aria-hidden="true">
-                ◆
-              </span>
-              <span
-                className="flex-1 h-px"
-                style={{ backgroundColor: colors.borderLight }}
-              />
-            </div>
-          );
+          return <div style={{ height: 4, margin: `${margin}px 0`, borderRadius: 4, background: GRADIENT_BTN }} role={role} aria-hidden={hidden} />;
         }
-
         return (
           <hr
-            className={`max-w-3xl mx-auto ${spacingClasses[spacing]} border-0`}
-            style={styleProps[style]}
-            role={ariaHidden ? "presentation" : "separator"}
-            aria-hidden={ariaHidden}
+            style={{ margin: `${margin}px 0`, border: 0, borderTop: style === "dashed" ? "2px dashed #8aa4bf" : `1px solid ${C.rule}` }}
+            role={role}
+            aria-hidden={hidden}
           />
         );
       },
@@ -1205,14 +888,11 @@ export const puckConfig: Config<Props> = {
     },
 
     // ==========================================
-    // 功能列表
+    // 特色清單
     // ==========================================
     FeatureList: {
       fields: {
-        heading: {
-          type: "text",
-          label: "區塊標題",
-        },
+        heading: { type: "text", label: "區塊標題" },
         headingLevel: {
           type: "radio",
           label: "標題層級",
@@ -1224,97 +904,42 @@ export const puckConfig: Config<Props> = {
         },
         items: {
           type: "array",
-          label: "功能項目",
+          label: "項目",
           arrayFields: {
-            title: {
-              type: "text",
-              label: "功能名稱",
-            },
-            description: {
-              type: "custom",
-              label: "功能說明",
-              render: ({ value, onChange }) => (
-                <RichTextField
-                  value={typeof value === "string" ? value : ""}
-                  onChange={(html) => onChange(html)}
-                  label="功能說明"
-                />
-              ),
-            },
+            title: { type: "text", label: "名稱" },
+            description: richField("說明"),
             icon: {
               type: "custom",
-              render: ({ value, onChange }) => (
-                  <IconPicker
-                      value={typeof value === "string" ? value : ""}
-                      onChange={(next) => onChange(next)}
-                  />
-              ),
+              render: ({ value, onChange }) => <IconPicker value={typeof value === "string" ? value : ""} onChange={(next) => onChange(next)} />,
             },
           },
         },
       },
       defaultProps: {
-        heading: "我們的特色",
+        heading: "計畫特色",
         headingLevel: "h2",
         items: [
-          {
-            title: "快速設定",
-            description: "只需幾分鐘即可完成初始設定，立即開始使用。",
-            icon: "io5:IoFlashOutline",
-          },
-          {
-            title: "安全可靠",
-            description: "採用業界最高標準的安全機制，保護您的資料。",
-            icon: "io5:IoShieldCheckmarkOutline",
-          },
-          {
-            title: "專業支援",
-            description: "提供全天候技術支援，確保您的問題即時獲得解決。",
-            icon: "io5:IoStarOutline",
-          },
+          { title: "即時監測", description: "感測資料即時回傳，異常即刻通知。", icon: "io5:IoFlashOutline" },
+          { title: "安全可靠", description: "多重機制保護資料與現場安全。", icon: "io5:IoShieldCheckmarkOutline" },
+          { title: "專業支援", description: "專人協助導入與教育訓練。", icon: "io5:IoStarOutline" },
         ],
       },
       render: ({ heading, headingLevel, items }) => {
-        const HeadingTag = headingLevel as 'h2' | 'h3' | 'h4';
-
+        const HeadingTag = headingLevel as "h2" | "h3" | "h4";
         return (
-          <section className="max-w-5xl mx-auto py-12 px-6">
-            <HeadingTag
-              className="text-2xl md:text-3xl font-bold mb-10 text-center"
-              style={{ color: colors.textPrimary }}
-            >
-              {heading}
-            </HeadingTag>
-            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 list-none p-0">
+          <section style={{ margin: "18px 0" }}>
+            {heading ? <HeadingTag style={{ margin: "0 0 14px", fontSize: 21, fontWeight: 700, color: C.navy }}>{heading}</HeadingTag> : null}
+            <ul style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 18, listStyle: "none", margin: 0, padding: 0 }}>
               {items.map((item, index) => (
-                <li
-                  key={index}
-                  className="rounded-lg p-6"
-                  style={{
-                    backgroundColor: colors.bgSecondary,
-                    border: `1px solid ${colors.borderLight}`,
-                  }}
-                >
+                <li key={index} style={{ padding: 20, borderRadius: 12, background: C.panel }}>
                   <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-                    style={{
-                      backgroundColor: colors.accent,
-                      color: colors.bgPrimary,
-                    }}
+                    style={{ width: 44, height: 44, borderRadius: 10, background: GRADIENT_BTN, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}
                     aria-hidden="true"
                   >
-                    {renderReactIcon(item.icon, 24)}
+                    {renderReactIcon(item.icon, 22)}
                   </div>
-                  <h3
-                    className="text-xl font-bold mb-3"
-                    style={{ color: colors.textPrimary }}
-                  >
-                    {item.title}
-                  </h3>
-                  <div
-                    className="text-base leading-relaxed"
-                    style={{ color: colors.textSecondary }}
-                  >
+                  <h3 style={{ margin: "0 0 6px", fontSize: 17, fontWeight: 700, color: C.navy }}>{item.title}</h3>
+                  <div style={{ fontSize: 14, lineHeight: 1.7, color: C.text }}>
                     <RichTextContent html={item.description} />
                   </div>
                 </li>
@@ -1323,28 +948,25 @@ export const puckConfig: Config<Props> = {
           </section>
         );
       },
-      label: "功能列表",
+      label: "特色清單",
     },
+
     // ==========================================
-    // 檔案下載（多檔案清單）
+    // 附件下載（公告頁原本設計的藍框區塊）
     // ==========================================
     FileDownloads: {
       fields: {
-        heading: { type: "text", label: "大標題" },
+        heading: { type: "text", label: "標題" },
         description: { type: "textarea", label: "說明（選填）" },
         files: {
           type: "custom",
           label: "檔案清單",
           render: ({ value, onChange }) => (
-              <div role="group" aria-label="檔案上傳與管理">
-                <FileUploaderField
-                    value={Array.isArray(value) ? value : []}
-                    onChange={onChange}
-                />
-              </div>
+            <div role="group" aria-label="檔案上傳與管理">
+              <FileUploaderField value={Array.isArray(value) ? value : []} onChange={onChange} />
+            </div>
           ),
         },
-
         openInNewTab: {
           type: "radio",
           label: "在新視窗開啟",
@@ -1362,138 +984,160 @@ export const puckConfig: Config<Props> = {
           ],
         },
       },
-
       defaultProps: {
-        heading: "檔案下載",
-        description: "請點選下列檔案進行下載。",
-        files: [
-          {
-            id: "file-1",
-            name: "使用手冊.pdf",
-            url: "/files/manual.pdf",
-            size: "1.2MB",
-            type: "pdf",
-          },
-          {
-            id: "file-2",
-            name: "範本.xlsx",
-            url: "/files/template.xlsx",
-            size: "320KB",
-            type: "xls",
-          },
-        ],
-        openInNewTab: false,
+        heading: "附件下載",
+        description: "",
+        files: [],
+        openInNewTab: true,
         enableDownloadAttr: true,
       },
-
       render: ({ heading, description, files, openInNewTab, enableDownloadAttr }) => {
-        const typeLabelMap: Record<string, string> = {
-          pdf: "PDF",
-          doc: "Word",
-          xls: "Excel",
-          ppt: "PowerPoint",
-          zip: "ZIP",
-          image: "圖片",
-          other: "檔案",
-        };
-
+        const typeLabelMap: Record<string, string> = { pdf: "PDF", doc: "Word", xls: "Excel", ppt: "PPT", zip: "ZIP", image: "圖片", other: "檔案" };
         const toBool = (v: unknown) => v === true || v === "true";
-        const _openInNewTab = toBool(openInNewTab);
-        const _enableDownloadAttr = toBool(enableDownloadAttr);
-
-        const target = _openInNewTab ? "_blank" : undefined;
-        const rel = _openInNewTab ? "noopener noreferrer" : undefined;
+        const newTab = toBool(openInNewTab);
+        const download = toBool(enableDownloadAttr);
 
         return (
-            <section className="max-w-3xl mx-auto py-12 px-6">
-              <header className="mb-6">
-                <h2
-                    className="text-2xl md:text-3xl font-bold"
-                    style={{ color: colors.textPrimary }}
-                >
-                  {heading}
-                </h2>
-                {description ? (
-                    <p className="mt-2 text-lg" style={{ color: colors.textSecondary }}>
-                      {description}
-                    </p>
-                ) : null}
-              </header>
-
-              <div
-                  className="rounded-lg overflow-hidden"
-                  style={{ border: `1px solid ${colors.border}` }}
-              >
-                {(!files || files.length === 0) ? (
-                    <div className="p-6" style={{ backgroundColor: colors.bgPrimary }}>
-                      <p className="text-base" style={{ color: colors.textSecondary }}>
-                        尚未新增檔案。
-                      </p>
-                    </div>
-                ) : (
-                    <ul className="divide-y" style={{ backgroundColor: colors.bgPrimary }}>
-                      {files.map((f, idx) => {
-                        const typeLabel = typeLabelMap[f.type] ?? "檔案";
-                        const downloadProps = _enableDownloadAttr
-                            ? { download: f.name || true }
-                            : {};
-
-                        return (
-                            <li key={f.id || `${idx}`} className="p-5">
-                              <a
-                                  href={f.url}
-                                  target={target}
-                                  rel={rel}
-                                  {...downloadProps}
-                                  className="group flex items-center justify-between gap-4 rounded-lg px-3 py-3 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                                  style={{
-                                    color: colors.textPrimary,
-                                  }}
-                                  aria-label={`下載檔案：${f.name || "附件"}`}
-                                  onFocus={(e) => {
-                                    e.currentTarget.style.outlineColor = colors.accentFocus;
-                                  }}
-                              >
-                                <div className="min-w-0">
-                                  <div className="text-lg font-semibold truncate">
-                                    {f.name || "未命名檔案"}
-                                  </div>
-                                  <div
-                                      className="text-sm mt-1"
-                                      style={{ color: colors.textMuted }}
-                                  >
-                                    {typeLabel}{f.size ? ` · ${f.size}` : ""}
-                                  </div>
-                                </div>
-
-                                <span
-                                    className="shrink-0 inline-flex items-center gap-2 text-base font-semibold"
-                                    style={{ color: colors.accent }}
-                                    aria-hidden="true"
-                                >
-                        <Icon type="download" size={18} />
-                        下載
-                      </span>
-                              </a>
-
-                              {!f.url ? (
-                                  <p className="mt-3 text-sm" style={{ color: colors.error }}>
-                                    此檔案缺少 URL，請補上連結才能下載。
-                                  </p>
-                              ) : null}
-                            </li>
-                        );
-                      })}
-                    </ul>
-                )}
-              </div>
-            </section>
+          <DocFrame title={heading || "附件下載"} icon={<FileTitleIcon />}>
+            {description ? <p style={{ margin: "0 0 16px", fontSize: 15, color: C.text }}>{description}</p> : null}
+            {!files || files.length === 0 ? (
+              <p style={{ margin: 0, fontSize: 15, color: "#666" }}>尚未新增檔案。</p>
+            ) : (
+              <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                {files.map((f, idx) => {
+                  const ext = (f.name || "").split(".").pop();
+                  const label = ext && ext.length <= 5 && ext !== f.name ? ext.toUpperCase() : typeLabelMap[f.type] ?? "檔案";
+                  const href = safeUrl(f.url);
+                  return (
+                    <li key={f.id || idx} style={rowStyle(idx)}>
+                      <CaretIcon />
+                      {href ? (
+                        <a
+                          href={href}
+                          target={newTab ? "_blank" : undefined}
+                          rel={newTab ? "noopener noreferrer" : undefined}
+                          {...(download ? { download: f.name || true } : {})}
+                          style={{ color: "#090909", textDecoration: "none", minWidth: 0, overflowWrap: "anywhere" }}
+                          aria-label={`下載檔案：${f.name || "附件"}`}
+                        >
+                          {f.name || "未命名檔案"}
+                        </a>
+                      ) : (
+                        <span style={{ color: C.danger }}>{f.name || "未命名檔案"}（缺少連結）</span>
+                      )}
+                      <span style={badgeStyle}>{label}</span>
+                      {f.size ? <span style={metaStyle}>{f.size}</span> : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </DocFrame>
         );
       },
-
-      label: "檔案下載",
+      label: "附件下載",
     },
 
+    // ==========================================
+    // 相關連結（新增）
+    // ==========================================
+    RelatedLinks: {
+      fields: {
+        heading: { type: "text", label: "標題" },
+        items: {
+          type: "array",
+          label: "連結清單",
+          arrayFields: {
+            id: { type: "text", label: "項目 ID（唯一識別碼）" },
+            title: { type: "text", label: "連結名稱" },
+            url: { type: "text", label: "網址（http／https 開頭，或站內路徑）" },
+          },
+          getItemSummary: (item) => item.title || "未命名連結",
+        },
+      },
+      defaultProps: {
+        heading: "相關連結",
+        items: [{ id: "link-1", title: "經濟部產業發展署", url: "https://www.ida.gov.tw/" }],
+      },
+      render: ({ heading, items = [] }) => (
+        <DocFrame title={heading || "相關連結"} icon={<LinkTitleIcon />}>
+          {items.length === 0 ? (
+            <p style={{ margin: 0, fontSize: 15, color: "#666" }}>尚未新增連結。</p>
+          ) : (
+            <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+              {items.map((item, idx) => {
+                const href = safeUrl(item.url);
+                const external = href ? /^https?:\/\//i.test(href) : false;
+                return (
+                  <li key={item.id || idx} style={rowStyle(idx)}>
+                    <CaretIcon />
+                    {href ? (
+                      <a
+                        href={href}
+                        target={external ? "_blank" : undefined}
+                        rel={external ? "noopener noreferrer" : undefined}
+                        style={{ color: "#090909", textDecoration: "none", minWidth: 0, overflowWrap: "anywhere" }}
+                        title={external ? `${item.title}（另開視窗）` : item.title}
+                      >
+                        {item.title || href}
+                      </a>
+                    ) : (
+                      <span style={{ color: C.danger }}>{item.title || "未命名連結"}（網址無效）</span>
+                    )}
+                    {external ? <span style={metaStyle}>{hostOf(href)}</span> : null}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </DocFrame>
+      ),
+      label: "相關連結",
+    },
+
+    // ==========================================
+    // 聯絡資訊（新增）
+    // ==========================================
+    ContactInfo: {
+      fields: {
+        heading: { type: "text", label: "標題" },
+        name: { type: "text", label: "聯絡人" },
+        phone: { type: "text", label: "電話（分機用 # 隔開，例如 07-5503115#123）" },
+        email: { type: "text", label: "信箱" },
+      },
+      defaultProps: {
+        heading: "聯絡資訊",
+        name: "",
+        phone: "",
+        email: "",
+      },
+      render: ({ heading, name, phone, email }) => {
+        const dial = (phone ?? "").split("#")[0].replace(/[^0-9+]/g, "");
+        const mail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email ?? "").trim()) ? email.trim() : undefined;
+        const rows = [
+          name ? { label: "聯絡人：", content: <span>{name}</span> } : null,
+          phone ? { label: "電話：", content: dial ? <a href={`tel:${dial}`} style={{ color: C.blue, textDecoration: "none" }}>{phone}</a> : <span>{phone}</span> } : null,
+          email ? { label: "信箱：", content: mail ? <a href={`mailto:${mail}`} style={{ color: C.blue, textDecoration: "none" }}>{mail}</a> : <span>{email}</span> } : null,
+        ].filter(Boolean) as { label: string; content: ReactNode }[];
+
+        return (
+          <DocFrame title={heading || "聯絡資訊"} icon={<ContactTitleIcon />}>
+            {rows.length === 0 ? (
+              <p style={{ margin: 0, fontSize: 15, color: "#666" }}>尚未填寫聯絡資訊。</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 16 }}>
+                {rows.map((row) => (
+                  <div key={row.label} style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                    <span style={{ minWidth: 76, color: "#555" }}>{row.label}</span>
+                    {row.content}
+                  </div>
+                ))}
+              </div>
+            )}
+          </DocFrame>
+        );
+      },
+      label: "聯絡資訊",
+    },
   },
 };
-
