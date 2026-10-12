@@ -15,6 +15,12 @@ export const DemandTable = ({ demands, isLoading, onTogglePublish, onDelete }: D
 
   const columns: Column<Demand>[] = [
     {
+      key: 'number',
+      title: '編號',
+      className: 'font-mono text-xs whitespace-nowrap text-base-content/70',
+      render: (demand) => demand.number || '-',
+    },
+    {
       key: 'name',
       title: '需求名稱',
       render: (demand) => (

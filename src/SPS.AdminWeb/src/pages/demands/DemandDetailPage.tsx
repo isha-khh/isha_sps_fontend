@@ -82,6 +82,12 @@ export const DemandDetailPage = () => {
               <div className="flex items-center gap-2 text-sm text-base-content/70">
                 <span className="iconify lucide--calendar size-4" />
                 建立於 {formatDate(demand.createdAt)}
+                {demand.number && (
+                  <>
+                    <span className="iconify lucide--hash size-4 ml-3" />
+                    編號 <span className="font-mono select-all">{demand.number}</span>
+                  </>
+                )}
               </div>
             </div>
             <div>

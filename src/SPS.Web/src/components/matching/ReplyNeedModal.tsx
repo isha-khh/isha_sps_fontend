@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/auth-store";
 import Modal from "@/components/ui/Modal";
 import { demandRepliesApi } from "@/lib/api/demand-replies";
 
@@ -8,14 +9,25 @@ import { demandRepliesApi } from "@/lib/api/demand-replies";
  * 積木元件：需求詳情頁「我要回應」彈窗（取代原本寫進詢問單的「我要提案」彈窗），只有供應端企業會員開得起來。
  * 送出呼叫 `POST /api/Demand/{id}/replies`，存成「待審」；後台「需求回應」審核通過後才會寄信給刊登者與當下所有追蹤者，
  * 退回則寄信通知回應者。同一家供應業者對同一需求可以回應多次（不設上限）。
+2026-10-12：聯絡人姓名、信箱、電話自動帶入登入帳號的資料（可改）。
  * 彈窗上方明確提示收件對象與人數（`followerCount`，後端只對供應端會員提供），並要勾選「我了解」才能送出；聯絡資訊會一併寄出。
  *
  * 「送出」用 `<a>` 不是 `<button>`：見 `ProposeSolutionModal` 舊版與 `EnterpriseContactModal.tsx` 同一段說明（`.btn-theme` 只定義在 `a` 上）。
  */
 export default function ReplyNeedModal({ id, demandId, demandTitle, followerCount }: { id: string; demandId: string; demandTitle: string; followerCount: number | null }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  // 聯絡人姓名、信箱、電話預設帶入登入帳號的資料，使用者可以改成別的；沒改過（`null`）就跟著帳號資料，改過就以輸入的為準。
+  // 登入狀態用 `/api/Auth/session`（匿名也能呼叫，不會被導去登入頁）。
+  const sessionMember = useAuthStore((state) => state.member);
+  const checkSession = useAuthStore((state) => state.checkSession);
+  useEffect(() => {
+    void checkSession();
+  }, [checkSession]);
+  const [nameEdit, setName] = useState<string | null>(null);
+  const [emailEdit, setEmail] = useState<string | null>(null);
+  const [phoneEdit, setPhone] = useState<string | null>(null);
+  const name = nameEdit ?? sessionMember?.name ?? "";
+  const email = emailEdit ?? sessionMember?.email ?? "";
+  const phone = phoneEdit ?? sessionMember?.mobilePhone ?? sessionMember?.phone ?? "";
   const [content, setContent] = useState("");
   const [acknowledged, setAcknowledged] = useState(false);
   const [submitting, setSubmitting] = useState(false);

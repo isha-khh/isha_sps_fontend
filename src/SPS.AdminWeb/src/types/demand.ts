@@ -9,6 +9,8 @@ export interface DemandAttachment {
 
 export interface Demand {
   id: string;
+  /** 需求編號（例如 D20261012025236549），前台詳情頁也顯示；會員刊登的標題常常相同，靠編號分辨 */
+  number?: string;
   name: string;
   introduction?: string;
   /** 地點（前台列表與詳情顯示） */
