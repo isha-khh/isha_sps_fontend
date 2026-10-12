@@ -33,7 +33,7 @@ export default function ReplyNeedButton({ modalId }: { modalId: string }) {
 
   return (
     <>
-      <a href="javascript:void(0)" className="me_Publish more_x" aria-disabled="true" style={{ opacity: 0.5 }}>
+      <a href="javascript:void(0)" className="me_Publish more_x is-disabled" aria-disabled="true">
         <span>我要回應</span>
         <i className="bi bi-pencil-square" aria-hidden="true" />
       </a>

@@ -46,9 +46,8 @@ export default function PublishNeedButton({ modalId }: { modalId: string }) {
     <>
       <a
         href="javascript:void(0)"
-        className="me_Publish more_x"
-        aria-disabled="true"
-        style={role === "supplier" ? { opacity: 0.5 } : undefined}
+        className={`me_Publish more_x${role === "supplier" ? " is-disabled" : ""}`}
+        aria-disabled={role === "supplier" ? "true" : undefined}
         onClick={() => setNotice(message)}
       >
         <span>我要刊登</span>

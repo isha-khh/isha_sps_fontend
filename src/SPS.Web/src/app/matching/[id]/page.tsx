@@ -160,9 +160,11 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
             </>
           )}
 
-          <div className="dk_conbo mb-md-5 mb-4">
-            <RelatedNeeds id={`related-needs-${need.id}`} needs={relatedNeeds} />
-          </div>
+          {relatedNeeds.length > 0 && (
+            <div className="dk_conbo mb-md-5 mb-4">
+              <RelatedNeeds id={`related-needs-${need.id}`} needs={relatedNeeds} />
+            </div>
+          )}
 
           <MoreLink href="/matching" label="返回" title="返回" />
         </div>
