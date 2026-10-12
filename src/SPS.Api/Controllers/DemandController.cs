@@ -228,7 +228,7 @@ public class DemandController : ControllerBase
         => Ok(new { thresholdPercent = await _demandService.GetMatchThresholdPercentAsync() });
 
     /// <summary>
-    /// 會員從前台「我要刊登」送出需求。只有企業會員（Supplier／Buyer）可以；送出後是未發布狀態，
+    /// 會員從前台「我要刊登」送出需求。只有需求端企業會員（Buyer）可以；送出後是未發布狀態，
     /// 後台「需求張貼管理」審核（可以修改內容）後才上架。每個會員 24 小時內最多 5 筆。
     /// </summary>
     [HttpPost("submit")]
@@ -243,9 +243,10 @@ public class DemandController : ControllerBase
             return StatusCode(StatusCodes.Status403Forbidden, new { error = "僅會員可以刊登需求" });
         }
 
-        if (!User.IsInRole("Supplier") && !User.IsInRole("Buyer"))
+        // 媒合對接改版：刊登需求只開放需求端企業會員，供給端改為回應需求
+        if (!User.IsInRole("Buyer"))
         {
-            return StatusCode(StatusCodes.Status403Forbidden, new { error = "僅企業會員可以刊登需求" });
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "僅需求端企業會員可以刊登需求" });
         }
 
         var r = await _demandService.SubmitByMemberAsync(memberId, req, ct);
