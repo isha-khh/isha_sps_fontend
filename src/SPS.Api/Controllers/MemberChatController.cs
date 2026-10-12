@@ -25,9 +25,11 @@ public class MemberChatController : ControllerBase
     private readonly IHubContext<MemberHub> _hub;
     private readonly INotificationService _notificationService;
     private readonly IMemoryCache _cache;
+    private readonly IDirectChatService _direct;
 
-    public MemberChatController(IMemberChatService chatService, IHubContext<MemberHub> hub, INotificationService notificationService, IMemoryCache cache)
+    public MemberChatController(IMemberChatService chatService, IHubContext<MemberHub> hub, INotificationService notificationService, IMemoryCache cache, IDirectChatService direct)
     {
+        _direct = direct;
         _chatService = chatService;
         _hub = hub;
         _notificationService = notificationService;
@@ -48,7 +50,24 @@ public class MemberChatController : ControllerBase
     {
         var memberId = GetMemberId();
         var result = await _chatService.GetChatListForMemberAsync(memberId, ct);
-        return Ok(result);
+        // 補上需求名稱與封鎖狀態，並濾掉沒有綁定需求回應的舊會員對話
+        return Ok(await _direct.EnrichAsync(memberId, result, ct));
+    }
+
+    /// <summary>
+    /// 需求刊登者對「審核通過的回應」的回應者開啟對話（綁定那則回應；已經開過就回傳既有的）。
+    /// 只有刊登那筆需求的會員可以，其他情況（回應未通過、封鎖、一天開太多）會回 400
+    /// </summary>
+    [HttpPost("demand-reply/{replyId:int}")]
+    [SwaggerOperation(Summary = "對需求回應的回應者開啟對話")]
+    public async Task<ActionResult<ChatRecordDto>> OpenForReply(int replyId, CancellationToken ct)
+    {
+        var memberId = GetMemberId();
+        var opened = await _direct.OpenForReplyAsync(memberId, replyId, ct);
+        if (!opened.IsSuccess) return BadRequest(new { error = opened.Error });
+        var chats = await _direct.EnrichAsync(memberId, await _chatService.GetChatListForMemberAsync(memberId, ct), ct);
+        var chat = chats.FirstOrDefault(c => c.Id == opened.Data);
+        return chat == null ? NotFound() : Ok(chat);
     }
 
     [HttpGet("{chatRecordId:long}/messages")]
@@ -118,9 +137,9 @@ public class MemberChatController : ControllerBase
 
         var chat = (await _chatService.GetChatListForMemberAsync(memberId, ct)).FirstOrDefault(c => c.Id == chatRecordId);
         if (chat == null) return Forbid();
-        // 目前只開放會員與客服的對話（會員之間見 CreateChat 的說明）
-        if (chat.Type != 2) return StatusCode(StatusCodes.Status403Forbidden, new { error = "會員之間的訊息功能尚未開放" });
-        if (chat.Status == (short)ChatStatus.Closed) return BadRequest(new { error = "這個對話已經結束，請重新聯絡客服" });
+        // 規則集中在 IDirectChatService：對話是否結束、會員之間的對話是否綁定需求回應、有沒有被封鎖、對方帳號是否可用
+        var blocked = await _direct.CheckCanSendAsync(memberId, chatRecordId, ct);
+        if (blocked != null) return BadRequest(new { error = blocked });
 
         // 防洗版：每位會員每分鐘最多 MaxMessagesPerMinute 則
         var counter = _cache.GetOrCreate($"member-chat-rate:{memberId}", entry =>
@@ -132,11 +151,20 @@ public class MemberChatController : ControllerBase
             return StatusCode(StatusCodes.Status429TooManyRequests, new { error = "傳送太頻繁，請稍後再試" });
 
         var message = await _chatService.SaveMessageAsync(chatRecordId, memberId, null, text, ct);
-        ChatTypingState.Clear(_cache, chatRecordId, "member");
+        ChatTypingState.Clear(_cache, chatRecordId, chat.Type == 2 ? "member" : $"member:{memberId}");
 
-        // 即時通知客服：已領取的對話通知該客服，等待中的對話通知所有在線客服
-        var groups = new List<string> { $"member:{memberId}", "cs-agents" };
-        if (chat.TargetUserId.HasValue) groups.Add($"admin:{chat.TargetUserId.Value}");
+        // 即時通知：客服對話通知客服（已領取的通知該客服，等待中的通知所有在線客服）；會員之間的對話通知對方
+        var groups = new List<string> { $"member:{memberId}" };
+        if (chat.Type == 2)
+        {
+            groups.Add("cs-agents");
+            if (chat.TargetUserId.HasValue) groups.Add($"admin:{chat.TargetUserId.Value}");
+        }
+        else
+        {
+            var peer = await _direct.GetPeerMemberIdAsync(memberId, chatRecordId, ct);
+            if (peer.HasValue) groups.Add($"member:{peer.Value}");
+        }
         foreach (var group in groups.Distinct())
             await _hub.Clients.Group(group).SendAsync("ReceiveMessage", message, cancellationToken: ct);
 
@@ -144,34 +172,55 @@ public class MemberChatController : ControllerBase
     }
 
     /// <summary>
-    /// 會員回報「正在輸入」（前台輸入時每幾秒呼叫一次，見 <see cref="ChatTypingState"/>）：只通知客服那端，
-    /// 已領取的對話通知該客服，等待中的對話通知所有在線客服
+    /// 會員回報「正在輸入」（前台輸入時每幾秒呼叫一次，見 <see cref="ChatTypingState"/>）：客服對話只通知客服那端
+    /// （已領取的對話通知該客服，等待中的對話通知所有在線客服）；會員之間的對話只通知對方
     /// </summary>
     [HttpPost("{chatRecordId:long}/typing")]
     [SwaggerOperation(Summary = "回報正在輸入")]
     public async Task<IActionResult> Typing(long chatRecordId, CancellationToken ct)
     {
         var memberId = GetMemberId();
-        var chat = (await _chatService.GetChatListForMemberAsync(memberId, ct)).FirstOrDefault(c => c.Id == chatRecordId && c.Type == 2);
+        var chat = (await _chatService.GetChatListForMemberAsync(memberId, ct)).FirstOrDefault(c => c.Id == chatRecordId);
         if (chat == null || chat.Status == (short)ChatStatus.Closed) return NoContent();
 
-        ChatTypingState.Set(_cache, chatRecordId, "member");
-        var group = chat.TargetUserId.HasValue ? $"admin:{chat.TargetUserId.Value}" : "cs-agents";
-        await _hub.Clients.Group(group).SendAsync("UserTyping", new { chatRecordId, senderType = "member" }, cancellationToken: ct);
+        if (chat.Type == 2)
+        {
+            ChatTypingState.Set(_cache, chatRecordId, "member");
+            var group = chat.TargetUserId.HasValue ? $"admin:{chat.TargetUserId.Value}" : "cs-agents";
+            await _hub.Clients.Group(group).SendAsync("UserTyping", new { chatRecordId, senderType = "member" }, cancellationToken: ct);
+        }
+        else if (await _direct.CheckCanSendAsync(memberId, chatRecordId, ct) == null)
+        {
+            var peer = await _direct.GetPeerMemberIdAsync(memberId, chatRecordId, ct);
+            if (peer.HasValue)
+            {
+                ChatTypingState.Set(_cache, chatRecordId, $"member:{memberId}");
+                await _hub.Clients.Group($"member:{peer.Value}").SendAsync("UserTyping", new { chatRecordId, senderType = "member" }, cancellationToken: ct);
+            }
+        }
+
         return NoContent();
     }
 
-    /// <summary>客服是不是正在輸入（前台輪詢用，輸入狀態 5 秒內沒更新就當作停止）</summary>
+    /// <summary>
+    /// 對方是不是正在輸入（前台輪詢備援用，輸入狀態 5 秒內沒更新就當作停止）：客服對話是客服，會員之間的對話是另一位會員。
+    /// <c>agentTyping</c> 與 <c>peerTyping</c> 同值（前者是舊名稱）
+    /// </summary>
     [HttpGet("{chatRecordId:long}/typing")]
-    [SwaggerOperation(Summary = "查詢客服是否正在輸入")]
+    [SwaggerOperation(Summary = "查詢對方是否正在輸入")]
     public async Task<IActionResult> GetTyping(long chatRecordId, CancellationToken ct)
     {
         var memberId = GetMemberId();
         if (!await _chatService.IsParticipantAsync(chatRecordId, memberId, null, ct)) return Forbid();
-        return Ok(new { agentTyping = ChatTypingState.IsTyping(_cache, chatRecordId, "admin") });
+
+        var peer = await _direct.GetPeerMemberIdAsync(memberId, chatRecordId, ct);
+        var typing = peer.HasValue
+            ? ChatTypingState.IsTyping(_cache, chatRecordId, $"member:{peer.Value}")
+            : ChatTypingState.IsTyping(_cache, chatRecordId, "admin");
+        return Ok(new { agentTyping = typing, peerTyping = typing });
     }
 
-    /// <summary>把對話裡客服傳來的訊息標為已讀</summary>
+    /// <summary>把對話裡對方傳來的訊息標為已讀</summary>
     [HttpPost("{chatRecordId:long}/read")]
     [SwaggerOperation(Summary = "標記對話已讀")]
     public async Task<IActionResult> MarkRead(long chatRecordId, CancellationToken ct)
@@ -180,7 +229,35 @@ public class MemberChatController : ControllerBase
         if (!await _chatService.IsParticipantAsync(chatRecordId, memberId, null, ct)) return Forbid();
         await _chatService.MarkAsReadAsync(chatRecordId, memberId, null, ct);
         await _hub.Clients.Group($"member:{memberId}").SendAsync("MessagesRead", new { chatRecordId }, cancellationToken: ct);
+        var peer = await _direct.GetPeerMemberIdAsync(memberId, chatRecordId, ct);
+        if (peer.HasValue) await _hub.Clients.Group($"member:{peer.Value}").SendAsync("MessagesRead", new { chatRecordId }, cancellationToken: ct);
         return NoContent();
+    }
+
+    /// <summary>封鎖對話的另一方：雙方都不能再在這個對話傳訊息（已經存在的訊息保留），可以隨時解除</summary>
+    [HttpPost("{chatRecordId:long}/block")]
+    [SwaggerOperation(Summary = "封鎖對方")]
+    public async Task<IActionResult> Block(long chatRecordId, CancellationToken ct)
+    {
+        var r = await _direct.BlockAsync(GetMemberId(), chatRecordId, ct);
+        return r.IsSuccess ? NoContent() : BadRequest(new { error = r.Error });
+    }
+
+    [HttpDelete("{chatRecordId:long}/block")]
+    [SwaggerOperation(Summary = "解除封鎖")]
+    public async Task<IActionResult> Unblock(long chatRecordId, CancellationToken ct)
+    {
+        var r = await _direct.UnblockAsync(GetMemberId(), chatRecordId, ct);
+        return r.IsSuccess ? NoContent() : BadRequest(new { error = r.Error });
+    }
+
+    /// <summary>檢舉會員之間的對話：承辦人員平常看不到對話內容，檢舉後這個對話才開放給後台審閱</summary>
+    [HttpPost("{chatRecordId:long}/report")]
+    [SwaggerOperation(Summary = "檢舉對話")]
+    public async Task<IActionResult> Report(long chatRecordId, [FromBody] ReportChatRequest request, CancellationToken ct)
+    {
+        var r = await _direct.ReportAsync(GetMemberId(), chatRecordId, request, ct);
+        return r.IsSuccess ? Ok(new { message = "已收到您的檢舉，承辦人員會審閱這個對話" }) : BadRequest(new { error = r.Error });
     }
 
     [HttpGet("unread-count")]

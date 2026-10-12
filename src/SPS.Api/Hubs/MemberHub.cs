@@ -21,6 +21,7 @@ public class MemberHub : Hub
     private readonly ApplicationDbContext _db;
     private readonly ILogger<MemberHub> _logger;
     private readonly IMemoryCache _cache;
+    private readonly IDirectChatService _direct;
 
     public MemberHub(
         IMemberChatService chatService,
@@ -28,8 +29,10 @@ public class MemberHub : Hub
         INotificationService notificationService,
         ApplicationDbContext db,
         ILogger<MemberHub> logger,
-        IMemoryCache cache)
+        IMemoryCache cache,
+        IDirectChatService direct)
     {
+        _direct = direct;
         _cache = cache;
         _chatService = chatService;
         _redisService = redisService;
@@ -125,6 +128,15 @@ public class MemberHub : Hub
         else if (!await _chatService.IsParticipantAsync(chatRecordId, memberId, userId, CancellationToken.None))
         {
             throw new HubException("Not a participant of this chat.");
+        }
+
+        // 會員傳的訊息要符合同一套規則（對話是否結束、會員之間的對話是否綁定需求回應、封鎖、字數）；後台客服不受封鎖規則影響
+        if (memberId.HasValue)
+        {
+            text = text?.Trim() ?? string.Empty;
+            if (text.Length == 0 || text.Length > 1000) throw new HubException("訊息長度不正確");
+            var blocked = await _direct.CheckCanSendAsync(memberId.Value, chatRecordId, CancellationToken.None);
+            if (blocked != null) throw new HubException(blocked);
         }
 
         var msg = await _chatService.SaveMessageAsync(chatRecordId, memberId, userId, text, CancellationToken.None);

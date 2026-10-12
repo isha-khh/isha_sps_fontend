@@ -17,6 +17,11 @@ public class ChatRecord : BaseEntity<long>
     public Guid? TargetMemberId { get; set; }
     public Guid? TargetUserId { get; set; }
 
+    /// <summary>會員之間的對話（Type = 1）綁定的需求與已通過的回應；客服對話為空。對話只能從審核通過的回應由需求刊登者開啟</summary>
+    public int? DemandId { get; set; }
+
+    public int? DemandReplyId { get; set; }
+
     // Navigation properties
     public Company? InitiatorCompany { get; set; }
     public Company? TargetCompany { get; set; }

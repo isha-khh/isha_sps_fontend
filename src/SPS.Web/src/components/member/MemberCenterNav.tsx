@@ -47,11 +47,11 @@ export function getNavGroups(isEnterprise: boolean, role: MemberCenterRole = "")
  */
 export const MEMBER_CENTER_NAV_GROUPS: MemberCenterNavGroup[] = [
   {
-    // 收件匣：系統通知（回應審核結果、收到的回應、新需求媒合、客服回覆）；客服訊息：與平台客服的對話。所有會員都有
+    // 收件匣：系統通知（回應審核結果、收到的回應、新需求媒合、客服回覆）；對話訊息：與平台客服、以及需求刊登者與回應者之間的對話。所有會員都有
     groupLabel: "訊息",
     items: [
       { key: "inbox", label: "收件匣" },
-      { key: "chat", label: "客服訊息" },
+      { key: "chat", label: "對話訊息" },
     ],
   },
   {

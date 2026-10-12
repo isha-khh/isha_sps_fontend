@@ -13,5 +13,11 @@ public enum MemberNotificationType
     DemandMatched = 3,
 
     /// <summary>承辦人員對詢問單的回覆</summary>
-    InquiryReplied = 4
+    InquiryReplied = 4,
+
+    /// <summary>需求刊登者對您通過審核的回應開啟了對話</summary>
+    ChatOpened = 5,
+
+    /// <summary>您檢舉的對話，承辦人員已處理</summary>
+    ChatReportHandled = 6
 }

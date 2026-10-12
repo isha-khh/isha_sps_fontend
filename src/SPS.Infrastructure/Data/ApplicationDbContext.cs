@@ -62,6 +62,8 @@ public class ApplicationDbContext : DbContext
     // Chat & File Entities
     public DbSet<ChatRecord> ChatRecords { get; set; } = null!;
     public DbSet<Messages> Messages { get; set; } = null!;
+    public DbSet<MemberBlock> MemberBlocks { get; set; } = null!;
+    public DbSet<ChatReport> ChatReports { get; set; } = null!;
     public DbSet<SPS.Domain.Entities.File> Files { get; set; } = null!;
     public DbSet<Document> Documents { get; set; } = null!;
     public DbSet<Scoring> Scorings { get; set; } = null!;

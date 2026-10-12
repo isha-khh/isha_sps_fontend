@@ -44,7 +44,24 @@ export interface MemberDemand {
   createdTime: string;
 }
 
+/** 自己刊登的需求收到的、審核通過的供應業者回應（可以對回應者開啟對話） */
+export interface ReceivedReply {
+  replyId: number;
+  demandId: number;
+  companyName?: string | null;
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string | null;
+  content: string;
+  receivedTime: string;
+  /** 已經開啟的對話 */
+  chatRecordId?: number | null;
+}
+
 export const memberFavoritesApi = {
+  async getReceivedReplies(demandId: number): Promise<ReceivedReply[]> {
+    return (await apiClient.get<ReceivedReply[]>(`/api/member/demands/${demandId}/replies`)).data;
+  },
   async getFavorites(): Promise<MemberFavorites> {
     return (await apiClient.get<MemberFavorites>("/api/member/favorites")).data;
   },

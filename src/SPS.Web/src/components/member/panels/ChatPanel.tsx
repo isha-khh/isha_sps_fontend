@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { memberChatApi } from "@/lib/api/member-chat";
 import { connectChatHub, type ChatHubState } from "@/lib/chat-hub";
 import { getApiErrorMessage } from "@/lib/error-utils";
+import { useAuthStore } from "@/store/auth-store";
 import type { ChatRecordDto, MessageDto } from "@/types/member-chat";
 
 const MAX_LENGTH = 1000;
@@ -18,46 +20,88 @@ const TYPING_SHOW_MS = 5000;
 
 const STATUS_WAITING = 0;
 const STATUS_CLOSED = 2;
+const TYPE_MEMBER = 1;
+const TYPE_CUSTOMER_SERVICE = 2;
+
+const REPORT_REASONS = [
+  { value: 1, label: "騷擾或不當言論" },
+  { value: 2, label: "廣告或垃圾訊息" },
+  { value: 3, label: "詐騙或可疑" },
+  { value: 4, label: "其他" },
+];
 
 function formatTime(iso: string) {
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? iso : date.toLocaleString("zh-TW", { hour12: false, month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+function activityTime(chat: ChatRecordDto) {
+  return chat.lastMessage?.createdTime ?? chat.createdTime;
+}
+
+/** 會員之間的對話：對方的名稱（公司加姓名）；客服對話：「平台客服」 */
+function chatTitle(chat: ChatRecordDto, myId?: string) {
+  if (chat.type === TYPE_CUSTOMER_SERVICE) return "平台客服";
+  const iAmInitiator = chat.initiatorMemberId === myId;
+  const name = (iAmInitiator ? chat.targetMemberName : chat.initiatorMemberName) ?? "會員";
+  const company = iAmInitiator ? chat.targetCompanyName : chat.initiatorCompanyName;
+  return company ? `${company} ${name}` : name;
+}
+
 function statusText(chat: ChatRecordDto) {
   if (chat.status === STATUS_CLOSED) return "對話已結束";
+  if (chat.type === TYPE_MEMBER) return chat.demandName ? `需求：${chat.demandName}` : "會員對話";
   if (chat.status === STATUS_WAITING) return "等待客服接手";
   return chat.agentName ? `由 ${chat.agentName} 為您服務` : "客服服務中";
 }
 
+/** 這個對話目前能不能傳訊息，不能的話回傳要顯示的原因 */
+function sendBlockedReason(chat: ChatRecordDto): string | null {
+  if (chat.status === STATUS_CLOSED) return chat.type === TYPE_CUSTOMER_SERVICE ? "這個對話已經結束。如果還有問題，請按「聯絡客服」。" : "這個對話已經結束，無法再傳送訊息。";
+  if (chat.type === TYPE_MEMBER && chat.sendBlocked) return chat.blockedByMe ? "您已封鎖對方，解除封鎖後才能傳送訊息。" : "目前無法傳送訊息給對方。";
+  return null;
+}
+
 /**
- * 積木元件：會員中心「客服訊息」面板——會員與平台客服的對話（`api/member-chat`，會員之間的對話目前不開放）。
- * 按「聯絡客服」會建立一個等待中的對話並通知客服（已經有進行中的就直接打開），客服在後台領取後開始回覆；也可以先留言。
- * 傳訊息、回報輸入、標已讀走 HTTP；**接收**用即時連線（SignalR，見 `lib/chat-hub.ts`），客服的回覆與「客服正在輸入」立刻出現。
+ * 積木元件：會員中心「客服訊息」面板——會員與平台客服的對話，以及會員之間針對「審核通過的需求回應」的對話。
+ * 客服對話：按「聯絡客服」建立等待中的對話並通知客服（已經有進行中的就直接打開），客服在後台領取後回覆，也可以先留言。
+ * 會員之間的對話：只能由需求刊登者從「媒合資料維護」收到的回應開啟，綁定那筆需求；任一方可以封鎖對方（雙方都不能再傳訊息、可解除）
+ * 或檢舉對話（平常平台看不到會員之間的對話內容，只有被檢舉的才開放給承辦人員審閱）。
+ * 傳訊息、回報輸入、標已讀、封鎖與檢舉走 HTTP；**接收**用即時連線（SignalR，見 `lib/chat-hub.ts`），對方的回覆與「正在輸入」立刻出現。
  * 即時連線沒連上（代理不通、斷線重連中）時自動退回輪詢當備援（對話打開時每 5 秒、輸入提示每 2.5 秒、對話列表每 15 秒，分頁在背景時暫停），
- * 連上之後輪詢放慢成保險用。客服傳來的訊息打開後會自動標為已讀（頁首的未讀數跟著更新）。訊息內容是純文字，不當 HTML 輸出。
+ * 連上之後輪詢放慢成保險。對方傳來的訊息打開後會自動標為已讀（頁首的未讀數跟著更新）。訊息內容是純文字，不當 HTML 輸出。
+ * 網址 `?section=chat&chat=123` 可以直接打開指定的對話（通知裡的連結用）。
  */
 export default function ChatPanel() {
+  const myId = useAuthStore((state) => state.member?.id);
+  const paramChatId = Number(useSearchParams().get("chat")) || null;
+
   const [chats, setChats] = useState<ChatRecordDto[]>();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [thread, setThread] = useState<{ chatId: number; items: MessageDto[] } | null>(null);
   const [text, setText] = useState("");
   const [error, setError] = useState<string>();
+  const [notice, setNotice] = useState<string>();
   const [busy, setBusy] = useState(false);
-  // 客服是不是正在輸入：記下是哪個對話，換對話時不會殘留
-  const [agentTyping, setAgentTyping] = useState<number | null>(null);
+  // 對方是不是正在輸入：記下是哪個對話，換對話時不會殘留
+  const [peerTypingChatId, setPeerTypingChatId] = useState<number | null>(null);
   const [hubState, setHubState] = useState<ChatHubState>("connecting");
+  const [reporting, setReporting] = useState(false);
+  const [reportReason, setReportReason] = useState(1);
+  const [reportDetail, setReportDetail] = useState("");
   const connected = hubState === "connected";
   const lastTypingReportRef = useRef(0);
   const typingClearTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 只顯示會員與客服的對話，最新的在前
-  const customerServiceChats = (chats ?? []).filter((chat) => chat.type === 2).sort((a, b) => (a.createdTime < b.createdTime ? 1 : -1));
-  const currentId = selectedId ?? customerServiceChats[0]?.id ?? null;
-  const current = customerServiceChats.find((chat) => chat.id === currentId);
-  const isOpen = current != null && current.status !== STATUS_CLOSED;
-  const hasOpenChat = customerServiceChats.some((chat) => chat.status !== STATUS_CLOSED);
+  // 最近有動靜的對話在前
+  const sortedChats = [...(chats ?? [])].sort((a, b) => (activityTime(a) < activityTime(b) ? 1 : -1));
+  const currentId = selectedId ?? (paramChatId && sortedChats.some((chat) => chat.id === paramChatId) ? paramChatId : null) ?? sortedChats[0]?.id ?? null;
+  const current = sortedChats.find((chat) => chat.id === currentId);
+  const blockedReason = current ? sendBlockedReason(current) : null;
+  const canSend = current != null && blockedReason == null;
+  const pollable = current != null && current.status !== STATUS_CLOSED;
+  const hasOpenCustomerServiceChat = sortedChats.some((chat) => chat.type === TYPE_CUSTOMER_SERVICE && chat.status !== STATUS_CLOSED);
   const messages = thread && thread.chatId === currentId ? thread.items : [];
 
   const loadChats = useCallback(() => {
@@ -67,7 +111,7 @@ export default function ChatPanel() {
         setChats(data);
         setError(undefined);
       })
-      .catch((err) => setError(getApiErrorMessage(err, "載入客服對話失敗")));
+      .catch((err) => setError(getApiErrorMessage(err, "載入對話失敗")));
   }, []);
 
   // 對話列表：載入一次，之後定時更新（狀態變化、未讀數）；即時連線連著時放慢
@@ -83,7 +127,9 @@ export default function ChatPanel() {
       .getMessages(chatId)
       .then((items) => {
         setThread({ chatId, items });
-        if (items.some((m) => m.senderType === "admin" && !m.isRead)) void memberChatApi.markRead(chatId).catch(() => {});
+        const myIdNow = useAuthStore.getState().member?.id;
+        // 對方傳來還沒讀的訊息標為已讀（客服訊息的 senderType 是 admin；會員之間用傳送者是不是我判斷）
+        if (items.some((m) => !m.isRead && (m.senderType === "admin" || (m.senderMemberId != null && m.senderMemberId !== myIdNow)))) void memberChatApi.markRead(chatId).catch(() => {});
       })
       .catch(() => {});
   }, []);
@@ -96,10 +142,10 @@ export default function ChatPanel() {
     return () => window.clearInterval(timer);
   }, [currentId, connected, loadMessages]);
 
-  // 即時連線：收到客服的訊息、正在輸入與對話狀態變動。處理函式要用到最新的 currentId／isOpen，所以放在 ref 裡，連線本身只建立一次
-  const latestRef = useRef({ currentId, isOpen, loadChats, loadMessages });
+  // 即時連線：收到對方的訊息、正在輸入與對話狀態變動。處理函式要用到最新的 currentId，所以放在 ref 裡，連線本身只建立一次
+  const latestRef = useRef({ currentId, loadChats, loadMessages });
   useEffect(() => {
-    latestRef.current = { currentId, isOpen, loadChats, loadMessages };
+    latestRef.current = { currentId, loadChats, loadMessages };
   });
   useEffect(() => {
     const disconnect = connectChatHub({
@@ -116,16 +162,16 @@ export default function ChatPanel() {
         if (message.chatRecordId === openId) {
           // 自己送出的訊息也會回音一次，用訊息 Id 去重
           setThread((prev) => (prev && prev.chatId === openId && !prev.items.some((m) => m.id === message.id) ? { chatId: openId, items: [...prev.items, message] } : prev));
-          if (message.senderType === "admin" && !document.hidden) void memberChatApi.markRead(openId).catch(() => {});
+          if (!document.hidden && message.senderMemberId !== useAuthStore.getState().member?.id) void memberChatApi.markRead(openId).catch(() => {});
         }
-        if (message.senderType === "admin") setAgentTyping(null);
+        setPeerTypingChatId((prev) => (prev === message.chatRecordId ? null : prev));
         reloadChats();
       },
-      onTyping: (chatRecordId, senderType) => {
-        if (senderType !== "admin") return;
-        setAgentTyping(chatRecordId);
+      // 伺服器只會把「對方」輸入的事件傳給我（不會傳回給輸入的人自己）
+      onTyping: (chatRecordId) => {
+        setPeerTypingChatId(chatRecordId);
         clearTimeout(typingClearTimerRef.current);
-        typingClearTimerRef.current = setTimeout(() => setAgentTyping((prev) => (prev === chatRecordId ? null : prev)), TYPING_SHOW_MS);
+        typingClearTimerRef.current = setTimeout(() => setPeerTypingChatId((prev) => (prev === chatRecordId ? null : prev)), TYPING_SHOW_MS);
       },
       onChatChanged: () => latestRef.current.loadChats(),
     });
@@ -135,15 +181,15 @@ export default function ChatPanel() {
     };
   }, []);
 
-  // 客服正在輸入：即時連線沒連上時，對話還在進行中就每 2.5 秒問一次（分頁在背景時暫停）；連上時由即時事件通知，不用問
+  // 對方正在輸入：即時連線沒連上時，對話還在進行中就每 2.5 秒問一次（分頁在背景時暫停）；連上時由即時事件通知，不用問
   useEffect(() => {
-    if (currentId == null || !isOpen || connected) return;
+    if (currentId == null || !pollable || connected) return;
     let active = true;
     const load = () => {
       if (document.hidden) return;
       memberChatApi
-        .getAgentTyping(currentId)
-        .then((typing) => active && setAgentTyping(typing ? currentId : null))
+        .getPeerTyping(currentId)
+        .then((typing) => active && setPeerTypingChatId(typing ? currentId : null))
         .catch(() => {});
     };
     load();
@@ -152,7 +198,7 @@ export default function ChatPanel() {
       active = false;
       window.clearInterval(timer);
     };
-  }, [currentId, isOpen, connected]);
+  }, [currentId, pollable, connected]);
 
   // 有新訊息就捲到最底
   useEffect(() => {
@@ -160,7 +206,7 @@ export default function ChatPanel() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length, currentId]);
 
-  async function startChat() {
+  async function startCustomerServiceChat() {
     if (busy) return;
     setBusy(true);
     setError(undefined);
@@ -177,7 +223,7 @@ export default function ChatPanel() {
 
   async function send() {
     const content = text.trim();
-    if (busy || !content || currentId == null || !isOpen) return;
+    if (busy || !content || currentId == null || !canSend) return;
     setBusy(true);
     setError(undefined);
     try {
@@ -190,15 +236,16 @@ export default function ChatPanel() {
       setText("");
     } catch (err) {
       setError(getApiErrorMessage(err, "傳送失敗，請稍後再試"));
+      loadChats();
     } finally {
       setBusy(false);
     }
   }
 
-  // 輸入時回報給客服（每 3 秒最多一次），客服那端會顯示「會員正在輸入」
+  // 輸入時回報給對方（每 3 秒最多一次）
   function onTextChange(value: string) {
     setText(value);
-    if (!value.trim() || currentId == null || !isOpen) return;
+    if (!value.trim() || currentId == null || !canSend) return;
     const now = Date.now();
     if (now - lastTypingReportRef.current < TYPING_REPORT_MS) return;
     lastTypingReportRef.current = now;
@@ -213,6 +260,38 @@ export default function ChatPanel() {
     }
   }
 
+  async function toggleBlock() {
+    if (!current || busy) return;
+    if (!current.blockedByMe && !window.confirm("封鎖對方後，雙方都不能再在這個對話傳訊息（已有的訊息會保留），之後可以解除封鎖。確定要封鎖嗎？")) return;
+    setBusy(true);
+    setError(undefined);
+    setNotice(undefined);
+    try {
+      await (current.blockedByMe ? memberChatApi.unblock(current.id) : memberChatApi.block(current.id));
+      loadChats();
+    } catch (err) {
+      setError(getApiErrorMessage(err, "操作失敗，請稍後再試"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitReport() {
+    if (!current || busy) return;
+    setBusy(true);
+    setError(undefined);
+    try {
+      await memberChatApi.report(current.id, { reason: reportReason, detail: reportDetail.trim() || undefined });
+      setReporting(false);
+      setReportDetail("");
+      setNotice("已收到您的檢舉，承辦人員會審閱這個對話。");
+    } catch (err) {
+      setError(getApiErrorMessage(err, "檢舉失敗，請稍後再試"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!chats && !error) return <p className="text-muted">載入中…</p>;
 
   return (
@@ -223,96 +302,157 @@ export default function ChatPanel() {
           {error}
         </p>
       )}
+      {notice && (
+        <p className="text-success" role="status">
+          {notice}
+        </p>
+      )}
 
-      {chats && customerServiceChats.length === 0 && (
+      {chats && sortedChats.length === 0 && (
         <div>
           <p>有問題想詢問平台客服嗎？按下「聯絡客服」會通知客服，客服接手後會在這裡回覆您，也可以先留言。</p>
-          <button type="button" className="tier-submit-btn" disabled={busy} onClick={() => void startChat()}>
+          <p className="small text-muted">需求刊登者也可以到「媒合資料維護」，對審核通過的回應者開啟對話，對話會出現在這裡。</p>
+          <button type="button" className="tier-submit-btn" disabled={busy} onClick={() => void startCustomerServiceChat()}>
             {busy ? "處理中…" : "聯絡客服"}
           </button>
         </div>
       )}
 
-      {current && (
-        <>
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <div className="d-flex align-items-center gap-2 flex-wrap">
-              {customerServiceChats.length > 1 ? (
-                <select className="form-select form-select-sm" style={{ width: "auto" }} value={currentId ?? ""} onChange={(event) => setSelectedId(Number(event.target.value))} aria-label="選擇對話">
-                  {customerServiceChats.map((chat) => (
-                    <option key={chat.id} value={chat.id}>
-                      {formatTime(chat.createdTime)} 的對話{chat.unreadCount > 0 ? `（${chat.unreadCount} 則未讀）` : ""}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <strong>{formatTime(current.createdTime)} 的對話</strong>
-              )}
-              <span className="badge-tag">{statusText(current)}</span>
+      {chats && sortedChats.length > 0 && (
+        <div className="d-flex flex-wrap gap-3">
+          <div style={{ flex: "0 0 240px", minWidth: 200 }}>
+            <div className="d-grid gap-2 mb-2">
+              {sortedChats.map((chat) => (
+                <button
+                  key={chat.id}
+                  type="button"
+                  className="text-start border rounded p-2"
+                  style={{ background: chat.id === currentId ? "#eaf2ff" : "#fff", borderColor: chat.id === currentId ? "#0052cc" : undefined }}
+                  onClick={() => {
+                    setSelectedId(chat.id);
+                    setReporting(false);
+                    setNotice(undefined);
+                  }}
+                >
+                  <div className="d-flex justify-content-between align-items-start gap-2">
+                    <strong className="small">{chatTitle(chat, myId)}</strong>
+                    {chat.unreadCount > 0 && <span className="badge rounded-pill bg-danger">{chat.unreadCount}</span>}
+                  </div>
+                  <div className="small text-muted">{statusText(chat)}</div>
+                  {chat.lastMessage?.text && (
+                    <div className="small text-muted" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {chat.lastMessage.text}
+                    </div>
+                  )}
+                </button>
+              ))}
             </div>
-            {!hasOpenChat && (
-              <button type="button" className="tier-reset-btn" disabled={busy} onClick={() => void startChat()}>
-                重新聯絡客服
+            {!hasOpenCustomerServiceChat && (
+              <button type="button" className="tier-reset-btn" disabled={busy} onClick={() => void startCustomerServiceChat()}>
+                聯絡客服
               </button>
             )}
           </div>
 
-          <div ref={scrollRef} className="border rounded p-3 mb-3" style={{ height: 360, overflowY: "auto", background: "#f7f9fc" }} aria-live="polite">
-            {messages.length === 0 ? (
-              <p className="text-muted mb-0">{isOpen ? "還沒有訊息，請在下方輸入您的問題。" : "這個對話沒有訊息。"}</p>
-            ) : (
-              messages.map((message) => {
-                const mine = message.senderType === "member";
-                return (
-                  <div key={message.id} className={`d-flex mb-3 ${mine ? "justify-content-end" : "justify-content-start"}`}>
-                    <div style={{ maxWidth: "75%" }}>
-                      <div className="small text-muted mb-1" style={{ textAlign: mine ? "right" : "left" }}>
-                        {mine ? "我" : message.senderUserName || "客服"}　{formatTime(message.createdTime)}
-                      </div>
-                      <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", padding: "8px 12px", borderRadius: 12, background: mine ? "#0052cc" : "#fff", color: mine ? "#fff" : "#1a1a1a", border: mine ? "none" : "1px solid #d9dee3" }}>
-                        {message.text}
-                      </div>
-                    </div>
+          {current && (
+            <div style={{ flex: "1 1 320px", minWidth: 0 }}>
+              <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                  <strong>{chatTitle(current, myId)}</strong>
+                  <span className="badge-tag ms-2">{statusText(current)}</span>
+                </div>
+                {current.type === TYPE_MEMBER && (
+                  <div className="d-flex gap-2">
+                    <button type="button" className="tier-reset-btn" disabled={busy} onClick={() => void toggleBlock()}>
+                      {current.blockedByMe ? "解除封鎖" : "封鎖"}
+                    </button>
+                    <button type="button" className="tier-reset-btn" disabled={busy} onClick={() => setReporting((prev) => !prev)}>
+                      檢舉
+                    </button>
                   </div>
-                );
-              })
-            )}
-          </div>
-
-          {isOpen && agentTyping === currentId && (
-            <p className="small text-muted mb-2" aria-live="polite">
-              <i className="bi bi-three-dots me-1" aria-hidden="true"></i>
-              客服正在輸入…
-            </p>
-          )}
-
-          {current.status === STATUS_WAITING && <p className="small text-muted">已通知客服，客服接手後會在這裡回覆，您也可以先留言。這個頁面會自動更新，不需要重新整理。</p>}
-
-          {isOpen ? (
-            <div>
-              <textarea
-                className="form-control mb-2"
-                rows={3}
-                maxLength={MAX_LENGTH}
-                placeholder="輸入訊息（Enter 送出，Shift+Enter 換行）"
-                value={text}
-                onChange={(event) => onTextChange(event.target.value)}
-                onKeyDown={onKeyDown}
-                aria-label="訊息內容"
-              />
-              <div className="d-flex justify-content-between align-items-center">
-                <span className="small text-muted">
-                  {text.length} / {MAX_LENGTH}
-                </span>
-                <button type="button" className="tier-submit-btn" disabled={busy || !text.trim()} onClick={() => void send()}>
-                  {busy ? "傳送中…" : "送出"}
-                </button>
+                )}
               </div>
+
+              {reporting && (
+                <div className="border rounded p-3 mb-3" style={{ background: "#fff8f0" }}>
+                  <p className="small mb-2">檢舉後，承辦人員會審閱這個對話的內容（平常平台看不到會員之間的對話）。</p>
+                  <select className="form-select form-select-sm mb-2" value={reportReason} onChange={(event) => setReportReason(Number(event.target.value))} aria-label="檢舉原因">
+                    {REPORT_REASONS.map((reason) => (
+                      <option key={reason.value} value={reason.value}>
+                        {reason.label}
+                      </option>
+                    ))}
+                  </select>
+                  <textarea className="form-control mb-2" rows={2} maxLength={1000} placeholder="補充說明（選填）" value={reportDetail} onChange={(event) => setReportDetail(event.target.value)} aria-label="檢舉說明" />
+                  <div className="d-flex gap-2">
+                    <button type="button" className="tier-submit-btn" disabled={busy} onClick={() => void submitReport()}>
+                      送出檢舉
+                    </button>
+                    <button type="button" className="tier-reset-btn" onClick={() => setReporting(false)}>
+                      取消
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div ref={scrollRef} className="border rounded p-3 mb-3" style={{ height: 360, overflowY: "auto", background: "#f7f9fc" }} aria-live="polite">
+                {messages.length === 0 ? (
+                  <p className="text-muted mb-0">{canSend ? "還沒有訊息，請在下方輸入。" : "這個對話沒有訊息。"}</p>
+                ) : (
+                  messages.map((message) => {
+                    const mine = message.senderType === "member" && message.senderMemberId === myId;
+                    return (
+                      <div key={message.id} className={`d-flex mb-3 ${mine ? "justify-content-end" : "justify-content-start"}`}>
+                        <div style={{ maxWidth: "75%" }}>
+                          <div className="small text-muted mb-1" style={{ textAlign: mine ? "right" : "left" }}>
+                            {mine ? "我" : message.senderUserName || message.senderMemberName || "對方"}　{formatTime(message.createdTime)}
+                          </div>
+                          <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", padding: "8px 12px", borderRadius: 12, background: mine ? "#0052cc" : "#fff", color: mine ? "#fff" : "#1a1a1a", border: mine ? "none" : "1px solid #d9dee3" }}>
+                            {message.text}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {pollable && peerTypingChatId === currentId && (
+                <p className="small text-muted mb-2" aria-live="polite">
+                  <i className="bi bi-three-dots me-1" aria-hidden="true"></i>
+                  {current.type === TYPE_CUSTOMER_SERVICE ? "客服" : "對方"}正在輸入…
+                </p>
+              )}
+
+              {current.type === TYPE_CUSTOMER_SERVICE && current.status === STATUS_WAITING && <p className="small text-muted">已通知客服，客服接手後會在這裡回覆，您也可以先留言。這個頁面會自動更新，不需要重新整理。</p>}
+
+              {canSend ? (
+                <div>
+                  <textarea
+                    className="form-control mb-2"
+                    rows={3}
+                    maxLength={MAX_LENGTH}
+                    placeholder="輸入訊息（Enter 送出，Shift+Enter 換行）"
+                    value={text}
+                    onChange={(event) => onTextChange(event.target.value)}
+                    onKeyDown={onKeyDown}
+                    aria-label="訊息內容"
+                  />
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span className="small text-muted">
+                      {text.length} / {MAX_LENGTH}
+                    </span>
+                    <button type="button" className="tier-submit-btn" disabled={busy || !text.trim()} onClick={() => void send()}>
+                      {busy ? "傳送中…" : "送出"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-muted">{blockedReason}</p>
+              )}
             </div>
-          ) : (
-            <p className="text-muted">這個對話已經結束。如果還有問題，請按「重新聯絡客服」。</p>
           )}
-        </>
+        </div>
       )}
     </div>
   );

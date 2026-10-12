@@ -12,6 +12,8 @@ const TYPE_LABEL: Record<MemberNotificationType, string> = {
   ReplyReceived: "收到的回應",
   DemandMatched: "需求媒合",
   InquiryReplied: "客服回覆",
+  ChatOpened: "新對話",
+  ChatReportHandled: "檢舉處理",
 };
 
 function formatDateTime(iso: string) {

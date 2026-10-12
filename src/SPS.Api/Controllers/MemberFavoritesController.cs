@@ -19,9 +19,11 @@ public class MemberFavoritesController : ControllerBase
     private readonly IMemberFavoriteService _favorites;
     private readonly IDemandService _demands;
     private readonly IDemandReplyService _replies;
+    private readonly IDirectChatService _direct;
 
-    public MemberFavoritesController(IMemberFavoriteService favorites, IDemandService demands, IDemandReplyService replies)
+    public MemberFavoritesController(IMemberFavoriteService favorites, IDemandService demands, IDemandReplyService replies, IDirectChatService direct)
     {
+        _direct = direct;
         _favorites = favorites;
         _demands = demands;
         _replies = replies;
@@ -129,6 +131,18 @@ public class MemberFavoritesController : ControllerBase
         if (memberId == null) return Unauthorized(new { error = "Invalid token" });
         var r = await _demands.GetMemberDemandsAsync(memberId.Value, ct);
         return r.IsSuccess ? Ok(r.Data) : BadRequest(new { error = r.Error });
+    }
+
+    /// <summary>自己刊登的某筆需求收到的、審核通過的供應業者回應，可以從這裡對回應者開啟對話</summary>
+    [HttpGet("demands/{id:int}/replies")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<SPS.Application.DTOs.Chat.ReceivedReplyDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetReceivedReplies(int id, CancellationToken ct)
+    {
+        var memberId = GetMemberId();
+        if (memberId == null) return Unauthorized(new { error = "Invalid token" });
+        var r = await _direct.GetReceivedRepliesAsync(memberId.Value, id, ct);
+        return r.IsSuccess ? Ok(r.Data) : NotFound(new { error = r.Error });
     }
 
     /// <summary>修改自己刊登、還沒上架的需求（已上架的要聯絡承辦單位）</summary>

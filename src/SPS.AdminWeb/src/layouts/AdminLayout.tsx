@@ -62,6 +62,13 @@ const allMenuItems: MenuItemWithPermission[] = [
     permissions: [Permission.ManageDemands],
   },
   {
+    id: 'chat-reports',
+    label: '會員檢舉',
+    icon: 'lucide--shield-alert',
+    url: '/chat-reports',
+    permissions: [Permission.CustomerService],
+  },
+  {
     id: 'demand-replies',
     label: '需求回應',
     icon: 'lucide--messages-square',

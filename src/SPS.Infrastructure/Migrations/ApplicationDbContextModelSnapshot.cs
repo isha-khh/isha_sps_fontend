@@ -857,6 +857,12 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<short>("DataMode")
                         .HasColumnType("smallint");
 
+                    b.Property<int?>("DemandId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("DemandReplyId")
+                        .HasColumnType("integer");
+
                     b.Property<Guid?>("InitiatorCompanyId")
                         .HasColumnType("uuid");
 
@@ -892,6 +898,8 @@ namespace SPS.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DemandReplyId");
+
                     b.HasIndex("InitiatorCompanyId");
 
                     b.HasIndex("InitiatorMemberId");
@@ -905,6 +913,56 @@ namespace SPS.Infrastructure.Migrations
                     b.HasIndex("TargetUserId");
 
                     b.ToTable("ChatRecord", (string)null);
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.ChatReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("ChatRecordId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Detail")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("HandledByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("HandledTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("HandlerNote")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Reason")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ReportedMemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ReporterMemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatRecordId");
+
+                    b.HasIndex("Status", "CreatedTime");
+
+                    b.ToTable("ChatReports");
                 });
 
             modelBuilder.Entity("SPS.Domain.Entities.Company", b =>
@@ -2269,6 +2327,24 @@ namespace SPS.Infrastructure.Migrations
                     b.HasIndex("UnifiedSocialCreditCode");
 
                     b.ToTable("MemberApplication", (string)null);
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.MemberBlock", b =>
+                {
+                    b.Property<Guid>("BlockerMemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BlockedMemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("BlockerMemberId", "BlockedMemberId");
+
+                    b.HasIndex("BlockedMemberId");
+
+                    b.ToTable("MemberBlocks");
                 });
 
             modelBuilder.Entity("SPS.Domain.Entities.MemberDemand", b =>

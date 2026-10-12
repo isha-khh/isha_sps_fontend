@@ -17,6 +17,20 @@ export const memberChatApi = {
   async createCustomerServiceChat(): Promise<ChatRecordDto> {
     return (await apiClient.post<ChatRecordDto>("/api/member-chat/create-admin")).data;
   },
+  /** 需求刊登者對「審核通過的回應」的回應者開啟對話（已經有就回傳既有的） */
+  async openDemandChat(replyId: number): Promise<ChatRecordDto> {
+    return (await apiClient.post<ChatRecordDto>(`/api/member-chat/demand-reply/${replyId}`)).data;
+  },
+  async block(chatRecordId: number): Promise<void> {
+    await apiClient.post(`/api/member-chat/${chatRecordId}/block`);
+  },
+  async unblock(chatRecordId: number): Promise<void> {
+    await apiClient.delete(`/api/member-chat/${chatRecordId}/block`);
+  },
+  /** 檢舉會員之間的對話；reason：1 騷擾或不當言論、2 廣告或垃圾訊息、3 詐騙或可疑、4 其他 */
+  async report(chatRecordId: number, request: { reason: number; detail?: string }): Promise<void> {
+    await apiClient.post(`/api/member-chat/${chatRecordId}/report`, request);
+  },
   async sendMessage(chatRecordId: number, text: string): Promise<MessageDto> {
     return (await apiClient.post<MessageDto>(`/api/member-chat/${chatRecordId}/messages`, { text })).data;
   },
@@ -24,9 +38,9 @@ export const memberChatApi = {
   async sendTyping(chatRecordId: number): Promise<void> {
     await apiClient.post(`/api/member-chat/${chatRecordId}/typing`);
   },
-  /** 客服是不是正在輸入（輸入狀態 5 秒內沒更新就當作停止） */
-  async getAgentTyping(chatRecordId: number): Promise<boolean> {
-    return (await apiClient.get<{ agentTyping: boolean }>(`/api/member-chat/${chatRecordId}/typing`)).data.agentTyping;
+  /** 對方是不是正在輸入（客服對話是客服，會員之間的對話是另一位會員；輸入狀態 5 秒內沒更新就當作停止） */
+  async getPeerTyping(chatRecordId: number): Promise<boolean> {
+    return (await apiClient.get<{ peerTyping: boolean }>(`/api/member-chat/${chatRecordId}/typing`)).data.peerTyping;
   },
   async markRead(chatRecordId: number): Promise<void> {
     await apiClient.post(`/api/member-chat/${chatRecordId}/read`);

@@ -109,6 +109,7 @@ public static class DependencyInjection
         services.AddScoped<IChatRedisService, ChatRedisService>();
         services.AddScoped<IMemberChatRedisService, MemberChatRedisService>();
         services.AddScoped<IMemberChatService, MemberChatService>();
+        services.AddScoped<IDirectChatService, DirectChatService>();
         services.AddScoped<IChatPersistenceService>(sp =>
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection")

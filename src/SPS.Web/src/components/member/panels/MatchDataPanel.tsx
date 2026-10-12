@@ -6,6 +6,7 @@ import TagChecklists from "@/components/matching/TagChecklists";
 import { memberFavoritesApi, type MemberDemand } from "@/lib/api/member-favorites";
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
 import { getApiErrorMessage } from "@/lib/error-utils";
+import ReceivedReplies from "@/components/member/panels/ReceivedReplies";
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -154,6 +155,8 @@ export default function MatchDataPanel() {
                   </div>
                 )}
               </div>
+
+              {demand.published && <ReceivedReplies demandId={demand.id} />}
 
               {editing === demand.id && (
                 <div className="mt-3">

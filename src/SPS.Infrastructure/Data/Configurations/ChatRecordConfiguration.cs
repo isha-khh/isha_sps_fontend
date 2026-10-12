@@ -10,6 +10,9 @@ public class ChatRecordConfiguration : IEntityTypeConfiguration<ChatRecord>
     {
         builder.ToTable("ChatRecord");
 
+        // 會員之間的對話用需求回應 Id 找到（每則回應最多一個對話）
+        builder.HasIndex(cr => cr.DemandReplyId);
+
         builder.HasOne(cr => cr.InitiatorCompany)
             .WithMany(c => c.InitiatedChats)
             .HasForeignKey(cr => cr.InitiatorCompanyId)

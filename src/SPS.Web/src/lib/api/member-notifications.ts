@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 
 /** 收件匣的通知種類（對應後端 `MemberNotificationType`） */
-export type MemberNotificationType = "ReplyReviewed" | "ReplyReceived" | "DemandMatched" | "InquiryReplied";
+export type MemberNotificationType = "ReplyReviewed" | "ReplyReceived" | "DemandMatched" | "InquiryReplied" | "ChatOpened" | "ChatReportHandled";
 
 export interface MemberNotification {
   id: number;

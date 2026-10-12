@@ -10,13 +10,22 @@ export interface ChatRecordDto {
   agentName?: string; // 領收的客服名稱（status=1 時有值）
   initiatorMemberId?: string;
   initiatorMemberName?: string;
+  initiatorCompanyName?: string;
   targetMemberId?: string;
   targetMemberName?: string;
+  targetCompanyName?: string;
   targetUserId?: string;
   targetUserName?: string;
   lastMessage?: MessageDto;
   unreadCount: number;
   createdTime: string;
+  /** 會員之間的對話（type=1）綁定的需求 */
+  demandId?: number | null;
+  demandName?: string | null;
+  /** 我封鎖了對方 */
+  blockedByMe?: boolean;
+  /** 目前不能傳訊息（我封鎖了對方或對方封鎖了我，不透露是哪一種） */
+  sendBlocked?: boolean;
 }
 
 /**
