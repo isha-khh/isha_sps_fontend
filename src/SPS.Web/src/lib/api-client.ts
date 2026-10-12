@@ -74,6 +74,9 @@ const API_BASE_URL = isServer
   ? (process.env.API_URL || 'http://backend:8080')
   : (clientBaseUrl || normalizedBasePath);
 
+/** 瀏覽器端打後端用的位址前綴（API 與即時連線 `/hubs` 共用；沒設 `NEXT_PUBLIC_API_BASE` 時是站台 basePath，由外部 proxy 轉給後端） */
+export const clientApiBaseUrl = clientBaseUrl || normalizedBasePath;
+
 let csrfToken: string | null = null;
 
 

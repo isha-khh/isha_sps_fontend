@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { memberChatApi } from "@/lib/api/member-chat";
+import { connectChatHub, type ChatHubState } from "@/lib/chat-hub";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import type { ChatRecordDto, MessageDto } from "@/types/member-chat";
 
 const MAX_LENGTH = 1000;
+// 即時連線（SignalR）連著的時候輪詢只當保險（補漏掉的事件）；沒連上時輪詢就是主要的更新方式
 const LIST_POLL_MS = 15000;
 const MESSAGE_POLL_MS = 5000;
 const TYPING_POLL_MS = 2500;
+const LIST_POLL_CONNECTED_MS = 60000;
+const MESSAGE_POLL_CONNECTED_MS = 30000;
 const TYPING_REPORT_MS = 3000;
+const TYPING_SHOW_MS = 5000;
 
 const STATUS_WAITING = 0;
 const STATUS_CLOSED = 2;
@@ -28,8 +33,9 @@ function statusText(chat: ChatRecordDto) {
 /**
  * 積木元件：會員中心「客服訊息」面板——會員與平台客服的對話（`api/member-chat`，會員之間的對話目前不開放）。
  * 按「聯絡客服」會建立一個等待中的對話並通知客服（已經有進行中的就直接打開），客服在後台領取後開始回覆；也可以先留言。
- * 前台用 HTTP 傳訊息、輪詢更新（對話打開時每 5 秒、分頁在背景時暫停；對話列表每 15 秒），不依賴即時連線，
- * 所以延遲最多幾秒。客服傳來的訊息打開後會自動標為已讀（頁首的未讀數跟著更新）。訊息內容是純文字，不當 HTML 輸出。
+ * 傳訊息、回報輸入、標已讀走 HTTP；**接收**用即時連線（SignalR，見 `lib/chat-hub.ts`），客服的回覆與「客服正在輸入」立刻出現。
+ * 即時連線沒連上（代理不通、斷線重連中）時自動退回輪詢當備援（對話打開時每 5 秒、輸入提示每 2.5 秒、對話列表每 15 秒，分頁在背景時暫停），
+ * 連上之後輪詢放慢成保險用。客服傳來的訊息打開後會自動標為已讀（頁首的未讀數跟著更新）。訊息內容是純文字，不當 HTML 輸出。
  */
 export default function ChatPanel() {
   const [chats, setChats] = useState<ChatRecordDto[]>();
@@ -40,7 +46,10 @@ export default function ChatPanel() {
   const [busy, setBusy] = useState(false);
   // 客服是不是正在輸入：記下是哪個對話，換對話時不會殘留
   const [agentTyping, setAgentTyping] = useState<number | null>(null);
+  const [hubState, setHubState] = useState<ChatHubState>("connecting");
+  const connected = hubState === "connected";
   const lastTypingReportRef = useRef(0);
+  const typingClearTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 只顯示會員與客服的對話，最新的在前
@@ -51,53 +60,84 @@ export default function ChatPanel() {
   const hasOpenChat = customerServiceChats.some((chat) => chat.status !== STATUS_CLOSED);
   const messages = thread && thread.chatId === currentId ? thread.items : [];
 
-  // 對話列表：載入一次，之後定時更新（狀態變化、未讀數）
+  const loadChats = useCallback(() => {
+    memberChatApi
+      .getChats()
+      .then((data) => {
+        setChats(data);
+        setError(undefined);
+      })
+      .catch((err) => setError(getApiErrorMessage(err, "載入客服對話失敗")));
+  }, []);
+
+  // 對話列表：載入一次，之後定時更新（狀態變化、未讀數）；即時連線連著時放慢
   useEffect(() => {
-    let active = true;
-    const load = () => {
-      memberChatApi
-        .getChats()
-        .then((data) => {
-          if (!active) return;
-          setChats(data);
-          setError(undefined);
-        })
-        .catch((err) => active && setError(getApiErrorMessage(err, "載入客服對話失敗")));
-    };
-    load();
-    const timer = window.setInterval(load, LIST_POLL_MS);
+    loadChats();
+    const timer = window.setInterval(loadChats, connected ? LIST_POLL_CONNECTED_MS : LIST_POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [loadChats, connected]);
+
+  const loadMessages = useCallback((chatId: number) => {
+    if (document.hidden) return;
+    memberChatApi
+      .getMessages(chatId)
+      .then((items) => {
+        setThread({ chatId, items });
+        if (items.some((m) => m.senderType === "admin" && !m.isRead)) void memberChatApi.markRead(chatId).catch(() => {});
+      })
+      .catch(() => {});
+  }, []);
+
+  // 目前對話的訊息：載入一次，之後定時更新（即時連線連著時放慢，只當保險）
+  useEffect(() => {
+    if (currentId == null) return;
+    loadMessages(currentId);
+    const timer = window.setInterval(() => loadMessages(currentId), connected ? MESSAGE_POLL_CONNECTED_MS : MESSAGE_POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [currentId, connected, loadMessages]);
+
+  // 即時連線：收到客服的訊息、正在輸入與對話狀態變動。處理函式要用到最新的 currentId／isOpen，所以放在 ref 裡，連線本身只建立一次
+  const latestRef = useRef({ currentId, isOpen, loadChats, loadMessages });
+  useEffect(() => {
+    latestRef.current = { currentId, isOpen, loadChats, loadMessages };
+  });
+  useEffect(() => {
+    const disconnect = connectChatHub({
+      onStateChange: (state) => {
+        setHubState(state);
+        // 連上（或重連）後重新載入一次，補上斷線期間漏掉的
+        if (state === "connected") {
+          latestRef.current.loadChats();
+          if (latestRef.current.currentId != null) latestRef.current.loadMessages(latestRef.current.currentId);
+        }
+      },
+      onMessage: (message) => {
+        const { currentId: openId, loadChats: reloadChats } = latestRef.current;
+        if (message.chatRecordId === openId) {
+          // 自己送出的訊息也會回音一次，用訊息 Id 去重
+          setThread((prev) => (prev && prev.chatId === openId && !prev.items.some((m) => m.id === message.id) ? { chatId: openId, items: [...prev.items, message] } : prev));
+          if (message.senderType === "admin" && !document.hidden) void memberChatApi.markRead(openId).catch(() => {});
+        }
+        if (message.senderType === "admin") setAgentTyping(null);
+        reloadChats();
+      },
+      onTyping: (chatRecordId, senderType) => {
+        if (senderType !== "admin") return;
+        setAgentTyping(chatRecordId);
+        clearTimeout(typingClearTimerRef.current);
+        typingClearTimerRef.current = setTimeout(() => setAgentTyping((prev) => (prev === chatRecordId ? null : prev)), TYPING_SHOW_MS);
+      },
+      onChatChanged: () => latestRef.current.loadChats(),
+    });
     return () => {
-      active = false;
-      window.clearInterval(timer);
+      disconnect();
+      clearTimeout(typingClearTimerRef.current);
     };
   }, []);
 
-  // 目前對話的訊息：載入一次，之後每 5 秒更新；客服傳來還沒讀的訊息標為已讀
+  // 客服正在輸入：即時連線沒連上時，對話還在進行中就每 2.5 秒問一次（分頁在背景時暫停）；連上時由即時事件通知，不用問
   useEffect(() => {
-    if (currentId == null) return;
-    let active = true;
-    const load = () => {
-      if (document.hidden) return;
-      memberChatApi
-        .getMessages(currentId)
-        .then((items) => {
-          if (!active) return;
-          setThread({ chatId: currentId, items });
-          if (items.some((m) => m.senderType === "admin" && !m.isRead)) void memberChatApi.markRead(currentId).catch(() => {});
-        })
-        .catch(() => {});
-    };
-    load();
-    const timer = window.setInterval(load, MESSAGE_POLL_MS);
-    return () => {
-      active = false;
-      window.clearInterval(timer);
-    };
-  }, [currentId]);
-
-  // 客服正在輸入：對話還在進行中時每 2.5 秒問一次（分頁在背景時暫停）
-  useEffect(() => {
-    if (currentId == null || !isOpen) return;
+    if (currentId == null || !isOpen || connected) return;
     let active = true;
     const load = () => {
       if (document.hidden) return;
@@ -112,7 +152,7 @@ export default function ChatPanel() {
       active = false;
       window.clearInterval(timer);
     };
-  }, [currentId, isOpen]);
+  }, [currentId, isOpen, connected]);
 
   // 有新訊息就捲到最底
   useEffect(() => {
@@ -142,7 +182,11 @@ export default function ChatPanel() {
     setError(undefined);
     try {
       const message = await memberChatApi.sendMessage(currentId, content);
-      setThread((prev) => ({ chatId: currentId, items: [...(prev && prev.chatId === currentId ? prev.items : []), message] }));
+      setThread((prev) => {
+        const existing = prev && prev.chatId === currentId ? prev.items : [];
+        // 即時連線可能已經先把這則訊息的回音加進來了
+        return { chatId: currentId, items: existing.some((m) => m.id === message.id) ? existing : [...existing, message] };
+      });
       setText("");
     } catch (err) {
       setError(getApiErrorMessage(err, "傳送失敗，請稍後再試"));
