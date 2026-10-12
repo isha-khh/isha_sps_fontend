@@ -163,6 +163,18 @@ public class InquiryController : ControllerBase
         return r.Error?.Contains("不存在") == true ? NotFound(new { error = r.Error }) : BadRequest(new { error = r.Error });
     }
 
+    /// <summary>後台：回覆會員（寫進該會員的收件匣，可同時寄信）。只有登入會員送出的詢問單可以回覆</summary>
+    [HttpPost("{id:guid}/reply")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.CustomerService)]
+    public async Task<IActionResult> Reply(Guid id, [FromBody] ReplyInquiryRequest request, CancellationToken ct)
+    {
+        Guid? userId = Guid.TryParse(User.FindFirst("UserId")?.Value, out var parsed) ? parsed : null;
+        var r = await _inquiryService.ReplyAsync(id, request, userId, ct);
+        if (r.IsSuccess) return Ok(r.Data);
+        return r.Error?.Contains("不存在") == true ? NotFound(new { error = r.Error }) : BadRequest(new { error = r.Error });
+    }
+
     /// <summary>後台：刪除詢問單</summary>
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = "Admin")]

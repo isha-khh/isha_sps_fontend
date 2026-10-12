@@ -41,6 +41,9 @@ export interface Inquiry {
   industry?: string | null;
   handlerNote?: string | null;
   handledTime?: string | null;
+  /** 承辦人員回覆給會員的內容與時間（寫進會員的收件匣） */
+  replyMessage?: string | null;
+  repliedAt?: string | null;
   createdTime: string;
 }
 

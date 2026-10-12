@@ -50,6 +50,10 @@ public class InquiryResponse
     public string? Industry { get; set; }
     public string? HandlerNote { get; set; }
     public DateTime? HandledTime { get; set; }
+
+    /// <summary>承辦人員回覆給會員的內容與時間</summary>
+    public string? ReplyMessage { get; set; }
+    public DateTime? RepliedAt { get; set; }
     public DateTime CreatedTime { get; set; }
 }
 
@@ -67,6 +71,14 @@ public class UpdateInquiryRequest
     public InquiryStatus Status { get; set; }
 
     [MaxLength(2000)] public string? HandlerNote { get; set; }
+}
+
+/// <summary>後台回覆會員：內容會寫進會員的收件匣，可選擇同時寄信到詢問單上的信箱</summary>
+public class ReplyInquiryRequest
+{
+    [Required, MaxLength(2000)] public string Message { get; set; } = string.Empty;
+
+    public bool AlsoEmail { get; set; }
 }
 
 public class InquiryCountsResponse

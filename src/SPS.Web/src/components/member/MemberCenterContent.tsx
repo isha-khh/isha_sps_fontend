@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { authApi } from "@/lib/api/auth";
-import MemberCenterNav, { getNavGroups, type MemberCenterRole, type MemberCenterSection } from "@/components/member/MemberCenterNav";
+import MemberCenterNav, { MEMBER_CENTER_NAV_GROUPS, getNavGroups, type MemberCenterRole, type MemberCenterSection } from "@/components/member/MemberCenterNav";
 import ProfilePanel from "@/components/member/panels/ProfilePanel";
 import UpgradePanel from "@/components/member/panels/UpgradePanel";
 import CompanyPanel from "@/components/member/panels/CompanyPanel";
@@ -16,6 +16,7 @@ import MembersPanel from "@/components/member/panels/MembersPanel";
 import MatchDataPanel from "@/components/member/panels/MatchDataPanel";
 import FavoritesPanel from "@/components/member/panels/FavoritesPanel";
 import RepliesPanel from "@/components/member/panels/RepliesPanel";
+import InboxPanel from "@/components/member/panels/InboxPanel";
 import { memberFavoritesApi } from "@/lib/api/member-favorites";
 
 /**
@@ -37,7 +38,13 @@ import { memberFavoritesApi } from "@/lib/api/member-favorites";
 export default function MemberCenterContent() {
   const router = useRouter();
   const { member, loading, fetchProfile, clear } = useAuthStore();
-  const [active, setActive] = useState<MemberCenterSection>("profile");
+  // 網址的 `?section=inbox` 可以直接開在指定分頁（頁首收件匣連結、通知裡的連結用）；沒有或不認得就是基本資料
+  const [active, setActive] = useState<MemberCenterSection>(() => {
+    if (typeof window === "undefined") return "profile";
+    const wanted = new URLSearchParams(window.location.search).get("section");
+    const known = MEMBER_CENTER_NAV_GROUPS.flatMap((group) => group.items.map((item) => item.key));
+    return known.find((key) => key === wanted) ?? "profile";
+  });
   const [loggingOut, setLoggingOut] = useState(false);
   // 需求端／供給端：決定側邊欄有沒有「媒合資料維護」（刊登，需求端）與「我的回應」（供給端）
   const [role, setRole] = useState<MemberCenterRole>("");
@@ -122,6 +129,8 @@ export default function MemberCenterContent() {
             <MembersPanel />
           ) : active === "match_data" ? (
             <MatchDataPanel />
+          ) : active === "inbox" ? (
+            <InboxPanel />
           ) : active === "my_replies" ? (
             <RepliesPanel />
           ) : active === "favorite" ? (

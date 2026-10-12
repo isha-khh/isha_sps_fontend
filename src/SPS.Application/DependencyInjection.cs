@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IDemandService, DemandService>();
         services.AddScoped<IInquiryService, InquiryService>();
         services.AddScoped<IDemandReplyService, DemandReplyService>();
+        services.AddScoped<IMemberNotificationService, MemberNotificationService>();
         services.AddSingleton<IStaffNotifier, StaffNotifier>();
         services.AddScoped<IMemberFavoriteService, MemberFavoriteService>();
         services.AddScoped<IContentIndexingService, ContentIndexingService>();

@@ -1824,6 +1824,15 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("RepliedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("RepliedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ReplyMessage")
+                        .HasColumnType("text");
+
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
 
@@ -2306,6 +2315,49 @@ namespace SPS.Infrastructure.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("MemberFavorite", (string)null);
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.MemberNotification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LinkPath")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId", "IsRead", "CreatedTime");
+
+                    b.ToTable("MemberNotifications");
                 });
 
             modelBuilder.Entity("SPS.Domain.Entities.Messages", b =>

@@ -8,7 +8,8 @@ export type MemberCenterSection =
   | "upgrade"
   | "match_data"
   | "my_replies"
-  | "favorite";
+  | "favorite"
+  | "inbox";
 
 /** 媒合對接的身分：Buyer＝需求端企業會員、Supplier＝供給端企業會員、空字串＝尚未載入或個人會員 */
 export type MemberCenterRole = "Buyer" | "Supplier" | "";
@@ -44,6 +45,11 @@ export function getNavGroups(isEnterprise: boolean, role: MemberCenterRole = "")
  * 判斷），所以移到「個人資料管理」分組底下，不是企業會員專屬項目。
  */
 export const MEMBER_CENTER_NAV_GROUPS: MemberCenterNavGroup[] = [
+  {
+    // 收件匣：系統通知（回應審核結果、收到的回應、新需求媒合、客服回覆），所有會員都有
+    groupLabel: "訊息",
+    items: [{ key: "inbox", label: "收件匣" }],
+  },
   {
     groupLabel: "個人資料管理",
     items: [

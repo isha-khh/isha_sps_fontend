@@ -25,9 +25,11 @@ public class DemandReplyService : IDemandReplyService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IConfiguration _configuration;
     private readonly ILogger<DemandReplyService> _logger;
+    private readonly IMemberNotificationService _inbox;
 
-    public DemandReplyService(IUnitOfWork unitOfWork, IStaffNotifier notifier, IServiceScopeFactory scopeFactory, IConfiguration configuration, ILogger<DemandReplyService> logger)
+    public DemandReplyService(IUnitOfWork unitOfWork, IStaffNotifier notifier, IServiceScopeFactory scopeFactory, IConfiguration configuration, ILogger<DemandReplyService> logger, IMemberNotificationService inbox)
     {
+        _inbox = inbox;
         _unitOfWork = unitOfWork;
         _notifier = notifier;
         _scopeFactory = scopeFactory;
@@ -177,6 +179,18 @@ public class DemandReplyService : IDemandReplyService
         var replyId = reply.Id;
         _ = Task.Run(() => SendApprovedMailsAsync(replyId));
 
+        // 站內收件匣（與寄信並行）：回應者看到審核通過；刊登者與當下所有追蹤者收到這則回應
+        var demandLink = $"/matching/{reply.DemandId}";
+        await _inbox.AddAsync(reply.MemberId, MemberNotificationType.ReplyReviewed,
+            $"您對需求「{reply.Demand.Name}」的回應已通過審核",
+            "平台已將您的回應寄給這筆需求的刊登者與追蹤者。", demandLink, ct);
+        var receivers = await FollowerMemberIdsAsync(Db, reply.DemandId, ct);
+        if (reply.Demand.SubmittedByMemberId is { } publisher) receivers.Add(publisher);
+        receivers.Remove(reply.MemberId);
+        await _inbox.AddToManyAsync(receivers, MemberNotificationType.ReplyReceived,
+            $"需求「{reply.Demand.Name}」收到新的回應",
+            BuildReceivedContent(reply), demandLink, ct);
+
         var followers = await CountFollowersAsync(reply.DemandId, ct);
         return Result<DemandReplyAdminResponse>.Success(ToAdmin(reply, reply.Demand.Number, reply.Demand.Name, followers));
     }
@@ -201,6 +215,10 @@ public class DemandReplyService : IDemandReplyService
         var replyId = reply.Id;
         _ = Task.Run(() => SendRejectedMailAsync(replyId));
 
+        await _inbox.AddAsync(reply.MemberId, MemberNotificationType.ReplyReviewed,
+            $"您對需求「{reply.Demand.Name}」的回應未通過審核",
+            $"退回原因：{reason}\n\n您的回應：\n{reply.Content}", "/member?section=my_replies", ct);
+
         return Result<DemandReplyAdminResponse>.Success(ToAdmin(reply, reply.Demand.Number, reply.Demand.Name, 0));
     }
 
@@ -210,6 +228,32 @@ public class DemandReplyService : IDemandReplyService
     {
         var emails = await FollowerEmailsAsync(db, demandId, ct);
         return emails.Count;
+    }
+
+    /// <summary>追蹤者的會員 Id（條件同 <see cref="FollowerEmailsAsync"/>）</summary>
+    private static async Task<HashSet<Guid>> FollowerMemberIdsAsync(DbContext db, int demandId, CancellationToken ct)
+    {
+        var ids = await db.Set<MemberDemand>()
+            .Where(md => md.DemandId == demandId
+                         && md.Member.Role == MemberRole.Buyer
+                         && md.Member.Status == Status.Active
+                         && md.Member.IsApproved)
+            .Select(md => md.MemberId)
+            .ToListAsync(ct);
+        return ids.ToHashSet();
+    }
+
+    private static string BuildReceivedContent(DemandReply reply)
+    {
+        var lines = new List<string>();
+        if (!string.IsNullOrWhiteSpace(reply.CompanyName)) lines.Add($"回應公司：{reply.CompanyName}");
+        lines.Add($"聯絡人：{reply.ContactName}");
+        lines.Add($"信箱：{reply.ContactEmail}");
+        if (!string.IsNullOrWhiteSpace(reply.ContactPhone)) lines.Add($"電話：{reply.ContactPhone}");
+        lines.Add(string.Empty);
+        lines.Add("回應內容：");
+        lines.Add(reply.Content);
+        return string.Join('\n', lines);
     }
 
     /// <summary>追蹤者 = 追蹤這筆需求、仍有效的需求端企業會員（供應端以前收藏過的不算）</summary>

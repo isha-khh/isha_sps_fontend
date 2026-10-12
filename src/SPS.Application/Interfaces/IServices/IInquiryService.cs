@@ -12,6 +12,8 @@ public interface IInquiryService
     Task<Result<PagedResult<InquiryResponse>>> GetPagedAsync(InquiryQueryParameters parameters, CancellationToken ct = default);
     Task<Result<InquiryResponse>> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<Result<InquiryResponse>> UpdateAsync(Guid id, UpdateInquiryRequest request, Guid? handledByUserId, CancellationToken ct = default);
+    /// <summary>回覆會員：寫進該會員的收件匣（只有登入會員送出的詢問單可以），可選擇同時寄信</summary>
+    Task<Result<InquiryResponse>> ReplyAsync(Guid id, ReplyInquiryRequest request, Guid? repliedByUserId, CancellationToken ct = default);
     Task<Result<bool>> DeleteAsync(Guid id, CancellationToken ct = default);
     Task<Result<InquiryCountsResponse>> GetCountsAsync(CancellationToken ct = default);
 }

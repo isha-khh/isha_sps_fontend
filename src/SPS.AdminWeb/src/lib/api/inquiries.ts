@@ -21,6 +21,12 @@ export const inquiriesApi = {
     return response.data;
   },
 
+  // 回覆會員：寫進該會員的收件匣（只有登入會員送出的詢問單可以），可選擇同時寄信到單上的信箱
+  async reply(id: string, data: { message: string; alsoEmail: boolean }): Promise<Inquiry> {
+    const response = await apiClient.post(`/api/Inquiry/${id}/reply`, data);
+    return response.data;
+  },
+
   async getNotificationSettings(): Promise<StaffNotificationSettings> {
     const response = await apiClient.get('/api/Inquiry/notification-settings');
     return response.data;

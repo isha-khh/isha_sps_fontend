@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { withBasePath } from "@/lib/api-client";
 import { authApi } from "@/lib/api/auth";
+import { INBOX_CHANGED_EVENT, memberNotificationsApi } from "@/lib/api/member-notifications";
 import { useAuthStore } from "@/store/auth-store";
 import HeaderSearch from "@/components/layout/HeaderSearch";
 
@@ -48,10 +49,34 @@ function MemberNavItem() {
   const checkSession = useAuthStore((state) => state.checkSession);
   const clear = useAuthStore((state) => state.clear);
   const [loggingOut, setLoggingOut] = useState(false);
+  // 收件匣未讀數：登入後查一次，之後每分鐘更新，並在收件匣標已讀時（INBOX_CHANGED_EVENT）立刻更新
+  const [unread, setUnread] = useState(0);
+  const memberId = member?.id;
 
   useEffect(() => {
     void checkSession();
   }, [checkSession]);
+
+  useEffect(() => {
+    if (!memberId) return;
+    let active = true;
+    const refresh = () => {
+      memberNotificationsApi
+        .getUnreadCount()
+        .then((count) => active && setUnread(count))
+        .catch(() => {});
+    };
+    refresh();
+    const timer = window.setInterval(refresh, 60000);
+    window.addEventListener(INBOX_CHANGED_EVENT, refresh);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener(INBOX_CHANGED_EVENT, refresh);
+    };
+  }, [memberId]);
+
+  const unreadShown = member ? unread : 0;
 
   async function handleLogout(event: React.MouseEvent) {
     event.preventDefault();
@@ -72,6 +97,11 @@ function MemberNavItem() {
     <li className="nav-item dropdown dropdown-left fadeup">
       <Link href={member ? "/member" : "/member/login"} className="nav-link dropdown-toggle" role="button" aria-expanded="false">
         <span className="title-main">會員中心</span>
+        {unreadShown > 0 && (
+          <span className="badge rounded-pill bg-danger ms-1" aria-label={`${unreadShown} 則未讀通知`}>
+            {unreadShown > 99 ? "99+" : unreadShown}
+          </span>
+        )}
       </Link>
       <ul className="dropdown-menu">
         {member ? (
@@ -79,6 +109,11 @@ function MemberNavItem() {
             <li className="hover_r_sider dropdown-submenu">
               <Link className="dropdown-item dropdown-toggle" href="/member" title="前往會員中心">
                 會員中心
+              </Link>
+            </li>
+            <li className="hover_r_sider dropdown-submenu">
+              <Link className="dropdown-item dropdown-toggle" href="/member?section=inbox" title="收件匣">
+                收件匣{unreadShown > 0 ? `（${unreadShown > 99 ? "99+" : unreadShown}）` : ""}
               </Link>
             </li>
             <li className="hover_r_sider dropdown-submenu">

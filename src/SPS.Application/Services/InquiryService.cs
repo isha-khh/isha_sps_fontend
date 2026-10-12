@@ -19,9 +19,13 @@ public class InquiryService : IInquiryService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<InquiryService> _logger;
     private readonly IStaffNotifier _notifier;
+    private readonly IMemberNotificationService _inbox;
+    private readonly IEmailService _emailService;
 
-    public InquiryService(IUnitOfWork unitOfWork, ILogger<InquiryService> logger, IStaffNotifier notifier)
+    public InquiryService(IUnitOfWork unitOfWork, ILogger<InquiryService> logger, IStaffNotifier notifier, IMemberNotificationService inbox, IEmailService emailService)
     {
+        _inbox = inbox;
+        _emailService = emailService;
         _unitOfWork = unitOfWork;
         _logger = logger;
         _notifier = notifier;
@@ -180,6 +184,52 @@ public class InquiryService : IInquiryService
         return Result<InquiryResponse>.Success(Map(inquiry));
     }
 
+    public async Task<Result<InquiryResponse>> ReplyAsync(Guid id, ReplyInquiryRequest request, Guid? repliedByUserId, CancellationToken ct = default)
+    {
+        var message = Clean(request.Message);
+        if (message == null) return Result<InquiryResponse>.Failure("請輸入回覆內容");
+        if (message.Length > 2000) return Result<InquiryResponse>.Failure("回覆內容最多 2000 字");
+
+        var inquiry = await _unitOfWork.Inquiries.GetByIdAsync(id, ct);
+        if (inquiry == null) return Result<InquiryResponse>.Failure("詢問單不存在");
+        if (inquiry.MemberId == null) return Result<InquiryResponse>.Failure("這張詢問單是訪客送出的，沒有會員收件匣可以回覆，請依單上的信箱或電話自行聯繫");
+
+        inquiry.ReplyMessage = message;
+        inquiry.RepliedAt = DateTime.UtcNow;
+        inquiry.RepliedByUserId = repliedByUserId;
+        if (inquiry.Status == InquiryStatus.New) inquiry.Status = InquiryStatus.InProgress;
+        inquiry.UpdatedTime = DateTime.UtcNow;
+        await _unitOfWork.Inquiries.UpdateAsync(inquiry, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        var typeName = TypeNameOf(inquiry.Type);
+        var subject = string.IsNullOrWhiteSpace(inquiry.TargetTitle) ? $"承辦人員回覆了您的「{typeName}」" : $"承辦人員回覆了您的「{typeName}」：{inquiry.TargetTitle}";
+        await _inbox.AddAsync(inquiry.MemberId.Value, MemberNotificationType.InquiryReplied, subject, message, null, ct);
+
+        if (request.AlsoEmail && !string.IsNullOrWhiteSpace(inquiry.Email))
+        {
+            try
+            {
+                if (await _emailService.IsEnabledAsync())
+                {
+                    var encodedSubject = System.Net.WebUtility.HtmlEncode(subject);
+                    var encodedMessage = System.Net.WebUtility.HtmlEncode(message).Replace("\n", "<br>");
+                    var body = "<div style=\"font-family:'Noto Sans TC',Arial,sans-serif;font-size:15px;line-height:1.7\">"
+                        + "<p style=\"font-size:17px;font-weight:700;color:#0e3f6b\">" + encodedSubject + "</p>"
+                        + "<p>" + encodedMessage + "</p>"
+                        + "<p style=\"font-size:12px;color:#888\">這是系統自動寄出的通知信，請勿直接回覆。也可以登入會員中心的「收件匣」查看。</p></div>";
+                    await _emailService.SendEmailAsync(new EmailOption { To = inquiry.Email!, Subject = $"【SPS】{subject}", Body = body, MailType = "InquiryReply" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "寄送詢問單回覆信失敗：{Id}", id);
+            }
+        }
+
+        return Result<InquiryResponse>.Success(Map(inquiry));
+    }
+
     public async Task<Result<bool>> DeleteAsync(Guid id, CancellationToken ct = default)
     {
         var inquiry = await _unitOfWork.Inquiries.GetByIdAsync(id, ct);
@@ -244,6 +294,8 @@ public class InquiryService : IInquiryService
             Industry = industry,
             HandlerNote = i.HandlerNote,
             HandledTime = i.HandledTime,
+            ReplyMessage = i.ReplyMessage,
+            RepliedAt = i.RepliedAt,
             CreatedTime = i.CreatedTime,
         };
     }

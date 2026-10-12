@@ -21,6 +21,7 @@ public class DemandService : IDemandService
     private readonly IEmbeddingService _embeddingService;
     private readonly IStaffNotifier _staffNotifier;
     private readonly ISystemSettingService _settingService;
+    private readonly IMemberNotificationService _inbox;
 
     public DemandService(
         IUnitOfWork unitOfWork,
@@ -29,8 +30,10 @@ public class DemandService : IDemandService
         IServiceScopeFactory scopeFactory,
         IEmbeddingService embeddingService,
         IStaffNotifier staffNotifier,
-        ISystemSettingService settingService)
+        ISystemSettingService settingService,
+        IMemberNotificationService inbox)
     {
+        _inbox = inbox;
         _staffNotifier = staffNotifier;
         _settingService = settingService;
         _unitOfWork = unitOfWork;
@@ -743,7 +746,7 @@ public class DemandService : IDemandService
                      && m.Status == Status.Active
                      && m.IsApproved
                      && m.Email != string.Empty)
-            .Select(m => new { m.CompanyId, m.Email })
+            .Select(m => new { m.Id, m.CompanyId, m.Email })
             .ToListAsync(ct);
 
         var newRecords = new List<DemandNotification>();
@@ -761,6 +764,12 @@ public class DemandService : IDemandService
             newRecords.Add(record);
         }
         await _unitOfWork.SaveChangesAsync(ct);
+
+        // 站內收件匣（與寄信並行）：符合的供應業者在收件匣看到新需求
+        var preview = (demand.Description ?? string.Empty).Trim();
+        if (preview.Length > 100) preview = preview[..100] + "…";
+        await _inbox.AddToManyAsync(members.Select(m => m.Id), MemberNotificationType.DemandMatched,
+            $"有新的需求符合您的專長：{demand.Name}", preview.Length == 0 ? null : preview, $"/matching/{demand.Id}", ct);
 
         // SaveChanges 後 EF 填回 PK，只回傳本次新建的 ID（避免舊的 Pending 記錄被重複處理）
         return newRecords.Select(r => r.Id).ToList();

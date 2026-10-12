@@ -48,4 +48,10 @@ public class Inquiry : BaseEntity<Guid>
 
     public Guid? HandledByUserId { get; set; }
     public DateTime? HandledTime { get; set; }
+
+    /// <summary>承辦人員回覆給會員的內容（只有登入會員送出的詢問單可以回覆，會寫進該會員的收件匣）</summary>
+    public string? ReplyMessage { get; set; }
+
+    public DateTime? RepliedAt { get; set; }
+    public Guid? RepliedByUserId { get; set; }
 }

@@ -35,6 +35,10 @@ export const InquiriesPage = () => {
   const [status, setStatus] = useState<number>(InquiryStatus.New);
   const [note, setNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  // 回覆會員（寫進會員收件匣）
+  const [replyText, setReplyText] = useState('');
+  const [replyAlsoEmail, setReplyAlsoEmail] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
   // 通知設定：有新的詢問單或會員刊登需求時寄信給承辦人員
   const [isNotifyOpen, setIsNotifyOpen] = useState(false);
   const [notifyEnabled, setNotifyEnabled] = useState(false);
@@ -120,6 +124,30 @@ export const InquiriesPage = () => {
     setSelected(item);
     setStatus(item.status);
     setNote(item.handlerNote ?? '');
+    setReplyText('');
+    setReplyAlsoEmail(false);
+  };
+
+  const sendReply = async () => {
+    if (!selected || isReplying) return;
+    if (!replyText.trim()) {
+      await notify.error('請輸入回覆內容');
+      return;
+    }
+    setIsReplying(true);
+    try {
+      const updated = await inquiriesApi.reply(selected.id, { message: replyText.trim(), alsoEmail: replyAlsoEmail });
+      setSelected(updated);
+      setStatus(updated.status);
+      setReplyText('');
+      await notify.success('已回覆，會員會在收件匣看到');
+      await load(currentPage, params);
+    } catch (error) {
+      const serverMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      await notify.error(serverMessage || '回覆失敗');
+    } finally {
+      setIsReplying(false);
+    }
   };
 
   const save = async () => {
@@ -319,6 +347,45 @@ export const InquiriesPage = () => {
                 <span className="label-text font-medium">處理備註</span>
               </label>
               <textarea id="inquiry-note" className="textarea textarea-bordered" rows={3} maxLength={2000} value={note} onChange={(e) => setNote(e.target.value)} />
+            </div>
+
+            <div className="divider my-1" />
+
+            <div className="space-y-2">
+              <h4 className="font-medium">回覆會員</h4>
+              {!selected.memberId ? (
+                <p className="text-sm text-base-content/60">這張詢問單是訪客送出的，沒有會員收件匣可以回覆，請依單上的信箱或電話自行聯繫。</p>
+              ) : (
+                <>
+                  {selected.replyMessage && (
+                    <div className="alert text-sm items-start">
+                      <span className="iconify lucide--message-square-reply size-4 mt-0.5" />
+                      <div>
+                        <div className="text-base-content/60">上次回覆（{formatDate(selected.repliedAt ?? '')}）</div>
+                        <div className="whitespace-pre-wrap">{selected.replyMessage}</div>
+                      </div>
+                    </div>
+                  )}
+                  <textarea
+                    id="inquiry-reply"
+                    className="textarea textarea-bordered w-full"
+                    rows={3}
+                    maxLength={2000}
+                    placeholder="輸入要回覆給會員的內容，會員會在前台「會員中心 → 收件匣」看到"
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <label className="label cursor-pointer justify-start gap-2">
+                      <input type="checkbox" className="checkbox checkbox-sm" checked={replyAlsoEmail} onChange={(e) => setReplyAlsoEmail(e.target.checked)} />
+                      <span className="label-text text-sm">同時寄信到 {selected.email || '詢問單上的信箱'}（郵件服務啟用時才會寄出）</span>
+                    </label>
+                    <button type="button" className="btn btn-sm btn-primary" disabled={isReplying} onClick={() => void sendReply()}>
+                      {isReplying ? <span className="loading loading-spinner loading-sm" /> : '送出回覆'}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="modal-action">
