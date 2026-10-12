@@ -132,6 +132,7 @@ public class MemberChatController : ControllerBase
             return StatusCode(StatusCodes.Status429TooManyRequests, new { error = "傳送太頻繁，請稍後再試" });
 
         var message = await _chatService.SaveMessageAsync(chatRecordId, memberId, null, text, ct);
+        ChatTypingState.Clear(_cache, chatRecordId, "member");
 
         // 即時通知客服：已領取的對話通知該客服，等待中的對話通知所有在線客服
         var groups = new List<string> { $"member:{memberId}", "cs-agents" };
@@ -140,6 +141,34 @@ public class MemberChatController : ControllerBase
             await _hub.Clients.Group(group).SendAsync("ReceiveMessage", message, cancellationToken: ct);
 
         return Ok(message);
+    }
+
+    /// <summary>
+    /// 會員回報「正在輸入」（前台輸入時每幾秒呼叫一次，見 <see cref="ChatTypingState"/>）：只通知客服那端，
+    /// 已領取的對話通知該客服，等待中的對話通知所有在線客服
+    /// </summary>
+    [HttpPost("{chatRecordId:long}/typing")]
+    [SwaggerOperation(Summary = "回報正在輸入")]
+    public async Task<IActionResult> Typing(long chatRecordId, CancellationToken ct)
+    {
+        var memberId = GetMemberId();
+        var chat = (await _chatService.GetChatListForMemberAsync(memberId, ct)).FirstOrDefault(c => c.Id == chatRecordId && c.Type == 2);
+        if (chat == null || chat.Status == (short)ChatStatus.Closed) return NoContent();
+
+        ChatTypingState.Set(_cache, chatRecordId, "member");
+        var group = chat.TargetUserId.HasValue ? $"admin:{chat.TargetUserId.Value}" : "cs-agents";
+        await _hub.Clients.Group(group).SendAsync("UserTyping", new { chatRecordId, senderType = "member" }, cancellationToken: ct);
+        return NoContent();
+    }
+
+    /// <summary>客服是不是正在輸入（前台輪詢用，輸入狀態 5 秒內沒更新就當作停止）</summary>
+    [HttpGet("{chatRecordId:long}/typing")]
+    [SwaggerOperation(Summary = "查詢客服是否正在輸入")]
+    public async Task<IActionResult> GetTyping(long chatRecordId, CancellationToken ct)
+    {
+        var memberId = GetMemberId();
+        if (!await _chatService.IsParticipantAsync(chatRecordId, memberId, null, ct)) return Forbid();
+        return Ok(new { agentTyping = ChatTypingState.IsTyping(_cache, chatRecordId, "admin") });
     }
 
     /// <summary>把對話裡客服傳來的訊息標為已讀</summary>

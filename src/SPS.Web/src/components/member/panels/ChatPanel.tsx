@@ -8,6 +8,8 @@ import type { ChatRecordDto, MessageDto } from "@/types/member-chat";
 const MAX_LENGTH = 1000;
 const LIST_POLL_MS = 15000;
 const MESSAGE_POLL_MS = 5000;
+const TYPING_POLL_MS = 2500;
+const TYPING_REPORT_MS = 3000;
 
 const STATUS_WAITING = 0;
 const STATUS_CLOSED = 2;
@@ -36,6 +38,9 @@ export default function ChatPanel() {
   const [text, setText] = useState("");
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  // 客服是不是正在輸入：記下是哪個對話，換對話時不會殘留
+  const [agentTyping, setAgentTyping] = useState<number | null>(null);
+  const lastTypingReportRef = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // 只顯示會員與客服的對話，最新的在前
@@ -90,6 +95,25 @@ export default function ChatPanel() {
     };
   }, [currentId]);
 
+  // 客服正在輸入：對話還在進行中時每 2.5 秒問一次（分頁在背景時暫停）
+  useEffect(() => {
+    if (currentId == null || !isOpen) return;
+    let active = true;
+    const load = () => {
+      if (document.hidden) return;
+      memberChatApi
+        .getAgentTyping(currentId)
+        .then((typing) => active && setAgentTyping(typing ? currentId : null))
+        .catch(() => {});
+    };
+    load();
+    const timer = window.setInterval(load, TYPING_POLL_MS);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [currentId, isOpen]);
+
   // 有新訊息就捲到最底
   useEffect(() => {
     const el = scrollRef.current;
@@ -127,6 +151,16 @@ export default function ChatPanel() {
     }
   }
 
+  // 輸入時回報給客服（每 3 秒最多一次），客服那端會顯示「會員正在輸入」
+  function onTextChange(value: string) {
+    setText(value);
+    if (!value.trim() || currentId == null || !isOpen) return;
+    const now = Date.now();
+    if (now - lastTypingReportRef.current < TYPING_REPORT_MS) return;
+    lastTypingReportRef.current = now;
+    void memberChatApi.sendTyping(currentId).catch(() => {});
+  }
+
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     // Enter 送出，Shift+Enter 換行；輸入法選字中的 Enter 不送出
     if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -149,7 +183,7 @@ export default function ChatPanel() {
       {chats && customerServiceChats.length === 0 && (
         <div>
           <p>有問題想詢問平台客服嗎？按下「聯絡客服」會通知客服，客服接手後會在這裡回覆您，也可以先留言。</p>
-          <button type="button" className="btn-theme" disabled={busy} onClick={() => void startChat()}>
+          <button type="button" className="tier-submit-btn" disabled={busy} onClick={() => void startChat()}>
             {busy ? "處理中…" : "聯絡客服"}
           </button>
         </div>
@@ -201,6 +235,13 @@ export default function ChatPanel() {
             )}
           </div>
 
+          {isOpen && agentTyping === currentId && (
+            <p className="small text-muted mb-2" aria-live="polite">
+              <i className="bi bi-three-dots me-1" aria-hidden="true"></i>
+              客服正在輸入…
+            </p>
+          )}
+
           {current.status === STATUS_WAITING && <p className="small text-muted">已通知客服，客服接手後會在這裡回覆，您也可以先留言。這個頁面會自動更新，不需要重新整理。</p>}
 
           {isOpen ? (
@@ -211,7 +252,7 @@ export default function ChatPanel() {
                 maxLength={MAX_LENGTH}
                 placeholder="輸入訊息（Enter 送出，Shift+Enter 換行）"
                 value={text}
-                onChange={(event) => setText(event.target.value)}
+                onChange={(event) => onTextChange(event.target.value)}
                 onKeyDown={onKeyDown}
                 aria-label="訊息內容"
               />
@@ -219,7 +260,7 @@ export default function ChatPanel() {
                 <span className="small text-muted">
                   {text.length} / {MAX_LENGTH}
                 </span>
-                <button type="button" className="btn-theme" disabled={busy || !text.trim()} onClick={() => void send()}>
+                <button type="button" className="tier-submit-btn" disabled={busy || !text.trim()} onClick={() => void send()}>
                   {busy ? "傳送中…" : "送出"}
                 </button>
               </div>

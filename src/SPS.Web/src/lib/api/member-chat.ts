@@ -20,6 +20,14 @@ export const memberChatApi = {
   async sendMessage(chatRecordId: number, text: string): Promise<MessageDto> {
     return (await apiClient.post<MessageDto>(`/api/member-chat/${chatRecordId}/messages`, { text })).data;
   },
+  /** 回報「我正在輸入」，客服那端會顯示「會員正在輸入」；輸入中每幾秒呼叫一次即可 */
+  async sendTyping(chatRecordId: number): Promise<void> {
+    await apiClient.post(`/api/member-chat/${chatRecordId}/typing`);
+  },
+  /** 客服是不是正在輸入（輸入狀態 5 秒內沒更新就當作停止） */
+  async getAgentTyping(chatRecordId: number): Promise<boolean> {
+    return (await apiClient.get<{ agentTyping: boolean }>(`/api/member-chat/${chatRecordId}/typing`)).data.agentTyping;
+  },
   async markRead(chatRecordId: number): Promise<void> {
     await apiClient.post(`/api/member-chat/${chatRecordId}/read`);
     // 頁首的未讀數也包含客服訊息，標已讀後要重新查

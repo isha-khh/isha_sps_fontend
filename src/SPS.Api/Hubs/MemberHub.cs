@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using SPS.Api.Attributes;
 using SPS.Application.DTOs.Notification;
 using SPS.Application.Interfaces;
@@ -19,14 +20,17 @@ public class MemberHub : Hub
     private readonly INotificationService _notificationService;
     private readonly ApplicationDbContext _db;
     private readonly ILogger<MemberHub> _logger;
+    private readonly IMemoryCache _cache;
 
     public MemberHub(
         IMemberChatService chatService,
         IMemberChatRedisService redisService,
         INotificationService notificationService,
         ApplicationDbContext db,
-        ILogger<MemberHub> logger)
+        ILogger<MemberHub> logger,
+        IMemoryCache cache)
     {
+        _cache = cache;
         _chatService = chatService;
         _redisService = redisService;
         _notificationService = notificationService;
@@ -125,6 +129,9 @@ public class MemberHub : Hub
 
         var msg = await _chatService.SaveMessageAsync(chatRecordId, memberId, userId, text, CancellationToken.None);
 
+        // 送出訊息就代表不再輸入了
+        ChatTypingState.Clear(_cache, chatRecordId, userType);
+
         await SendToParticipants(chatRecordId, "ReceiveMessage", msg);
     }
 
@@ -151,7 +158,10 @@ public class MemberHub : Hub
         if (!await _chatService.IsParticipantAsync(chatRecordId, memberId, userId, CancellationToken.None))
             return;
 
-        await SendToParticipants(chatRecordId, "UserTyping", new { chatRecordId, senderType = userType });
+        // 只通知「對方」：不能傳回給輸入的人自己（原本後台客服自己輸入時，自己的畫面也會顯示「管理員正在輸入」）。
+        // 同時記下輸入狀態，前台會員用輪詢查詢（GET api/member-chat/{id}/typing）
+        ChatTypingState.Set(_cache, chatRecordId, userType);
+        await SendToParticipants(chatRecordId, "UserTyping", new { chatRecordId, senderType = userType }, excludeGroup: $"{userType}:{entityId}");
     }
 
     public Task CreateMemberChat(Guid targetMemberId)
@@ -244,7 +254,7 @@ public class MemberHub : Hub
         await Clients.Group("cs-agents").SendAsync("NewWaitingChat", chat);
     }
 
-    private async Task SendToParticipants(long chatRecordId, string method, object data)
+    private async Task SendToParticipants(long chatRecordId, string method, object data, string? excludeGroup = null)
     {
         var cr = await _db.ChatRecords
             .AsNoTracking()
@@ -258,8 +268,9 @@ public class MemberHub : Hub
         if (cr.InitiatorUserId.HasValue) groups.Add($"admin:{cr.InitiatorUserId.Value}");
         if (cr.TargetUserId.HasValue) groups.Add($"admin:{cr.TargetUserId.Value}");
 
-        foreach (var group in groups)
+        foreach (var group in groups.Distinct())
         {
+            if (group == excludeGroup) continue;
             await Clients.Group(group).SendAsync(method, data);
         }
     }
