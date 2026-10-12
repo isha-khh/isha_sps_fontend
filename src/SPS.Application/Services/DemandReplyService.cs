@@ -55,11 +55,16 @@ public class DemandReplyService : IDemandReplyService
         var demand = await _unitOfWork.Demands.GetByIdAsync(demandId, ct);
         if (demand == null || demand.Status != Status.Active) return Result<bool>.Failure("需求不存在或已下架");
 
+        // 企業會員的公司名稱在公司資料（Company.Name）；Member.CompanyName 只有個人會員才有
+        var companyName = member.CompanyId.HasValue
+            ? await Db.Set<Company>().Where(c => c.Id == member.CompanyId.Value).Select(c => c.Name).FirstOrDefaultAsync(ct)
+            : member.CompanyName;
+
         var reply = new DemandReply
         {
             DemandId = demandId,
             MemberId = memberId,
-            CompanyName = member.CompanyName,
+            CompanyName = companyName,
             ContactName = name,
             ContactEmail = email,
             ContactPhone = string.IsNullOrWhiteSpace(request.ContactPhone) ? null : request.ContactPhone.Trim(),

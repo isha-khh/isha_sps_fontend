@@ -157,6 +157,11 @@ public class DemandService : IDemandService
         await _unitOfWork.SaveChangesAsync(ct);
         TriggerDemandIndexing(demand.Id);
 
+        // 企業會員的公司名稱在公司資料（Company.Name）；Member.CompanyName 只有個人會員才有
+        var publisherCompany = member.CompanyId.HasValue
+            ? await _unitOfWork.GetDbContext().Set<Company>().Where(c => c.Id == member.CompanyId.Value).Select(c => c.Name).FirstOrDefaultAsync(ct)
+            : member.CompanyName;
+
         _staffNotifier.Notify(
             "【SPS】會員刊登了新的需求，待審核",
             "有企業會員刊登了新的需求，審核通過後才會上架",
@@ -165,7 +170,7 @@ public class DemandService : IDemandService
                 ("需求編號", demand.Number),
                 ("需求標題", demand.Name),
                 ("刊登會員", member.Email),
-                ("公司", member.CompanyName),
+                ("公司", publisherCompany),
                 ("內容", introduction is { Length: > 300 } ? introduction[..300] + "…" : introduction),
             },
             $"/demands/{demand.Id}");
