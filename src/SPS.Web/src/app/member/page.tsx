@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import MemberCenterContent from "@/components/member/MemberCenterContent";
@@ -32,7 +33,10 @@ export default function MemberPage() {
     <>
       <BodyClass className="member" />
       <InnerPageShell title="會員中心" breadcrumb={[{ label: "會員中心" }]}>
-        <MemberCenterContent />
+        {/* `MemberCenterContent` 用 `useSearchParams` 讀 `?section=`，靜態頁面要包在 Suspense 裡 */}
+        <Suspense fallback={<p className="text-muted">載入中…</p>}>
+          <MemberCenterContent />
+        </Suspense>
       </InnerPageShell>
     </>
   );

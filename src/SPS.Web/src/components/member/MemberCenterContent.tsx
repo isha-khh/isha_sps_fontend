@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { authApi } from "@/lib/api/auth";
 import MemberCenterNav, { MEMBER_CENTER_NAV_GROUPS, getNavGroups, type MemberCenterRole, type MemberCenterSection } from "@/components/member/MemberCenterNav";
@@ -38,13 +38,14 @@ import { memberFavoritesApi } from "@/lib/api/member-favorites";
 export default function MemberCenterContent() {
   const router = useRouter();
   const { member, loading, fetchProfile, clear } = useAuthStore();
-  // 網址的 `?section=inbox` 可以直接開在指定分頁（頁首收件匣連結、通知裡的連結用）；沒有或不認得就是基本資料
-  const [active, setActive] = useState<MemberCenterSection>(() => {
-    if (typeof window === "undefined") return "profile";
-    const wanted = new URLSearchParams(window.location.search).get("section");
-    const known = MEMBER_CENTER_NAV_GROUPS.flatMap((group) => group.items.map((item) => item.key));
-    return known.find((key) => key === wanted) ?? "profile";
-  });
+  // 網址的 `?section=inbox` 可以直接開在指定分頁（頁首收件匣連結、通知裡的連結用）；沒有或不認得就是基本資料。
+  // 要用 `useSearchParams` 而不是 `window.location`：站內換頁時畫面先渲染、網址晚一步才更新，讀 `window.location` 會讀到舊網址。
+  // 側邊欄自己點的分頁記在 `picked`，並記下當時的網址參數；網址參數之後變了（例如已經在會員中心又點頁首的收件匣），就以新的網址為準。
+  const sectionParam = useSearchParams().get("section");
+  const [picked, setPicked] = useState<{ key: MemberCenterSection; param: string | null } | null>(null);
+  const paramSection = MEMBER_CENTER_NAV_GROUPS.flatMap((group) => group.items.map((item) => item.key)).find((key) => key === sectionParam);
+  const active: MemberCenterSection = picked && picked.param === sectionParam ? picked.key : (paramSection ?? "profile");
+  const setActive = (key: MemberCenterSection) => setPicked({ key, param: sectionParam });
   const [loggingOut, setLoggingOut] = useState(false);
   // 需求端／供給端：決定側邊欄有沒有「媒合資料維護」（刊登，需求端）與「我的回應」（供給端）
   const [role, setRole] = useState<MemberCenterRole>("");
