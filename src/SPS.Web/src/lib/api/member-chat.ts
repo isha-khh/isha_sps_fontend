@@ -1,46 +1,28 @@
-import { apiClient } from '@/lib/api-client';
-import type { ChatRecordDto, MessageDto } from '@/types/member-chat';
+import { apiClient } from "@/lib/api-client";
+import type { ChatRecordDto, MessageDto } from "@/types/member-chat";
+import { INBOX_CHANGED_EVENT } from "@/lib/api/member-notifications";
 
-
-// ==================== 會員聊天 API ====================
-
+/**
+ * 會員與客服的對話（`api/member-chat`）。前台用 HTTP 傳訊息、輪詢更新，不依賴即時連線（SignalR）；
+ * 後台客服那端仍是即時推送。會員之間的對話目前後端不開放。
+ */
 export const memberChatApi = {
-  /**
-   * 取得會員聊天列表
-   * GET /api/member-chat/list
-   */
-  async getChatList(): Promise<ChatRecordDto[]> {
-    const response = await apiClient.get<ChatRecordDto[]>('/api/member-chat/list');
-    return response.data;
+  async getChats(): Promise<ChatRecordDto[]> {
+    return (await apiClient.get<ChatRecordDto[]>("/api/member-chat/list")).data;
   },
-
-  /**
-   * 取得聊天訊息歷史
-   * GET /api/member-chat/{chatRecordId}/messages
-   */
-  async getMessages(chatRecordId: number, skip = 0, take = 50): Promise<MessageDto[]> {
-    const response = await apiClient.get<MessageDto[]>(
-      `/api/member-chat/${chatRecordId}/messages`,
-      { params: { skip, take } }
-    );
-    return response.data;
+  async getMessages(chatRecordId: number): Promise<MessageDto[]> {
+    return (await apiClient.get<MessageDto[]>(`/api/member-chat/${chatRecordId}/messages`, { params: { take: 200 } })).data;
   },
-
-  /**
-   * 建立會員↔管理員聊天室
-   * POST /api/member-chat/create-admin
-   */
-  async createAdminChat(): Promise<ChatRecordDto> {
-    const response = await apiClient.post<ChatRecordDto>('/api/member-chat/create-admin');
-    return response.data;
+  /** 聯絡客服：已經有進行中的對話就回傳那一個，沒有才建立新的（並通知客服） */
+  async createCustomerServiceChat(): Promise<ChatRecordDto> {
+    return (await apiClient.post<ChatRecordDto>("/api/member-chat/create-admin")).data;
   },
-
-  /**
-   * 取得總未讀數
-   * GET /api/member-chat/unread-count
-   */
-  async getUnreadCount(): Promise<number> {
-    const response = await apiClient.get<number>('/api/member-chat/unread-count');
-    return response.data;
+  async sendMessage(chatRecordId: number, text: string): Promise<MessageDto> {
+    return (await apiClient.post<MessageDto>(`/api/member-chat/${chatRecordId}/messages`, { text })).data;
+  },
+  async markRead(chatRecordId: number): Promise<void> {
+    await apiClient.post(`/api/member-chat/${chatRecordId}/read`);
+    // 頁首的未讀數也包含客服訊息，標已讀後要重新查
+    if (typeof window !== "undefined") window.dispatchEvent(new Event(INBOX_CHANGED_EVENT));
   },
 };

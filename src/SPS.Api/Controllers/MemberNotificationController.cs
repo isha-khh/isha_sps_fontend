@@ -17,8 +17,13 @@ namespace SPS.Api.Controllers;
 public class MemberNotificationController : ControllerBase
 {
     private readonly IMemberNotificationService _notifications;
+    private readonly IMemberChatService _chat;
 
-    public MemberNotificationController(IMemberNotificationService notifications) => _notifications = notifications;
+    public MemberNotificationController(IMemberNotificationService notifications, IMemberChatService chat)
+    {
+        _notifications = notifications;
+        _chat = chat;
+    }
 
     private Guid? GetMemberId() => Guid.TryParse(User.FindFirst("MemberId")?.Value, out var id) ? id : null;
 
@@ -32,14 +37,21 @@ public class MemberNotificationController : ControllerBase
         return Ok(await _notifications.GetListAsync(memberId.Value, unreadOnly, page, pageSize, ct));
     }
 
-    /// <summary>未讀數，給頁首的收件匣小圖示用。**沒登入也可以呼叫**（回 0），避免匿名頁面載入時被 401 導去登入頁</summary>
+    /// <summary>
+    /// 未讀數，給頁首的收件匣小圖示用：<c>unreadCount</c> 是系統通知、<c>chatUnreadCount</c> 是客服對話裡客服傳來還沒讀的訊息。
+    /// **沒登入也可以呼叫**（回 0），避免匿名頁面載入時被 401 導去登入頁
+    /// </summary>
     [HttpGet("unread-count")]
     [AllowAnonymous]
     public async Task<IActionResult> GetUnreadCount(CancellationToken ct)
     {
         var memberId = GetMemberId();
-        if (memberId == null) return Ok(new { unreadCount = 0 });
-        return Ok(new { unreadCount = await _notifications.GetUnreadCountAsync(memberId.Value, ct) });
+        if (memberId == null) return Ok(new { unreadCount = 0, chatUnreadCount = 0 });
+        return Ok(new
+        {
+            unreadCount = await _notifications.GetUnreadCountAsync(memberId.Value, ct),
+            chatUnreadCount = await _chat.GetTotalUnreadCountAsync(memberId.Value, null, ct),
+        });
     }
 
     [HttpPost("{id:long}/read")]

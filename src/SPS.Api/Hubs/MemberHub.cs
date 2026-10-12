@@ -154,16 +154,11 @@ public class MemberHub : Hub
         await SendToParticipants(chatRecordId, "UserTyping", new { chatRecordId, senderType = userType });
     }
 
-    public async Task CreateMemberChat(Guid targetMemberId)
+    public Task CreateMemberChat(Guid targetMemberId)
     {
-        var (entityId, userType) = GetIdentity();
-        if (userType != "member")
-            throw new HubException("Only members can create member-to-member chats.");
-
-        var chat = await _chatService.GetOrCreateMemberChatAsync(entityId, targetMemberId, CancellationToken.None);
-
-        await Clients.Group($"member:{entityId}").SendAsync("ChatCreated", chat);
-        await Clients.Group($"member:{targetMemberId}").SendAsync("ChatCreated", chat);
+        // 會員之間互傳訊息的規則（誰能傳給誰、是否要審核、封鎖與檢舉）還沒決定，先不開放（見 MemberChatController.CreateChat）。
+        // 原本的實作：GetOrCreateMemberChatAsync 建立對話後，通知雙方的 member 群組 ChatCreated。
+        throw new HubException("Member-to-member chats are not available yet.");
     }
 
     public async Task CreateAdminChat()

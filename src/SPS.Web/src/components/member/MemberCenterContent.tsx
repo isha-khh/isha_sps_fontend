@@ -17,6 +17,7 @@ import MatchDataPanel from "@/components/member/panels/MatchDataPanel";
 import FavoritesPanel from "@/components/member/panels/FavoritesPanel";
 import RepliesPanel from "@/components/member/panels/RepliesPanel";
 import InboxPanel from "@/components/member/panels/InboxPanel";
+import ChatPanel from "@/components/member/panels/ChatPanel";
 import { memberFavoritesApi } from "@/lib/api/member-favorites";
 
 /**
@@ -132,6 +133,8 @@ export default function MemberCenterContent() {
             <MatchDataPanel />
           ) : active === "inbox" ? (
             <InboxPanel />
+          ) : active === "chat" ? (
+            <ChatPanel />
           ) : active === "my_replies" ? (
             <RepliesPanel />
           ) : active === "favorite" ? (

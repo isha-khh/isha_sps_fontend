@@ -28,9 +28,9 @@ export const memberNotificationsApi = {
     const { unreadOnly = false, page = 1, pageSize = 20 } = options;
     return (await apiClient.get<MemberNotificationList>("/api/member/notifications", { params: { unreadOnly, page, pageSize } })).data;
   },
-  /** 沒登入也可以呼叫（回 0），不會被導去登入頁 */
-  async getUnreadCount(): Promise<number> {
-    return (await apiClient.get<{ unreadCount: number }>("/api/member/notifications/unread-count")).data.unreadCount;
+  /** 系統通知與客服訊息的未讀數；沒登入也可以呼叫（回 0），不會被導去登入頁 */
+  async getUnreadCount(): Promise<{ unreadCount: number; chatUnreadCount: number }> {
+    return (await apiClient.get<{ unreadCount: number; chatUnreadCount: number }>("/api/member/notifications/unread-count")).data;
   },
   async markRead(id: number): Promise<void> {
     await apiClient.post(`/api/member/notifications/${id}/read`);

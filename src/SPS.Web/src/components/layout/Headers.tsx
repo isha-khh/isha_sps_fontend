@@ -63,7 +63,7 @@ function MemberNavItem() {
     const refresh = () => {
       memberNotificationsApi
         .getUnreadCount()
-        .then((count) => active && setUnread(count))
+        .then((counts) => active && setUnread(counts.unreadCount + counts.chatUnreadCount))
         .catch(() => {});
     };
     refresh();
