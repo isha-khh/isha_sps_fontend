@@ -70,6 +70,12 @@ public class NewsRepository : Repository<News, int>, INewsRepository
             query = query.Where(n => n.Type == parameters.Type.Value);
         }
 
+        // 專區過濾
+        if (parameters.Section.HasValue)
+        {
+            query = query.Where(n => n.Section == parameters.Section.Value);
+        }
+
         // 發布狀態過濾
         if (parameters.Published.HasValue)
         {

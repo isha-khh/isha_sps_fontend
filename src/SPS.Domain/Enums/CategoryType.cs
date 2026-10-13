@@ -48,5 +48,8 @@ public enum CategoryType
     /// <summary>
     /// 產品類別
     /// </summary>
-    ProductCategory = 8
+    ProductCategory = 8,
+
+    /// <summary>服務專區分類（兩層：分組在上、葉節點在下，用 ParentId 表示）</summary>
+    Serve = 9
 }

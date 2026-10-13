@@ -24,6 +24,7 @@ public class NewsController : ControllerBase
     private readonly IFileManagementService _fileService;
     private readonly ILogger<NewsController> _logger;
     private readonly IMemoryCache _cache;
+    private readonly SPS.Api.Services.AttachmentLinks _attachments;
 
     /// <summary>同一個來源 IP 對同一篇公告，這段時間內只累計一次瀏覽數</summary>
     private static readonly TimeSpan ViewDedupeWindow = TimeSpan.FromMinutes(30);
@@ -37,8 +38,10 @@ public class NewsController : ControllerBase
         INewsService newsService,
         IFileManagementService fileService,
         ILogger<NewsController> logger,
-        IMemoryCache cache)
+        IMemoryCache cache,
+        SPS.Api.Services.AttachmentLinks attachments)
     {
+        _attachments = attachments;
         _newsService = newsService;
         _fileService = fileService;
         _logger = logger;
@@ -106,6 +109,9 @@ public class NewsController : ControllerBase
             return NotFound(new { error = result.Error ?? "新聞不存在" });
         }
 
+        // 附件檔案 Id 只給後台：公開頁不列附件，要填完「立即下載」表單（POST api/Inquiry/download/{newsId}）才拿得到連結
+        if (!User.IsInRole("Admin")) result.Data!.AttachmentFileIds = new List<Guid>();
+
         return Ok(result.Data);
     }
 
@@ -145,6 +151,8 @@ public class NewsController : ControllerBase
 
         var coverError = await ValidateCoverAsync(request.CoverFileId, cancellationToken);
         if (coverError != null) return BadRequest(new { error = coverError });
+        var attachmentError = await _attachments.ValidateAsync(request.AttachmentFileIds, cancellationToken);
+        if (attachmentError != null) return BadRequest(new { error = attachmentError });
 
         var result = await _newsService.CreateAsync(request, cancellationToken);
 
@@ -186,6 +194,8 @@ public class NewsController : ControllerBase
 
         var coverError = await ValidateCoverAsync(request.CoverFileId, cancellationToken);
         if (coverError != null) return BadRequest(new { error = coverError });
+        var attachmentError = await _attachments.ValidateAsync(request.AttachmentFileIds, cancellationToken);
+        if (attachmentError != null) return BadRequest(new { error = attachmentError });
 
         var result = await _newsService.UpdateAsync(id, request, cancellationToken);
 

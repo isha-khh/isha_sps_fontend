@@ -12,6 +12,11 @@ export interface News {
   categoryId?: number;
   categoryName?: string;
   type: number;
+  /** 所屬專區：0 公告、1 服務專區 */
+  section?: number;
+  /** 附件檔案 Id（服務專區用，只有後台拿得到） */
+  attachmentFileIds?: string[];
+  attachmentCount?: number;
   viewCount: number;
   tags?: string[];
   /** 標籤（id + 名稱），編輯表單預選用 */
@@ -32,6 +37,9 @@ export interface CreateNewsRequest {
   ordinal?: number;
   categoryId?: number;
   type: number;
+  section?: number;
+  /** 附件：檔案管理中的檔案 Id（服務專區用） */
+  attachmentFileIds?: string[];
   /** 標籤 ID 清單（公告標籤管理頁維護） */
   tagIds?: number[];
   /** 封面圖：檔案管理中的圖片檔案 Id */
@@ -48,6 +56,9 @@ export interface UpdateNewsRequest {
   ordinal?: number;
   categoryId?: number;
   type?: number;
+  section?: number;
+  /** 沒帶＝不動附件；帶空陣列＝清空附件 */
+  attachmentFileIds?: string[];
   /** 沒帶＝不動標籤；帶空陣列＝清空標籤 */
   tagIds?: number[];
   /** 換封面圖：檔案管理中的圖片檔案 Id；沒帶＝不更新 */
@@ -60,6 +71,8 @@ export interface NewsSearchParams {
   search?: string;
   categoryId?: number;
   type?: number;
+  /** 只列這個專區：0 公告、1 服務專區 */
+  section?: number;
   published?: boolean;
   tagId?: number;
   startDateFrom?: string;

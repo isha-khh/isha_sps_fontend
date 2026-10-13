@@ -16,7 +16,17 @@ public class NewsResponse
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
     public short Type { get; set; }
+
+    /// <summary>所屬專區：0 公告、1 服務專區</summary>
+    public short Section { get; set; }
     public int ViewCount { get; set; }
+
+    /// <summary>附件檔案 Id：只有後台使用者拿得到（編輯表單用），公開呼叫一律是空的（附件要填完下載表單才給）</summary>
+    public List<Guid> AttachmentFileIds { get; set; } = new();
+
+    /// <summary>附件數量（公開也看得到，列表卡片用來顯示「有附件」）</summary>
+    public int AttachmentCount { get; set; }
+
     public List<string> Tags { get; set; } = new();
 
     /// <summary>
@@ -53,6 +63,9 @@ public class NewsListItemResponse
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
     public int ViewCount { get; set; }
+    public short Type { get; set; }
+    public short Section { get; set; }
+    public int AttachmentCount { get; set; }
     public DateTime CreatedTime { get; set; }
 
     /// <summary>

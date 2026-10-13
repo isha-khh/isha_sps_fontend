@@ -47,3 +47,28 @@ export async function submitInquiry(payload: InquiryPayload): Promise<string | n
     return getApiErrorMessage(error, "送出失敗，請稍後再試");
   }
 }
+
+/** 服務專區項目的附件下載資訊（填完「立即下載」表單後才拿得到） */
+export interface ServeDownloadLink {
+  fileId: string;
+  fileName: string;
+  formattedFileSize: string;
+  /** 下載網址（相對於 API 位址，用 `resolveBackendAssetUrl` 補成完整網址） */
+  url: string;
+}
+
+/**
+ * 服務專區「立即下載」：存成「下載申請」詢問單，**成功後直接回傳這個項目的附件下載連結**（`POST /api/Inquiry/download/{newsId}`）。
+ * 針對的項目與種類由後端決定。成功回傳 `{ links }`；失敗回傳 `{ error }`（後端的訊息，沒有就用通用說明）。
+ */
+export async function requestServeDownload(
+  newsId: number | string,
+  payload: Pick<InquiryPayload, "name" | "email" | "phone" | "companyName" | "unit" | "jobTitle">,
+): Promise<{ links: ServeDownloadLink[] } | { error: string }> {
+  try {
+    const response = await apiClient.post<ServeDownloadLink[]>(`/api/Inquiry/download/${newsId}`, { ...payload, consentAccepted: true });
+    return { links: response.data ?? [] };
+  } catch (error) {
+    return { error: getApiErrorMessage(error, "送出失敗，請稍後再試") };
+  }
+}

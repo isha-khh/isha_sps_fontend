@@ -50,7 +50,8 @@ public class SearchService : ISearchService
             var db = _unitOfWork.GetDbContext();
             var groups = new List<SearchGroup>
             {
-                await SearchNewsAsync(db, kw, limit, encoded, cancellationToken),
+                await SearchNewsAsync(db, kw, limit, encoded, cancellationToken, NewsSection.Announcement, "news", "最新消息", "/news"),
+                await SearchNewsAsync(db, kw, limit, encoded, cancellationToken, NewsSection.Serve, "serve", "服務專區", "/serve"),
                 await SearchCasesAsync(db, kw, limit, encoded, cancellationToken),
                 await SearchFaqAsync(db, kw, limit, encoded, cancellationToken),
                 await SearchVideosAsync(db, kw, limit, encoded, cancellationToken),
@@ -70,10 +71,11 @@ public class SearchService : ISearchService
         }
     }
 
+    /// <summary>公告與服務專區共用 News 資料表，用 <c>Section</c> 區分；各自一組搜尋結果，連結指向各自的頁面（<paramref name="basePath"/>）</summary>
     private static async Task<SearchGroup> SearchNewsAsync(
-        DbContext db, string kw, int limit, string encoded, CancellationToken ct)
+        DbContext db, string kw, int limit, string encoded, CancellationToken ct, short section, string groupType, string label, string basePath)
     {
-        var query = db.Set<News>().Where(n => n.Published &&
+        var query = db.Set<News>().Where(n => n.Published && n.Section == section &&
             ((n.Title != null && n.Title.DefaultText != null && n.Title.DefaultText.ToLower().Contains(kw)) ||
              (n.Introduction != null && n.Introduction.DefaultText != null && n.Introduction.DefaultText.ToLower().Contains(kw))));
 
@@ -86,10 +88,10 @@ public class SearchService : ISearchService
 
         return new SearchGroup
         {
-            Type = "news",
-            Label = "最新消息",
+            Type = groupType,
+            Label = label,
             TotalCount = total,
-            MoreUrl = $"/news?q={encoded}",
+            MoreUrl = $"{basePath}?q={encoded}",
             Items = rows.Select(r => new SearchResultItem
             {
                 Id = r.Id.ToString(),
@@ -97,7 +99,7 @@ public class SearchService : ISearchService
                 Summary = r.Intro,
                 Date = r.StartDate,
                 ImageUrl = r.Image,
-                Url = $"/news/{r.Id}",
+                Url = $"{basePath}/{r.Id}",
             }).ToList(),
         };
     }

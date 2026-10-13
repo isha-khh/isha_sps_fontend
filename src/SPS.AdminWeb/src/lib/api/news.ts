@@ -26,6 +26,7 @@ export const newsApi = {
           Search: params?.search,
           CategoryId: params?.categoryId,
           Type: params?.type,
+          Section: params?.section,
           Published: params?.published,
         },
       });

@@ -7,11 +7,11 @@ import { categoriesApi } from '@/lib/api/category';
 import type { News, NewsSearchParams } from '@/types/news';
 import type { CategoryResponse } from '@/types/category';
 import { useNotify } from '@/hooks/useNotify';
+import { NEWS_SECTIONS, type NewsSection } from '@/lib/news-section';
 
-// 公告分類的 type 值 (對應後端 CategoryType.News = 1)
-const NEWS_CATEGORY_TYPE = 1;
-
-export const NewsListPage = () => {
+/** `section`：0 公告（預設）、1 服務專區，兩者共用這個頁面，差異見 `lib/news-section.ts` */
+export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
+  const config = NEWS_SECTIONS[section];
   const notify = useNotify();
   const [news, setNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +20,7 @@ export const NewsListPage = () => {
   const pageSize = 20;
 
   // 搜尋與篩選參數
-  const [searchParams, setSearchParams] = useState<NewsSearchParams>({});
+  const [searchParams, setSearchParams] = useState<NewsSearchParams>({ section });
   const [searchText, setSearchText] = useState('');
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
 
@@ -28,7 +28,7 @@ export const NewsListPage = () => {
   const fetchNews = async () => {
     setIsLoading(true);
     try {
-      const response = await newsApi.getNews(currentPage, pageSize, searchParams);
+      const response = await newsApi.getNews(currentPage, pageSize, { ...searchParams, section });
       setNews(response.items);
       setTotalCount(response.totalCount);
     } catch (error) {
@@ -42,7 +42,7 @@ export const NewsListPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await categoriesApi.getCategoriesByType(NEWS_CATEGORY_TYPE);
+        const data = await categoriesApi.getCategoriesByType(config.categoryType);
         setCategories(data.filter(c => c.published));
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -90,8 +90,8 @@ export const NewsListPage = () => {
     <div className="space-y-6">
       {notify.NotifyComponent}
       <PageTitle
-        title="公告管理"
-        items={[{ label: '內容管理', path: '/announcements' }, { label: '公告內容', active: true }]}
+        title={config.listTitle}
+        items={[{ label: config.parentLabel, path: config.basePath }, { label: config.listCrumb, active: true }]}
       />
 
       {/* 操作列 */}
@@ -99,7 +99,7 @@ export const NewsListPage = () => {
         <form onSubmit={handleSearch} className="flex gap-2 flex-1 max-w-md">
           <input
             type="text"
-            placeholder="搜尋公告標題或內容..."
+            placeholder={`搜尋${config.noun}標題或內容...`}
             className="input input-bordered flex-1"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -111,9 +111,9 @@ export const NewsListPage = () => {
         </form>
 
         <div className="flex gap-2">
-          <Link to="/announcements/new/edit" className="btn btn-success">
+          <Link to={`${config.basePath}/new/edit`} className="btn btn-success">
             <span className="iconify lucide--plus size-5" />
-            新增公告
+            新增{config.noun}
           </Link>
         </div>
       </div>
@@ -148,7 +148,7 @@ export const NewsListPage = () => {
             {/* 分類篩選 */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text">公告分類</span>
+                <span className="label-text">{config.noun}分類</span>
               </label>
               <select
                 className="select select-bordered"
@@ -171,8 +171,8 @@ export const NewsListPage = () => {
               </select>
             </div>
 
-            {/* 類型篩選 */}
-            <div className="form-control">
+            {/* 類型篩選（只有公告有一般／重要／緊急） */}
+            {config.hasSeverityType && <div className="form-control">
               <label className="label">
                 <span className="label-text">公告類型</span>
               </label>
@@ -193,7 +193,7 @@ export const NewsListPage = () => {
                 <option value="1">重要公告</option>
                 <option value="2">緊急公告</option>
               </select>
-            </div>
+            </div>}
 
             {/* 重置篩選 */}
             {(searchParams.published !== undefined ||
@@ -206,7 +206,7 @@ export const NewsListPage = () => {
                 <button
                   className="btn btn-ghost"
                   onClick={() => {
-                    setSearchParams({});
+                    setSearchParams({ section });
                     setSearchText('');
                     setCurrentPage(1);
                   }}
@@ -241,6 +241,8 @@ export const NewsListPage = () => {
             isLoading={isLoading}
             onTogglePublish={handleTogglePublish}
             onDelete={handleDelete}
+            basePath={config.basePath}
+            noun={config.noun}
           />
         </div>
       </div>

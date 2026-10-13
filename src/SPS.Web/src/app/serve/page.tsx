@@ -7,57 +7,62 @@ import SidebarBanner from "@/components/layout/SidebarBanner";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import ServeItemCard from "@/components/serve/ServeItemCard";
-import { SERVE_ITEMS, getServeSiblingCategories } from "@/lib/serve-data";
-import { fetchBanners } from "@/lib/api.server";
+import { toServeCardItem } from "@/lib/serve-data";
+import { fetchBanners, fetchServeCategories, fetchServeItems } from "@/lib/api.server";
 
 export const metadata: Metadata = {
   title: "服務專區",
 };
 
+const SERVE_PAGE_SIZE = 9;
+
 /**
- * 服務專區列表，對應舊站 serve/index.html。跟 `/news` 同一套組裝方式，
- * 差別在卡片版面（ServeItemCard 是網格排版，不是橫向卡片）、搜尋列
- * 用沒有年份下拉的 search2 變體、右側欄沒有熱門文章（舊站這裡沒載
- * side2_new，只有 side2_banner）。
+ * 服務專區列表，對應舊站 serve/index.html（三欄卡片）。2026-10-13 起資料來自後台「服務專區」維護的內容
+ * （跟公告共用 News 資料表，見 `lib/serve-data.ts`），分類、關鍵字搜尋與分頁都交給後端；沒有內容就顯示「目前沒有資料」，
+ * 不再有假資料。`?category=` 是分類名稱（前台主選單連來的是 `產業AI`、`技術文件`），對應後台「服務專區分類」同名的分類；
+ * 後台還沒建立那個分類時，該分類顯示沒有項目。
  *
- * 服務專區的分類其實是兩層，之前誤把它做成單層（用側欄切四個分組），
- * 使用者拿舊站截圖對過才發現的——完整說明見 [serve-data.ts](../../lib/serve-data.ts)
- * 開頭的註解：
- *
- * 1. `?category=` 帶的是「葉節點」名稱（例如「技術文件」），不是分組
- *    名稱（技術工具）——分組本身在 Headers.tsx 裡是 disabled、點不了的
- *    純分組標籤。有帶分類時，標題／麵包屑改成該葉節點名稱（對照舊站
- *    `page/serve/index.html` 的 marquee 標題就是「技術文件」，不是
- *    「服務專區」），並顯示 `titleAside`（`ServeSubNav`，對應舊站
- *    `.s_meu_lk`）讓使用者在同一組的兄弟節點間切換（產業AI／技術文件）。
- *    沒帶分類（`/serve` 本身）維持「服務專區」總覽，不顯示 titleAside。
- * 2. 側欄 `CategoryTabList` 對應舊站 `side1_serve.html`（`.wid-cont`）
- *    的「全部／分類1／分類2」——這層在舊站原始碼裡三個連結全部指回
- *    同一個 `index.html`，是純裝飾、不是真的篩選，這裡照舊站原樣呈現
- *    （不自己編一套真的篩選邏輯），所以每個連結都連回目前這個網址，
- *    「全部」固定顯示 active。
+ * 側欄的「全部／分類1／分類2」是舊站原樣的裝飾性連結（舊站原始碼裡三個連結都指回同一個網址，不是真的篩選），
+ * 照舊站原樣呈現，不要自己幫這層編出真的篩選邏輯。
  */
 export default async function ServeIndexPage({ searchParams }: PageProps<"/serve">) {
   const sidebarBanners = await fetchBanners("sidebar-serve");
-  const { category: rawCategory } = await searchParams;
-  const category = typeof rawCategory === "string" ? rawCategory : undefined;
-  const siblingCategories = category ? getServeSiblingCategories(category) : undefined;
-  const items = category ? SERVE_ITEMS.filter((item) => item.category === category) : SERVE_ITEMS;
-  const currentHref = category ? `/serve?category=${category}` : "/serve";
+  const { category: rawCategory, q: rawQuery, page: rawPage } = await searchParams;
+  const category = typeof rawCategory === "string" && rawCategory ? rawCategory : undefined;
+  const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
+  const requestedPage = typeof rawPage === "string" ? Number(rawPage) : 1;
+  const page = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.floor(requestedPage) : 1;
+
+  const categories = await fetchServeCategories();
+  const activeCategory = category ? categories.find((c) => c.name === category) : undefined;
+  // 指定了分類名稱卻找不到（後台還沒建立）→ 不顯示任何項目，而不是退回「全部」誤導使用者
+  const unknownCategory = category !== undefined && !activeCategory;
+
+  const result = unknownCategory ? { items: [], totalCount: 0, backendAvailable: true } : await fetchServeItems({ search: query || undefined, categoryId: activeCategory?.id, page, pageSize: SERVE_PAGE_SIZE });
+  const items = result.items.map(toServeCardItem);
+  const totalPages = Math.max(1, Math.ceil(result.totalCount / SERVE_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+
+  const currentHref = category ? `/serve?category=${encodeURIComponent(category)}` : "/serve";
+  const siblingCategories = category && categories.length > 1 ? categories.map((c) => c.name) : undefined;
+  const getPageHref = (target: number) => {
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    if (query) params.set("q", query);
+    if (target > 1) params.set("page", String(target));
+    const qs = params.toString();
+    return qs ? `/serve?${qs}` : "/serve";
+  };
 
   return (
     <>
       <BodyClass className="serve" />
+
       <InnerPageShell
         title={category ?? "服務專區"}
-        titleAside={siblingCategories && siblingCategories.length > 1 ? <ServeSubNav categories={siblingCategories} activeCategory={category!} /> : undefined}
+        titleAside={siblingCategories && category ? <ServeSubNav categories={siblingCategories} activeCategory={category} /> : undefined}
         breadcrumb={category ? [{ label: "服務專區", href: "/serve" }, { label: category }] : [{ label: "服務專區" }]}
         sidebar={
-          // 「全部／分類1／分類2」是舊站原樣的裝飾性連結，三個連結在
-          // 舊站原始碼裡都指回同一個網址，不是真的篩選（見上面說明）。
-          // 分類1／分類2 故意接一個不會被用到的錨點後綴，讓它們的 href
-          // 跟「全部」不同——不然三個都等於 activeHref，會變成三個同時
-          // 顯示 active，跟舊站「只有全部是 active」的樣子對不上。
           <CategoryTabList
             activeHref={currentHref}
             items={[
@@ -70,12 +75,11 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
         aside={<SidebarBanner banners={sidebarBanners} />}
       >
         <div className="search2 mb-md-5 mb-4">
-          <SearchBar keywordPlaceholder="請輸入關鍵字" />
+          <SearchBar keywordPlaceholder="請輸入關鍵字" defaultKeyword={query} hiddenFields={category ? { category } : undefined} />
         </div>
-
         <div className="row">
-          {items.length === 0 && <p>目前沒有符合這個分類的項目。</p>}
-
+          {!result.backendAvailable && <p>目前無法載入服務專區的資料，請稍後再試。</p>}
+          {result.backendAvailable && items.length === 0 && <p>{query ? "沒有符合的項目。" : category ? "目前沒有符合這個分類的項目。" : "目前沒有資料。"}</p>}
           {items.map((item) => (
             <ServeItemCard
               key={item.id}
@@ -87,12 +91,12 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
                 title: item.title,
                 description: item.description,
                 keywords: item.keywords,
+                hasAttachments: item.hasAttachments,
               }}
             />
           ))}
         </div>
-
-        <Pagination currentPage={1} totalPages={5} getHref={(page) => `/serve?page=${page}`} />
+        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={getPageHref} />
       </InnerPageShell>
     </>
   );

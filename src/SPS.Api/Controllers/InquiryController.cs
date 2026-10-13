@@ -30,9 +30,13 @@ public class InquiryController : ControllerBase
     private readonly IMemoryCache _cache;
     private readonly ISystemSettingService _settingService;
     private readonly IStaffNotifier _notifier;
+    private readonly INewsService _newsService;
+    private readonly SPS.Api.Services.AttachmentLinks _attachments;
 
-    public InquiryController(IInquiryService inquiryService, IMemoryCache cache, ISystemSettingService settingService, IStaffNotifier notifier)
+    public InquiryController(IInquiryService inquiryService, IMemoryCache cache, ISystemSettingService settingService, IStaffNotifier notifier, INewsService newsService, SPS.Api.Services.AttachmentLinks attachments)
     {
+        _newsService = newsService;
+        _attachments = attachments;
         _inquiryService = inquiryService;
         _cache = cache;
         _settingService = settingService;
@@ -49,6 +53,43 @@ public class InquiryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> Create([FromBody] CreateInquiryRequest request, CancellationToken ct)
+    {
+        var failure = await SubmitAsync(request, ct);
+        return failure ?? Ok(new { success = true });
+    }
+
+    /// <summary>
+    /// 服務專區的「立即下載」：使用者填完資料並同意個資告知後，存成「下載申請」詢問單（針對這個服務項目），
+    /// **成功後直接回傳這個項目的附件下載連結**。附件不在公開頁面列出（公開的項目資料沒有附件 Id），只有送出這張表單才拿得到。
+    /// 沿用詢問單的規則：匿名也可以、要同意個資告知、誘捕欄位、每個 IP 或會員每小時送出次數上限。
+    /// </summary>
+    [HttpPost("download/{newsId:int}")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<SPS.Application.DTOs.News.NewsAttachmentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> DownloadServeItem(int newsId, [FromBody] CreateInquiryRequest request, CancellationToken ct)
+    {
+        var news = await _newsService.GetByIdAsync(newsId, ct);
+        if (!news.IsSuccess || news.Data is not { Published: true } item || item.Section != Domain.Enums.NewsSection.Serve)
+            return NotFound(new { error = "找不到這個服務項目" });
+        if (item.AttachmentFileIds.Count == 0) return BadRequest(new { error = "這個項目目前沒有可下載的文件" });
+
+        // 針對的項目與種類由伺服器決定，不信任前端送來的值
+        request.Type = Domain.Enums.InquiryType.DownloadRequest;
+        request.TargetType = "ServeItem";
+        request.TargetKey = newsId.ToString();
+        request.TargetTitle = item.Title;
+
+        var failure = await SubmitAsync(request, ct);
+        if (failure != null) return failure;
+
+        return Ok(await _attachments.ResolveAsync(item.AttachmentFileIds, ct));
+    }
+
+    /// <summary>送出詢問單（共用：次數限制＋建立）；成功回傳 null，失敗回傳要回給前端的結果</summary>
+    private async Task<IActionResult?> SubmitAsync(CreateInquiryRequest request, CancellationToken ct)
     {
         Guid? memberId = Guid.TryParse(User.FindFirst("MemberId")?.Value, out var parsed) ? parsed : null;
         var isEnterprise = memberId != null && (User.IsInRole("Supplier") || User.IsInRole("Buyer"));
@@ -67,7 +108,7 @@ public class InquiryController : ControllerBase
         }
 
         var r = await _inquiryService.CreateAsync(request, memberId, isEnterprise, ip, ct);
-        return r.IsSuccess ? Ok(new { success = true }) : BadRequest(new { error = r.Error });
+        return r.IsSuccess ? null : BadRequest(new { error = r.Error });
     }
 
     /// <summary>後台：詢問單列表</summary>

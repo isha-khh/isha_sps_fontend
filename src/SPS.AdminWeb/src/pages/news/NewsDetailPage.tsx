@@ -1,3 +1,4 @@
+import { NEWS_SECTIONS, type NewsSection } from '@/lib/news-section';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { PageTitle } from '@/components/PageTitle';
@@ -7,7 +8,9 @@ import { PuckRenderer } from '@/components/puck/PuckRenderer';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useNotify } from '@/hooks/useNotify';
 
-export const NewsDetailPage = () => {
+/** `section`：0 公告（預設）、1 服務專區，共用這個頁面，差異見 `lib/news-section.ts` */
+export const NewsDetailPage = ({ section = 0 }: { section?: NewsSection }) => {
+  const config = NEWS_SECTIONS[section];
   const notify = useNotify();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -25,8 +28,8 @@ export const NewsDetailPage = () => {
         setNews(data);
       } catch (error) {
         console.error('Failed to fetch news:', error);
-        await notify.error('載入公告失敗');
-        navigate('/announcements');
+        await notify.error(`載入${config.noun}失敗`);
+        navigate(config.basePath);
       } finally {
         setIsLoading(false);
       }
@@ -51,8 +54,8 @@ export const NewsDetailPage = () => {
     if (!news) return;
 
     const confirmed = await confirmDialog({
-      cardTitle: '刪除公告',
-      message: '確定要刪除此公告嗎？此操作無法復原。',
+      cardTitle: `刪除${config.noun}`,
+      message: `確定要刪除此${config.noun}嗎？此操作無法復原。`,
       buttonConfirm: '刪除',
       confirmStyle: 'bg-error',
     });
@@ -60,10 +63,10 @@ export const NewsDetailPage = () => {
 
     try {
       await newsApi.deleteNews(news.id);
-      navigate('/announcements');
+      navigate(config.basePath);
     } catch (error) {
       console.error('Failed to delete news:', error);
-      await notify.error('刪除公告失敗');
+      await notify.error(`刪除${config.noun}失敗`);
     }
   };
 
@@ -100,7 +103,7 @@ export const NewsDetailPage = () => {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
           <span className="iconify lucide--alert-circle size-16 text-error mb-4" />
-          <p className="text-lg">找不到此公告</p>
+          <p className="text-lg">找不到此{config.noun}</p>
         </div>
       </div>
     );
@@ -110,10 +113,10 @@ export const NewsDetailPage = () => {
     <>
     <div className="space-y-6">
       <PageTitle
-        title="公告詳情"
+        title={`${config.noun}詳情`}
         items={[
-          { label: '內容管理', path: '/announcements' },
-          { label: '公告內容', path: '/announcements' },
+          { label: config.parentLabel, path: config.basePath },
+          { label: config.listCrumb, path: config.basePath },
           { label: news.title, active: true },
         ]}
       />
@@ -125,7 +128,7 @@ export const NewsDetailPage = () => {
           返回
         </button>
         <div className="flex-1" />
-        <Link to={`/announcements/${id}/edit`} className="btn btn-neutral">
+        <Link to={`${config.basePath}/${id}/edit`} className="btn btn-neutral">
           <span className="iconify lucide--edit size-4" />
           編輯
         </Link>

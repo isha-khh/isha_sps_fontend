@@ -50,6 +50,9 @@ public class CreateNewsRequest
     /// </summary>
     public short Type { get; set; }
 
+    /// <summary>所屬專區：0 公告（預設）、1 服務專區</summary>
+    public short Section { get; set; }
+
     /// <summary>
     /// 標簽ID列表
     /// </summary>
@@ -57,4 +60,7 @@ public class CreateNewsRequest
 
     /// <summary>封面圖：檔案管理中的圖片檔案 Id（Controller 會檢查必須是可用的圖片）</summary>
     public Guid? CoverFileId { get; set; }
+
+    /// <summary>附件（檔案管理中的檔案 Id，服務專區用）</summary>
+    public List<Guid>? AttachmentFileIds { get; set; }
 }

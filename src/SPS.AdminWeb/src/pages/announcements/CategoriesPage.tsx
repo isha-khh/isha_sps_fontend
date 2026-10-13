@@ -5,8 +5,7 @@ import type { CategoryResponse, CreateCategoryRequest, UpdateCategoryRequest } f
 import { useConfirm } from '@/hooks/useConfirm';
 import { useNotify } from '@/hooks/useNotify';
 
-// 公告分類的 type 值 (對應後端 CategoryType.News = 1)
-const NEWS_CATEGORY_TYPE = 1;
+import { NEWS_SECTIONS, type NewsSection } from '@/lib/news-section';
 
 interface CategoryFormData {
   name: string;
@@ -15,7 +14,10 @@ interface CategoryFormData {
   published: boolean;
 }
 
-export const AnnouncementCategoriesPage = () => {
+/** `section`：0 公告分類（預設）、1 服務專區分類；兩者共用這個頁面，差異見 `lib/news-section.ts`（服務專區分類的名稱要對上前台選單：產業AI、技術文件） */
+export const AnnouncementCategoriesPage = ({ section = 0 }: { section?: NewsSection }) => {
+  const config = NEWS_SECTIONS[section];
+  const NEWS_CATEGORY_TYPE = config.categoryType;
   const notify = useNotify();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,9 +131,9 @@ export const AnnouncementCategoriesPage = () => {
     <>
     <div className="space-y-6">
       <PageTitle
-        title="公告類別"
+        title={`${config.noun}分類`}
         items={[
-          { label: '公告管理', path: '/announcements' },
+          { label: config.section === 0 ? '公告管理' : '服務專區管理', path: config.basePath },
           { label: '類別管理', active: true },
         ]}
       />
@@ -242,7 +244,7 @@ export const AnnouncementCategoriesPage = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="例如：系統公告"
+                    placeholder={config.section === 0 ? '例如：系統公告' : '例如：產業AI、技術文件'}
                     className="input input-bordered"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}

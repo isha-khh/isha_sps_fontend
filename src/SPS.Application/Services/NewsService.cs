@@ -43,6 +43,9 @@ public class NewsService : INewsService
                 CategoryId = n.CategoryId,
                 CategoryName = n.Category?.Name,
                 ViewCount = n.ViewCount,
+                Type = n.Type,
+                Section = n.Section,
+                AttachmentCount = n.AttachmentFileIds.Count,
                 CreatedTime = n.CreatedTime,
                 Tags = tagsByNewsId.GetValueOrDefault(n.Id, new List<NewsTagItem>()).Select(t => t.Name).ToList(),
                 TagItems = tagsByNewsId.GetValueOrDefault(n.Id, new List<NewsTagItem>()),
@@ -77,7 +80,10 @@ public class NewsService : INewsService
             CategoryId = news.CategoryId,
             CategoryName = news.Category?.Name,
             Type = news.Type,
+            Section = news.Section,
             ViewCount = news.ViewCount,
+            AttachmentFileIds = news.AttachmentFileIds,
+            AttachmentCount = news.AttachmentFileIds.Count,
             Tags = tags.Select(t => t.Name).ToList(),
             TagItems = tags,
             CreatedTime = news.CreatedTime,
@@ -133,6 +139,8 @@ public class NewsService : INewsService
                 Ordinal = request.Ordinal,
                 CategoryId = request.CategoryId,
                 Type = request.Type,
+                Section = request.Section,
+                AttachmentFileIds = request.AttachmentFileIds?.Distinct().ToList() ?? new List<Guid>(),
                 CreatedTime = DateTime.UtcNow,
                 UpdatedTime = DateTime.UtcNow
             };
@@ -162,7 +170,10 @@ public class NewsService : INewsService
                 Ordinal = news.Ordinal,
                 CategoryId = news.CategoryId,
                 Type = news.Type,
+                Section = news.Section,
                 ViewCount = news.ViewCount,
+                AttachmentFileIds = news.AttachmentFileIds,
+                AttachmentCount = news.AttachmentFileIds.Count,
                 Tags = createdTags.Select(t => t.Name).ToList(),
                 TagItems = createdTags,
                 CreatedTime = news.CreatedTime,
@@ -270,6 +281,8 @@ public class NewsService : INewsService
         if (request.Ordinal.HasValue) news.Ordinal = request.Ordinal.Value;
         if (request.CategoryId.HasValue) news.CategoryId = request.CategoryId;
         if (request.Type.HasValue) news.Type = request.Type.Value;
+        if (request.Section.HasValue) news.Section = request.Section.Value;
+        if (request.AttachmentFileIds != null) news.AttachmentFileIds = request.AttachmentFileIds.Distinct().ToList();
         MultilingualImage? newCover = null;
         if (request.RemoveCover == true)
         {
@@ -306,7 +319,10 @@ public class NewsService : INewsService
             CategoryId = news.CategoryId,
             CategoryName = news.Category?.Name,
             Type = news.Type,
+            Section = news.Section,
             ViewCount = news.ViewCount,
+            AttachmentFileIds = news.AttachmentFileIds,
+            AttachmentCount = news.AttachmentFileIds.Count,
             Tags = updatedTags.Select(t => t.Name).ToList(),
             TagItems = updatedTags,
             CreatedTime = news.CreatedTime,

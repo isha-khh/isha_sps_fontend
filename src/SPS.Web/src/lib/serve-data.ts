@@ -1,101 +1,37 @@
-import { withBasePath } from "@/lib/api-client";
+import type { NewsItem } from "@/lib/types";
+import { formatIsoDate } from "@/lib/content-list-utils";
 
-export interface ServeItem {
-  id: string;
+/**
+ * 服務專區（`/serve`）。資料來自後台「服務專區」維護的內容——跟公告共用同一張資料表（`News`，`section = 1`），
+ * 分類是後台「服務專區分類」（`CategoryType.Serve`）；這裡只負責把後端形狀轉成列表卡片用的樣子。
+ * 2026-10-13 從前台寫死的假資料改接真後端，不再有假資料。
+ *
+ * 前台主選單（`Headers.tsx`）的「服務專區」只有「技術工具」這一組（產業AI、技術文件）連來這一頁
+ * （`/serve?category=<分類名稱>`）；人才培育、產業輔導、補助資源各有自己的頁面。所以後台「服務專區分類」
+ * 要建立的就是這兩個，**名稱要跟選單一致**（產業AI、技術文件），前台用名稱對應分類。
+ */
+export interface ServeCardItem {
+  id: number;
   category: string;
   date: string;
   title: string;
   description: string;
-  image: string;
-  keywords?: string[];
-  contributor?: string;
-  bodyHtml: string;
+  /** 沒有封面圖就是 undefined，卡片不顯示圖片區塊（不再用 logo 當假圖） */
+  image?: string;
+  keywords: string[];
+  /** 有沒有附件（卡片顯示「下載文件」）；附件本身要填完下載表單才看得到 */
+  hasAttachments: boolean;
 }
 
-/**
- * 服務專區的分類其實是兩層（盤點舊站 page/serve/index.html＋
- * page/_uc/breadcrumb.html 後才確認的，之前誤把它當成單層做）：
- *
- * 1. 主選單（Headers.tsx 的「服務專區」下拉）分四組，每組底下的
- *    「葉節點」才是真正的可瀏覽分類，組名本身（技術工具／人才培育）
- *    只是分組標籤，不是可點的頁面——對照舊站 `.s_meu_lk` 那個跑馬燈
- *    標題旁的子選單，切的正是同一組底下的葉節點（例如「產業AI／
- *    技術文件」），不是四個組名互切。`SERVE_ITEMS.category` 存的是
- *    葉節點名稱，`SERVE_CATEGORY_GROUPS` 則是「這個葉節點屬於哪一組、
- *    組內還有哪些兄弟節點」的對照表，給 titleAside 子選單用。
- * 2. 側欄（`side1_serve.html`，`.wid-cont`）是另一層、更細的分類
- *    「全部／分類1／分類2」——舊站原始碼裡這三個連結全部指回同一個
- *    `index.html`（純裝飾，不是真的篩選），照舊站原樣呈現，不要自己
- *    幫這層編出真的篩選邏輯。
- */
-export interface ServeCategoryGroup {
-  label: string;
-  leaves: string[];
-}
-
-export const SERVE_CATEGORY_GROUPS: ServeCategoryGroup[] = [
-  { label: "技術工具", leaves: ["產業AI", "技術文件"] },
-  { label: "人才培育", leaves: ["知識加值", "XR"] },
-  { label: "產業輔導", leaves: ["輔導"] },
-  { label: "補助資源", leaves: ["本計畫補助", "政府補助資源"] },
-];
-
-/** 給 titleAside 用：查某個葉節點分類屬於哪一組，回傳同組的兄弟節點清單（含自己） */
-export function getServeSiblingCategories(category: string): string[] | undefined {
-  return SERVE_CATEGORY_GROUPS.find((group) => group.leaves.includes(category))?.leaves;
-}
-
-/**
- * 服務專區假資料，跟 news-data.ts 是一樣的做法：`/serve` 列表跟
- * `/serve/[id]` 詳情共用同一份，之後接真的 CMS 資料時只換這個檔案。
- */
-export const SERVE_ITEMS: ServeItem[] = [
-  {
-    id: "1",
-    category: "技術文件",
-    date: "2026-04-15",
-    title: "114年度石化產業智慧化補助計畫正式開放申請",
-    description: "提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。",
-    image: withBasePath("/images/all/new_logo.jpg"),
-    keywords: ["產業AI", "技術文件"],
-    contributor: "設計研發組研究員 郭憶璇、江宛庭",
-    bodyHtml: `
-      <p>設計已不只是產品外觀與美學工具，而是協助企業理解市場、整合技術、回應永續議題，建立創新策略的核心驅動力。台灣設計研究院《產業設計創新趨勢與應用方法》提出「設計驅動產業創新模式」，涵蓋三大執行階段：瞭解現況與趨勢、發展解決方案、建構產品策略與迭代。</p>
-      <p>世界改變的速度大幅加快，產業不僅要回應市場，也必須面對數位轉型、環境永續與社會責任等多重挑戰。過往所仰賴的開發模式與營運策略，已難以因應變化快速的市場，因此產業需具備新的思維與方法來面對未來的不確定性與轉型挑戰（Gutsche，2021）。</p>
-    `,
-  },
-  {
-    id: "2",
-    category: "知識加值",
-    date: "2026-04-10",
-    title: "智慧化人才培訓課程即日起開放報名",
-    description: "提供專業人才培訓方案，協助提升產業競爭力與技術能量，課程結業另有補助資格認證。",
-    image: withBasePath("/images/all/new_logo.jpg"),
-    keywords: ["培訓課程"],
-    bodyHtml: `<p>提供專業人才培訓方案，協助提升產業競爭力與技術能量，課程結業另有補助資格認證，詳細課綱請下載附件。</p>`,
-  },
-  {
-    id: "3",
-    category: "輔導",
-    date: "2026-03-28",
-    title: "跨領域專家團隊進場輔導申請說明",
-    description: "安排跨領域專家團隊進場輔導，協助診斷升級瓶頸與提供解決策略。",
-    image: withBasePath("/images/all/new_logo.jpg"),
-    keywords: ["專家諮詢"],
-    bodyHtml: `<p>安排跨領域專家團隊進場輔導，協助診斷升級瓶頸與提供解決策略，申請流程與資格請參閱下載文件。</p>`,
-  },
-  {
-    id: "4",
-    category: "本計畫補助",
-    date: "2026-03-12",
-    title: "中央與地方補助資源整合手冊",
-    description: "整合中央與地方各項專案補助資源，減輕企業研發與數位轉型負擔。",
-    image: withBasePath("/images/all/new_logo.jpg"),
-    keywords: ["補助申請"],
-    bodyHtml: `<p>整合中央與地方各項專案補助資源，減輕企業研發與數位轉型負擔，內容每季更新，請下載最新版手冊。</p>`,
-  },
-];
-
-export function getServeItem(id: string): ServeItem | undefined {
-  return SERVE_ITEMS.find((item) => item.id === id);
+export function toServeCardItem(item: NewsItem): ServeCardItem {
+  return {
+    id: item.id,
+    category: item.categoryName,
+    date: formatIsoDate(item.startDate ?? item.createdTime),
+    title: item.title,
+    description: item.introduction,
+    image: item.imageUrl || undefined,
+    keywords: item.tags ?? [],
+    hasAttachments: (item.attachmentCount ?? 0) > 0,
+  };
 }

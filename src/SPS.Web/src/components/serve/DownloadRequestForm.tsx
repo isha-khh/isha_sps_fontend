@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
-import { InquiryType, submitInquiry } from "@/lib/api/inquiries";
+import { requestServeDownload, type ServeDownloadLink } from "@/lib/api/inquiries";
+import { resolveBackendAssetUrl } from "@/lib/content-list-utils";
 
 /**
  * 服務專區詳情頁的「立即下載」表單，對應舊站 serve/show.html 裡的
@@ -16,14 +17,16 @@ import { InquiryType, submitInquiry } from "@/lib/api/inquiries";
  *
  * 2026-10-06 接上真後端：改成 client 元件，提交呼叫 `POST /api/Inquiry`（種類＝下載申請，匿名也可以，要勾選個資同意），
  * 存進後台「詢問單」收件匣，記錄是針對哪一個服務項目（`itemId`／`itemTitle`），由承辦單位回覆並提供文件。
- * 目前服務專區的項目還是前端靜態資料，項目識別先用它的代號。
+ *
+ * 2026-10-13 服務專區改接後台內容：改呼叫 `POST /api/Inquiry/download/{項目編號}`（`requestServeDownload`），**送出成功後直接顯示這個項目的附件下載連結**
+ * （詢問單照樣存下申請人資料，針對的項目由後端決定）。附件不在公開頁面列出，沒填表單拿不到連結；項目沒有附件時父頁面不顯示這個表單。
  */
-export default function DownloadRequestForm({ itemId, itemTitle }: { itemId: string; itemTitle: string }) {
+export default function DownloadRequestForm({ itemId }: { itemId: number | string; itemTitle?: string }) {
   const [form, setForm] = useState({ companyName: "", userName: "", userUnit: "", userTitle: "", userTel: "", userEmail: "" });
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [links, setLinks] = useState<ServeDownloadLink[] | null>(null);
 
   const bind = (key: keyof typeof form) => ({
     value: form[key],
@@ -38,22 +41,17 @@ export default function DownloadRequestForm({ itemId, itemTitle }: { itemId: str
     if (!agreed) return setError("請勾選已閱讀並同意個資蒐集同意");
 
     setSubmitting(true);
-    const message = await submitInquiry({
-      type: InquiryType.DownloadRequest,
+    const result = await requestServeDownload(itemId, {
       companyName: form.companyName.trim(),
       name: form.userName.trim(),
       unit: form.userUnit.trim(),
       jobTitle: form.userTitle.trim(),
       phone: form.userTel.trim(),
       email: form.userEmail.trim(),
-      targetType: "ServeItem",
-      targetKey: itemId,
-      targetTitle: itemTitle,
-      consentAccepted: true,
     });
     setSubmitting(false);
-    if (message) return setError(message);
-    setSubmitted(true);
+    if ("error" in result) return setError(result.error);
+    setLinks(result.links);
     setForm({ companyName: "", userName: "", userUnit: "", userTitle: "", userTel: "", userEmail: "" });
     setAgreed(false);
   }
@@ -65,6 +63,28 @@ export default function DownloadRequestForm({ itemId, itemTitle }: { itemId: str
         <span>立即下載</span>
       </div>
 
+      {links && (
+        <div className="dow_box" role="status">
+          <p className="text-success mb-3">已收到您的申請，請從下面下載文件：</p>
+          {links.length === 0 ? (
+            <p className="mb-0">目前沒有可下載的文件，承辦單位會與您聯繫。</p>
+          ) : (
+            <ul className="list-unstyled mb-0 d-grid gap-2">
+              {links.map((link) => (
+                <li key={link.fileId}>
+                  <a href={resolveBackendAssetUrl(link.url) ?? link.url} target="_blank" rel="noopener noreferrer" className="d-inline-flex align-items-center gap-2" title={`下載 ${link.fileName}（另開視窗）`}>
+                    <i className="bi bi-file-earmark-arrow-down" aria-hidden="true"></i>
+                    <span>{link.fileName}</span>
+                    <span className="small text-muted">（{link.formattedFileSize}）</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {!links && (
       <div className="dow_box">
         <div className="row g-3 g-lg-4 mb-3 mb-lg-4">
           <div className="col-md-6 col-12">
@@ -148,13 +168,13 @@ export default function DownloadRequestForm({ itemId, itemTitle }: { itemId: str
             {error}
           </p>
         )}
-        {submitted && <p className="text-center text-success mb-3">已收到您的申請，承辦單位將與您聯繫並提供文件。</p>}
 
         <a href="#" title="提交" className="more_x" aria-disabled={submitting} onClick={(event) => void submit(event)}>
           <span>{submitting ? "送出中…" : "提交"}</span>
           <i className="bi bi-arrow-right" aria-hidden="true"></i>
         </a>
       </div>
+      )}
 
       <Modal id="privacyConsentModal" title="個資蒐集條款">
         <p>內容內容內容內容內容</p>

@@ -14,10 +14,16 @@ public class UpdateNewsRequest
     public int? Ordinal { get; set; }
     public int? CategoryId { get; set; }
     public short? Type { get; set; }
+
+    /// <summary>所屬專區；沒帶（null）= 不更新</summary>
+    public short? Section { get; set; }
     public List<int>? TagIds { get; set; }
 
     /// <summary>換封面圖：檔案管理中的圖片檔案 Id；沒帶（null）= 不更新</summary>
     public Guid? CoverFileId { get; set; }
+
+    /// <summary>附件：沒帶（null）= 不更新；空陣列 = 清除全部附件</summary>
+    public List<Guid>? AttachmentFileIds { get; set; }
 
     /// <summary>true = 移除封面圖（優先於 <see cref="CoverFileId"/>）</summary>
     public bool? RemoveCover { get; set; }

@@ -8,9 +8,13 @@ interface NewsTableProps {
   isLoading?: boolean;
   onTogglePublish?: (id: number, published: boolean) => void;
   onDelete?: (id: number) => void;
+  /** 列表所在路徑（檢視與編輯連結掛在底下），預設是公告 */
+  basePath?: string;
+  /** 項目名稱（空列表與刪除確認的文字） */
+  noun?: string;
 }
 
-export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete }: NewsTableProps) => {
+export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete, basePath = '/announcements', noun = '公告' }: NewsTableProps) => {
   const { confirmDialog, ConfirmComponent } = useConfirm();
 
   const columns: Column<News>[] = [
@@ -104,20 +108,20 @@ export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete }: NewsTa
         keyField="id"
         isLoading={isLoading}
         emptyIcon="lucide--newspaper"
-        emptyMessage="沒有找到公告資料"
+        emptyMessage={`沒有找到${noun}資料`}
         confirmDialog={confirmDialog}
         primaryActions={[
           {
             label: '查看',
             icon: 'lucide--eye',
-            to: (item) => `/announcements/${item.id}`,
+            to: (item) => `${basePath}/${item.id}`,
           },
         ]}
         dropdownActions={[
           {
             label: '編輯',
             icon: 'lucide--edit',
-            to: (item) => `/announcements/${item.id}/edit`,
+            to: (item) => `${basePath}/${item.id}/edit`,
           },
           ...(onTogglePublish
             ? [

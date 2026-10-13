@@ -3,12 +3,15 @@ import { withBasePath } from "@/lib/api-client";
 
 export interface ServeItemCardData {
   href: string;
-  image: string;
+  /** 沒有封面圖就不顯示圖片區塊 */
+  image?: string;
   category: string;
   date: string;
   title: string;
   description: string;
   keywords?: string[];
+  /** 有附件才顯示「下載文件」 */
+  hasAttachments?: boolean;
 }
 
 /**
@@ -29,13 +32,15 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
   return (
     <div className="col-lg-4 col-md-6 col-12 item mb-md-4 mb-4">
       <div className="item_box">
-        <a href={withBasePath(data.href)} className="pic" title={data.title}>
-          <div className="ratio ratio-4x3">
-            <img className="img-fluid d-block" src={data.image} alt="" />
-          </div>
-        </a>
+        {data.image && (
+          <a href={withBasePath(data.href)} className="pic" title={data.title}>
+            <div className="ratio ratio-4x3">
+              <img className="img-fluid d-block" src={data.image} alt="" />
+            </div>
+          </a>
+        )}
 
-        <div className="tit mt-4">
+        <div className={data.image ? "tit mt-4" : "tit"}>
           <a href={withBasePath(data.href)} title={data.title}>
             <div className="tit_nsl">
               <div className="tit_three d-flex mb-2">
@@ -51,12 +56,14 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
 
               <p>{data.description}</p>
 
-              <ul className="nav d-block mb-3">
-                <li>
-                  <i className="bi bi-file-earmark-arrow-down" aria-hidden="true"></i>
-                  <span>下載文件</span>
-                </li>
-              </ul>
+              {data.hasAttachments && (
+                <ul className="nav d-block mb-3">
+                  <li>
+                    <i className="bi bi-file-earmark-arrow-down" aria-hidden="true"></i>
+                    <span>下載文件</span>
+                  </li>
+                </ul>
+              )}
             </div>
           </a>
 

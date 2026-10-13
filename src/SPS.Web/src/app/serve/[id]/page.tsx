@@ -8,22 +8,14 @@ import ShareBox from "@/components/ui/ShareBox";
 import ZoomableImage from "@/components/ui/ZoomableImage";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import DownloadRequestForm from "@/components/serve/DownloadRequestForm";
-import { SERVE_ITEMS, getServeItem } from "@/lib/serve-data";
+import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import { withBasePath } from "@/lib/api-client";
-import { fetchBanners } from "@/lib/api.server";
-
-export function generateStaticParams() {
-  return SERVE_ITEMS.map((item) => ({ id: item.id }));
-}
-
-// 說明見 news/[id]/page.tsx 同一行的註解：現在是固定假資料，不在名單裡
-// 的 id 直接在路由層級當 404，順便避開一個實測到的問題（未預先產生的
-// 動態 id 觸發 notFound() 時，全站腳本載入順序會跟正常頁面不一樣）。
-export const dynamicParams = false;
+import { fetchBanners, fetchServeDetail } from "@/lib/api.server";
+import { formatIsoDate } from "@/lib/content-list-utils";
 
 export async function generateMetadata({ params }: PageProps<"/serve/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const item = getServeItem(id);
+  const item = await fetchServeDetail(id);
   // 查無這個項目時，分頁標題也要跟著換成「找不到頁面」，不然瀏覽器
   // 分頁會顯示「服務專區」，但畫面其實已經是 not-found.tsx 那頁了。
   return { title: item?.title ?? "找不到頁面" };
@@ -39,7 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/serve/[id]">): Pr
 export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">) {
   const sidebarBanners = await fetchBanners("sidebar-serve");
   const { id } = await params;
-  const item = getServeItem(id);
+  const item = await fetchServeDetail(id);
 
   if (!item) {
     notFound();
@@ -49,7 +41,7 @@ export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">
     <>
       <BodyClass className="serve show" />
       <InnerPageShell
-        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: item.category, href: `/serve?category=${item.category}` }, { label: item.title }]}
+        breadcrumb={[{ label: "服務專區", href: "/serve" }, ...(item.categoryName ? [{ label: item.categoryName, href: `/serve?category=${encodeURIComponent(item.categoryName)}` }] : []), { label: item.title }]}
         aside={<SidebarBanner banners={sidebarBanners} />}
         decorations={
           <>
@@ -70,19 +62,19 @@ export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">
                   <div className="tag-wrap">
-                    <Badge>{item.category}</Badge>
+                    <Badge>{item.categoryName}</Badge>
                   </div>
                   <div className="part-line"></div>
-                  <div className="date">{item.date}</div>
+                  <div className="date">{formatIsoDate(item.startDate ?? item.createdTime)}</div>
                 </div>
 
                 <ShareBox />
               </div>
             </div>
 
-            {item.keywords && item.keywords.length > 0 && (
+            {item.tags && item.tags.length > 0 && (
               <ul className="nav ul-key">
-                {item.keywords.map((keyword) => (
+                {item.tags.map((keyword) => (
                   <li key={keyword}>
                     <a href="#" title={`前往${keyword}`} tabIndex={0}>
                       {keyword}
@@ -93,15 +85,18 @@ export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">
             )}
           </div>
 
-          <ZoomableImage src={item.image} alt={item.title} caption={item.title} />
+          {item.imageUrl && <ZoomableImage src={item.imageUrl} alt={item.title} caption={item.title} />}
 
-          {item.contributor && <div className="Contributor">撰稿人 / {item.contributor}</div>}
-
-          <div className="txt editor mb-md-5 mb-4" dangerouslySetInnerHTML={{ __html: item.bodyHtml }} />
-
-          <div className="dk_conbo mb-md-5 mb-4">
-            <DownloadRequestForm itemId={item.id} itemTitle={item.title} />
+          <div className="txt editor mb-md-5 mb-4">
+            <PuckRenderer content={item.content} />
           </div>
+
+          {/* 有附件才顯示「立即下載」表單；附件不在頁面上列出，填完表單才拿得到下載連結 */}
+          {(item.attachmentCount ?? 0) > 0 && (
+            <div className="dk_conbo mb-md-5 mb-4">
+              <DownloadRequestForm itemId={item.id} itemTitle={item.title} />
+            </div>
+          )}
 
           <MoreLink href="/serve" label="返回" title="返回" />
         </div>

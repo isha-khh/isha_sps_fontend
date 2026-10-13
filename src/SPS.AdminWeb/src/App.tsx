@@ -219,6 +219,10 @@ function App() {
           {/* 公告管理 */}
           <Route path="announcements/categories" element={<AnnouncementCategoriesPage />} />
           <Route path="announcements/tags" element={<AnnouncementTagsPage />} />
+          <Route path="serve-items/categories" element={<AnnouncementCategoriesPage section={1} />} />
+          <Route path="serve-items" element={<NewsListPage section={1} />} />
+          <Route path="serve-items/:id" element={<NewsDetailPage section={1} />} />
+          <Route path="serve-items/:id/edit" element={<NewsFormPage section={1} />} />
           <Route path="announcements" element={<NewsListPage />} />
           <Route path="announcements/:id" element={<NewsDetailPage />} />
           <Route path="announcements/:id/edit" element={<NewsFormPage />} />

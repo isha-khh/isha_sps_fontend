@@ -180,6 +180,10 @@ export type NewsTagItem = {
 
 export type NewsItem = {
     id: number;
+    /** 所屬專區：0 公告、1 服務專區 */
+    section?: number;
+    /** 附件數量（服務專區用，列表卡片顯示「下載文件」） */
+    attachmentCount?: number;
     title: string;
     introduction: string;
     // 真後端 News.StartDate 是 `DateTime?`（可為 null）——2026-09-08
@@ -222,6 +226,10 @@ export type PagedResult<T> = {
 
 export type NewsDetail = {
     id: number;
+    /** 所屬專區：0 公告、1 服務專區（公告頁不顯示服務專區的內容，反之亦然） */
+    section?: number;
+    /** 附件數量（服務專區用）；附件本身不在公開資料裡，要填完下載表單才給 */
+    attachmentCount?: number;
     title: string;
     introduction?: string;
     // 可能是 null，理由同 NewsItem.startDate
@@ -627,3 +635,10 @@ export interface DownloadLink {
  */
 export type DownloadResources = Record<string, { title: string; links: DownloadLink[] }>;
 
+
+
+/** 服務專區的分類（後端 `CategoryType.Serve`），名稱要對上前台選單的項目 */
+export type ServeCategory = {
+    id: number;
+    name: string;
+};

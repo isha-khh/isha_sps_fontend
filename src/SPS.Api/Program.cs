@@ -47,6 +47,7 @@ builder.Services.AddApplication();
 // Add API-layer services
 builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
 builder.Services.AddScoped<SPS.Api.Services.CompanyShowcaseHelper>();
+builder.Services.AddScoped<SPS.Api.Services.AttachmentLinks>();
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

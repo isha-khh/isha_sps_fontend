@@ -11,11 +11,11 @@ import { PuckEditor } from '@/components/puck/PuckEditor';
 import { useNotify } from '@/hooks/useNotify';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
+import { NEWS_SECTIONS, type NewsSection } from '@/lib/news-section';
 
-// 公告分類的 type 值 (對應後端 CategoryType.News = 1)
-const NEWS_CATEGORY_TYPE = 1;
-
-export const NewsFormPage = () => {
+/** `section`：0 公告（預設）、1 服務專區，兩者共用這個表單，差異見 `lib/news-section.ts` */
+export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
+  const config = NEWS_SECTIONS[section];
   const notify = useNotify();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -27,6 +27,7 @@ export const NewsFormPage = () => {
     content: '',
     published: false,
     type: 0,
+    section,
   });
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
@@ -39,6 +40,10 @@ export const NewsFormPage = () => {
   const [coverFileId, setCoverFileId] = useState<string | undefined>();
   const [removeCover, setRemoveCover] = useState(false);
   const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
+  // 附件（服務專區用）：檔案管理中的檔案，依顯示順序；`attachmentNames` 只是畫面上顯示檔名用
+  const [attachmentIds, setAttachmentIds] = useState<string[]>([]);
+  const [attachmentNames, setAttachmentNames] = useState<Record<string, string>>({});
+  const [isAttachmentPickerOpen, setIsAttachmentPickerOpen] = useState(false);
 
   // 使用 ref 保存最新的 Puck 內容
   const puckContentRef = useRef<string>('');
@@ -47,7 +52,7 @@ export const NewsFormPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await categoriesApi.getCategoriesByType(NEWS_CATEGORY_TYPE);
+        const data = await categoriesApi.getCategoriesByType(config.categoryType);
         setCategories(data.filter(c => c.published));
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -86,8 +91,10 @@ export const NewsFormPage = () => {
           ordinal: data.ordinal,
           categoryId: data.categoryId,
           type: data.type,
+          section: data.section ?? section,
         };
         setFormData(newsData);
+        setAttachmentIds(data.attachmentFileIds ?? []);
         setCoverUrl(data.imageUrl || undefined);
         setSelectedTagIds((data.tagItems ?? []).map((t) => t.id));
         // 初始化 ref
@@ -95,8 +102,8 @@ export const NewsFormPage = () => {
         console.log('[NewsFormPage] Loaded existing content, length:', data.content?.length || 0);
       } catch (error) {
         console.error('Failed to fetch news:', error);
-        await notify.error('載入公告失敗');
-        navigate('/announcements');
+        await notify.error(`載入${config.noun}失敗`);
+        navigate(config.basePath);
       } finally {
         setIsLoading(false);
       }
@@ -121,7 +128,7 @@ export const NewsFormPage = () => {
 
   const handleSubmit = async (publish: boolean) => {
     if (!formData.title.trim()) {
-      await notify.warning('請輸入公告標題');
+      await notify.warning(`請輸入${config.noun}標題`);
       return;
     }
 
@@ -145,7 +152,9 @@ export const NewsFormPage = () => {
           ordinal: formData.ordinal,
           categoryId: formData.categoryId,
           type: formData.type,
+          section,
           tagIds: selectedTagIds,
+          ...(config.hasAttachments ? { attachmentFileIds: attachmentIds } : {}),
           ...(coverFileId ? { coverFileId } : {}),
           ...(removeCover && !coverFileId ? { removeCover: true } : {}),
         };
@@ -163,7 +172,9 @@ export const NewsFormPage = () => {
           ordinal: formData.ordinal,
           categoryId: formData.categoryId,
           type: formData.type,
+          section,
           tagIds: selectedTagIds,
+          ...(config.hasAttachments ? { attachmentFileIds: attachmentIds } : {}),
           ...(coverFileId ? { coverFileId } : {}),
         };
         console.log('[NewsFormPage] Creating new news');
@@ -171,11 +182,11 @@ export const NewsFormPage = () => {
         console.log('[NewsFormPage] Create successful');
       }
 
-      navigate('/announcements');
+      navigate(config.basePath);
     } catch (error) {
       console.error('Failed to save news:', error);
       const serverMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
-      await notify.error(serverMessage || '儲存公告失敗，請稍後再試');
+      await notify.error(serverMessage || `儲存${config.noun}失敗，請稍後再試`);
     } finally {
       setIsSaving(false);
     }
@@ -193,10 +204,10 @@ export const NewsFormPage = () => {
   return (
     <div className="space-y-6">
       <PageTitle
-        title={isEditMode ? '編輯公告' : '新增公告'}
+        title={isEditMode ? `編輯${config.noun}` : `新增${config.noun}`}
         items={[
-          { label: '內容管理', path: '/announcements' },
-          { label: '公告內容', path: '/announcements' },
+          { label: config.parentLabel, path: config.basePath },
+          { label: config.listCrumb, path: config.basePath },
           { label: isEditMode ? '編輯' : '新增', active: true },
         ]}
       />
@@ -329,6 +340,48 @@ export const NewsFormPage = () => {
               </div>
             </div>
 
+            {/* 附件（服務專區）：不在公開頁面列出，使用者填完「立即下載」表單才拿得到下載連結 */}
+            {config.hasAttachments && (
+              <div className="card bg-base-100 shadow-xl">
+                <div className="card-body">
+                  <h3 className="card-title mb-2">
+                    <span className="iconify lucide--paperclip size-5" />
+                    下載附件
+                  </h3>
+                  <p className="text-sm text-base-content/60 mb-3">
+                    從檔案系統挑選（最多 10 個）。前台詳情頁不會直接列出，使用者填寫「立即下載」表單並同意個資告知後才會看到下載連結；沒有附件的項目，表單送出會提示沒有可下載的文件。
+                  </p>
+                  {attachmentIds.length === 0 ? (
+                    <div className="flex h-20 items-center justify-center rounded-box border border-dashed border-base-300 text-sm text-base-content/50">尚未選擇附件</div>
+                  ) : (
+                    <ul className="space-y-2">
+                      {attachmentIds.map((fileId, index) => (
+                        <li key={fileId} className="flex items-center gap-2 rounded-box border border-base-300 px-3 py-2 text-sm">
+                          <span className="iconify lucide--file size-4 shrink-0" />
+                          <span className="flex-1 truncate">{attachmentNames[fileId] ?? `檔案 ${fileId.slice(0, 8)}…`}</span>
+                          <button type="button" className="btn btn-ghost btn-xs" disabled={index === 0} aria-label="上移" onClick={() => setAttachmentIds((prev) => { const next = [...prev]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })}>
+                            <span className="iconify lucide--arrow-up size-3" />
+                          </button>
+                          <button type="button" className="btn btn-ghost btn-xs" disabled={index === attachmentIds.length - 1} aria-label="下移" onClick={() => setAttachmentIds((prev) => { const next = [...prev]; [next[index + 1], next[index]] = [next[index], next[index + 1]]; return next; })}>
+                            <span className="iconify lucide--arrow-down size-3" />
+                          </button>
+                          <button type="button" className="btn btn-ghost btn-xs text-error" aria-label="移除" onClick={() => setAttachmentIds((prev) => prev.filter((id) => id !== fileId))}>
+                            <span className="iconify lucide--x size-3" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="mt-3">
+                    <button type="button" className="btn btn-sm btn-neutral" disabled={attachmentIds.length >= 10} onClick={() => setIsAttachmentPickerOpen(true)}>
+                      <span className="iconify lucide--folder-open size-4" />
+                      從檔案系統加入
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 分類與類型 */}
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
@@ -338,7 +391,8 @@ export const NewsFormPage = () => {
                 </h3>
 
                 <div className="space-y-4">
-                  {/* 公告類型 */}
+                  {/* 公告類型（只有公告有一般／重要／緊急） */}
+                  {config.hasSeverityType && (
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-medium">公告類型</span>
@@ -355,11 +409,12 @@ export const NewsFormPage = () => {
                       <option value={2}>緊急公告</option>
                     </select>
                   </div>
+                  )}
 
                   {/* 公告分類 */}
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium">公告分類</span>
+                      <span className="label-text font-medium">{config.noun}分類</span>
                     </label>
                     <select
                       className="select select-bordered"
@@ -554,6 +609,19 @@ export const NewsFormPage = () => {
         </div>
       </div>
 
+      <FilePickerModal
+        isOpen={isAttachmentPickerOpen}
+        onClose={() => setIsAttachmentPickerOpen(false)}
+        onSelect={(file) => {
+          // 檔案挑選器回傳兩種形狀：已存在的檔案（id、originalFileName）或剛上傳的檔案（fileId、fileName）
+          const fileId = 'fileId' in file ? file.fileId : file.id;
+          const name = 'fileId' in file ? file.fileName : file.originalFileName;
+          setAttachmentIds((prev) => (prev.includes(fileId) || prev.length >= 10 ? prev : [...prev, fileId]));
+          setAttachmentNames((prev) => ({ ...prev, [fileId]: name }));
+          setIsAttachmentPickerOpen(false);
+        }}
+        title="選擇下載附件"
+      />
       <FilePickerModal
         isOpen={isCoverPickerOpen}
         onClose={() => setIsCoverPickerOpen(false)}

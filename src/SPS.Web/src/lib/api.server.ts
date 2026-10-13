@@ -1,5 +1,5 @@
 import { cookies, headers } from "next/headers";
-import {
+import { ServeCategory,
     BannerItem,
     SearchResult,
     FaqItem,
@@ -220,8 +220,9 @@ export async function fetchBanners(positionCode: string): Promise<BannerItem[]> 
  */
 async function tryBackendNews(search?: string, tagId?: number): Promise<NewsItem[] | null> {
     try {
+        // section: 0 只列「公告事項」，不把服務專區的內容混進來（兩者共用同一張資料表）
         const response = await apiClient.get<PagedResult<NewsItem>>(
-            "/api/News", { params: { page: 1, pageSize: 100, search: search || undefined, tagId: tagId || undefined } }
+            "/api/News", { params: { page: 1, pageSize: 100, section: 0, search: search || undefined, tagId: tagId || undefined } }
         );
         const published = response.data.items?.filter((n) => n.published) ?? [];
         // imageUrl 是相對於後端 API 的路徑，要轉成完整網址瀏覽器才載得到，
@@ -252,6 +253,8 @@ export async function fetchNews(options?: { search?: string; tagId?: number }): 
 export async function fetchNewsDetail(id: string): Promise<NewsDetail | null> {
     try {
         const response = await apiClient.get<NewsDetail>(`/api/News/${id}`);
+        // 服務專區的內容走 /serve，不能從 /news/{id} 看到
+        if ((response.data.section ?? 0) !== 0) return null;
         return { ...response.data, imageUrl: resolveBackendAssetUrl(response.data.imageUrl) };
     } catch {
         return null;
@@ -607,5 +610,54 @@ export async function fetchDownloadResources(): Promise<DownloadResources> {
         return result;
     } catch {
         return {};
+    }
+}
+
+
+// ===== 服務專區（與公告共用 News 資料表，`section = 1`）=====
+
+/** 服務專區的分類（後台「服務專區分類」維護；名稱要對上前台選單：產業AI、技術文件） */
+export async function fetchServeCategories(): Promise<ServeCategory[]> {
+    try {
+        const response = await apiClient.get<{ id: number; name?: string; published: boolean; ordinal: number }[]>("/api/Category/type/9");
+        return (response.data ?? [])
+            .filter((c) => c.published && c.name)
+            .sort((a, b) => a.ordinal - b.ordinal || a.id - b.id)
+            .map((c) => ({ id: c.id, name: c.name! }));
+    } catch {
+        return [];
+    }
+}
+
+/**
+ * 服務專區列表（已發布）。`backendAvailable` 是 `false` 才代表後端連不到；有回應但 0 筆就是真的沒有內容，
+ * 不會退回假資料。分頁、分類篩選與關鍵字搜尋都交給後端。
+ */
+export async function fetchServeItems(options?: { search?: string; categoryId?: number; page?: number; pageSize?: number }): Promise<{ items: NewsItem[]; totalCount: number; backendAvailable: boolean }> {
+    try {
+        const response = await apiClient.get<PagedResult<NewsItem>>("/api/News", {
+            params: {
+                section: 1,
+                page: options?.page ?? 1,
+                pageSize: options?.pageSize ?? 9,
+                search: options?.search || undefined,
+                categoryId: options?.categoryId || undefined,
+            },
+        });
+        const items = (response.data.items ?? []).filter((n) => n.published).map((n) => ({ ...n, imageUrl: resolveBackendAssetUrl(n.imageUrl) }));
+        return { items, totalCount: response.data.totalCount ?? items.length, backendAvailable: true };
+    } catch {
+        return { items: [], totalCount: 0, backendAvailable: false };
+    }
+}
+
+/** 單筆服務項目詳情；不是服務專區的內容（公告）或找不到都回傳 null */
+export async function fetchServeDetail(id: string): Promise<NewsDetail | null> {
+    try {
+        const response = await apiClient.get<NewsDetail>(`/api/News/${id}`);
+        if (response.data.section !== 1) return null;
+        return { ...response.data, imageUrl: resolveBackendAssetUrl(response.data.imageUrl) };
+    } catch {
+        return null;
     }
 }

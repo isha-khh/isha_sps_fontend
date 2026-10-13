@@ -20,6 +20,9 @@ public class NewsQueryParameters
     /// </summary>
     public short? Type { get; set; }
 
+    /// <summary>只列這個專區的內容：0 公告、1 服務專區；沒帶 = 不限</summary>
+    public short? Section { get; set; }
+
     /// <summary>
     /// 發布狀態篩選
     /// </summary>
