@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import BootstrapModalRouteCleanup from "@/components/BootstrapModalRouteCleanup";
 import SiteVisitTracker from "@/components/SiteVisitTracker";
+import PopupAnnouncements from "@/components/PopupAnnouncements";
 import { notoSansTC } from "@/lib/fonts";
 import "./globals.css";
 import { withBasePath } from "@/lib/api-client";
@@ -104,6 +105,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         ))}
         <BootstrapModalRouteCleanup />
         <SiteVisitTracker />
+        <PopupAnnouncements />
 
         {children}
 

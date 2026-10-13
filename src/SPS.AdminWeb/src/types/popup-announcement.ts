@@ -46,6 +46,8 @@ export interface CreatePopupAnnouncementRequest {
   title: string;
   content?: string;
   imageId?: number;
+  /** 圖片：檔案管理中的圖片檔案 Id */
+  coverFileId?: string;
   linkUrl?: string;
   linkTarget?: string;
   routes: string[];
@@ -63,6 +65,10 @@ export interface UpdatePopupAnnouncementRequest {
   title?: string;
   content?: string;
   imageId?: number;
+  /** 換圖片：檔案管理中的圖片檔案 Id；沒帶＝不更新 */
+  coverFileId?: string;
+  /** true＝移除圖片 */
+  removeCover?: boolean;
   linkUrl?: string;
   linkTarget?: string;
   routes?: string[];

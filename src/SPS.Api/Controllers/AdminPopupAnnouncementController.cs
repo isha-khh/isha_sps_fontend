@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.Common;
+using SPS.Application.DTOs.File;
 using SPS.Application.DTOs.PopupAnnouncement;
 using SPS.Application.Interfaces.IServices;
 using Swashbuckle.AspNetCore.Annotations;
@@ -22,13 +23,29 @@ public class AdminPopupAnnouncementController : ControllerBase
 {
     private readonly IPopupAnnouncementService _service;
     private readonly ILogger<AdminPopupAnnouncementController> _logger;
+    private readonly IFileManagementService _fileService;
 
     public AdminPopupAnnouncementController(
         IPopupAnnouncementService service,
+        IFileManagementService fileService,
         ILogger<AdminPopupAnnouncementController> logger)
     {
         _service = service;
+        _fileService = fileService;
         _logger = logger;
+    }
+
+    /// <summary>圖片必須是檔案管理中可用的圖片（不是資料夾、已刪除的檔案、會員申請附件，也不是圖片以外的檔案）</summary>
+    private async Task<string?> ValidateImageAsync(Guid? fileId, CancellationToken ct)
+    {
+        if (fileId == null) return null;
+        var info = await _fileService.GetFileByIdAsync(fileId.Value, ct);
+        if (!info.IsSuccess || info.Data == null) return "圖片必須是檔案管理中存在的圖片";
+        var file = info.Data;
+        if (file.IsFolder || file.Status != FileStatus.Active) return "圖片必須是檔案管理中存在的圖片";
+        if (await _fileService.IsApplicationDocumentFileAsync(file.Id, ct)) return "圖片必須是檔案管理中存在的圖片";
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) return "圖片必須是圖片檔案";
+        return null;
     }
 
     /// <summary>
@@ -78,6 +95,9 @@ public class AdminPopupAnnouncementController : ControllerBase
         [FromBody] CreatePopupAnnouncementRequest request,
         CancellationToken cancellationToken)
     {
+        var imageError = await ValidateImageAsync(request.CoverFileId, cancellationToken);
+        if (imageError != null) return BadRequest(new { error = imageError });
+
         var result = await _service.CreateAsync(request, cancellationToken);
 
         if (!result.IsSuccess)
@@ -100,6 +120,9 @@ public class AdminPopupAnnouncementController : ControllerBase
         [FromBody] UpdatePopupAnnouncementRequest request,
         CancellationToken cancellationToken)
     {
+        var imageError = await ValidateImageAsync(request.CoverFileId, cancellationToken);
+        if (imageError != null) return BadRequest(new { error = imageError });
+
         var result = await _service.UpdateAsync(id, request, cancellationToken);
 
         if (!result.IsSuccess)

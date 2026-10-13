@@ -44,7 +44,7 @@ public class PopupAnnouncement : BaseEntity<int>
     public PopupFrequency Frequency { get; set; } = PopupFrequency.OncePerSession;
 
     /// <summary>
-    /// 優先順序（數字小優先）
+    /// 優先順序（數字越大越優先，後台畫面就是這樣寫）
     /// </summary>
     public int Priority { get; set; }
 
