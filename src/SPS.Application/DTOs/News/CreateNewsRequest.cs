@@ -63,4 +63,7 @@ public class CreateNewsRequest
 
     /// <summary>附件（檔案管理中的檔案 Id，服務專區用）</summary>
     public List<Guid>? AttachmentFileIds { get; set; }
+
+    /// <summary>專區專屬欄位（人才培育、產業輔導、補助資源用）；欄位名稱必須在 <c>NewsSection.MetaKeys</c> 內</summary>
+    public Dictionary<string, string>? Meta { get; set; }
 }

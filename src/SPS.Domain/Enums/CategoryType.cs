@@ -51,5 +51,11 @@ public enum CategoryType
     ProductCategory = 8,
 
     /// <summary>服務專區分類（兩層：分組在上、葉節點在下，用 ParentId 表示）</summary>
-    Serve = 9
+    Serve = 9,
+
+    /// <summary>產業輔導的產業別（石化業、塑膠製品…）</summary>
+    Tutoring = 10,
+
+    /// <summary>政府補助資源的分類（數位轉型、設備升級…）</summary>
+    SupportResource = 11
 }

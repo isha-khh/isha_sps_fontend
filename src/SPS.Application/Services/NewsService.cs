@@ -46,6 +46,7 @@ public class NewsService : INewsService
                 Type = n.Type,
                 Section = n.Section,
                 AttachmentCount = n.AttachmentFileIds.Count,
+                Meta = n.Meta ?? new Dictionary<string, string>(),
                 CreatedTime = n.CreatedTime,
                 Tags = tagsByNewsId.GetValueOrDefault(n.Id, new List<NewsTagItem>()).Select(t => t.Name).ToList(),
                 TagItems = tagsByNewsId.GetValueOrDefault(n.Id, new List<NewsTagItem>()),
@@ -84,6 +85,7 @@ public class NewsService : INewsService
             ViewCount = news.ViewCount,
             AttachmentFileIds = news.AttachmentFileIds,
             AttachmentCount = news.AttachmentFileIds.Count,
+            Meta = news.Meta ?? new Dictionary<string, string>(),
             Tags = tags.Select(t => t.Name).ToList(),
             TagItems = tags,
             CreatedTime = news.CreatedTime,
@@ -106,6 +108,10 @@ public class NewsService : INewsService
                 if (categoryExists == null)
                     return Result<NewsResponse>.Failure($"分類 ID {request.CategoryId.Value} 不存在，請選擇有效的分類");
             }
+
+            var (meta, metaError) = NormalizeMeta(request.Section, request.Meta);
+            if (metaError != null)
+                return Result<NewsResponse>.Failure(metaError);
 
             // 標籤只能綁「公告類型」且實際存在的標籤，先驗證再寫入，避免綁到不存在的 ID 才炸 FK
             var (tagIds, tagError) = await ResolveNewsTagIdsAsync(request.TagIds, cancellationToken);
@@ -141,6 +147,7 @@ public class NewsService : INewsService
                 Type = request.Type,
                 Section = request.Section,
                 AttachmentFileIds = request.AttachmentFileIds?.Distinct().ToList() ?? new List<Guid>(),
+                Meta = meta,
                 CreatedTime = DateTime.UtcNow,
                 UpdatedTime = DateTime.UtcNow
             };
@@ -174,6 +181,7 @@ public class NewsService : INewsService
                 ViewCount = news.ViewCount,
                 AttachmentFileIds = news.AttachmentFileIds,
                 AttachmentCount = news.AttachmentFileIds.Count,
+                Meta = news.Meta,
                 Tags = createdTags.Select(t => t.Name).ToList(),
                 TagItems = createdTags,
                 CreatedTime = news.CreatedTime,
@@ -203,6 +211,16 @@ public class NewsService : INewsService
             var categoryExists = await _unitOfWork.Categories.GetByIdAsync(request.CategoryId.Value, cancellationToken);
             if (categoryExists == null)
                 return Result<NewsResponse>.Failure($"分類 ID {request.CategoryId.Value} 不存在，請選擇有效的分類");
+        }
+
+        // 專區改了、或有帶 Meta 時，都要重新檢查欄位名稱是否屬於（新的）專區
+        var targetSection = request.Section ?? news.Section;
+        if (request.Section.HasValue || request.Meta != null)
+        {
+            var (checkedMeta, metaError) = NormalizeMeta(targetSection, request.Meta ?? news.Meta);
+            if (metaError != null)
+                return Result<NewsResponse>.Failure(metaError);
+            if (request.Meta != null) news.Meta = checkedMeta;
         }
 
         // TagIds 沒帶（null）= 不動標籤；帶空陣列 = 清空標籤
@@ -323,6 +341,7 @@ public class NewsService : INewsService
             ViewCount = news.ViewCount,
             AttachmentFileIds = news.AttachmentFileIds,
             AttachmentCount = news.AttachmentFileIds.Count,
+            Meta = news.Meta ?? new Dictionary<string, string>(),
             Tags = updatedTags.Select(t => t.Name).ToList(),
             TagItems = updatedTags,
             CreatedTime = news.CreatedTime,
@@ -423,5 +442,29 @@ public class NewsService : INewsService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<int>.Success(news.ViewCount);
+    }
+
+    private const int MaxMetaValueLength = 500;
+
+    /// <summary>
+    /// 檢查並整理專區專屬欄位：專區必須存在、欄位名稱必須在該專區允許的清單內、值去頭尾空白並丟掉空值、單一值不超過 500 字。
+    /// 公告與服務專區沒有專屬欄位，帶了就拒絕。
+    /// </summary>
+    private static (Dictionary<string, string> Meta, string? Error) NormalizeMeta(short section, Dictionary<string, string>? meta)
+    {
+        if (!NewsSection.IsValid(section)) return (new Dictionary<string, string>(), $"不支援的專區：{section}");
+        var result = new Dictionary<string, string>();
+        if (meta == null || meta.Count == 0) return (result, null);
+
+        var allowed = NewsSection.MetaKeys.GetValueOrDefault(section) ?? Array.Empty<string>();
+        foreach (var (key, raw) in meta)
+        {
+            if (!allowed.Contains(key)) return (result, $"這個專區不支援欄位「{key}」");
+            var value = (raw ?? string.Empty).Trim();
+            if (value.Length == 0) continue;
+            if (value.Length > MaxMetaValueLength) return (result, $"欄位「{key}」內容過長（上限 {MaxMetaValueLength} 字）");
+            result[key] = value;
+        }
+        return (result, null);
     }
 }

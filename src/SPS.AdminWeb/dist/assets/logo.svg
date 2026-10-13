@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 925 192" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="Symbols" transform="matrix(4.166667,0,0,4.166667,0,0)">
+        <g id="Header" transform="matrix(0.759991,0,0,0.759991,-57.759287,-1.164956)">
+            <g id="Group-6" transform="matrix(1,0,0,1,76,11)">
+                <g id="Group-4" transform="matrix(1,0,0,1,66,0)">
+                    <g id="Group">
+                        <g id="智慧石化產業資訊">
+                            <g transform="matrix(0.824152,0,0,0.824152,0.157645,35.78178)">
+                                <g transform="matrix(18,0,0,18,273.78,0)">
+                                </g>
+                                <text x="0px" y="0px" style="font-family:'.PingFangTC-Medium', '.PingFang TC', sans-serif;font-weight:500;font-size:18px;fill:rgb(78,78,78);">智<tspan x="18.27px 36.54px 54.81px 73.08px 91.35px 109.62px 127.89px 146.16px 164.43px 182.7px 200.97px 219.24px 237.51px 255.78px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">慧工安技術產業資訊暨媒合平台</tspan></text>
+                            </g>
+                        </g>
+                        <g id="經濟部產業發展署">
+                            <g transform="matrix(1,0,0,1,0,17)">
+                                <text x="0px" y="0px" style="font-family:'.PingFangTC-Regular', '.PingFang TC', sans-serif;font-size:15px;fill:rgb(121,121,121);">經<tspan x="15.188px 30.375px 45.562px 60.75px 75.938px 91.125px 106.312px " y="0px 0px 0px 0px 0px 0px 0px ">濟部產業發展署</tspan></text>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+                <g id="Group1" serif:id="Group" transform="matrix(1,0,0,1,0,9)">
+                    <path id="Path" d="M18.56,28C26.535,28 33,21.731 33,14C33,6.268 26.534,0 18.56,0L6.187,0L6.187,3.998L18.56,3.998C24.255,3.998 28.872,8.475 28.872,13.995C28.872,19.516 24.255,23.992 18.56,23.992L4.124,23.992L4.124,5.998L0,5.998L0,27.991L18.56,28Z" style="fill:rgb(14,87,151);fill-rule:nonzero;"/>
+                    <path id="Path1" serif:id="Path" d="M38,0L49.79,28L54,28L42.21,0L38,0Z" style="fill:rgb(40,181,173);fill-rule:nonzero;"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

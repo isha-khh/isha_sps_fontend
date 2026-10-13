@@ -223,6 +223,20 @@ function App() {
           <Route path="serve-items" element={<NewsListPage section={1} />} />
           <Route path="serve-items/:id" element={<NewsDetailPage section={1} />} />
           <Route path="serve-items/:id/edit" element={<NewsFormPage section={1} />} />
+          <Route path="support-notices" element={<NewsListPage section={2} />} />
+          <Route path="support-notices/:id" element={<NewsDetailPage section={2} />} />
+          <Route path="support-notices/:id/edit" element={<NewsFormPage section={2} />} />
+          <Route path="talent-courses" element={<NewsListPage section={3} />} />
+          <Route path="talent-courses/:id" element={<NewsDetailPage section={3} />} />
+          <Route path="talent-courses/:id/edit" element={<NewsFormPage section={3} />} />
+          <Route path="tutoring-items/categories" element={<AnnouncementCategoriesPage section={4} />} />
+          <Route path="tutoring-items" element={<NewsListPage section={4} />} />
+          <Route path="tutoring-items/:id" element={<NewsDetailPage section={4} />} />
+          <Route path="tutoring-items/:id/edit" element={<NewsFormPage section={4} />} />
+          <Route path="support-resources/categories" element={<AnnouncementCategoriesPage section={5} />} />
+          <Route path="support-resources" element={<NewsListPage section={5} />} />
+          <Route path="support-resources/:id" element={<NewsDetailPage section={5} />} />
+          <Route path="support-resources/:id/edit" element={<NewsFormPage section={5} />} />
           <Route path="announcements" element={<NewsListPage />} />
           <Route path="announcements/:id" element={<NewsDetailPage />} />
           <Route path="announcements/:id/edit" element={<NewsFormPage />} />

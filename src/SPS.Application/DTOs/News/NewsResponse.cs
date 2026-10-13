@@ -27,6 +27,9 @@ public class NewsResponse
     /// <summary>附件數量（公開也看得到，列表卡片用來顯示「有附件」）</summary>
     public int AttachmentCount { get; set; }
 
+    /// <summary>專區專屬欄位（人才培育的講師、產業輔導的主辦單位…）</summary>
+    public Dictionary<string, string> Meta { get; set; } = new();
+
     public List<string> Tags { get; set; } = new();
 
     /// <summary>
@@ -66,6 +69,9 @@ public class NewsListItemResponse
     public short Type { get; set; }
     public short Section { get; set; }
     public int AttachmentCount { get; set; }
+
+    /// <summary>專區專屬欄位（列表卡片、表格要顯示的講師、主辦單位等）</summary>
+    public Dictionary<string, string> Meta { get; set; } = new();
     public DateTime CreatedTime { get; set; }
 
     /// <summary>

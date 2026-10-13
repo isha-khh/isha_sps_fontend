@@ -2598,6 +2598,12 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<int?>("IntroductionId")
                         .HasColumnType("integer");
 
+                    b.Property<Dictionary<string, string>>("Meta")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValueSql("'{}'::jsonb");
+
                     b.Property<int>("Ordinal")
                         .HasColumnType("integer");
 

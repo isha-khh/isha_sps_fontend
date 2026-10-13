@@ -10,6 +10,10 @@ public class NewsConfiguration : IEntityTypeConfiguration<News>
     {
         builder.ToTable("News");
 
+        builder.Property(n => n.Meta)
+            .HasColumnType("jsonb")
+            .HasDefaultValueSql("'{}'::jsonb");
+
         builder.HasOne(n => n.Title)
             .WithMany(mt => mt.NewsTitles)
             .HasForeignKey(n => n.TitleId)

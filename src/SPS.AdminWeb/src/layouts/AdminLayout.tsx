@@ -115,6 +115,34 @@ const allMenuItems: MenuItemWithPermission[] = [
     ],
   },
   {
+    id: 'talent-courses',
+    label: '人才培育',
+    icon: 'lucide--graduation-cap',
+    permissions: [Permission.ManageNews],
+    children: [{ id: 'talent-course-list', label: '課程內容', url: '/talent-courses', permissions: [Permission.ManageNews] }],
+  },
+  {
+    id: 'tutoring-items',
+    label: '產業輔導',
+    icon: 'lucide--handshake',
+    permissions: [Permission.ManageNews],
+    children: [
+      { id: 'tutoring-categories', label: '產業別', url: '/tutoring-items/categories', permissions: [Permission.ManageCategories] },
+      { id: 'tutoring-item-list', label: '輔導內容', url: '/tutoring-items', permissions: [Permission.ManageNews] },
+    ],
+  },
+  {
+    id: 'support-zone',
+    label: '補助專區',
+    icon: 'lucide--hand-coins',
+    permissions: [Permission.ManageNews],
+    children: [
+      { id: 'support-notice-list', label: '補助公告', url: '/support-notices', permissions: [Permission.ManageNews] },
+      { id: 'support-resource-categories', label: '補助資源分類', url: '/support-resources/categories', permissions: [Permission.ManageCategories] },
+      { id: 'support-resource-list', label: '政府補助資源', url: '/support-resources', permissions: [Permission.ManageNews] },
+    ],
+  },
+  {
     id: 'announcements',
     label: '公告管理',
     icon: 'lucide--megaphone',

@@ -224,14 +224,14 @@ export const NewsDetailPage = ({ section = 0 }: { section?: NewsSection }) => {
               </h3>
 
               <div className="space-y-4">
-                <div>
-                  <div className="text-sm font-medium text-base-content/60 mb-2">公告分類</div>
+                {config.categoryType !== undefined && <div>
+                  <div className="text-sm font-medium text-base-content/60 mb-2">{config.categoryLabel ?? `${config.noun}分類`}</div>
                   {news.categoryName ? (
                     <span className="badge badge-outline badge-lg">{news.categoryName}</span>
                   ) : (
                     <span className="text-base-content/50">未分類</span>
                   )}
-                </div>
+                </div>}
 
                 <div>
                   <div className="text-sm font-medium text-base-content/60 mb-2">標籤</div>
@@ -248,17 +248,36 @@ export const NewsDetailPage = ({ section = 0 }: { section?: NewsSection }) => {
                   )}
                 </div>
 
-                <div>
+                {config.hasSeverityType && <div>
                   <div className="text-sm font-medium text-base-content/60 mb-2">類型</div>
                   <span className="badge badge-neutral">
                     {news.type === 0 && '一般公告'}
                     {news.type === 1 && '重要公告'}
                     {news.type === 2 && '緊急公告'}
                   </span>
-                </div>
+                </div>}
               </div>
             </div>
           </div>
+
+          {config.metaFields && (
+            <div className="card bg-base-100 shadow">
+              <div className="card-body">
+                <h3 className="card-title mb-4">
+                  <span className="iconify lucide--list-checks size-5" />
+                  {config.metaTitle ?? '專屬欄位'}
+                </h3>
+                <dl className="space-y-3 text-sm">
+                  {config.metaFields.map((field) => (
+                    <div key={field.key}>
+                      <dt className="font-medium text-base-content/60">{field.label}</dt>
+                      <dd>{news.meta?.[field.key] || <span className="text-base-content/40">未填</span>}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+          )}
 
           {/* 發布時間 */}
           <div className="card bg-base-100 shadow">

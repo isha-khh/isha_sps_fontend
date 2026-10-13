@@ -17,7 +17,7 @@ interface CategoryFormData {
 /** `section`：0 公告分類（預設）、1 服務專區分類；兩者共用這個頁面，差異見 `lib/news-section.ts`（服務專區分類的名稱要對上前台選單：產業AI、技術文件） */
 export const AnnouncementCategoriesPage = ({ section = 0 }: { section?: NewsSection }) => {
   const config = NEWS_SECTIONS[section];
-  const NEWS_CATEGORY_TYPE = config.categoryType;
+  const NEWS_CATEGORY_TYPE = config.categoryType ?? 1;
   const notify = useNotify();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,7 +133,7 @@ export const AnnouncementCategoriesPage = ({ section = 0 }: { section?: NewsSect
       <PageTitle
         title={`${config.noun}分類`}
         items={[
-          { label: config.section === 0 ? '公告管理' : '服務專區管理', path: config.basePath },
+          { label: config.parentLabel === '內容管理' ? '公告管理' : config.parentLabel, path: config.basePath },
           { label: '類別管理', active: true },
         ]}
       />
@@ -244,7 +244,7 @@ export const AnnouncementCategoriesPage = ({ section = 0 }: { section?: NewsSect
                   </label>
                   <input
                     type="text"
-                    placeholder={config.section === 0 ? '例如：系統公告' : '例如：產業AI、技術文件'}
+                    placeholder={config.section === 0 ? '例如：系統公告' : config.section === 1 ? '例如：產業AI、技術文件' : config.section === 4 ? '例如：石化業、塑膠製品、化學材料' : '例如：數位轉型、設備升級、工安改善'}
                     className="input input-bordered"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}

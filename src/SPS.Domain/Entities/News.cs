@@ -23,6 +23,9 @@ public class News : BaseEntity<int>
     /// 公告的附件是內文裡的「附件下載」區塊，不用這個欄位
     /// </summary>
     public List<Guid> AttachmentFileIds { get; set; } = new();
+
+    /// <summary>各專區的專屬欄位（人才培育的講師、產業輔導的主辦單位…），欄位名稱見 <see cref="SPS.Domain.Enums.NewsSection.MetaKeys"/>；存成 jsonb</summary>
+    public Dictionary<string, string> Meta { get; set; } = new();
     public int ViewCount { get; set; }
 
     // Navigation properties

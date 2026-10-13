@@ -13,7 +13,7 @@ import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
 import { NEWS_SECTIONS, type NewsSection } from '@/lib/news-section';
 
-/** `section`：0 公告（預設）、1 服務專區，兩者共用這個表單，差異見 `lib/news-section.ts` */
+/** `section`：0 公告（預設）、1 服務專區、2 補助公告、3 人才培育、4 產業輔導、5 補助資源，共用這個表單，差異見 `lib/news-section.ts` */
 export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
   const config = NEWS_SECTIONS[section];
   const notify = useNotify();
@@ -44,15 +44,19 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
   const [attachmentIds, setAttachmentIds] = useState<string[]>([]);
   const [attachmentNames, setAttachmentNames] = useState<Record<string, string>>({});
   const [isAttachmentPickerOpen, setIsAttachmentPickerOpen] = useState(false);
+  // 專區專屬欄位（人才培育的講師、產業輔導的主辦單位…），空字串 = 沒填
+  const [meta, setMeta] = useState<Record<string, string>>({});
 
   // 使用 ref 保存最新的 Puck 內容
   const puckContentRef = useRef<string>('');
 
   // 載入分類列表
   useEffect(() => {
+    if (config.categoryType === undefined) return;
+    const categoryType = config.categoryType;
     const fetchCategories = async () => {
       try {
-        const data = await categoriesApi.getCategoriesByType(config.categoryType);
+        const data = await categoriesApi.getCategoriesByType(categoryType);
         setCategories(data.filter(c => c.published));
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -63,6 +67,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
 
   // 載入可選的公告標籤（到「公告標籤」頁維護）
   useEffect(() => {
+    if (!config.hasTags) return;
     const fetchTags = async () => {
       try {
         const result = await tagsApi.getPaged({ type: TagType.News, page: 1, pageSize: 100 });
@@ -95,6 +100,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
         };
         setFormData(newsData);
         setAttachmentIds(data.attachmentFileIds ?? []);
+        setMeta(data.meta ?? {});
         setCoverUrl(data.imageUrl || undefined);
         setSelectedTagIds((data.tagItems ?? []).map((t) => t.id));
         // 初始化 ref
@@ -155,6 +161,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           section,
           tagIds: selectedTagIds,
           ...(config.hasAttachments ? { attachmentFileIds: attachmentIds } : {}),
+          ...(config.metaFields ? { meta } : {}),
           ...(coverFileId ? { coverFileId } : {}),
           ...(removeCover && !coverFileId ? { removeCover: true } : {}),
         };
@@ -175,6 +182,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           section,
           tagIds: selectedTagIds,
           ...(config.hasAttachments ? { attachmentFileIds: attachmentIds } : {}),
+          ...(config.metaFields ? { meta } : {}),
           ...(coverFileId ? { coverFileId } : {}),
         };
         console.log('[NewsFormPage] Creating new news');
@@ -227,7 +235,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
               <div className="card-body">
                 <h2 className="card-title mb-6">
                   <span className="iconify lucide--file-edit size-6" />
-                  公告內容
+                  {config.noun}內容
                 </h2>
 
                 <div className="space-y-6">
@@ -235,7 +243,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-medium">
-                        公告標題 <span className="text-error">*</span>
+                        {config.noun}標題 <span className="text-error">*</span>
                       </span>
                     </label>
                     <input
@@ -251,13 +259,13 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                   {/* 公告摘要 */}
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium">公告摘要</span>
+                      <span className="label-text font-medium">{config.noun}摘要</span>
                       <span className="label-text-alt text-base-content/60">
                         顯示在列表中的簡短說明
                       </span>
                     </label>
                     <textarea
-                      placeholder="簡短描述此公告的重點內容..."
+                      placeholder={`簡短描述此${config.noun}的重點內容...`}
                       className="textarea textarea-bordered h-24"
                       value={formData.introduction}
                       onChange={(e) => setFormData({ ...formData, introduction: e.target.value })}
@@ -412,9 +420,10 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                   )}
 
                   {/* 公告分類 */}
+                  {config.categoryType !== undefined && (
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium">{config.noun}分類</span>
+                      <span className="label-text font-medium">{config.categoryLabel ?? `${config.noun}分類`}</span>
                     </label>
                     <select
                       className="select select-bordered"
@@ -435,11 +444,13 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                       ))}
                     </select>
                   </div>
+                  )}
 
                   {/* 公告標籤（多選）：前台公告卡片上的藍色關鍵字 */}
+                  {config.hasTags && (
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium">公告標籤</span>
+                      <span className="label-text font-medium">關鍵字標籤</span>
                       <a href="/announcements/tags" target="_blank" rel="noreferrer" className="label-text-alt link link-primary">
                         管理標籤
                       </a>
@@ -469,9 +480,40 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* 專區專屬欄位（人才培育、產業輔導、補助資源） */}
+            {config.metaFields && (
+              <div className="card bg-base-100 shadow-xl">
+                <div className="card-body">
+                  <h3 className="card-title mb-4">
+                    <span className="iconify lucide--list-checks size-5" />
+                    {config.metaTitle ?? '專屬欄位'}
+                  </h3>
+                  <div className="space-y-4">
+                    {config.metaFields.map((field) => (
+                      <div className="form-control" key={field.key}>
+                        <label className="label">
+                          <span className="label-text font-medium">{field.label}</span>
+                          {field.hint && <span className="label-text-alt text-base-content/60">{field.hint}</span>}
+                        </label>
+                        <input
+                          type={field.type ?? 'text'}
+                          className="input input-bordered"
+                          placeholder={field.placeholder}
+                          maxLength={field.type === 'date' || field.type === 'number' ? undefined : 500}
+                          value={meta[field.key] ?? ''}
+                          onChange={(e) => setMeta((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* 發布時間 */}
             <div className="card bg-base-100 shadow-xl">

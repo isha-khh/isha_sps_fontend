@@ -40,9 +40,11 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
 
   // 載入分類列表
   useEffect(() => {
+    if (config.categoryType === undefined) return;
+    const categoryType = config.categoryType;
     const fetchCategories = async () => {
       try {
-        const data = await categoriesApi.getCategoriesByType(config.categoryType);
+        const data = await categoriesApi.getCategoriesByType(categoryType);
         setCategories(data.filter(c => c.published));
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -146,9 +148,9 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
             </div>
 
             {/* 分類篩選 */}
-            <div className="form-control">
+            {config.categoryType !== undefined && <div className="form-control">
               <label className="label">
-                <span className="label-text">{config.noun}分類</span>
+                <span className="label-text">{config.categoryLabel ?? `${config.noun}分類`}</span>
               </label>
               <select
                 className="select select-bordered"
@@ -169,7 +171,7 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
                   </option>
                 ))}
               </select>
-            </div>
+            </div>}
 
             {/* 類型篩選（只有公告有一般／重要／緊急） */}
             {config.hasSeverityType && <div className="form-control">

@@ -52,6 +52,9 @@ public class SearchService : ISearchService
             {
                 await SearchNewsAsync(db, kw, limit, encoded, cancellationToken, NewsSection.Announcement, "news", "最新消息", "/news"),
                 await SearchNewsAsync(db, kw, limit, encoded, cancellationToken, NewsSection.Serve, "serve", "服務專區", "/serve"),
+                await SearchNewsAsync(db, kw, limit, encoded, cancellationToken, NewsSection.Talent, "talent", "人才培育", "/talent"),
+                await SearchNewsAsync(db, kw, limit, encoded, cancellationToken, NewsSection.Tutoring, "tutoring", "產業輔導", "/tutoring"),
+                await SearchNewsAsync(db, kw, limit, encoded, cancellationToken, NewsSection.Support, "support", "補助公告", "/support"),
                 await SearchCasesAsync(db, kw, limit, encoded, cancellationToken),
                 await SearchFaqAsync(db, kw, limit, encoded, cancellationToken),
                 await SearchVideosAsync(db, kw, limit, encoded, cancellationToken),

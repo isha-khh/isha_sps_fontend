@@ -25,6 +25,9 @@ public class UpdateNewsRequest
     /// <summary>附件：沒帶（null）= 不更新；空陣列 = 清除全部附件</summary>
     public List<Guid>? AttachmentFileIds { get; set; }
 
+    /// <summary>專區專屬欄位：沒帶（null）= 不更新；帶了就整組取代（空物件 = 清空）</summary>
+    public Dictionary<string, string>? Meta { get; set; }
+
     /// <summary>true = 移除封面圖（優先於 <see cref="CoverFileId"/>）</summary>
     public bool? RemoveCover { get; set; }
 }
