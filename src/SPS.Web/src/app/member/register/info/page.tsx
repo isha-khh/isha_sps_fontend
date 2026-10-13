@@ -42,8 +42,9 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
   if (applicantType === "company") qs.set("role", role);
   if (applicantType === "company" && role === "supply") qs.set("tier", tier);
   const nextHrefBase = `/member/register/complete?${qs.toString()}`;
-  // 供給端新興會員：勾選的是「資料同意書」（公司資料與 Logo 的授權展示聲明）；個資告知與同意改由附件一簽署後與登錄申請書一併上傳
-  const isEmergingSupplier = applicantType === "company" && role === "supply" && tier === "emerging";
+  // 企業申請（供給端新興、供給端卓越、需求端）：勾選的是「資料同意書」（公司資料與 Logo 的授權展示聲明）；
+  // 個資的告知與同意在註冊第一步已經完成。個人會員仍是「個人資料同意書」
+  const isCompanyApplicant = applicantType === "company";
 
   // 申請須知與附件的下載（後台「頁面設定 → 下載資源」維護）
   const downloads = await fetchDownloadResources();
@@ -57,14 +58,14 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h4>{isEmergingSupplier ? "資料同意書" : "個人資料同意書"}</h4>
+              <h4>{isCompanyApplicant ? "資料同意書" : "個人資料同意書"}</h4>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close">
                 X
               </button>
             </div>
             <div className="modal-body">
               <div className="txt editor">
-                {isEmergingSupplier ? (
+                {isCompanyApplicant ? (
                   <LogoAuthorizationNotice />
                 ) : (
                   <>

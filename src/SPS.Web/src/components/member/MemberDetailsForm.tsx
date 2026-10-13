@@ -171,7 +171,7 @@ export default function MemberDetailsForm({
       }
     }
     if (!consentChecked) {
-      return isSupplier && tier === "emerging" ? "請詳細閱讀並勾選資料同意書" : "請詳細閱讀並勾選個人資料同意書";
+      return isCompany ? "請詳細閱讀並勾選資料同意書" : "請詳細閱讀並勾選個人資料同意書";
     }
     return null;
   }
@@ -531,8 +531,8 @@ export default function MemberDetailsForm({
           </label>
           <span>
             我已詳細閱讀「
-            <a href="#" data-bs-toggle="modal" data-bs-target="#staticmembership" className="blue text-decoration-underline" title={isSupplier && tier === "emerging" ? "我已詳細閱讀資料同意書" : "我已詳細閱讀個人資料同意書"}>
-              {isSupplier && tier === "emerging" ? "資料同意書" : "個人資料同意書"}
+            <a href="#" data-bs-toggle="modal" data-bs-target="#staticmembership" className="blue text-decoration-underline" title={isCompany ? "我已詳細閱讀資料同意書" : "我已詳細閱讀個人資料同意書"}>
+              {isCompany ? "資料同意書" : "個人資料同意書"}
             </a>
             」
           </span>
