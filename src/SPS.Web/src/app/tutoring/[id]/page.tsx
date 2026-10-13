@@ -5,56 +5,51 @@ import BodyClass from "@/components/BodyClass";
 import Badge from "@/components/ui/Badge";
 import MoreLink from "@/components/ui/MoreLink";
 import ShareBox from "@/components/ui/ShareBox";
-import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
+import ZoomableImage from "@/components/ui/ZoomableImage";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
-import { TUTORING_ITEMS, getTutoringItem } from "@/lib/tutoring-data";
-import { fetchBanners } from "@/lib/api.server";
-
-// 說明見 tutoring/page.tsx 同一份假資料的註解
-export function generateStaticParams() {
-  return TUTORING_ITEMS.map((item) => ({ id: item.id }));
-}
-
-// 說明見 serve/[id]/page.tsx 同一行的註解：目前是固定假資料，不在
-// 名單裡的 id 直接在路由層級當 404。
-export const dynamicParams = false;
+import { PuckRenderer } from "@/components/puck/PuckRenderer";
+import { toTutoringItem } from "@/lib/tutoring-data";
+import { fetchBanners, fetchSectionDetail, fetchSectionItems, NewsSections } from "@/lib/api.server";
+import { sortByViewCount } from "@/lib/content-list-utils";
 
 export async function generateMetadata({ params }: PageProps<"/tutoring/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const item = getTutoringItem(id);
-  return { title: item?.title ?? "找不到頁面" };
+  const detail = await fetchSectionDetail(NewsSections.Tutoring, id);
+  return { title: detail?.title ?? "找不到頁面" };
 }
 
 /**
- * 產業輔導詳情頁，對應設計稿 page/tutoring/show.html。結構跟
- * `/news/[id]` 幾乎一樣（沒有跑馬燈標題、封面圖＋撰稿人＋內文＋
- * 返回按鈕），目前後端沒有對應的內容類型，先用固定假資料。
+ * 產業輔導詳情頁，對應設計稿 page/tutoring/show.html。結構跟 `/news/[id]` 幾乎一樣（沒有跑馬燈標題、封面圖＋
+ * 撰稿人＋內文＋返回按鈕）。2026-10-13 起資料來自後台「產業輔導 → 輔導內容」；附件下載（簡章）、相關連結、
+ * 聯絡資訊都是後台內容編輯器裡的區塊。
  */
 export default async function TutoringShowPage({ params }: PageProps<"/tutoring/[id]">) {
-  const sidebarBanners = await fetchBanners("sidebar-tutoring");
   const { id } = await params;
-  const item = getTutoringItem(id);
+  const [detail, sidebarBanners, popularSource] = await Promise.all([
+    fetchSectionDetail(NewsSections.Tutoring, id),
+    fetchBanners("sidebar-tutoring"),
+    fetchSectionItems(NewsSections.Tutoring, { pageSize: 20 }),
+  ]);
 
-  if (!item) {
+  if (!detail) {
     notFound();
   }
 
-  const popularItems = TUTORING_ITEMS.map((popular) => ({
-    href: `/tutoring/${popular.id}`,
-    title: popular.title,
-    date: popular.date,
-    image: popular.image,
-  }));
+  const item = toTutoringItem(detail);
+  const popularItems = sortByViewCount(popularSource.items)
+    .slice(0, 5)
+    .map(toTutoringItem)
+    .map((popular) => ({ href: `/tutoring/${popular.id}`, title: popular.title, date: popular.date, image: popular.image }));
 
   return (
     <>
       <BodyClass className="tutoring show" />
       <InnerPageShell
-        breadcrumb={[{ label: "產業輔導", href: "/tutoring" }, { label: item.title }]}
+        breadcrumb={[{ label: "產業輔導", href: "/tutoring" }, ...(item.industry ? [{ label: item.industry, href: `/tutoring?category=${encodeURIComponent(item.industry)}` }] : []), { label: item.title }]}
         aside={
           <>
-            <PopularPosts items={popularItems} heading="熱門輔導" />
+            {popularItems.length > 0 && <PopularPosts items={popularItems} heading="熱門輔導" />}
             <SidebarBanner banners={sidebarBanners} />
           </>
         }
@@ -66,9 +61,7 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
 
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">
-                  <div className="tag-wrap">
-                    <Badge>{item.category}</Badge>
-                  </div>
+                  <div className="tag-wrap">{item.industry && <Badge>{item.industry}</Badge>}</div>
                   <div className="part-line"></div>
                   <div className="date">{item.date}</div>
                 </div>
@@ -90,16 +83,12 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
             )}
           </div>
 
-          <div className="ratio ratio-4x3">
-            <img className="img-fluid d-block" src={item.image} alt={item.title} />
-          </div>
+          {item.image && <ZoomableImage src={item.image} alt={item.title} caption={item.title} />}
 
           {item.contributor && <div className="Contributor">撰稿人 / {item.contributor}</div>}
 
-          <div className="txt editor mb-md-5 mb-4" dangerouslySetInnerHTML={{ __html: item.bodyHtml }} />
-
-          <div className="dk_conbo mb-md-5 mb-4">
-            <AttachmentsPanel attachments={item.attachments} relatedLinks={item.relatedLinks} contact={item.contact} />
+          <div className="txt editor mb-md-5 mb-4">
+            <PuckRenderer content={detail.content} />
           </div>
 
           <MoreLink href="/tutoring" label="返回" title="返回" />

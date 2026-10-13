@@ -26,9 +26,7 @@ export default function PopularCourses({ courses }: { courses: TalentCourse[] })
                   <a href={href} title={course.title}>
                     <div className="tit_nsl">
                       <div className="tit_three d-flex mb-2">
-                        <div className="tag-wrap">
-                          <span className="badge-tag mb-0">{course.city}</span>
-                        </div>
+                        <div className="tag-wrap">{course.city && <span className="badge-tag mb-0">{course.city}</span>}</div>
                         <div className="date">{course.postedDate}</div>
                       </div>
                       <h3>{course.title}</h3>
@@ -36,11 +34,13 @@ export default function PopularCourses({ courses }: { courses: TalentCourse[] })
                   </a>
                 </div>
 
-                <a href={href} className="pic" title={course.title}>
-                  <div className="tit_quota">
-                    剩餘<span className="blue">{course.remainingSeats}名</span>
-                  </div>
-                </a>
+                {course.remainingSeats !== undefined && (
+                  <a href={href} className="pic" title={course.title}>
+                    <div className="tit_quota">
+                      剩餘<span className="blue">{course.remainingSeats}名</span>
+                    </div>
+                  </a>
+                )}
               </div>
             </div>
           );

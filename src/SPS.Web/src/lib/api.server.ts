@@ -614,12 +614,19 @@ export async function fetchDownloadResources(): Promise<DownloadResources> {
 }
 
 
-// ===== 服務專區（與公告共用 News 資料表，`section = 1`）=====
+// ===== 公告以外的專區（與公告共用 News 資料表，用 `section` 區分）=====
 
-/** 服務專區的分類（後台「服務專區分類」維護；名稱要對上前台選單：產業AI、技術文件） */
-export async function fetchServeCategories(): Promise<ServeCategory[]> {
+/** 專區編號，對應後端 `NewsSection`。公告是 0（`fetchNews` 專用），這裡是其他專區 */
+export const NewsSections = { Serve: 1, Support: 2, Talent: 3, Tutoring: 4, SupportResource: 5 } as const;
+export type NewsSectionId = (typeof NewsSections)[keyof typeof NewsSections];
+
+/** 後端 `CategoryType`：服務專區 9、產業輔導的產業別 10、補助資源分類 11 */
+export const SectionCategoryTypes = { Serve: 9, Tutoring: 10, SupportResource: 11 } as const;
+
+/** 某個專區用的分類（後台維護），依排序回傳已發布的 */
+export async function fetchSectionCategories(categoryType: number): Promise<ServeCategory[]> {
     try {
-        const response = await apiClient.get<{ id: number; name?: string; published: boolean; ordinal: number }[]>("/api/Category/type/9");
+        const response = await apiClient.get<{ id: number; name?: string; published: boolean; ordinal: number }[]>(`/api/Category/type/${categoryType}`);
         return (response.data ?? [])
             .filter((c) => c.published && c.name)
             .sort((a, b) => a.ordinal - b.ordinal || a.id - b.id)
@@ -630,14 +637,17 @@ export async function fetchServeCategories(): Promise<ServeCategory[]> {
 }
 
 /**
- * 服務專區列表（已發布）。`backendAvailable` 是 `false` 才代表後端連不到；有回應但 0 筆就是真的沒有內容，
+ * 某個專區的列表（已發布）。`backendAvailable` 是 `false` 才代表後端連不到；有回應但 0 筆就是真的沒有內容，
  * 不會退回假資料。分頁、分類篩選與關鍵字搜尋都交給後端。
  */
-export async function fetchServeItems(options?: { search?: string; categoryId?: number; page?: number; pageSize?: number }): Promise<{ items: NewsItem[]; totalCount: number; backendAvailable: boolean }> {
+export async function fetchSectionItems(
+    section: NewsSectionId,
+    options?: { search?: string; categoryId?: number; page?: number; pageSize?: number },
+): Promise<{ items: NewsItem[]; totalCount: number; backendAvailable: boolean }> {
     try {
         const response = await apiClient.get<PagedResult<NewsItem>>("/api/News", {
             params: {
-                section: 1,
+                section,
                 page: options?.page ?? 1,
                 pageSize: options?.pageSize ?? 9,
                 search: options?.search || undefined,
@@ -651,13 +661,29 @@ export async function fetchServeItems(options?: { search?: string; categoryId?: 
     }
 }
 
-/** 單筆服務項目詳情；不是服務專區的內容（公告）或找不到都回傳 null */
-export async function fetchServeDetail(id: string): Promise<NewsDetail | null> {
+/** 單筆詳情；不屬於這個專區（例如拿公告的編號來開人才培育）或找不到都回傳 null */
+export async function fetchSectionDetail(section: NewsSectionId, id: string): Promise<NewsDetail | null> {
     try {
         const response = await apiClient.get<NewsDetail>(`/api/News/${id}`);
-        if (response.data.section !== 1) return null;
+        if (response.data.section !== section) return null;
         return { ...response.data, imageUrl: resolveBackendAssetUrl(response.data.imageUrl) };
     } catch {
         return null;
     }
+}
+
+// ===== 服務專區（`section = 1`）=====
+
+/** 服務專區的分類（後台「服務專區分類」維護；名稱要對上前台選單：產業AI、技術文件） */
+export async function fetchServeCategories(): Promise<ServeCategory[]> {
+    return fetchSectionCategories(SectionCategoryTypes.Serve);
+}
+
+export async function fetchServeItems(options?: { search?: string; categoryId?: number; page?: number; pageSize?: number }) {
+    return fetchSectionItems(NewsSections.Serve, options);
+}
+
+/** 單筆服務項目詳情；不是服務專區的內容（公告）或找不到都回傳 null */
+export async function fetchServeDetail(id: string): Promise<NewsDetail | null> {
+    return fetchSectionDetail(NewsSections.Serve, id);
 }

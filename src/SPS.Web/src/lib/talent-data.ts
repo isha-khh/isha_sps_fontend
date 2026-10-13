@@ -1,11 +1,11 @@
-import { withBasePath } from "@/lib/api-client";
-import type { AttachmentLink, ContactInfo } from "@/components/ui/AttachmentsPanel";
+import type { NewsDetail, NewsItem } from "@/lib/types";
+import { formatIsoDate } from "@/lib/content-list-utils";
 
 /**
- * 「人才培訓」課程假資料，對應設計稿 page/talent/index.html（表格
- * 列表）／page/talent/show.html（詳情）。目前後端沒有對應的內容
- * 類型，先照 news/serve 假資料先行的做法，之後接真後端時只換這個
- * 檔案。
+ * 人才培育課程（`/talent`、`/talent/[id]`）。資料來自後台「人才培育 → 課程內容」維護的內容——跟公告共用
+ * `News` 資料表（`section = 3`），課程專屬的欄位（開課單位、日期區間、講師聯絡人、費用…）存在 `News.Meta`；
+ * 這裡只負責把後端形狀轉成表格與詳情頁用的樣子。2026-10-13 從前台寫死的假資料改接真後端，不再有假資料。
+ * 內文、附件下載、相關連結都在後台的內容編輯器裡做成區塊。
  */
 export interface TalentCourse {
   id: string;
@@ -27,60 +27,53 @@ export interface TalentCourse {
   hostOrganizer: string;
   executor: string;
   keywords: string[];
-  /** 對應設計稿「熱門課程」側欄的「剩餘 X 名」 */
-  remainingSeats: number;
+  /** 對應「熱門課程」側欄的「剩餘 X 名」；後台沒填就是 undefined，側欄不顯示名額 */
+  remainingSeats?: number;
   /** 課程公告上架日期，跟 dateStart/dateEnd（課程實際上課日期區間）是兩回事，對應「熱門課程」側欄顯示的日期 */
   postedDate: string;
-  bodyHtml: string;
-  /** 對應詳情頁「附件下載／相關連結／聯繫人資訊」（page/news/_uc/dot.html、link.html、cont.html），見 AttachmentsPanel.tsx */
-  attachments: AttachmentLink[];
-  relatedLinks: AttachmentLink[];
-  contact: ContactInfo;
+  /** 「立即報名」連去的網址；後台沒填就不顯示按鈕 */
+  registerUrl?: string;
 }
 
-export const TALENT_FALLBACK_IMAGE = withBasePath("/images/all/new_logo.jpg");
+/** 後台日期欄位存 `YYYY-MM-DD`，前台課程日期顯示成 `YYYY/MM/DD` */
+function slashDate(value?: string): string {
+  return value ? value.replaceAll("-", "/") : "";
+}
 
-export const TALENT_COURSES: TalentCourse[] = Array.from({ length: 3 }, (_, index) => ({
-  id: String(index + 1),
-  title: "AI智慧基礎與淨零永續實作",
-  organizer: "財團法人工業技術研究院南分院",
-  dateStart: "2026/06/25",
-  dateEnd: "2026/08/31",
-  city: "臺南市",
-  contactName: "許佩昱",
-  contactPhone: "06-3847108",
-  courseCode: "115SE048",
-  courseDate: "2026/10/20~2026/10/20",
-  courseTime: "09:30~16:00",
-  totalHours: "6 小時",
-  fee: "免費",
-  audience: "具備AI導入1年以上經驗之輔導團成員",
-  location: "集思台中新烏日會議中心4F富蘭克林廳（臺中市烏日區高鐵東1路26號-4F）",
-  hostOrganizer: "經濟部產業發展署",
-  executor: "精密機械研究發展中心",
-  keywords: ["產業AI", "技術文件"],
-  remainingSeats: 6,
-  postedDate: "2026-04-15",
-  bodyHtml:
-    "<p>設計已不只是產品外觀與美學工具，而是協助企業理解市場、整合技術、回應永續議題，建立創新策略的核心驅動力。台灣設計研究院《產業設計創新趨勢與應用方法》提出「設計驅動產業創新模式」，涵蓋三大執行階段：瞭解現況與趨勢、發展解決方案、建構產品策略與迭代。書中以自行車 AI 工具開發、工具機沉浸展示、循環石材材料研發等跨產業案例，說明設計如何在不確定時代降低創新風險、提升決策精準度，並加速技術與市場需求的連結。</p><p>世界改變的速度大幅加快，產業不僅要回應市場，也必須面對數位轉型、環境永續與社會責任等多重挑戰。過往所仰賴的開發模式與營運策略，已難以因應變化快速的市場，因此產業需具備新的思維與方法來面對未來的不確定性與轉型挑戰（Gutsche，2021）。</p>",
-  attachments: [
-    { name: "附件名稱附件.pdf", href: "#" },
-    { name: "附件名稱附件名稱附件名稱.pdf", href: "#" },
-    { name: "附件名稱附件名稱.pdf", href: "#" },
-  ],
-  relatedLinks: [
-    { name: "相關連結名稱相關連結名稱", href: "#" },
-    { name: "相關連結名稱相關連結名稱相關連結名稱", href: "#" },
-    { name: "相關連結名稱相關", href: "#" },
-  ],
-  contact: {
-    phone: "+886-7-550-3115",
-    email: "isha_khh@mail.isha.org.tw",
-    address: "813707 高雄市左營區博愛三路12號15樓",
-    addressMapUrl: "https://maps.app.goo.gl/iZ6rqmW5CcSKJgp17",
-  },
-}));
+function parseSeats(value?: string): number | undefined {
+  if (!value) return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : undefined;
+}
 
-export function getTalentCourse(id: string): TalentCourse | undefined {
-  return TALENT_COURSES.find((item) => item.id === id);
+/** 只放行 http／https 網址，避免後台誤填 `javascript:` 之類的值變成可點擊的連結 */
+function safeUrl(value?: string): string | undefined {
+  return value && /^https?:\/\//i.test(value) ? value : undefined;
+}
+
+export function toTalentCourse(item: NewsItem | NewsDetail): TalentCourse {
+  const meta = item.meta ?? {};
+  return {
+    id: String(item.id),
+    title: item.title,
+    organizer: meta.organizer ?? "",
+    dateStart: slashDate(meta.dateStart),
+    dateEnd: slashDate(meta.dateEnd),
+    city: meta.city ?? "",
+    contactName: meta.contactName ?? "",
+    contactPhone: meta.contactPhone ?? "",
+    courseCode: meta.courseCode ?? "",
+    courseDate: meta.courseDate ?? "",
+    courseTime: meta.courseTime ?? "",
+    totalHours: meta.totalHours ?? "",
+    fee: meta.fee ?? "",
+    audience: meta.audience ?? "",
+    location: meta.location ?? "",
+    hostOrganizer: meta.hostOrganizer ?? "",
+    executor: meta.executor ?? "",
+    keywords: item.tags ?? [],
+    remainingSeats: parseSeats(meta.remainingSeats),
+    postedDate: formatIsoDate(item.startDate ?? item.createdTime),
+    registerUrl: safeUrl(meta.registerUrl),
+  };
 }

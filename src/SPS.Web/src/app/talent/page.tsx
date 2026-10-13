@@ -7,24 +7,35 @@ import CourseTable from "@/components/talent/CourseTable";
 import PopularCourses from "@/components/talent/PopularCourses";
 import NewsBanner from "@/components/news/NewsBanner";
 import SidebarBanner from "@/components/layout/SidebarBanner";
-import { TALENT_COURSES } from "@/lib/talent-data";
+import { toTalentCourse } from "@/lib/talent-data";
 import { withBasePath } from "@/lib/api-client";
-import { fetchBanners } from "@/lib/api.server";
+import { fetchBanners, fetchSectionItems, NewsSections } from "@/lib/api.server";
+import { buildListHref, readListQuery } from "@/lib/list-query";
+import { sortByViewCount } from "@/lib/content-list-utils";
 
 export const metadata: Metadata = {
   title: "人才培訓",
 };
 
-// 對應設計稿 page/_uc/side2_banner.html——原本漏掉這塊，只做了
-// 「熱門課程」，忘了它下面還有一個共用的廣告欄位（跟 /serve、/faq、
-// /news、/promotion* 這幾頁側欄用的是同一份假資料/元件）。
+const TALENT_PAGE_SIZE = 10;
+
+// 對應設計稿 page/_uc/side2_banner.html——「熱門課程」下面還有一個共用的廣告欄位。
 /**
- * 人才培訓課程列表，對應設計稿 page/talent/index.html。目前後端
- * 沒有對應的內容類型，先用 talent-data.ts 的假資料，分頁跟
- * /serve、/tutoring 一樣先用寫死的佔位。
+ * 人才培訓課程列表，對應設計稿 page/talent/index.html。2026-10-13 起資料來自後台「人才培育 → 課程內容」
+ * （跟公告共用 News 資料表，見 `lib/talent-data.ts`），關鍵字搜尋與分頁交給後端；「熱門課程」側欄取瀏覽數最高的 5 筆。
  */
-export default async function TalentIndexPage() {
-  const [sidebarBanners, topBanners] = await Promise.all([fetchBanners("sidebar-talent"), fetchBanners("talent-top")]);
+export default async function TalentIndexPage({ searchParams }: PageProps<"/talent">) {
+  const { query, page } = readListQuery(await searchParams);
+  const [sidebarBanners, topBanners, result, popularSource] = await Promise.all([
+    fetchBanners("sidebar-talent"),
+    fetchBanners("talent-top"),
+    fetchSectionItems(NewsSections.Talent, { search: query || undefined, page, pageSize: TALENT_PAGE_SIZE }),
+    fetchSectionItems(NewsSections.Talent, { pageSize: 20 }),
+  ]);
+  const courses = result.items.map(toTalentCourse);
+  const popularCourses = sortByViewCount(popularSource.items).slice(0, 5).map(toTalentCourse);
+  const totalPages = Math.max(1, Math.ceil(result.totalCount / TALENT_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
   return (
     <>
       <BodyClass className="talent" />
@@ -34,7 +45,7 @@ export default async function TalentIndexPage() {
         banner={topBanners.some((b) => b.uri) ? <NewsBanner id="talent-banner" banners={topBanners} /> : undefined}
         aside={
           <>
-            <PopularCourses courses={TALENT_COURSES} />
+            {popularCourses.length > 0 && <PopularCourses courses={popularCourses} />}
             <SidebarBanner banners={sidebarBanners} />
           </>
         }
@@ -50,12 +61,14 @@ export default async function TalentIndexPage() {
         }
       >
         <div className="search mb-4">
-          <SearchBar years={[]} typeOptions={[]} keywordPlaceholder="請輸入關鍵字" />
+          <SearchBar years={[]} typeOptions={[]} keywordPlaceholder="請輸入關鍵字" defaultKeyword={query} />
         </div>
 
-        <CourseTable courses={TALENT_COURSES} />
+        {!result.backendAvailable && <p>目前無法載入課程資料，請稍後再試。</p>}
+        {result.backendAvailable && courses.length === 0 && <p>{query ? "沒有符合的課程。" : "目前沒有課程資料。"}</p>}
+        {courses.length > 0 && <CourseTable courses={courses} startIndex={(currentPage - 1) * TALENT_PAGE_SIZE} />}
 
-        <Pagination currentPage={1} totalPages={5} getHref={(page) => `/talent?page=${page}`} />
+        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(target) => buildListHref("/talent", { q: query, page: target })} />
       </InnerPageShell>
     </>
   );

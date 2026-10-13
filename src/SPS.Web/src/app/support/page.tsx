@@ -3,9 +3,11 @@ import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import NewsBanner from "@/components/news/NewsBanner";
-import { SUPPORT_INFO_BLOCKS, SUPPORT_QUICK_LINKS, SUPPORT_ANNOUNCEMENTS } from "@/lib/support-data";
+import { SUPPORT_INFO_BLOCKS, SUPPORT_QUICK_LINKS, toSupportAnnouncement } from "@/lib/support-data";
+import Pagination from "@/components/ui/Pagination";
+import { buildListHref, readListQuery } from "@/lib/list-query";
 import { withBasePath } from "@/lib/api-client";
-import { fetchBanners, fetchDownloadResources } from "@/lib/api.server";
+import { fetchBanners, fetchDownloadResources, fetchSectionItems, NewsSections } from "@/lib/api.server";
 import DownloadDialog from "@/components/ui/DownloadDialog";
 
 export const metadata: Metadata = {
@@ -19,10 +21,18 @@ export const metadata: Metadata = {
  * 底下兩個平行頁面之一（另一個是 /support/resources，對應
  * page/support/p01.html「政府補助資源」），不是這頁的詳情頁。
  *
- * 目前後端沒有對應的內容類型，四個資訊區塊跟公告列表都先用
- * `support-data.ts` 的假資料，之後有真後端再換掉。
+ * 2026-10-13 起公告列表來自後台「補助專區 → 補助公告」（跟公告共用 News 資料表，`section = 2`），點進去是
+ * `/support/[id]` 詳情；四個資訊區塊（適用對象／補助類別／補助金額／聯繫諮詢）是這個計畫的固定說明文字，
+ * 仍寫在 `support-data.ts`。
  */
-export default async function SupportPage() {
+const SUPPORT_NOTICE_PAGE_SIZE = 10;
+
+export default async function SupportPage({ searchParams }: PageProps<"/support">) {
+  const { page } = readListQuery(await searchParams);
+  const notices = await fetchSectionItems(NewsSections.Support, { page, pageSize: SUPPORT_NOTICE_PAGE_SIZE });
+  const announcements = notices.items.map(toSupportAnnouncement);
+  const noticeTotalPages = Math.max(1, Math.ceil(notices.totalCount / SUPPORT_NOTICE_PAGE_SIZE));
+  const noticePage = Math.min(page, noticeTotalPages);
   // 五個快速連結的檔案／外部連結由後台「頁面設定 → 下載資源」維護
   const downloads = await fetchDownloadResources();
   const [supportTutoringBanners, sidebarBanners, topBanners] = await Promise.all([
@@ -111,8 +121,10 @@ export default async function SupportPage() {
           </div>
 
           <div className="new_box">
-            {SUPPORT_ANNOUNCEMENTS.map((item) => (
-              <a href={withBasePath("/support/resources")} className="news-item" title={`前往閱讀：${item.title}`} key={item.id}>
+            {!notices.backendAvailable && <p>目前無法載入補助公告，請稍後再試。</p>}
+            {notices.backendAvailable && announcements.length === 0 && <p>目前沒有補助公告。</p>}
+            {announcements.map((item) => (
+              <a href={withBasePath(`/support/${item.id}`)} className="news-item" title={`前往閱讀：${item.title}`} key={item.id}>
                 <div className="news-content">
                   <span className="date blue mb-1 d-block">{item.date}</span>
                   <h4>{item.title}</h4>
@@ -123,6 +135,7 @@ export default async function SupportPage() {
               </a>
             ))}
           </div>
+          {noticeTotalPages > 1 && <Pagination currentPage={noticePage} totalPages={noticeTotalPages} getHref={(target) => buildListHref("/support", { page: target })} />}
         </div>
 
         <div className="supp_five mt-md-5 mt-4">

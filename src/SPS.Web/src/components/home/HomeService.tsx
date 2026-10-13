@@ -4,7 +4,7 @@ import MoreLink from "@/components/ui/MoreLink";
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
 import { withBasePath } from "@/lib/api-client";
-import { fetchServeItems } from "@/lib/api.server";
+import { fetchSectionItems, NewsSections, type NewsSectionId } from "@/lib/api.server";
 
 interface ServiceSlideData {
   href: string;
@@ -38,80 +38,58 @@ const TOOL_FALLBACK_SLIDE: ServiceSlideData = {
 };
 
 /**
- * 「技術工具」頁籤的投影片：取後台「服務專區」最新發布的項目；還沒有任何項目（或連不到後端）時，
- * 退回一張通用介紹，連到服務專區列表頁——不再連到寫死的 `/serve/<編號>`（那些編號不一定存在）。
+ * 一個頁籤的投影片：取後台對應專區最新發布的項目；還沒有任何項目（或連不到後端）時，
+ * 退回一張通用介紹，連到該專區的列表頁——不再連到寫死的 `/serve/<編號>`（那些編號不一定存在）。
+ * `categoryPath` 有值時，項目的分類名稱會連到 `<categoryPath>?category=<分類名稱>`。
  */
-async function loadToolSlides(): Promise<ServiceSlideData[]> {
-  const { items } = await fetchServeItems({ pageSize: HOME_SERVE_COUNT });
-  if (items.length === 0) return [TOOL_FALLBACK_SLIDE];
+async function loadSlides(section: NewsSectionId, detailBase: string, categoryPath: string | undefined, fallback: ServiceSlideData): Promise<ServiceSlideData[]> {
+  const { items } = await fetchSectionItems(section, { pageSize: HOME_SERVE_COUNT });
+  if (items.length === 0) return [fallback];
   return items.map((item) => {
     const intro = (item.introduction ?? "").trim();
     const category = item.categoryName?.trim();
+    const keywords = categoryPath ? (category ? [category] : []) : (item.tags ?? []).slice(0, 3);
     return {
-      href: `/serve/${item.id}`,
+      href: `${detailBase}/${item.id}`,
       image: item.imageUrl || SERVICE_FALLBACK_IMAGE,
       title: item.title,
-      keywords: category ? [category] : [],
-      keywordHrefs: category ? [`/serve?category=${encodeURIComponent(category)}`] : [],
+      keywords,
+      keywordHrefs: categoryPath ? keywords.map((name) => `${categoryPath}?category=${encodeURIComponent(name)}`) : undefined,
       description: intro.length > DESCRIPTION_MAX_LENGTH ? `${intro.slice(0, DESCRIPTION_MAX_LENGTH)}…` : intro,
     };
   });
 }
 
-function buildCategories(toolSlides: ServiceSlideData[]): ServiceCategory[] {
+const TALENT_FALLBACK_SLIDE: ServiceSlideData = {
+  href: "/talent",
+  image: SERVICE_FALLBACK_IMAGE,
+  title: "人才培育",
+  keywords: ["培訓課程"],
+  description: "提供專業人才培訓方案，協助提升產業競爭力與技術能量。",
+};
+
+const TUTORING_FALLBACK_SLIDE: ServiceSlideData = {
+  href: "/tutoring",
+  image: SERVICE_FALLBACK_IMAGE,
+  title: "產業輔導",
+  keywords: ["專家諮詢"],
+  description: "安排跨領域專家團隊進場輔導，協助診斷升級瓶頸與提供解決策略。",
+};
+
+const SUPPORT_FALLBACK_SLIDE: ServiceSlideData = {
+  href: "/support",
+  image: SERVICE_FALLBACK_IMAGE,
+  title: "補助資源",
+  keywords: ["補助申請"],
+  description: "整合中央與地方各項專案補助資源，減輕企業研發與數位轉型負擔。",
+};
+
+function buildCategories(slides: { tool: ServiceSlideData[]; talent: ServiceSlideData[]; tutoring: ServiceSlideData[]; support: ServiceSlideData[] }): ServiceCategory[] {
   return [
-  {
-    id: "ser-home-01",
-    label: "技術工具",
-    icon: withBasePath("/images/home/ser_icon01.svg"),
-    englishLabel: "Services 01",
-    slides: toolSlides,
-  },
-  {
-    id: "ser-home-02",
-    label: "人才培育",
-    icon: withBasePath("/images/home/ser_icon02.svg"),
-    englishLabel: "Services 02",
-    slides: [
-      {
-        href: "/talent",
-        image: withBasePath("/images/home/ser_bg.jpg"),
-        title: "人才培育",
-        keywords: ["培訓課程"],
-        description: "提供專業人才培訓方案，協助提升產業競爭力與技術能量。",
-      },
-    ],
-  },
-  {
-    id: "ser-home-03",
-    label: "產業輔導",
-    icon: withBasePath("/images/home/ser_icon03.svg"),
-    englishLabel: "Services 03",
-    slides: [
-      {
-        href: "/tutoring",
-        image: withBasePath("/images/home/ser_bg.jpg"),
-        title: "產業輔導",
-        keywords: ["專家諮詢"],
-        description: "安排跨領域專家團隊進場輔導，協助診斷升級瓶頸與提供解決策略。",
-      },
-    ],
-  },
-  {
-    id: "ser-home-04",
-    label: "補助資源",
-    icon: withBasePath("/images/home/ser_icon04.svg"),
-    englishLabel: "Services 04",
-    slides: [
-      {
-        href: "/support",
-        image: withBasePath("/images/home/ser_bg.jpg"),
-        title: "補助資源",
-        keywords: ["補助申請"],
-        description: "整合中央與地方各項專案補助資源，減輕企業研發與數位轉型負擔。",
-      },
-    ],
-  },
+    { id: "ser-home-01", label: "技術工具", icon: withBasePath("/images/home/ser_icon01.svg"), englishLabel: "Services 01", slides: slides.tool },
+    { id: "ser-home-02", label: "人才培育", icon: withBasePath("/images/home/ser_icon02.svg"), englishLabel: "Services 02", slides: slides.talent },
+    { id: "ser-home-03", label: "產業輔導", icon: withBasePath("/images/home/ser_icon03.svg"), englishLabel: "Services 03", slides: slides.tutoring },
+    { id: "ser-home-04", label: "補助資源", icon: withBasePath("/images/home/ser_icon04.svg"), englishLabel: "Services 04", slides: slides.support },
   ];
 }
 
@@ -182,11 +160,17 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
  * 首頁「服務專區」，對應舊站 page/_uc/home/home_service.html。
  * 是 Carousel／CarouselControls 這組積木第一次真的接上真實內容驗證。
  *
- * 2026-10-13：「技術工具」頁籤改讀後台服務專區最新項目；人才培育、產業輔導、補助資源三個頁籤
- * 的內容還是寫死（那三個專區本身還沒接後台），連結改指向各自的專區頁面。
+ * 2026-10-13：四個頁籤都改讀後台對應專區的最新項目（技術工具＝服務專區、人才培育＝課程、產業輔導、
+ * 補助資源＝補助公告）；還沒有內容時各自退回一張通用介紹、連到專區列表頁。
  */
 export default async function HomeService() {
-  const CATEGORIES = buildCategories(await loadToolSlides());
+  const [tool, talent, tutoring, support] = await Promise.all([
+    loadSlides(NewsSections.Serve, "/serve", "/serve", TOOL_FALLBACK_SLIDE),
+    loadSlides(NewsSections.Talent, "/talent", undefined, TALENT_FALLBACK_SLIDE),
+    loadSlides(NewsSections.Tutoring, "/tutoring", "/tutoring", TUTORING_FALLBACK_SLIDE),
+    loadSlides(NewsSections.Support, "/support", undefined, SUPPORT_FALLBACK_SLIDE),
+  ]);
+  const CATEGORIES = buildCategories({ tool, talent, tutoring, support });
   return (
     <div className="home_service">
       <SectionTitle eyebrow="Services" description="提供企業全方位的智慧化升級服務，從工具導入到人才培育，一站式滿足產業需求。">

@@ -8,7 +8,7 @@ import type { TalentCourse } from "@/lib/talent-data";
  * 縣市/聯絡人/課程網址），`data-label` 屬性搭配 CSS 是給手機版
  * RWD 直向卡片顯示用的（見 style.css `.course-table` 對應規則）。
  */
-export default function CourseTable({ courses }: { courses: TalentCourse[] }) {
+export default function CourseTable({ courses, startIndex = 0 }: { courses: TalentCourse[]; startIndex?: number }) {
   return (
     <div className="course_box">
       <div className="course-table-container">
@@ -43,7 +43,7 @@ export default function CourseTable({ courses }: { courses: TalentCourse[] }) {
             {courses.map((course, index) => (
               <tr key={course.id}>
                 <td data-label="序號" className="td-seq">
-                  {index + 1}
+                  {startIndex + index + 1}
                 </td>
                 <td data-label="課程名稱" className="td-name">
                   {course.title}
@@ -53,16 +53,22 @@ export default function CourseTable({ courses }: { courses: TalentCourse[] }) {
                 </td>
                 <td data-label="課程日期" className="td-date">
                   {course.dateStart}
-                  <br />~ {course.dateEnd}
+                  {course.dateEnd && (
+                    <>
+                      <br />~ {course.dateEnd}
+                    </>
+                  )}
                 </td>
                 <td data-label="縣市" className="td-city">
                   {course.city}
                 </td>
                 <td data-label="聯絡人" className="td-contact">
                   <div>{course.contactName}</div>
-                  <a href={`tel:${course.contactPhone}`} title={`撥打電話給${course.contactName}：${course.contactPhone}`}>
-                    {course.contactPhone}
-                  </a>
+                  {course.contactPhone && (
+                    <a href={`tel:${course.contactPhone}`} title={`撥打電話給${course.contactName}：${course.contactPhone}`}>
+                      {course.contactPhone}
+                    </a>
+                  )}
                 </td>
                 <td data-label="課程網址" className="td-link">
                   <a

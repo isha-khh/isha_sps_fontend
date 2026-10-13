@@ -7,39 +7,52 @@ import TutoringItemCard from "@/components/tutoring/TutoringItemCard";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import CategoryTabList from "@/components/layout/CategoryTabList";
-import { TUTORING_ITEMS, TUTORING_INDUSTRIES } from "@/lib/tutoring-data";
+import { toTutoringItem } from "@/lib/tutoring-data";
 import { withBasePath } from "@/lib/api-client";
-import { fetchBanners } from "@/lib/api.server";
+import { fetchBanners, fetchSectionCategories, fetchSectionItems, NewsSections, SectionCategoryTypes } from "@/lib/api.server";
+import { buildListHref, readListQuery } from "@/lib/list-query";
+import { sortByViewCount } from "@/lib/content-list-utils";
 
 export const metadata: Metadata = {
   title: "產業輔導",
 };
 
+const TUTORING_PAGE_SIZE = 6;
+
 // 對應設計稿 page/_uc/side2_banner.html
 /**
- * 產業輔導列表，對應設計稿 page/tutoring/index.html。目前後端沒有
- * 對應的內容類型，先用 tutoring-data.ts 的假資料，分頁跟 /serve
- * 一樣先用寫死的佔位（currentPage/totalPages），之後接真後端時再
- * 照實際筆數切頁。
+ * 產業輔導列表，對應設計稿 page/tutoring/index.html。2026-10-13 起資料來自後台「產業輔導 → 輔導內容」
+ * （跟公告共用 News 資料表，見 `lib/tutoring-data.ts`）；左側分類是後台「產業別」，沒帶 `?category=` 時
+ * 比照設計稿預設第一個產業別（後台還沒建立任何產業別時顯示全部）；關鍵字搜尋與分頁交給後端。
  */
 export default async function TutoringIndexPage({ searchParams }: PageProps<"/tutoring">) {
-  const sidebarBanners = await fetchBanners("sidebar-tutoring");
-  const { category: rawCategory } = await searchParams;
-  // 對應設計稿 page/_uc/side/side1_tutoring.html——「石化業」是設計稿
-  // 裡寫死 class="active" 的預設分類，沒帶 ?category= 時比照辦理。
-  const activeIndustry = typeof rawCategory === "string" && TUTORING_INDUSTRIES.includes(rawCategory) ? rawCategory : TUTORING_INDUSTRIES[0];
-  const filteredItems = TUTORING_ITEMS.filter((item) => item.industry === activeIndustry);
+  const params = await searchParams;
+  const { query, page } = readListQuery(params);
+  const rawCategory = params.category;
+  const [sidebarBanners, industries, popularSource] = await Promise.all([
+    fetchBanners("sidebar-tutoring"),
+    fetchSectionCategories(SectionCategoryTypes.Tutoring),
+    fetchSectionItems(NewsSections.Tutoring, { pageSize: 20 }),
+  ]);
+  const requestedName = typeof rawCategory === "string" && rawCategory ? rawCategory : undefined;
+  const activeIndustry = requestedName ? industries.find((c) => c.name === requestedName) : industries[0];
+  // 指定了產業別卻找不到（或已下架）→ 不顯示任何項目，而不是退回「全部」誤導使用者
+  const unknownIndustry = requestedName !== undefined && !activeIndustry;
 
-  // 對應設計稿 page/_uc/side2_industry.html——原始檔案標題寫
-  // 「熱門產業案例」、連去 /promotion，明顯是共用範本複製時忘記改，
-  // 這裡照這頁實際的內容類型換成「熱門輔導」，卡片版型（排名＋縮圖＋
-  // 標題＋日期）沿用同一顆通用的 PopularPosts。
-  const popularItems = TUTORING_ITEMS.map((item) => ({
-    href: `/tutoring/${item.id}`,
-    title: item.title,
-    date: item.date,
-    image: item.image,
-  }));
+  const result = unknownIndustry
+    ? { items: [], totalCount: 0, backendAvailable: true }
+    : await fetchSectionItems(NewsSections.Tutoring, { search: query || undefined, categoryId: activeIndustry?.id, page, pageSize: TUTORING_PAGE_SIZE });
+  const items = result.items.map(toTutoringItem);
+  const totalPages = Math.max(1, Math.ceil(result.totalCount / TUTORING_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const activeName = activeIndustry?.name ?? requestedName;
+
+  // 對應設計稿 page/_uc/side2_industry.html——原始檔案標題寫「熱門產業案例」、連去 /promotion，明顯是共用範本
+  // 複製時忘記改，這裡照這頁實際的內容類型換成「熱門輔導」，卡片版型沿用同一顆通用的 PopularPosts。
+  const popularItems = sortByViewCount(popularSource.items)
+    .slice(0, 5)
+    .map(toTutoringItem)
+    .map((item) => ({ href: `/tutoring/${item.id}`, title: item.title, date: item.date, image: item.image }));
 
   return (
     <>
@@ -48,14 +61,16 @@ export default async function TutoringIndexPage({ searchParams }: PageProps<"/tu
         title="輔導"
         breadcrumb={[{ label: "產業輔導" }, { label: "輔導" }]}
         sidebar={
-          <CategoryTabList
-            activeHref={`/tutoring?category=${encodeURIComponent(activeIndustry)}`}
-            items={TUTORING_INDUSTRIES.map((industry) => ({ label: industry, href: `/tutoring?category=${encodeURIComponent(industry)}` }))}
-          />
+          industries.length > 0 ? (
+            <CategoryTabList
+              activeHref={`/tutoring?category=${encodeURIComponent(activeName ?? "")}`}
+              items={industries.map((industry) => ({ label: industry.name, href: `/tutoring?category=${encodeURIComponent(industry.name)}` }))}
+            />
+          ) : undefined
         }
         aside={
           <>
-            <PopularPosts items={popularItems} heading="熱門輔導" />
+            {popularItems.length > 0 && <PopularPosts items={popularItems} heading="熱門輔導" />}
             <SidebarBanner banners={sidebarBanners} />
           </>
         }
@@ -71,17 +86,18 @@ export default async function TutoringIndexPage({ searchParams }: PageProps<"/tu
         }
       >
         <div className="search mb-md-5 mb-4">
-          <SearchBar typeOptions={[]} typeLabel="產業別篩選" keywordPlaceholder="請輸入關鍵字" hiddenFields={{ category: activeIndustry }} />
+          <SearchBar typeOptions={[]} typeLabel="產業別篩選" keywordPlaceholder="請輸入關鍵字" defaultKeyword={query} hiddenFields={activeName ? { category: activeName } : undefined} />
         </div>
 
         <div className="column_box">
-          {filteredItems.length === 0 && <p>目前這個分類還沒有輔導項目。</p>}
-          {filteredItems.map((item) => (
+          {!result.backendAvailable && <p>目前無法載入輔導資料，請稍後再試。</p>}
+          {result.backendAvailable && items.length === 0 && <p>{query ? "沒有符合的輔導項目。" : "目前這個分類還沒有輔導項目。"}</p>}
+          {items.map((item) => (
             <TutoringItemCard item={item} key={item.id} />
           ))}
         </div>
 
-        <Pagination currentPage={1} totalPages={5} getHref={(page) => `/tutoring?category=${encodeURIComponent(activeIndustry)}&page=${page}`} />
+        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(target) => buildListHref("/tutoring", { category: activeName, q: query, page: target })} />
       </InnerPageShell>
     </>
   );

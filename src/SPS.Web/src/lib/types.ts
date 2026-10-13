@@ -184,6 +184,8 @@ export type NewsItem = {
     section?: number;
     /** 附件數量（服務專區用，列表卡片顯示「下載文件」） */
     attachmentCount?: number;
+    /** 專區專屬欄位（人才培育的講師、產業輔導的主辦單位…），欄位名稱見後端 `NewsSection.MetaKeys` */
+    meta?: Record<string, string>;
     title: string;
     introduction: string;
     // 真後端 News.StartDate 是 `DateTime?`（可為 null）——2026-09-08
@@ -230,6 +232,8 @@ export type NewsDetail = {
     section?: number;
     /** 附件數量（服務專區用）；附件本身不在公開資料裡，要填完下載表單才給 */
     attachmentCount?: number;
+    /** 專區專屬欄位，見 NewsItem.meta */
+    meta?: Record<string, string>;
     title: string;
     introduction?: string;
     // 可能是 null，理由同 NewsItem.startDate

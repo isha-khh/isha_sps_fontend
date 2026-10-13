@@ -1,4 +1,5 @@
-import { withBasePath } from "@/lib/api-client";
+import type { NewsItem } from "@/lib/types";
+import { formatIsoDate } from "@/lib/content-list-utils";
 
 /**
  * 「補助資源」底下兩個平行頁面的假資料，對應設計稿：
@@ -8,7 +9,8 @@ import { withBasePath } from "@/lib/api-client";
  *   不是文章詳情頁——所以這裡不像 news/serve 做成 list+detail，
  *   兩個都是純列表頁。
  *
- * 目前後端沒有對應的內容類型，先照 news/serve 假資料先行的做法。
+ * 本計畫補助的公告列表與政府補助資源都來自後台（`News` 資料表）；四個資訊區塊（適用對象／補助類別／補助金額／
+ * 聯繫諮詢）是這個計畫的固定說明文字，目前仍寫在這個檔案裡。
  */
 
 export interface SupportApplicantRequirement {
@@ -79,15 +81,15 @@ export interface SupportAnnouncement {
   title: string;
 }
 
-export const SUPPORT_ANNOUNCEMENTS: SupportAnnouncement[] = Array.from({ length: 5 }, (_, index) => ({
-  id: String(index + 1),
-  date: "2026-04-15",
-  title: "114年度石化產業智慧化補助計畫正式開放申請",
-}));
+/** 後台「補助專區 → 補助公告」（`News` 資料表，`section = 2`）轉成列表用的樣子 */
+export function toSupportAnnouncement(item: NewsItem): SupportAnnouncement {
+  return { id: String(item.id), date: formatIsoDate(item.startDate ?? item.createdTime), title: item.title };
+}
 
 export interface SupportResource {
   id: string;
-  image: string;
+  /** 沒有封面圖就是 undefined，卡片不顯示圖片區塊 */
+  image?: string;
   title: string;
   description: string;
   applicant: string;
@@ -95,35 +97,26 @@ export interface SupportResource {
   organizer: string;
   period: string;
   keywords: string[];
-  /** 左側欄分類，對應設計稿 page/_uc/side/side1_support.html（數位轉型／設備升級／工安改善） */
+  /** 後台「補助資源分類」名稱 */
   category: string;
 }
 
-export const SUPPORT_RESOURCE_CATEGORIES = ["數位轉型", "設備升級", "工安改善"];
-
-export const SUPPORT_RESOURCES: SupportResource[] = [
-  {
-    id: "1",
-    image: withBasePath("/images/all/new_logo.jpg"),
-    title: "114年度石化產業智慧化補助計畫正式開放申請",
-    description: "提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。",
-    applicant: "製造業（依法登記之公司）",
-    amount: "最高補助新臺幣 300 萬元",
-    organizer: "經濟部產業發展署",
-    period: "2026/01/15 – 2026/03/31",
-    keywords: ["數位轉型", "工安改善"],
-    category: "數位轉型",
-  },
-  {
-    id: "2",
-    image: withBasePath("/images/all/new_logo.jpg"),
-    title: "114年度石化產業智慧化補助計畫正式開放申請",
-    description: "提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。",
-    applicant: "製造業（依法登記之公司）",
-    amount: "最高補助新臺幣 300 萬元",
-    organizer: "經濟部產業發展署",
-    period: "2026/01/15 – 2026/03/31",
-    keywords: ["數位轉型", "工安改善"],
-    category: "設備升級",
-  },
-];
+/**
+ * 政府補助資源（`News` 資料表，`section = 5`）：適用對象／補助金額／主辦單位／申請期間存在 `News.Meta`，
+ * 分類是後台「補助資源分類」。2026-10-13 從前台寫死的假資料改接真後端，不再有假資料。
+ */
+export function toSupportResource(item: NewsItem): SupportResource {
+  const meta = item.meta ?? {};
+  return {
+    id: String(item.id),
+    image: item.imageUrl || undefined,
+    title: item.title,
+    description: item.introduction ?? "",
+    applicant: meta.applicant ?? "",
+    amount: meta.amount ?? "",
+    organizer: meta.organizer ?? "",
+    period: meta.period ?? "",
+    keywords: item.tags ?? [],
+    category: item.categoryName ?? "",
+  };
+}
