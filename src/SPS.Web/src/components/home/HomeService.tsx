@@ -4,9 +4,12 @@ import MoreLink from "@/components/ui/MoreLink";
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
 import { withBasePath } from "@/lib/api-client";
+import { fetchServeItems } from "@/lib/api.server";
 
 interface ServiceSlideData {
   href: string;
+  /** 關鍵字連結：沒給就連到這張投影片所屬專區的列表頁 */
+  keywordHrefs?: string[];
   image: string;
   title: string;
   keywords: string[];
@@ -21,28 +24,48 @@ interface ServiceCategory {
   slides: ServiceSlideData[];
 }
 
-const CATEGORIES: ServiceCategory[] = [
+const SERVICE_FALLBACK_IMAGE = withBasePath("/images/home/ser_bg.jpg");
+const HOME_SERVE_COUNT = 5;
+const DESCRIPTION_MAX_LENGTH = 90;
+
+const TOOL_FALLBACK_SLIDE: ServiceSlideData = {
+  href: "/serve",
+  image: SERVICE_FALLBACK_IMAGE,
+  title: "技術工具",
+  keywords: ["產業AI", "技術文件"],
+  keywordHrefs: ["/serve?category=" + encodeURIComponent("產業AI"), "/serve?category=" + encodeURIComponent("技術文件")],
+  description: "提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。",
+};
+
+/**
+ * 「技術工具」頁籤的投影片：取後台「服務專區」最新發布的項目；還沒有任何項目（或連不到後端）時，
+ * 退回一張通用介紹，連到服務專區列表頁——不再連到寫死的 `/serve/<編號>`（那些編號不一定存在）。
+ */
+async function loadToolSlides(): Promise<ServiceSlideData[]> {
+  const { items } = await fetchServeItems({ pageSize: HOME_SERVE_COUNT });
+  if (items.length === 0) return [TOOL_FALLBACK_SLIDE];
+  return items.map((item) => {
+    const intro = (item.introduction ?? "").trim();
+    const category = item.categoryName?.trim();
+    return {
+      href: `/serve/${item.id}`,
+      image: item.imageUrl || SERVICE_FALLBACK_IMAGE,
+      title: item.title,
+      keywords: category ? [category] : [],
+      keywordHrefs: category ? [`/serve?category=${encodeURIComponent(category)}`] : [],
+      description: intro.length > DESCRIPTION_MAX_LENGTH ? `${intro.slice(0, DESCRIPTION_MAX_LENGTH)}…` : intro,
+    };
+  });
+}
+
+function buildCategories(toolSlides: ServiceSlideData[]): ServiceCategory[] {
+  return [
   {
     id: "ser-home-01",
     label: "技術工具",
     icon: withBasePath("/images/home/ser_icon01.svg"),
     englishLabel: "Services 01",
-    slides: [
-      {
-        href: "/serve/1",
-        image: withBasePath("/images/home/ser_bg.jpg"),
-        title: "技術工具",
-        keywords: ["產業AI", "技術文件"],
-        description: "提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。",
-      },
-      {
-        href: "/serve/2",
-        image: withBasePath("/images/home/ser_bg.jpg"),
-        title: "技術工具",
-        keywords: ["產業AI", "技術文件"],
-        description: "提供產業適用的AI工具庫與技術規範文件，協助企業快速評估並導入智慧化解決方案。",
-      },
-    ],
+    slides: toolSlides,
   },
   {
     id: "ser-home-02",
@@ -51,7 +74,7 @@ const CATEGORIES: ServiceCategory[] = [
     englishLabel: "Services 02",
     slides: [
       {
-        href: "/serve/3",
+        href: "/talent",
         image: withBasePath("/images/home/ser_bg.jpg"),
         title: "人才培育",
         keywords: ["培訓課程"],
@@ -66,7 +89,7 @@ const CATEGORIES: ServiceCategory[] = [
     englishLabel: "Services 03",
     slides: [
       {
-        href: "/serve/4",
+        href: "/tutoring",
         image: withBasePath("/images/home/ser_bg.jpg"),
         title: "產業輔導",
         keywords: ["專家諮詢"],
@@ -81,7 +104,7 @@ const CATEGORIES: ServiceCategory[] = [
     englishLabel: "Services 04",
     slides: [
       {
-        href: "/serve/5",
+        href: "/support",
         image: withBasePath("/images/home/ser_bg.jpg"),
         title: "補助資源",
         keywords: ["補助申請"],
@@ -89,7 +112,8 @@ const CATEGORIES: ServiceCategory[] = [
       },
     ],
   },
-];
+  ];
+}
 
 /**
  * 一個分類頁籤裡的輪播：對應舊站 `.ser_box`。
@@ -130,9 +154,9 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
                 <div className="d-flex">
                   <h3>{slide.title}</h3>
                   <ul className="nav ul-key">
-                    {slide.keywords.map((keyword) => (
+                    {slide.keywords.map((keyword, index) => (
                       <li key={keyword}>
-                        <a href="#" title={`前往${keyword}`}>
+                        <a href={withBasePath(slide.keywordHrefs?.[index] ?? slide.href)} title={`前往${keyword}`}>
                           {keyword}
                         </a>
                       </li>
@@ -157,8 +181,12 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
 /**
  * 首頁「服務專區」，對應舊站 page/_uc/home/home_service.html。
  * 是 Carousel／CarouselControls 這組積木第一次真的接上真實內容驗證。
+ *
+ * 2026-10-13：「技術工具」頁籤改讀後台服務專區最新項目；人才培育、產業輔導、補助資源三個頁籤
+ * 的內容還是寫死（那三個專區本身還沒接後台），連結改指向各自的專區頁面。
  */
-export default function HomeService() {
+export default async function HomeService() {
+  const CATEGORIES = buildCategories(await loadToolSlides());
   return (
     <div className="home_service">
       <SectionTitle eyebrow="Services" description="提供企業全方位的智慧化升級服務，從工具導入到人才培育，一站式滿足產業需求。">

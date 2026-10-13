@@ -17,13 +17,13 @@ interface IndustryCaseData {
 
 const CASES: IndustryCaseData[] = [
   {
-    href: "/serve/case-1",
+    href: "/promotion",
     title: "AI 智慧安全帽偵測系統導入石化廠",
     description: "透過電腦視覺即時偵測人員安全裝備佩戴情況，顯著降低工安事故發生率，有效提升工地安全管理效率。",
     image: withBasePath("/images/home/ser_bg.jpg"),
   },
   {
-    href: "/serve/case-2",
+    href: "/promotion",
     title: "AI 智慧安全帽偵測系統導入石化廠",
     description: "透過電腦視覺即時偵測人員安全裝備佩戴情況，顯著降低工安事故發生率，有效提升工地安全管理效率。",
     image: withBasePath("/images/home/ser_bg.jpg"),
@@ -88,7 +88,7 @@ export default async function HomeIndustry() {
               pauseOnFocus: true,
             }}
             slides={visibleCases.map((item, index) => (
-              <div className="d-flex" key={item.href}>
+              <div className="d-flex" key={`${item.href}-${index}`}>
                 <div className="tit">
                   <div className="tit_1">
                     <a href={withBasePath(item.href)} title="查看更多產業案例">
