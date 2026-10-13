@@ -61,6 +61,40 @@ export interface DownloadResourceUpdate {
   externalUrl: string;
 }
 
+/** 「關於我們」頁的文字內容 */
+export interface AboutMilestone {
+  year: string;
+  title: string;
+  items: string[];
+}
+
+export interface AboutPageSettings {
+  title: string;
+  intro: string;
+  milestones: AboutMilestone[];
+  visionTitle: string;
+  visionLine: string;
+  visionHighlight: string;
+}
+
+/** 補助專區頁首的資訊區塊 */
+export interface SupportInfoItem {
+  label: string;
+  children: string[];
+}
+
+export interface SupportInfoBlock {
+  icon: string;
+  title: string;
+  items: SupportInfoItem[];
+  fullTextResourceKey: string | null;
+  fullTextLabel: string | null;
+}
+
+export interface SupportInfoSettings {
+  blocks: SupportInfoBlock[];
+}
+
 export const pageSettingsApi = {
   /**
    * 取得「我要投稿」頁設定
@@ -98,5 +132,27 @@ export const pageSettingsApi = {
    */
   async updateDownloads(items: DownloadResourceUpdate[]): Promise<void> {
     await apiClient.put('/api/page-settings/downloads', { items });
+  },
+
+  /** GET /api/page-settings/about */
+  async getAbout(): Promise<AboutPageSettings> {
+    const response = await apiClient.get<AboutPageSettings>('/api/page-settings/about');
+    return response.data;
+  },
+
+  /** PUT /api/page-settings/about（欄位太長、歷程缺年份或標題時後端回 400 `{ error }`） */
+  async updateAbout(settings: AboutPageSettings): Promise<void> {
+    await apiClient.put('/api/page-settings/about', settings);
+  },
+
+  /** GET /api/page-settings/support-info */
+  async getSupportInfo(): Promise<SupportInfoSettings> {
+    const response = await apiClient.get<SupportInfoSettings>('/api/page-settings/support-info');
+    return response.data;
+  },
+
+  /** PUT /api/page-settings/support-info（圖示不在清單內、連結的下載資源不存在時後端回 400 `{ error }`） */
+  async updateSupportInfo(settings: SupportInfoSettings): Promise<void> {
+    await apiClient.put('/api/page-settings/support-info', settings);
   },
 };

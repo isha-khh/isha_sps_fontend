@@ -687,3 +687,73 @@ export async function fetchServeItems(options?: { search?: string; categoryId?: 
 export async function fetchServeDetail(id: string): Promise<NewsDetail | null> {
     return fetchSectionDetail(NewsSections.Serve, id);
 }
+
+
+// ===== 後台「頁面設定」維護的純文字頁面 =====
+
+export type AboutPageContent = {
+    title: string;
+    intro: string;
+    milestones: { year: string; title: string; items: string[] }[];
+    visionTitle: string;
+    visionLine: string;
+    visionHighlight: string;
+};
+
+/** 後端連不到時的「關於我們」內容（與後台沒設定過時的預設值相同） */
+export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
+    title: "智慧石化永續發展計畫",
+    intro: "以高雄石化產業聚落為核心，導入智慧科技與創新應用，強化製程安全、環境永續與營運韌性，促進產業升級轉型，打造安全、智慧、永續的石化產業生態。",
+    milestones: [
+        { year: "2024", title: "盤點產業需求", items: ["深入石化場域，盤點製程、設備、巡檢及安全管理痛點，建立石化產業智慧安全需求與技術應用方向。"] },
+        { year: "2025", title: "孵化技術缺口", items: ["推動AI影像辨識、智慧巡檢、設備監測等技術進入石化場域，透過輔導及補助降低產業導入門檻。"] },
+        { year: "2026", title: "擴大推動對象", items: ["聚焦高雄石化相關上下游產業實際需求，媒合國內智慧科技業者，推動AI與智慧安全技術PoC驗證，強化火災、洩漏、設備異常等風險之即時辨識與預警能力。"] },
+        { year: "2027", title: "形成產業服務生態鏈", items: ["彙整場域實證成果，建立可複製的石化智慧安全應用模式，促進不同廠區、製程及高風險場域導入應用。"] },
+    ],
+    visionTitle: "願景",
+    visionLine: "立足高雄",
+    visionHighlight: "放眼全台",
+};
+
+/** 「關於我們」頁的文字內容（後台「頁面設定」維護）。快取 60 秒；取不到就用預設內容 */
+export async function fetchAboutPage(): Promise<AboutPageContent> {
+    try {
+        const data = await getBackendJson<Partial<AboutPageContent>>("/api/page-settings/about/public", 60);
+        return {
+            title: data.title || DEFAULT_ABOUT_PAGE.title,
+            intro: data.intro ?? DEFAULT_ABOUT_PAGE.intro,
+            milestones: data.milestones ?? DEFAULT_ABOUT_PAGE.milestones,
+            visionTitle: data.visionTitle ?? DEFAULT_ABOUT_PAGE.visionTitle,
+            visionLine: data.visionLine ?? DEFAULT_ABOUT_PAGE.visionLine,
+            visionHighlight: data.visionHighlight ?? DEFAULT_ABOUT_PAGE.visionHighlight,
+        };
+    } catch {
+        return DEFAULT_ABOUT_PAGE;
+    }
+}
+
+export type SupportInfoBlockContent = {
+    icon: string;
+    title: string;
+    items: { label: string; children?: string[] }[];
+    /** 區塊底部的「完整內容請參閱〈…〉」：連到對應的下載資源（後台「下載資源」的 key） */
+    fullTextLink?: { resourceKey: string; label: string };
+};
+
+/** 補助專區頁首的資訊區塊（後台「頁面設定」維護）。快取 60 秒；取不到（後端連不到）回 null，由呼叫端用預設內容 */
+export async function fetchSupportInfoBlocks(): Promise<SupportInfoBlockContent[] | null> {
+    try {
+        const data = await getBackendJson<{
+            blocks?: { icon: string; title: string; items?: { label: string; children?: string[] }[]; fullTextResourceKey?: string | null; fullTextLabel?: string | null }[];
+        }>("/api/page-settings/support-info/public", 60);
+        if (!data.blocks) return null;
+        return data.blocks.map((b) => ({
+            icon: b.icon,
+            title: b.title,
+            items: (b.items ?? []).map((i) => ({ label: i.label, children: i.children?.length ? i.children : undefined })),
+            fullTextLink: b.fullTextResourceKey && b.fullTextLabel ? { resourceKey: b.fullTextResourceKey, label: b.fullTextLabel } : undefined,
+        }));
+    } catch {
+        return null;
+    }
+}

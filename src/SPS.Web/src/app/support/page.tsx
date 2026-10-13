@@ -7,7 +7,7 @@ import { SUPPORT_INFO_BLOCKS, SUPPORT_QUICK_LINKS, toSupportAnnouncement } from 
 import Pagination from "@/components/ui/Pagination";
 import { buildListHref, readListQuery } from "@/lib/list-query";
 import { withBasePath } from "@/lib/api-client";
-import { fetchBanners, fetchDownloadResources, fetchSectionItems, NewsSections } from "@/lib/api.server";
+import { fetchBanners, fetchDownloadResources, fetchSectionItems, fetchSupportInfoBlocks, NewsSections } from "@/lib/api.server";
 import DownloadDialog from "@/components/ui/DownloadDialog";
 
 export const metadata: Metadata = {
@@ -22,13 +22,15 @@ export const metadata: Metadata = {
  * page/support/p01.html「政府補助資源」），不是這頁的詳情頁。
  *
  * 2026-10-13 起公告列表來自後台「補助專區 → 補助公告」（跟公告共用 News 資料表，`section = 2`），點進去是
- * `/support/[id]` 詳情；四個資訊區塊（適用對象／補助類別／補助金額／聯繫諮詢）是這個計畫的固定說明文字，
- * 仍寫在 `support-data.ts`。
+ * `/support/[id]` 詳情；四個資訊區塊（適用對象／補助類別／補助金額／聯繫諮詢）由後台「頁面設定」維護，
+ * 後端連不到才用 `support-data.ts` 的預設內容。
  */
 const SUPPORT_NOTICE_PAGE_SIZE = 10;
 
 export default async function SupportPage({ searchParams }: PageProps<"/support">) {
   const { page } = readListQuery(await searchParams);
+  // 四個資訊區塊由後台「頁面設定」維護；後端連不到才用程式裡的預設內容
+  const infoBlocks = (await fetchSupportInfoBlocks()) ?? SUPPORT_INFO_BLOCKS;
   const notices = await fetchSectionItems(NewsSections.Support, { page, pageSize: SUPPORT_NOTICE_PAGE_SIZE });
   const announcements = notices.items.map(toSupportAnnouncement);
   const noticeTotalPages = Math.max(1, Math.ceil(notices.totalCount / SUPPORT_NOTICE_PAGE_SIZE));
@@ -75,7 +77,7 @@ export default async function SupportPage({ searchParams }: PageProps<"/support"
       >
         <div className="support_box">
           <div className="d-flex">
-            {SUPPORT_INFO_BLOCKS.map((block) => (
+            {infoBlocks.map((block) => (
               <div className="support_er" key={block.title}>
                 <h3>
                   <i className={`bi ${block.icon}`} />
