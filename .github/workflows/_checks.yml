@@ -1,0 +1,87 @@
+# 共用的「編譯檢查」：後端、前台、後台各自能不能編過。
+# 只被 ci.yml（PR）與 release.yml（打 tag／手動發版）呼叫，不單獨觸發。
+name: Checks
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (.NET)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore src/SPS.sln
+
+      - name: Build (Release)
+        run: dotnet build src/SPS.sln -c Release --no-restore
+
+  web:
+    name: Web (Next.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/SPS.Web
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm 版本取自 src/SPS.Web/package.json 的 packageManager 欄位
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: src/SPS.Web/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: src/SPS.Web/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit
+
+      # 目前有一個既有的 lint 錯誤（TaiwanAddressSelector.tsx），先不擋流程；修掉後把 continue-on-error 拿掉
+      - name: Lint (non-blocking)
+        continue-on-error: true
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+  admin:
+    name: Admin (Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/SPS.AdminWeb
+    steps:
+      - uses: actions/checkout@v4
+
+      # 後台沒有 packageManager 欄位，版本與 src/SPS.AdminWeb/Dockerfile 一致
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: src/SPS.AdminWeb/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # `pnpm build` = tsc -b && vite build（含型別檢查）；後台的 ESLint 設定目前壞掉（expand is not a function），所以不跑 lint
+      - name: Build
+        run: pnpm build
