@@ -167,11 +167,11 @@ export default function MemberDetailsForm({
         return "請上傳技術服務能量/相關登錄證明";
       }
       if (isSupplier && tier === "emerging" && !docs.application) {
-        return "請上傳智慧工安技術產業資訊暨媒合平台登錄申請書＋個資申請書";
+        return "請上傳智慧工安技術產業資訊暨媒合平台登錄申請書＋蒐集個人資料告知事項暨個人資料同意書";
       }
     }
     if (!consentChecked) {
-      return "請詳細閱讀並勾選個人資料同意書";
+      return isSupplier && tier === "emerging" ? "請詳細閱讀並勾選資料同意書" : "請詳細閱讀並勾選個人資料同意書";
     }
     return null;
   }
@@ -483,7 +483,7 @@ export default function MemberDetailsForm({
               )}
               {isSupplier && tier === "emerging" && (
                 <DocumentUploadField
-                  label="智慧工安技術產業資訊暨媒合平台登錄申請書＋個資申請書"
+                  label="智慧工安技術產業資訊暨媒合平台登錄申請書＋蒐集個人資料告知事項暨個人資料同意書"
                   required
                   mode={mode}
                   preview={previewOf(DocumentType.Application)}
@@ -531,8 +531,8 @@ export default function MemberDetailsForm({
           </label>
           <span>
             我已詳細閱讀「
-            <a href="#" data-bs-toggle="modal" data-bs-target="#staticmembership" className="blue text-decoration-underline" title="我已詳細閱讀個人資料同意書">
-              個人資料同意書
+            <a href="#" data-bs-toggle="modal" data-bs-target="#staticmembership" className="blue text-decoration-underline" title={isSupplier && tier === "emerging" ? "我已詳細閱讀資料同意書" : "我已詳細閱讀個人資料同意書"}>
+              {isSupplier && tier === "emerging" ? "資料同意書" : "個人資料同意書"}
             </a>
             」
           </span>

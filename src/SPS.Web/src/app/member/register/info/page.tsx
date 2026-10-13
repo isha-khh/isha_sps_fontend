@@ -5,6 +5,7 @@ import StepProgress from "@/components/member/StepProgress";
 import MemberDetailsForm from "@/components/member/MemberDetailsForm";
 import { fetchDownloadResources } from "@/lib/api.server";
 import PersonalDataConsentNotice from "@/components/member/PersonalDataConsentNotice";
+import LogoAuthorizationNotice from "@/components/member/LogoAuthorizationNotice";
 import RedirectIfLoggedIn from "@/components/member/RedirectIfLoggedIn";
 
 export const metadata: Metadata = {
@@ -41,6 +42,8 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
   if (applicantType === "company") qs.set("role", role);
   if (applicantType === "company" && role === "supply") qs.set("tier", tier);
   const nextHrefBase = `/member/register/complete?${qs.toString()}`;
+  // 供給端新興會員：勾選的是「資料同意書」（公司資料與 Logo 的授權展示聲明）；個資告知與同意改由附件一簽署後與登錄申請書一併上傳
+  const isEmergingSupplier = applicantType === "company" && role === "supply" && tier === "emerging";
 
   // 申請須知與附件的下載（後台「頁面設定 → 下載資源」維護）
   const downloads = await fetchDownloadResources();
@@ -54,19 +57,24 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h4>個人資料同意書</h4>
+              <h4>{isEmergingSupplier ? "資料同意書" : "個人資料同意書"}</h4>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close">
                 X
               </button>
             </div>
             <div className="modal-body">
               <div className="txt editor">
-                <h5 className="mb-3">蒐集個人資料告知事項：</h5>
-                {/* 第十項（公司資料與 Logo 的授權展示聲明）只有供給端新興會員的申請才加 */}
-                <PersonalDataConsentNotice includeLogoAuthorization={applicantType === "company" && role === "supply" && tier === "emerging"} />
-                <h5 className="mt-4 mb-2">個人資料之同意提供：</h5>
-                <p className="mb-1">一、本人已充分知悉貴署上述告知事項。</p>
-                <p className="mb-0">二、本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</p>
+                {isEmergingSupplier ? (
+                  <LogoAuthorizationNotice />
+                ) : (
+                  <>
+                    <h5 className="mb-3">蒐集個人資料告知事項：</h5>
+                    <PersonalDataConsentNotice />
+                    <h5 className="mt-4 mb-2">個人資料之同意提供：</h5>
+                    <p className="mb-1">一、本人已充分知悉貴署上述告知事項。</p>
+                    <p className="mb-0">二、本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</p>
+                  </>
+                )}
               </div>
             </div>
           </div>

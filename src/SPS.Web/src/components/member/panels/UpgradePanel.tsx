@@ -122,7 +122,7 @@ export default function UpgradePanel() {
     if (isDemand && !docs.companyRegistration) return "請上傳工廠登記證明文件";
     if (isSupplier && !docs.companyRegistration) return "請上傳公司登記證明文件";
     if (isSupplier && tier === "excellent" && !docs.capability) return "請上傳技術服務能量/相關登錄證明";
-    if (isSupplier && tier === "emerging" && !docs.application) return "請上傳智慧工安技術產業資訊暨媒合平台登錄申請書＋個資申請書";
+    if (isSupplier && tier === "emerging" && !docs.application) return "請上傳智慧工安技術產業資訊暨媒合平台登錄申請書＋蒐集個人資料告知事項暨個人資料同意書";
     if (!consentChecked) return "請詳細閱讀並勾選個人資料同意書";
     return null;
   }
@@ -294,7 +294,7 @@ export default function UpgradePanel() {
               )}
               {isSupplier && tier === "emerging" && (
                 <DocumentUploadField
-                  label="智慧工安技術產業資訊暨媒合平台登錄申請書＋個資申請書"
+                  label="智慧工安技術產業資訊暨媒合平台登錄申請書＋蒐集個人資料告知事項暨個人資料同意書"
                   required
                   mode="edit"
                   selectedFileName={docs.application?.name}
