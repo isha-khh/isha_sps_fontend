@@ -48,15 +48,14 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Type check
-        run: pnpm exec tsc --noEmit
-
       # 目前有一個既有的 lint 錯誤（TaiwanAddressSelector.tsx），先不擋流程；修掉後把 continue-on-error 拿掉
       - name: Lint (non-blocking)
         continue-on-error: true
         run: pnpm lint
 
-      - name: Build
+      # next build 本身就會做型別檢查。不要另外跑 tsc --noEmit：Next 16 的 PageProps／LayoutProps 型別是 build 時才產生的，
+      # 乾淨的 checkout 上單獨跑 tsc 會找不到這些型別
+      - name: Build (includes type check)
         run: pnpm build
 
   admin:

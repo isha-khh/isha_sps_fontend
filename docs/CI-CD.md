@@ -10,7 +10,7 @@
 | `release.yml` | **打 tag**（如 `v1.1.2`）、**手動** | 先跑同一組編譯檢查，通過後打包成容器映像推送到 GitHub Packages；打 tag 時另外建立 GitHub Release |
 | `_checks.yml` | 只被上面兩個呼叫 | 共用的編譯檢查（不能單獨觸發） |
 
-編譯檢查內容：後端 `dotnet build`（Release）；前台 `pnpm install --frozen-lockfile`、`tsc --noEmit`、`pnpm build`（另跑 `pnpm lint`，**不擋流程**，因為有一個既有的 lint 錯誤，修掉後把 `continue-on-error` 拿掉）；後台 `pnpm build`（含 `tsc -b`；後台的 ESLint 設定目前壞掉，所以不跑 lint）。專案目前沒有自動化測試。
+編譯檢查內容：後端 `dotnet build`（Release）；前台 `pnpm install --frozen-lockfile`、`pnpm build`（`next build` 本身會做型別檢查；不能另外單跑 `tsc --noEmit`，因為 Next 16 的 `PageProps` 型別是 build 時才產生的）（另跑 `pnpm lint`，**不擋流程**，因為有一個既有的 lint 錯誤，修掉後把 `continue-on-error` 拿掉）；後台 `pnpm build`（含 `tsc -b`；後台的 ESLint 設定目前壞掉，所以不跑 lint）。專案目前沒有自動化測試。
 
 ## 套件（GitHub Packages／ghcr.io）
 
