@@ -3,8 +3,9 @@ import { TopbarLanguageMenu } from "./TopbarLanguageMenu";
 import { TopbarNotificationButton } from "./TopbarNotificationButton";
 import { TopbarProfileMenu } from "./TopbarProfileMenu";
 import { TopbarSearchButton } from "./TopbarSearchButton";
+import type { ISidebarMenuItem } from "./SidebarMenuItem";
 
-export const Topbar = () => {
+export const Topbar = ({ menuItems }: { menuItems: ISidebarMenuItem[] }) => {
     return (
         <div
             role="navigation"
@@ -24,7 +25,7 @@ export const Topbar = () => {
                     htmlFor="layout-sidebar-hover-trigger">
                     <span className="iconify lucide--menu size-5" />
                 </label>
-                <TopbarSearchButton />
+                <TopbarSearchButton menuItems={menuItems} />
             </div>
             <div className="inline-flex items-center gap-0.5">
                 <TopbarLanguageMenu />

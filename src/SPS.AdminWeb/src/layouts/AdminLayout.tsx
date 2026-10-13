@@ -272,7 +272,7 @@ export const AdminLayout = () => {
             <Sidebar menuItems={filteredMenuItems} />
 
             <div className="flex min-h-screen grow flex-col">
-              <Topbar />
+              <Topbar menuItems={filteredMenuItems} />
 
               <main className="grow p-4 md:p-6">
                 <Outlet />

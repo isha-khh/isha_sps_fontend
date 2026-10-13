@@ -1,11 +1,89 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { ISidebarMenuItem } from './SidebarMenuItem';
 
-export const TopbarSearchButton = () => {
+/** 可搜尋的一個頁面：側邊選單的最底層項目，附上它的上層名稱（例如「內容管理 › 頁面設定」） */
+interface SearchEntry {
+    id: string;
+    label: string;
+    parents: string[];
+    url: string;
+    icon?: string;
+}
+
+function flatten(items: ISidebarMenuItem[], parents: string[] = [], inheritedIcon?: string): SearchEntry[] {
+    return items.flatMap((item) => {
+        if (item.isTitle) return [];
+        if (item.children && item.children.length > 0) {
+            return flatten(item.children, [...parents, item.label], item.icon ?? inheritedIcon);
+        }
+        return item.url ? [{ id: item.id, label: item.label, parents, url: item.url, icon: item.icon ?? inheritedIcon }] : [];
+    });
+}
+
+/**
+ * 頂端的「搜尋」：搜尋後台選單裡的頁面（只含目前帳號有權限看到的），輸入「頁面設定」「彈窗」「檔案」之類的關鍵字，
+ * 用 ↑↓ 選擇、Enter 開啟；也可以直接按 Ctrl／⌘ + K 開啟。比對選單名稱、上層名稱與網址。
+ */
+export const TopbarSearchButton = ({ menuItems }: { menuItems: ISidebarMenuItem[] }) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const navigate = useNavigate();
+    const [query, setQuery] = useState('');
+    const [activeIndex, setActiveIndex] = useState(0);
 
-    const showModal = () => {
-        if (dialogRef.current) {
-            dialogRef.current.showModal();
+    const entries = useMemo(() => flatten(menuItems), [menuItems]);
+    const results = useMemo(() => {
+        const keyword = query.trim().toLowerCase();
+        if (!keyword) return entries;
+        const terms = keyword.split(/\s+/);
+        return entries.filter((entry) => {
+            const haystack = [entry.label, ...entry.parents, entry.url].join(' ').toLowerCase();
+            return terms.every((term) => haystack.includes(term));
+        });
+    }, [entries, query]);
+
+    const open = () => {
+        const dialog = dialogRef.current;
+        if (dialog && !dialog.open) dialog.showModal();
+        setTimeout(() => inputRef.current?.focus(), 0);
+    };
+
+    const close = () => dialogRef.current?.close();
+
+    const go = (entry: SearchEntry) => {
+        close();
+        navigate(entry.url);
+    };
+
+    // Ctrl／⌘ + K 開啟搜尋
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                open();
+            }
+        };
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, []);
+
+    // 目前選到的項目要捲進可視範圍
+    useEffect(() => {
+        document.getElementById(`topbar-search-option-${activeIndex}`)?.scrollIntoView({ block: 'nearest' });
+    }, [activeIndex]);
+
+    const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            setActiveIndex((index) => Math.min(index + 1, results.length - 1));
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            setActiveIndex((index) => Math.max(index - 1, 0));
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            const entry = results[activeIndex];
+            if (entry) go(entry);
         }
     };
 
@@ -13,214 +91,91 @@ export const TopbarSearchButton = () => {
         <>
             <button
                 className="btn btn-outline btn-sm btn-ghost border-base-300 text-base-content/70 hidden h-9 w-48 justify-start gap-2 !text-sm md:flex"
-                onClick={showModal}>
+                onClick={open}>
                 <span className="iconify lucide--search size-4" />
-                <span>Search</span>
+                <span>搜尋功能頁面</span>
+                <kbd className="kbd kbd-xs ms-auto">Ctrl K</kbd>
             </button>
             <button
                 className="btn btn-outline btn-sm btn-square btn-ghost border-base-300 text-base-content/70 flex size-9 md:hidden"
-                aria-label="Search"
-                onClick={showModal}>
+                aria-label="搜尋功能頁面"
+                onClick={open}>
                 <span className="iconify lucide--search size-4" />
             </button>
-            <dialog ref={dialogRef} className="modal p-0">
+            <dialog
+                ref={dialogRef}
+                className="modal p-0"
+                onClose={() => {
+                    setQuery('');
+                    setActiveIndex(0);
+                }}>
                 <div className="modal-box bg-transparent p-0 shadow-none">
                     <div className="bg-base-100 rounded-box">
                         <div className="input w-full border-0 !outline-none">
                             <span className="iconify lucide--search text-base-content/60 size-4.5" />
-                            <input type="search" className="grow" placeholder="Search" aria-label="Search" />
-                            <form method="dialog">
-                                <button className="btn btn-xs btn-circle btn-ghost" aria-label="Close">
-                                    <span className="iconify lucide--x text-base-content/80 size-4" />
-                                </button>
-                            </form>
+                            <input
+                                ref={inputRef}
+                                type="search"
+                                className="grow"
+                                placeholder="搜尋功能頁面，例如：頁面設定、彈窗、檔案"
+                                aria-label="搜尋功能頁面"
+                                role="combobox"
+                                aria-expanded="true"
+                                aria-controls="topbar-search-results"
+                                value={query}
+                                onChange={(event) => {
+                                    setQuery(event.target.value);
+                                    setActiveIndex(0);
+                                }}
+                                onKeyDown={onInputKeyDown}
+                            />
+                            <button type="button" className="btn btn-xs btn-circle btn-ghost" aria-label="關閉" onClick={close}>
+                                <span className="iconify lucide--x text-base-content/80 size-4" />
+                            </button>
                         </div>
-                        <div className="border-base-300 flex items-center gap-3 border-t px-2 py-2">
-                            <div className="flex items-center gap-0.5">
-                                <div className="border-base-300 bg-base-200 flex size-5 items-center justify-center rounded-sm border shadow-xs">
-                                    <span className="iconify lucide--arrow-up size-3.5"></span>
-                                </div>
-                                <div className="border-base-300 bg-base-200 flex size-5 items-center justify-center rounded-sm border shadow-xs">
-                                    <span className="iconify lucide--arrow-down size-3.5"></span>
-                                </div>
-                                <p className="text-base-content/80 ms-1 text-sm">Navigate</p>
+
+                        <div className="border-base-300 max-h-[60vh] overflow-y-auto border-t">
+                            {results.length === 0 ? (
+                                <p className="text-base-content/60 px-5 py-6 text-center text-sm">找不到符合「{query.trim()}」的功能頁面</p>
+                            ) : (
+                                <ul id="topbar-search-results" role="listbox" className="menu w-full">
+                                    {results.map((entry, index) => (
+                                        <li key={entry.id} role="presentation">
+                                            <button
+                                                type="button"
+                                                id={`topbar-search-option-${index}`}
+                                                role="option"
+                                                aria-selected={index === activeIndex}
+                                                className={index === activeIndex ? 'menu-active' : ''}
+                                                onMouseEnter={() => setActiveIndex(index)}
+                                                onClick={() => go(entry)}>
+                                                {entry.icon && <span className={`iconify ${entry.icon} size-4`} />}
+                                                <span className="grow text-start text-sm">{entry.label}</span>
+                                                {entry.parents.length > 0 && (
+                                                    <span className="text-base-content/50 text-xs">{entry.parents.join(' › ')}</span>
+                                                )}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
+                        <div className="border-base-300 flex items-center gap-3 border-t px-2 py-2 text-sm">
+                            <div className="flex items-center gap-1">
+                                <kbd className="kbd kbd-xs">↑</kbd>
+                                <kbd className="kbd kbd-xs">↓</kbd>
+                                <span className="text-base-content/80 ms-1">選擇</span>
                             </div>
-                            <div className="flex items-center gap-0.5 max-sm:hidden">
-                                <div className="border-base-300 bg-base-200 flex size-5 items-center justify-center rounded-sm border shadow-xs">
-                                    <span className="iconify lucide--undo-2 size-3.5"></span>
-                                </div>
-                                <p className="text-base-content/80 ms-1 text-sm">Return</p>
+                            <div className="flex items-center gap-1">
+                                <kbd className="kbd kbd-xs">Enter</kbd>
+                                <span className="text-base-content/80 ms-1">開啟</span>
                             </div>
-                            <div className="flex items-center gap-0.5">
-                                <div className="border-base-300 bg-base-200 flex size-5 items-center justify-center rounded-sm border shadow-xs">
-                                    <span className="iconify lucide--corner-down-left size-3.5"></span>
-                                </div>
-                                <p className="text-base-content/80 ms-1 text-sm">Open</p>
-                            </div>
-                            <div className="ms-auto flex items-center gap-0.5">
-                                <div className="border-base-300 bg-base-200 flex h-5 items-center justify-center rounded-sm border px-1 text-sm/none shadow-xs">
-                                    esc
-                                </div>
-                                <p className="text-base-content/80 ms-1 text-sm">Close</p>
+                            <div className="ms-auto flex items-center gap-1">
+                                <kbd className="kbd kbd-xs">Esc</kbd>
+                                <span className="text-base-content/80 ms-1">關閉</span>
                             </div>
                         </div>
-                    </div>
-                    <div className="bg-base-100 rounded-box mt-4">
-                        <div className="px-5 py-3">
-                            <p className="text-base-content/80 text-sm font-medium">I'm looking for...</p>
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                                <div className="border-base-300 hover:bg-base-200 rounded-box cursor-pointer border px-2.5 py-1 text-sm/none">
-                                    Writer
-                                </div>
-                                <div className="border-base-300 hover:bg-base-200 rounded-box cursor-pointer border px-2.5 py-1 text-sm/none">
-                                    Editor
-                                </div>
-                                <div className="border-base-300 hover:bg-base-200 rounded-box cursor-pointer border px-2.5 py-1 text-sm/none">
-                                    Explainer
-                                </div>
-                                <div className="border-base-300 hover:bg-base-200 rounded-box flex cursor-pointer items-center gap-1 border border-dashed px-2.5 py-1 text-sm/none">
-                                    <span className="iconify lucide--plus size-3.5"></span>
-                                    Action
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="border-base-300 h-px border-dashed" />
-
-                        <ul className="menu w-full pt-1">
-                            <li className="menu-title">Talk to assistant</li>
-                            <li>
-                                <div className="group">
-                                    <div className="from-primary to-primary/80 mask mask-squircle text-primary-content flex size-5 items-center justify-center bg-linear-to-b leading-none font-medium">
-                                        R
-                                    </div>
-                                    <p className="grow text-sm">Research Buddy</p>
-                                    <div className="flex translate-x-2 items-center gap-2.5 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-                                        <span className="iconify lucide--star text-orange-500"></span>
-                                        <div className="flex items-center gap-0.5">
-                                            <div className="border-base-300 flex size-5 items-center justify-center rounded-sm border shadow-xs">
-                                                <span className="iconify lucide--corner-down-left size-3.5"></span>
-                                            </div>
-                                            <p className="ms-1 text-sm opacity-80">Select</p>
-                                        </div>
-                                        <span className="iconify lucide--ellipsis-vertical opacity-80"></span>
-                                    </div>
-                                </div>
-                            </li>
-
-                            <li>
-                                <div className="group">
-                                    <div className="from-secondary to-secondary/80 mask mask-squircle text-secondary-content flex size-5 items-center justify-center bg-linear-to-b leading-none font-medium">
-                                        T
-                                    </div>
-                                    <p className="grow text-sm">Task Planner</p>
-                                    <div className="flex translate-x-2 items-center gap-2.5 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-                                        <span className="iconify lucide--star text-orange-500"></span>
-                                        <div className="flex items-center gap-0.5">
-                                            <div className="border-base-300 flex size-5 items-center justify-center rounded-sm border shadow-xs">
-                                                <span className="iconify lucide--corner-down-left size-3.5"></span>
-                                            </div>
-                                            <p className="ms-1 text-sm opacity-80">Select</p>
-                                        </div>
-                                        <span className="iconify lucide--ellipsis-vertical opacity-80"></span>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div className="group">
-                                    <div className="from-success to-success/80 mask mask-squircle text-success-content flex size-5 items-center justify-center bg-linear-to-b leading-none font-medium">
-                                        S
-                                    </div>
-                                    <p className="grow text-sm">Sparking Ideas</p>
-                                    <div className="flex translate-x-2 items-center gap-2.5 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-                                        <span className="iconify lucide--star text-orange-500"></span>
-                                        <div className="flex items-center gap-0.5">
-                                            <div className="border-base-300 flex size-5 items-center justify-center rounded-sm border shadow-xs">
-                                                <span className="iconify lucide--corner-down-left size-3.5"></span>
-                                            </div>
-                                            <p className="ms-1 text-sm opacity-80">Select</p>
-                                        </div>
-                                        <span className="iconify lucide--ellipsis-vertical opacity-80"></span>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div className="group">
-                                    <div className="from-warning to-warning/80 mask mask-squircle text-warning-content flex size-5 items-center justify-center bg-linear-to-b leading-none font-medium">
-                                        D
-                                    </div>
-                                    <p className="grow text-sm">Docs Assistant</p>
-                                    <div className="flex translate-x-2 items-center gap-2.5 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-                                        <span className="iconify lucide--star text-orange-500"></span>
-                                        <div className="flex items-center gap-0.5">
-                                            <div className="border-base-300 flex size-5 items-center justify-center rounded-sm border shadow-xs">
-                                                <span className="iconify lucide--corner-down-left size-3.5"></span>
-                                            </div>
-                                            <p className="ms-1 text-sm opacity-80">Select</p>
-                                        </div>
-                                        <span className="iconify lucide--ellipsis-vertical opacity-80"></span>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-
-                        <hr className="border-base-300 h-px border-dashed" />
-
-                        <ul className="menu w-full pt-1">
-                            <li className="menu-title flex flex-row items-center justify-between gap-2">
-                                <span>Tasks Manager</span>
-                                <span>Progress</span>
-                            </li>
-                            <li>
-                                <div>
-                                    <span className="iconify lucide--notebook size-4" />
-                                    <p className="grow text-sm">Creating an essay</p>
-                                    <progress
-                                        className="progress progress-primary h-1 w-30"
-                                        value="60"
-                                        max="100"></progress>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <span className="iconify lucide--message-circle size-4" />
-                                    <p className="grow text-sm">Summarizing chat</p>
-                                    <progress
-                                        className="progress progress-secondary h-1 w-30"
-                                        value="80"
-                                        max="100"></progress>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <span className="iconify lucide--code size-4" />
-                                    <p className="grow text-sm">Fixing syntax</p>
-                                    <progress
-                                        className="progress progress-accent h-1 w-30"
-                                        value="35"
-                                        max="100"></progress>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <span className="iconify lucide--book-open size-4" />
-                                    <p className="grow text-sm">Reading docs</p>
-                                    <progress
-                                        className="progress progress-info h-1 w-30"
-                                        value="90"
-                                        max="100"></progress>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <span className="iconify lucide--lightbulb size-4" />
-                                    <p className="grow text-sm">Generating ideas</p>
-                                    <progress
-                                        className="progress progress-warning h-1 w-30"
-                                        value="50"
-                                        max="100"></progress>
-                                </div>
-                            </li>
-                        </ul>
                     </div>
                 </div>
                 <form method="dialog" className="modal-backdrop">
