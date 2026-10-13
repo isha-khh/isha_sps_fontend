@@ -4,11 +4,14 @@
  * （`SPS.Api/wwwroot/seed/register/consent-form.docx／.pdf`）逐字一致——法律文件，不要自己改寫或精簡；
  * 官方文件更新時，這裡要跟著改。
  *
+ * **供給端新興會員**另外多一項（第十項，`includeLogoAuthorization`）：公司資料與 Logo 的合法使用與授權展示聲明（2026-10-13 依產品方提供的文字加上，
+ * 編號接在原有第九項之後、原有一至九不動；這是**網頁文字**，官方附件一的 Word／ODF／PDF 下載檔還沒同步更新，見 docs/後續更新需注意事項.md）。
+ *
  * 文件裡有幾處是範本留下來的填寫標記，照原文保留（「(計畫執行單位)」「(計畫名稱)_」，
  * 以及第一項最後那句「請參照《法務部個人資料保護法之特定目的及個人資料類別》依實填列」），
  * 是否要由主辦單位定稿後再更新，見 docs/後續更新需注意事項.md。
  */
-export default function PersonalDataConsentNotice() {
+export default function PersonalDataConsentNotice({ includeLogoAuthorization = false }: { includeLogoAuthorization?: boolean }) {
   return (
     <>
       <p className="mt-2 mb-4">
@@ -66,6 +69,15 @@ export default function PersonalDataConsentNotice() {
             <label>九</label>
             <span>您瞭解此一同意書符合個人資料保護法及相關法規之要求，且同意本署留存此同意書，供日後取出查驗。</span>
           </li>
+          {includeLogoAuthorization && (
+            <li className="d-flex mb-2">
+              <label>十</label>
+              <span>
+                本人／本公司確認所提供之公司相關資料及 Logo 均具有合法使用及提供之權利，並同意授權「智慧工安技術產業資訊暨媒合平台」及其執行單位，於平台營運、企業名冊、會員資訊展示、媒合服務及相關推廣宣傳之必要範圍內，使用、重製及公開展示所提供之資料及
+                Logo；本人／本公司並確認所提供之資料及 Logo 不侵害第三人之權利。
+              </span>
+            </li>
+          )}
         </ul>
       </div>
     </>

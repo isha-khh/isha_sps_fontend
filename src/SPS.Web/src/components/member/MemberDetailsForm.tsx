@@ -167,7 +167,7 @@ export default function MemberDetailsForm({
         return "請上傳技術服務能量/相關登錄證明";
       }
       if (isSupplier && tier === "emerging" && !docs.application) {
-        return "請上傳智慧工安技術產業資訊暨媒合平台登錄申請書";
+        return "請上傳智慧工安技術產業資訊暨媒合平台登錄申請書＋個資申請書";
       }
     }
     if (!consentChecked) {
@@ -441,9 +441,9 @@ export default function MemberDetailsForm({
             <RegisterDownloadList
               resources={downloads}
               keys={
-                // 供給端新興會員要自己填「登錄申請書」（附件二）並依「審查評定方式」（附件三）備齊資料；其他人只需要申請須知
+                // 供給端新興會員要自己填「登錄申請書」（附件二）、個資同意書（附件一）並依「審查評定方式」（附件三）備齊資料；其他人只需要申請須知
                 isSupplier && tier === "emerging"
-                  ? ["register-guide", "register-application", "register-review"]
+                  ? ["register-guide", "register-consent", "register-application", "register-review"]
                   : ["register-guide"]
               }
               heading="請先下載空白文件（再填寫後上傳）"
@@ -483,7 +483,7 @@ export default function MemberDetailsForm({
               )}
               {isSupplier && tier === "emerging" && (
                 <DocumentUploadField
-                  label="智慧工安技術產業資訊暨媒合平台登錄申請書"
+                  label="智慧工安技術產業資訊暨媒合平台登錄申請書＋個資申請書"
                   required
                   mode={mode}
                   preview={previewOf(DocumentType.Application)}

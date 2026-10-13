@@ -62,7 +62,8 @@ export default async function MemberRegisterInfoPage({ searchParams }: PageProps
             <div className="modal-body">
               <div className="txt editor">
                 <h5 className="mb-3">蒐集個人資料告知事項：</h5>
-                <PersonalDataConsentNotice />
+                {/* 第十項（公司資料與 Logo 的授權展示聲明）只有供給端新興會員的申請才加 */}
+                <PersonalDataConsentNotice includeLogoAuthorization={applicantType === "company" && role === "supply" && tier === "emerging"} />
                 <h5 className="mt-4 mb-2">個人資料之同意提供：</h5>
                 <p className="mb-1">一、本人已充分知悉貴署上述告知事項。</p>
                 <p className="mb-0">二、本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</p>
