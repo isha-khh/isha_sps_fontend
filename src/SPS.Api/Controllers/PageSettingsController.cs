@@ -20,6 +20,8 @@ public class PageSettingsController : ControllerBase
 {
     private const string ContributeKey = "PageContribute";
     public const string DownloadsKey = "DownloadResources";
+    private const string AboutKey = "PageAbout";
+    private const string SupportInfoKey = "PageSupportInfo";
 
     private readonly ISystemSettingService _settingService;
     private readonly IFileManagementService _fileService;
@@ -114,6 +116,70 @@ public class PageSettingsController : ControllerBase
             ContactPhone = contactOk ? settings.ContactPhone : string.Empty,
             ContactEmail = contactOk ? settings.ContactEmail : string.Empty,
         });
+    }
+
+    // ==================== 關於我們、補助專區資訊區塊（純文字內容）====================
+
+    /// <summary>取得「關於我們」頁的文字內容（後台編輯用）；沒設定過就是預設內容</summary>
+    [HttpGet("about")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得關於我們頁設定（後台）")]
+    public async Task<IActionResult> GetAbout(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<AboutPageSettingsDto>(AboutKey, cancellationToken));
+
+    /// <summary>更新「關於我們」頁的文字內容；欄位長度與筆數有上限，空白的歷程筆數會被丟掉</summary>
+    [HttpPut("about")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新關於我們頁設定（後台）")]
+    public async Task<IActionResult> UpdateAbout([FromBody] AboutPageSettingsDto settings, CancellationToken cancellationToken)
+    {
+        var (normalized, error) = ContentPageValidator.NormalizeAbout(settings);
+        if (error != null) return BadRequest(new { error });
+        var result = await _settingService.UpdateSettingAsync(AboutKey, normalized);
+        return result.IsSuccess ? Ok(new { message = "About page settings updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>取得「關於我們」頁的文字內容（前台使用）</summary>
+    [HttpGet("about/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "取得關於我們頁公開資料")]
+    public async Task<IActionResult> GetAboutPublic(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<AboutPageSettingsDto>(AboutKey, cancellationToken));
+
+    /// <summary>取得補助專區頁首四個資訊區塊（後台編輯用）；沒設定過就是預設內容</summary>
+    [HttpGet("support-info")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得補助專區資訊區塊設定（後台）")]
+    public async Task<IActionResult> GetSupportInfo(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<SupportInfoSettingsDto>(SupportInfoKey, cancellationToken));
+
+    /// <summary>更新補助專區頁首的資訊區塊；圖示必須在可選清單內、「完整內容」連結的下載資源必須存在</summary>
+    [HttpPut("support-info")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新補助專區資訊區塊設定（後台）")]
+    public async Task<IActionResult> UpdateSupportInfo([FromBody] SupportInfoSettingsDto settings, CancellationToken cancellationToken)
+    {
+        var (normalized, error) = ContentPageValidator.NormalizeSupportInfo(settings);
+        if (error != null) return BadRequest(new { error });
+        var result = await _settingService.UpdateSettingAsync(SupportInfoKey, normalized);
+        return result.IsSuccess ? Ok(new { message = "Support info settings updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>取得補助專區頁首四個資訊區塊（前台使用）</summary>
+    [HttpGet("support-info/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "取得補助專區資訊區塊公開資料")]
+    public async Task<IActionResult> GetSupportInfoPublic(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<SupportInfoSettingsDto>(SupportInfoKey, cancellationToken));
+
+    private async Task<T> LoadSettingAsync<T>(string key, CancellationToken cancellationToken) where T : class, new()
+    {
+        var result = await _settingService.GetSettingAsync<T>(key, cancellationToken);
+        return result.IsSuccess ? result.Data ?? new T() : new T();
     }
 
     // ==================== 下載資源（固定檔案與外部連結）====================
