@@ -79,6 +79,7 @@ export const AboutPageSection = () => {
 
   return (
     <div className="card bg-base-100 shadow-xl">
+      {notify.NotifyComponent}
       <div className="card-body space-y-4">
         <h3 className="card-title text-lg">關於我們（前台 /about 的文字）</h3>
         <p className="text-sm text-base-content/70">背景圖與台灣地圖不在這裡調整。計畫歷程「說明」一行一點；整筆空白的歷程儲存時會被丟掉。</p>

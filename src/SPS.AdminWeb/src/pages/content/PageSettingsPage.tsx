@@ -170,6 +170,7 @@ export const PageSettingsPage = () => {
 
   return (
     <div className="space-y-6">
+      {notify.NotifyComponent}
       <PageTitle
         title="頁面設定"
         items={[

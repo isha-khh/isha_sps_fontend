@@ -179,6 +179,7 @@ export const FooterLinksPage = () => {
 
   return (
     <div className="space-y-6">
+      {notify.NotifyComponent}
       <PageTitle
         title="頁尾連結"
         items={[

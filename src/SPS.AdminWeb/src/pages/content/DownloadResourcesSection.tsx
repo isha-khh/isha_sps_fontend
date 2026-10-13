@@ -129,6 +129,7 @@ export const DownloadResourcesSection = () => {
 
   return (
     <div className="card bg-base-100 shadow-xl">
+      {notify.NotifyComponent}
       <div className="card-body space-y-4">
         <h3 className="card-title text-lg">下載資源（前台各處的下載按鈕）</h3>
         <p className="text-sm text-base-content/70">

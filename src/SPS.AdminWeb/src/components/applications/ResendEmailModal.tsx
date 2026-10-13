@@ -70,6 +70,7 @@ export const ResendEmailModal = ({
 
   return (
     <>
+      {notify.NotifyComponent}
       <input type="checkbox" id="resend-email-modal" className="modal-toggle" checked={isOpen} readOnly />
       <div className="modal" role="dialog">
         <div className="modal-box max-w-lg">
