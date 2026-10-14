@@ -131,6 +131,8 @@ export function getYouTubeEmbedUrl(url?: string | null): string | undefined {
 }
 
 const DIRECT_VIDEO_EXTENSION = /\.(mp4|m4v|mov|webm|ogv|ogg)(?:[?#]|$)/i;
+/** 後台上傳的檔案網址：`/api/FileManagement/{GUID}/download`（影片資料的「影片檔案」欄位指到這裡就是自己上傳的影片） */
+const UPLOADED_FILE_URL = /\/api\/FileManagement\/[0-9a-f-]{36}\/download/i;
 
 /**
  * 是不是「直接上傳的影片檔」（不是 YouTube 之類的網頁）：看後台記錄的 `contentType`（`video/…`），
@@ -140,7 +142,8 @@ const DIRECT_VIDEO_EXTENSION = /\.(mp4|m4v|mov|webm|ogv|ogg)(?:[?#]|$)/i;
  */
 export function isDirectVideo(url?: string | null, contentType?: string | null): boolean {
   if (contentType && /^video\//i.test(contentType)) return true;
-  return Boolean(url && DIRECT_VIDEO_EXTENSION.test(url));
+  // 舊資料沒有記錄 contentType：影片的連結若指向後台上傳的檔案，一定是影片檔（網址只會出現在「影片檔案」欄位）
+  return Boolean(url && (DIRECT_VIDEO_EXTENSION.test(url) || UPLOADED_FILE_URL.test(url)));
 }
 
 /**
@@ -154,13 +157,9 @@ export function getFancyboxVideoProps(href: string, group: string, contentType?:
   if (embedUrl) return { "data-fancybox": group, "data-type": "iframe", "data-src": embedUrl };
   if (isDirectVideo(href, contentType)) {
     const isMov = /quicktime|mov/i.test(contentType ?? "") || /\.mov(?:[?#]|$)/i.test(href);
-    const format = isMov ? "video/mp4" : contentType && /^video\//i.test(contentType) ? contentType : undefined;
-    return {
-      "data-fancybox": group,
-      "data-type": "html5video",
-      "data-src": href,
-      ...(format ? { "data-video-format": format } : {}),
-    };
+    // 型別不明（舊資料）就假設 mp4：上傳的影片絕大多數是 mp4／mov，瀏覽器實際是看檔案內容解碼，不是看這個型別
+    const format = isMov ? "video/mp4" : contentType && /^video\//i.test(contentType) ? contentType : "video/mp4";
+    return { "data-fancybox": group, "data-type": "html5video", "data-src": href, "data-video-format": format };
   }
   return { "data-fancybox": group };
 }
