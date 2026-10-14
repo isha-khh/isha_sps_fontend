@@ -3,6 +3,7 @@ import { PageTitle } from '@/components/PageTitle';
 import { DownloadResourcesSection } from './DownloadResourcesSection';
 import { AboutPageSection } from './AboutPageSection';
 import { SupportInfoSection } from './SupportInfoSection';
+import { IndustryAiLinkSection } from './IndustryAiLinkSection';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import { pageSettingsApi, type ContributeFormatFile, type ContributePageSettings } from '@/lib/api/page-settings';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
@@ -223,6 +224,8 @@ export const PageSettingsPage = () => {
           </div>
         </form>
       )}
+
+      {!isLoading && <IndustryAiLinkSection />}
 
       {!isLoading && <AboutPageSection />}
 

@@ -95,6 +95,13 @@ export interface SupportInfoSettings {
   blocks: SupportInfoBlock[];
 }
 
+/** 「產業AI」外部連結開關 */
+export interface IndustryAiLinkSettings {
+  enabled: boolean;
+  url: string;
+  newTab: boolean;
+}
+
 export const pageSettingsApi = {
   /**
    * 取得「我要投稿」頁設定
@@ -154,5 +161,16 @@ export const pageSettingsApi = {
   /** PUT /api/page-settings/support-info（圖示不在清單內、連結的下載資源不存在時後端回 400 `{ error }`） */
   async updateSupportInfo(settings: SupportInfoSettings): Promise<void> {
     await apiClient.put('/api/page-settings/support-info', settings);
+  },
+
+  /** GET /api/page-settings/industry-ai-link */
+  async getIndustryAiLink(): Promise<IndustryAiLinkSettings> {
+    const response = await apiClient.get<IndustryAiLinkSettings>('/api/page-settings/industry-ai-link');
+    return response.data;
+  },
+
+  /** PUT /api/page-settings/industry-ai-link（開啟時沒填網址、網址不是 http／https 時後端回 400 `{ error }`） */
+  async updateIndustryAiLink(settings: IndustryAiLinkSettings): Promise<void> {
+    await apiClient.put('/api/page-settings/industry-ai-link', settings);
   },
 };

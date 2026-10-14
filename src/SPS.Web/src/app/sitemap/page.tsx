@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import { withBasePath } from "@/lib/api-client";
+import { fetchIndustryAiLink } from "@/lib/api.server";
+import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
 
 export const metadata: Metadata = {
   title: "網站導覽",
@@ -16,7 +18,7 @@ interface SiteUnitGroup {
 /**
  * 「本站各單元連結」資料，對應設計稿 page/sitemap/index.html 的
  * `.sitmp_fx`。連結一律指向已經做出來的真頁面；還沒做出來的頁面
- * （例如服務專區底下的「產業AI」）維持設計稿原樣的 `#` 佔位連結。
+ * 維持設計稿原樣的 `#` 佔位連結。「技術工具 → 產業AI」連到站內的分類頁，後台「頁面設定」開啟外部連結時改連外部網址。
  */
 const SITE_UNIT_GROUPS: SiteUnitGroup[] = [
   {
@@ -45,7 +47,7 @@ const SERVICE_LINKS = [
     label: "技術工具",
     href: "/serve",
     children: [
-      { label: "產業AI", href: "#" },
+      { label: "產業AI", href: "/serve?category=%E7%94%A2%E6%A5%ADAI" },
       { label: "技術文件", href: "/serve" },
     ],
   },
@@ -72,7 +74,9 @@ const SERVICE_LINKS = [
   },
 ];
 
-export default function SitemapPage() {
+export default async function SitemapPage() {
+  // 後台「頁面設定」開啟「產業AI」外部連結時，這裡的「產業AI」連到外部網址
+  const industryAi = resolveServeCategoryLink("產業AI", await fetchIndustryAiLink());
   return (
     <>
       <BodyClass className="sitemap" />
@@ -213,9 +217,19 @@ export default function SitemapPage() {
                         <ul className="list-unstyled">
                           {group.children.map((child) => (
                             <li key={child.label}>
-                              <a href={withBasePath(child.href)} title={`前往 ${child.label}`}>
-                                {child.label}
-                              </a>
+                              {child.label === "產業AI" && industryAi.external ? (
+                                <a
+                                  href={industryAi.href}
+                                  title={`前往 ${child.label}`}
+                                  {...(industryAi.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                                >
+                                  {child.label}
+                                </a>
+                              ) : (
+                                <a href={withBasePath(child.href)} title={`前往 ${child.label}`}>
+                                  {child.label}
+                                </a>
+                              )}
                             </li>
                           ))}
                         </ul>

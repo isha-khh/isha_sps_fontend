@@ -106,12 +106,12 @@ const allMenuItems: MenuItemWithPermission[] = [
   },
   {
     id: 'serve-items',
-    label: '服務專區',
+    label: '技術工具',
     icon: 'lucide--briefcase',
     permissions: [Permission.ManageNews],
     children: [
-      { id: 'serve-categories', label: '服務專區分類', url: '/serve-items/categories', permissions: [Permission.ManageCategories] },
-      { id: 'serve-item-list', label: '服務專區內容', url: '/serve-items', permissions: [Permission.ManageNews] },
+      { id: 'serve-categories', label: '技術工具分類', url: '/serve-items/categories', permissions: [Permission.ManageCategories] },
+      { id: 'serve-item-list', label: '技術工具內容', url: '/serve-items', permissions: [Permission.ManageNews] },
     ],
   },
   {
@@ -133,7 +133,7 @@ const allMenuItems: MenuItemWithPermission[] = [
   },
   {
     id: 'support-zone',
-    label: '補助專區',
+    label: '補助資源',
     icon: 'lucide--hand-coins',
     permissions: [Permission.ManageNews],
     children: [

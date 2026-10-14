@@ -22,6 +22,7 @@ public class PageSettingsController : ControllerBase
     public const string DownloadsKey = "DownloadResources";
     private const string AboutKey = "PageAbout";
     private const string SupportInfoKey = "PageSupportInfo";
+    private const string IndustryAiKey = "PageIndustryAiLink";
 
     private readonly ISystemSettingService _settingService;
     private readonly IFileManagementService _fileService;
@@ -175,6 +176,34 @@ public class PageSettingsController : ControllerBase
     [SwaggerOperation(Summary = "取得補助專區資訊區塊公開資料")]
     public async Task<IActionResult> GetSupportInfoPublic(CancellationToken cancellationToken) =>
         Ok(await LoadSettingAsync<SupportInfoSettingsDto>(SupportInfoKey, cancellationToken));
+
+    /// <summary>取得「產業AI」外部連結開關（後台編輯用）；沒設定過就是關閉</summary>
+    [HttpGet("industry-ai-link")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得產業AI外部連結設定（後台）")]
+    public async Task<IActionResult> GetIndustryAiLink(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<IndustryAiLinkSettingsDto>(IndustryAiKey, cancellationToken));
+
+    /// <summary>更新「產業AI」外部連結開關；開啟時網址必填且必須是 http／https</summary>
+    [HttpPut("industry-ai-link")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新產業AI外部連結設定（後台）")]
+    public async Task<IActionResult> UpdateIndustryAiLink([FromBody] IndustryAiLinkSettingsDto settings, CancellationToken cancellationToken)
+    {
+        var (normalized, error) = IndustryAiLinkValidator.Normalize(settings);
+        if (error != null) return BadRequest(new { error });
+        var result = await _settingService.UpdateSettingAsync(IndustryAiKey, normalized);
+        return result.IsSuccess ? Ok(new { message = "Industry AI link settings updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>取得「產業AI」外部連結（前台使用）；沒開啟或網址無效時 enabled 一律是 false</summary>
+    [HttpGet("industry-ai-link/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "取得產業AI外部連結公開資料")]
+    public async Task<IActionResult> GetIndustryAiLinkPublic(CancellationToken cancellationToken) =>
+        Ok(IndustryAiLinkValidator.ToPublic(await LoadSettingAsync<IndustryAiLinkSettingsDto>(IndustryAiKey, cancellationToken)));
 
     private async Task<T> LoadSettingAsync<T>(string key, CancellationToken cancellationToken) where T : class, new()
     {

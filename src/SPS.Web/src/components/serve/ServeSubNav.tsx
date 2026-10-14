@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Fragment } from "react";
+import { resolveServeCategoryLink, type IndustryAiLink } from "@/lib/industry-ai-link";
 
 /**
  * 積木元件：服務專區跑馬燈標題旁的子選單，對應舊站 page/serve/index.html
@@ -10,7 +11,7 @@ import { Fragment } from "react";
  * 跟 PromotionSubNav 是同一個 `.s_meu_lk` 樣式，但那邊固定三個項目、
  * 這邊項目隨分組不同而變，所以是資料驅動的版本，不合併成同一個元件。
  */
-export default function ServeSubNav({ categories, activeCategory }: { categories: string[]; activeCategory: string }) {
+export default function ServeSubNav({ categories, activeCategory, industryAiLink }: { categories: string[]; activeCategory: string; industryAiLink?: IndustryAiLink }) {
   return (
     <div className="s_meu_lk">
       <ul className="nav">
@@ -18,9 +19,19 @@ export default function ServeSubNav({ categories, activeCategory }: { categories
           <Fragment key={category}>
             {index > 0 && <li className="s_meu_sid"></li>}
             <li>
-              <Link href={`/serve?category=${category}`} title={category} className={category === activeCategory ? "active" : undefined}>
-                {category}
-              </Link>
+              {(() => {
+                // 「產業AI」在後台開啟外部連結時連到外部網址，其他分類維持站內
+                const target = resolveServeCategoryLink(category, industryAiLink);
+                return target.external ? (
+                  <a href={target.href} title={category} {...(target.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+                    {category}
+                  </a>
+                ) : (
+                  <Link href={target.href} title={category} className={category === activeCategory ? "active" : undefined}>
+                    {category}
+                  </Link>
+                );
+              })()}
             </li>
           </Fragment>
         ))}

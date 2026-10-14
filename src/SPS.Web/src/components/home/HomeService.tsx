@@ -4,12 +4,15 @@ import MoreLink from "@/components/ui/MoreLink";
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
 import { withBasePath } from "@/lib/api-client";
-import { fetchSectionItems, NewsSections, type NewsSectionId } from "@/lib/api.server";
+import { fetchIndustryAiLink, fetchSectionItems, NewsSections, type NewsSectionId } from "@/lib/api.server";
+import { resolveServeCategoryLink, type IndustryAiLink } from "@/lib/industry-ai-link";
 
 interface ServiceSlideData {
   href: string;
   /** 關鍵字連結：沒給就連到這張投影片所屬專區的列表頁 */
   keywordHrefs?: string[];
+  /** 哪些關鍵字連到外部網址（後台「產業AI」外部連結開啟時），這些連結要另開新視窗 */
+  externalKeywords?: Array<{ newTab: boolean } | null>;
   image: string;
   title: string;
   keywords: string[];
@@ -84,6 +87,20 @@ const SUPPORT_FALLBACK_SLIDE: ServiceSlideData = {
   description: "整合中央與地方各項專案補助資源，減輕企業研發與數位轉型負擔。",
 };
 
+/** 後台「頁面設定」開啟「產業AI」外部連結時，技術工具投影片上的「產業AI」關鍵字改連外部網址（其他關鍵字不變） */
+function applyIndustryAiLink(slides: ServiceSlideData[], link: IndustryAiLink): ServiceSlideData[] {
+  if (!link.enabled) return slides;
+  return slides.map((slide) => {
+    const targets = slide.keywords.map((keyword) => resolveServeCategoryLink(keyword, link));
+    if (!targets.some((target) => target.external)) return slide;
+    return {
+      ...slide,
+      keywordHrefs: slide.keywords.map((_, index) => (targets[index].external ? targets[index].href : (slide.keywordHrefs?.[index] ?? slide.href))),
+      externalKeywords: targets.map((target) => (target.external ? { newTab: target.newTab } : null)),
+    };
+  });
+}
+
 function buildCategories(slides: { tool: ServiceSlideData[]; talent: ServiceSlideData[]; tutoring: ServiceSlideData[]; support: ServiceSlideData[] }): ServiceCategory[] {
   return [
     { id: "ser-home-01", label: "技術工具", icon: withBasePath("/images/home/ser_icon01.svg"), englishLabel: "Services 01", slides: slides.tool },
@@ -134,7 +151,11 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
                   <ul className="nav ul-key">
                     {slide.keywords.map((keyword, index) => (
                       <li key={keyword}>
-                        <a href={withBasePath(slide.keywordHrefs?.[index] ?? slide.href)} title={`前往${keyword}`}>
+                        <a
+                          href={withBasePath(slide.keywordHrefs?.[index] ?? slide.href)}
+                          title={`前往${keyword}`}
+                          {...(slide.externalKeywords?.[index]?.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                        >
                           {keyword}
                         </a>
                       </li>
@@ -164,13 +185,14 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
  * 補助資源＝補助公告）；還沒有內容時各自退回一張通用介紹、連到專區列表頁。
  */
 export default async function HomeService() {
-  const [tool, talent, tutoring, support] = await Promise.all([
+  const [tool, talent, tutoring, support, industryAiLink] = await Promise.all([
     loadSlides(NewsSections.Serve, "/serve", "/serve", TOOL_FALLBACK_SLIDE),
     loadSlides(NewsSections.Talent, "/talent", undefined, TALENT_FALLBACK_SLIDE),
     loadSlides(NewsSections.Tutoring, "/tutoring", "/tutoring", TUTORING_FALLBACK_SLIDE),
     loadSlides(NewsSections.Support, "/support", undefined, SUPPORT_FALLBACK_SLIDE),
+    fetchIndustryAiLink(),
   ]);
-  const CATEGORIES = buildCategories({ tool, talent, tutoring, support });
+  const CATEGORIES = buildCategories({ tool: applyIndustryAiLink(tool, industryAiLink), talent, tutoring, support });
   return (
     <div className="home_service">
       <SectionTitle eyebrow="Services" description="提供企業全方位的智慧化升級服務，從工具導入到人才培育，一站式滿足產業需求。">

@@ -201,3 +201,53 @@ public static class ContentPageValidator
         return (s, null);
     }
 }
+
+/// <summary>
+/// 「產業AI」外部連結開關（前台主選單、首頁、網站導覽裡的「產業AI」），後台「內容管理 → 頁面設定」維護。
+/// 關閉（預設）＝維持原本的內部頁面（服務專區「產業AI」分類）；開啟＝所有「產業AI」連結改連到這裡填的外部網址。
+/// </summary>
+public class IndustryAiLinkSettingsDto
+{
+    /// <summary>true＝使用外部連結；false＝維持內部頁面（預設）</summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>外部連結網址（只接受 http／https）；開啟時必填</summary>
+    public string Url { get; set; } = string.Empty;
+
+    /// <summary>是否另開新視窗（外部網站預設是）</summary>
+    public bool NewTab { get; set; } = true;
+}
+
+/// <summary>前台公開資料：只有「開啟且網址有效」才會是 Enabled，否則一律當作關閉（髒資料不輸出）</summary>
+public class IndustryAiLinkPublicDto
+{
+    public bool Enabled { get; set; }
+    public string Url { get; set; } = string.Empty;
+    public bool NewTab { get; set; } = true;
+}
+
+public static class IndustryAiLinkValidator
+{
+    public const int MaxUrlLength = 500;
+
+    /// <summary>檢查並整理；開啟時網址必須是 http／https 的絕對網址。關閉時網址可以留空或保留上次填的（方便再開啟）</summary>
+    public static (IndustryAiLinkSettingsDto Settings, string? Error) Normalize(IndustryAiLinkSettingsDto input)
+    {
+        var url = (input.Url ?? string.Empty).Trim();
+        var s = new IndustryAiLinkSettingsDto { Enabled = input.Enabled, Url = url, NewTab = input.NewTab };
+        if (url.Length > MaxUrlLength) return (s, $"外部連結太長（上限 {MaxUrlLength} 字）");
+        if (url.Length > 0 && !IsValidExternalUrl(url)) return (s, "外部連結只能是 http:// 或 https:// 開頭的完整網址");
+        if (s.Enabled && url.Length == 0) return (s, "開啟外部連結時必須填寫網址");
+        return (s, null);
+    }
+
+    public static bool IsValidExternalUrl(string url) =>
+        Uri.TryCreate(url, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps) && !string.IsNullOrEmpty(uri.Host);
+
+    public static IndustryAiLinkPublicDto ToPublic(IndustryAiLinkSettingsDto s)
+    {
+        var url = (s.Url ?? string.Empty).Trim();
+        var valid = s.Enabled && IsValidExternalUrl(url);
+        return new IndustryAiLinkPublicDto { Enabled = valid, Url = valid ? url : string.Empty, NewTab = s.NewTab };
+    }
+}

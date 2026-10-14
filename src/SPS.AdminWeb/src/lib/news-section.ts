@@ -16,7 +16,7 @@ export interface MetaField {
 
 export interface NewsSectionConfig {
   section: NewsSection;
-  /** 後端 CategoryType：1 公告分類、9 服務專區分類、10 產業輔導的產業別、11 補助資源分類；沒有分類的專區是 undefined */
+  /** 後端 CategoryType：1 公告分類、9 技術工具分類（原服務專區）、10 產業輔導的產業別、11 補助資源分類；沒有分類的專區是 undefined */
   categoryType?: number;
   /** 列表頁路徑（編輯、檢視、新增都掛在底下） */
   basePath: string;
@@ -61,10 +61,10 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
     categoryType: 9,
     basePath: '/serve-items',
     categoriesPath: '/serve-items/categories',
-    parentLabel: '服務專區',
-    noun: '服務項目',
-    listTitle: '服務專區管理',
-    listCrumb: '服務專區內容',
+    parentLabel: '技術工具',
+    noun: '技術工具',
+    listTitle: '技術工具管理',
+    listCrumb: '技術工具內容',
     hasSeverityType: false,
     hasAttachments: true,
     hasTags: true,
@@ -72,7 +72,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
   2: {
     section: 2,
     basePath: '/support-notices',
-    parentLabel: '補助專區',
+    parentLabel: '補助資源',
     noun: '補助公告',
     listTitle: '補助公告管理',
     listCrumb: '補助公告',
@@ -137,7 +137,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
     categoryType: 11,
     basePath: '/support-resources',
     categoriesPath: '/support-resources/categories',
-    parentLabel: '補助專區',
+    parentLabel: '補助資源',
     noun: '補助資源',
     listTitle: '政府補助資源管理',
     listCrumb: '補助資源',

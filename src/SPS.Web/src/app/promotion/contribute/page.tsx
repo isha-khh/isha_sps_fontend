@@ -9,7 +9,8 @@ import PromotionContactInfo from "@/components/promotion/PromotionContactInfo";
 import ContributeFormatDialog from "@/components/promotion/ContributeFormatDialog";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
-import { fetchContributePage, fetchPromotionCases, fetchBanners } from "@/lib/api.server";
+import { fetchContributePage, fetchPromotionCases, fetchBanners, fetchIndustryAiLink } from "@/lib/api.server";
+import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
 import { formatIsoDate, sortByViewCount } from "@/lib/content-list-utils";
 import { INDUSTRY_CASES, PROMOTION_FALLBACK_IMAGE } from "@/lib/promotion-data";
 import { withBasePath } from "@/lib/api-client";
@@ -34,11 +35,13 @@ export const metadata: Metadata = {
  * 圖片也跟著變大。
  */
 export default async function PromotionContributePage() {
-  const [page, sidebarBanners, cases] = await Promise.all([
+  const [page, sidebarBanners, cases, industryAiLink] = await Promise.all([
     fetchContributePage(),
     fetchBanners("sidebar-promotion"),
     fetchPromotionCases(),
+    fetchIndustryAiLink(),
   ]);
+  const industryAi = resolveServeCategoryLink("產業AI", industryAiLink);
   const popularSource = cases.backendAvailable ? cases.items : INDUSTRY_CASES;
   const popularItems = sortByViewCount(popularSource)
     .slice(0, 5)
@@ -91,9 +94,15 @@ export default async function PromotionContributePage() {
 
             <ul className="nav ul-key">
               <li>
-                <Link href="/serve?category=產業AI" title="前往產業AI" tabIndex={0}>
-                  產業AI
-                </Link>
+                {industryAi.external ? (
+                  <a href={industryAi.href} title="前往產業AI" tabIndex={0} {...(industryAi.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+                    產業AI
+                  </a>
+                ) : (
+                  <Link href="/serve?category=產業AI" title="前往產業AI" tabIndex={0}>
+                    產業AI
+                  </Link>
+                )}
               </li>
               <li>
                 <Link href="/serve?category=技術文件" title="前往技術文件" tabIndex={0}>
