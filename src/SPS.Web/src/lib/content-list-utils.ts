@@ -129,3 +129,38 @@ export function getYouTubeEmbedUrl(url?: string | null): string | undefined {
   const videoId = parseYouTubeId(url);
   return videoId ? `https://www.youtube.com/embed/${videoId}` : undefined;
 }
+
+const DIRECT_VIDEO_EXTENSION = /\.(mp4|m4v|mov|webm|ogv|ogg)(?:[?#]|$)/i;
+
+/**
+ * 是不是「直接上傳的影片檔」（不是 YouTube 之類的網頁）：看後台記錄的 `contentType`（`video/…`），
+ * 沒有的話看網址副檔名。後台上傳的檔案網址是 `/api/FileManagement/{id}/download`，**沒有副檔名**，
+ * 所以一定要靠 `contentType`；沒有帶 `contentType` 時 Fancybox 只能照網址猜，會把它當圖片載入，
+ * 燈箱就顯示「Image Not Found」。
+ */
+export function isDirectVideo(url?: string | null, contentType?: string | null): boolean {
+  if (contentType && /^video\//i.test(contentType)) return true;
+  return Boolean(url && DIRECT_VIDEO_EXTENSION.test(url));
+}
+
+/**
+ * 影片卡片點擊後給 Fancybox 的屬性：YouTube 用 iframe 嵌入；直接上傳的影片檔用 `html5video`。
+ * `.mov`（QuickTime）要把 `<source type>` 寫成 `video/mp4`——瀏覽器不認得 `video/quicktime`／`video/mov` 這兩個型別，
+ * 會直接略過來源；H.264 編碼的 mov 與 mp4 容器相容，瀏覽器可以播（HEVC／H.265 編碼的 mov，例如 iPhone 預設錄影，
+ * Chrome 與 Firefox 仍無法播放，需轉成 H.264 的 mp4）。其他情況交給 Fancybox 自己判斷。
+ */
+export function getFancyboxVideoProps(href: string, group: string, contentType?: string | null): Record<string, string> {
+  const embedUrl = getYouTubeEmbedUrl(href);
+  if (embedUrl) return { "data-fancybox": group, "data-type": "iframe", "data-src": embedUrl };
+  if (isDirectVideo(href, contentType)) {
+    const isMov = /quicktime|mov/i.test(contentType ?? "") || /\.mov(?:[?#]|$)/i.test(href);
+    const format = isMov ? "video/mp4" : contentType && /^video\//i.test(contentType) ? contentType : undefined;
+    return {
+      "data-fancybox": group,
+      "data-type": "html5video",
+      "data-src": href,
+      ...(format ? { "data-video-format": format } : {}),
+    };
+  }
+  return { "data-fancybox": group };
+}

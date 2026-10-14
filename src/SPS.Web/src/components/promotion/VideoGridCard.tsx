@@ -1,4 +1,4 @@
-import { getYouTubeEmbedUrl } from "@/lib/content-list-utils";
+import { getFancyboxVideoProps } from "@/lib/content-list-utils";
 
 export interface VideoGridCardData {
   href: string;
@@ -8,6 +8,8 @@ export interface VideoGridCardData {
   keywords?: string[];
   /** 後台「網站內播放」開關，`false` 時整張卡片一律當一般外部連結，不掛 `data-fancybox`，見下面的說明 */
   playOnSite: boolean;
+  /** 後台記錄的檔案型別，直接上傳的影片檔要靠它判斷怎麼播（網址沒有副檔名），見 `getFancyboxVideoProps` */
+  contentType?: string;
 }
 
 /**
@@ -58,13 +60,8 @@ export interface VideoGridCardData {
 export default function VideoGridCard({ data, group }: { data: VideoGridCardData; group?: string }) {
   const hasLink = data.href !== "#";
   const hasSource = hasLink && data.playOnSite;
-  const embedUrl = getYouTubeEmbedUrl(data.href);
   const watchTitle = hasSource ? `播放：${data.title}` : hasLink ? `前往觀看：${data.title}（另開視窗）` : data.title;
-  const fancyboxProps = hasSource
-    ? embedUrl
-      ? { "data-fancybox": group ?? data.href, "data-type": "iframe", "data-src": embedUrl }
-      : { "data-fancybox": group ?? data.href }
-    : {};
+  const fancyboxProps = hasSource ? getFancyboxVideoProps(data.href, group ?? data.href, data.contentType) : {};
 
   return (
     <div className="col-lg-4 col-md-6 col-12 item item_video mb-md-4 mb-4">

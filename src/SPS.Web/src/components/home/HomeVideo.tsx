@@ -4,7 +4,7 @@ import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
 import { fetchVideos } from "@/lib/api.server";
 import { PROMOTION_VIDEOS, sortVideosByOrdinal } from "@/lib/promotion-data";
-import { formatIsoDate, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/content-list-utils";
+import { formatIsoDate, getYouTubeThumbnail, getFancyboxVideoProps } from "@/lib/content-list-utils";
 import { withBasePath } from "@/lib/api-client";
 
 const CAROUSEL_ID = "home-video";
@@ -86,12 +86,7 @@ export default async function HomeVideo() {
           // `playOnSite`：後台可以針對這支影片個別關掉站內嵌入播放
           // （CSP 顧慮），說明見 VideoGridCard.tsx 同一段註解。
           const hasSource = hasLink && video.playOnSite;
-          const embedUrl = getYouTubeEmbedUrl(href);
-          const fancyboxProps = hasSource
-            ? embedUrl
-              ? { "data-fancybox": "home-video", "data-type": "iframe", "data-src": embedUrl }
-              : { "data-fancybox": "home-video" }
-            : {};
+          const fancyboxProps = hasSource ? getFancyboxVideoProps(href, "home-video", video.contentType) : {};
           const watchTitle = hasSource ? `播放：${video.name}` : hasLink ? `前往觀看：${video.name}（另開視窗）` : video.name;
 
           return (

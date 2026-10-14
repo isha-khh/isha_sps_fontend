@@ -253,7 +253,8 @@ public class FileManagementController : ControllerBase
 
         var (fileStream, fileName, contentType) = result.Data;
 
-        return File(fileStream, contentType, fileName, lastModified: null, entityTag: etag);
+        // 支援 Range（`206 Partial Content`）：瀏覽器的 <video> 需要它才能拖曳進度、Safari 沒有 Range 根本不播
+        return File(fileStream, contentType, fileName, lastModified: null, entityTag: etag, enableRangeProcessing: true);
     }
 
     /// <summary>

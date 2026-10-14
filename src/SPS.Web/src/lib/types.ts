@@ -109,6 +109,8 @@ export type VideoItem = {
     // 後台可以逐支關掉嵌入播放，不用改前端程式碼、也不影響其他支
     // 影片。
     playOnSite: boolean;
+    /** 後台記錄的檔案型別（例如 `video/mp4`、`video/quicktime`）；上傳的影片網址沒有副檔名，前台靠它判斷怎麼播 */
+    contentType?: string;
     published: boolean;
     ordinal: number;
     albumId?: number;

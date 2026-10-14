@@ -44,6 +44,7 @@ function toGridCardData(video: VideoItem) {
     title: video.name ?? "",
     date: formatIsoDate(video.createdTime),
     playOnSite: video.playOnSite,
+    contentType: video.contentType,
   };
 }
 
@@ -115,6 +116,7 @@ export default async function PromotionVideoPage({ searchParams }: PageProps<"/p
                 thumbnail: featured.thumbnailUri || getYouTubeThumbnail(featured.uri) || VIDEO_FALLBACK_THUMBNAIL,
                 date: formatIsoDate(featured.createdTime),
                 playOnSite: featured.playOnSite,
+                contentType: featured.contentType,
               }}
               group={VIDEO_FANCYBOX_GROUP}
             />

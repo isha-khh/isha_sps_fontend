@@ -1,4 +1,4 @@
-import { getYouTubeEmbedUrl } from "@/lib/content-list-utils";
+import { getFancyboxVideoProps } from "@/lib/content-list-utils";
 
 export interface FeaturedVideoData {
   href: string;
@@ -10,6 +10,8 @@ export interface FeaturedVideoData {
   keywords?: string[];
   /** 後台「網站內播放」開關，`false` 時整張卡片一律當一般外部連結，不掛 `data-fancybox`，見 VideoGridCard.tsx 的說明 */
   playOnSite: boolean;
+  /** 後台記錄的檔案型別，見 VideoGridCard.tsx */
+  contentType?: string;
 }
 
 /**
@@ -39,12 +41,7 @@ export interface FeaturedVideoData {
 export default function FeaturedVideoCard({ data, group }: { data: FeaturedVideoData; group?: string }) {
   const hasLink = data.href !== "#";
   const hasSource = hasLink && data.playOnSite;
-  const embedUrl = getYouTubeEmbedUrl(data.href);
-  const fancyboxProps = hasSource
-    ? embedUrl
-      ? { "data-fancybox": group ?? data.href, "data-type": "iframe", "data-src": embedUrl }
-      : { "data-fancybox": group ?? data.href }
-    : {};
+  const fancyboxProps = hasSource ? getFancyboxVideoProps(data.href, group ?? data.href, data.contentType) : {};
   const watchTitle = hasSource ? `播放：${data.title}` : hasLink ? `前往觀看：${data.title}（另開視窗）` : data.title;
 
   return (
