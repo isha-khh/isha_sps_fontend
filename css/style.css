@@ -360,6 +360,13 @@ a:focus-visible {
 
 
 /*彈跳*/
+.serve.show .modal-body {
+    height: 500px;
+    overflow-y: auto;
+}
+.modal-body ul li {
+    padding: 2px 0;
+}
 .modal-body {
     padding: 30px;
 }
@@ -376,8 +383,8 @@ a:focus-visible {
     padding: 0;
     display: table;
     font-size: 20px;
-    top: -16px;
-    right: -20px;
+    top: -23px;
+    right: -26px;
     margin: 0;
     padding-top: 0;
     font-weight: bold;
@@ -1124,7 +1131,7 @@ body .main .side1 ul.wid-cont {
     /* justify-content: center;*/
     display: flex;
     margin-bottom: 10px;
-    gap: 10px 2px
+    gap: 10px 0
 }
 
 
@@ -3133,6 +3140,12 @@ a.more_x.more_x_gu,
 .support .support_box .d-flex .support_er > ul > li a {
     text-decoration: underline;
 }
+.support_box .d-flex .support_er > ul > li.con_4 a{
+    color:#000;
+}
+    .support_box .d-flex .support_er > ul > li.con_4 a:hover {
+        color: #0076c8;
+    }
 .support_box .d-flex .support_er > ul > li a {
     color: #009688;
 }
@@ -3198,18 +3211,71 @@ a.more_x.more_x_gu,
         flex-wrap: wrap;
     }
 /*人才 XR XR*/
-.xr_list5 .xr_ri .xr_cloud {
-    color: rgb(255, 255, 255);
-    width: 80px;
-    height: 80px;
-    font-size: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(3, 152, 185) 100%);
-    border-radius: 50%;
-    margin: 30px auto 0;
+
+.Stay_tuned{
+    font-size:1.5rem;
+    text-align:center;
+    font-weight:bold;
 }
+/*頁籤*/
+.xr .nav-pills {
+    justify-content: center;
+    gap: 0 0;
+    box-shadow: 0 3px 6px rgba(0, 102, 255, 0.25);
+}
+    .xr .nav-pills li{
+        flex:1;
+    }
+        .xr .nav-pills li button.active:focus,
+        .xr .nav-pills li button.active {
+            border: 1px solid #0052cc;
+            border-color: unset !important;
+        }
+        .xr .nav-pills li button.active:before {
+            opacity: 1;
+            height: 3px;
+
+        }
+        .xr .nav-pills li button {
+            position: relative;
+            border: 1px solid #0052cc;
+            width: 100%;
+            text-align: center;
+            padding: 14px 10px;
+        }
+            .xr .nav-pills li button:before {
+                content: " ";
+                display: block;
+                position: absolute;
+                width: 100%;
+                height: 0;
+                left: 0;
+                bottom: 0;
+                background: linear-gradient(90deg, rgb(0, 153, 255) 0%, rgb(0, 82, 204) 100%);
+                opacity: 0;
+                transition: all 0.5s;
+            }
+            
+            .xr .nav-pills li:first-child button {
+                border-radius: 8px 0 0 8px;
+            }
+        .xr .nav-pills li:last-child button {
+            border-radius: 0 8px 8px 0;
+        }
+    /*頁籤 END*/
+
+        .xr_list5 .xr_ri .xr_cloud {
+            color: rgb(255, 255, 255);
+            width: 80px;
+            height: 80px;
+            font-size: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(3, 152, 185) 100%);
+            border-radius: 50%;
+            margin: 30px auto 0;
+        }
 .xr_list5 .d-flex .xr_ri ul li a.more_x span{
     padding:0;
 }
