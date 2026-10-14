@@ -192,16 +192,8 @@ const allMenuItems: MenuItemWithPermission[] = [
       { id: 'albums', label: '相簿管理', url: '/content/albums', permissions: [Permission.ManageMedia] },
     ],
   },
-  {
-    id: 'knowledge',
-    label: '法規',
-    icon: 'lucide--book-open',
-    permissions: [Permission.ManageRegulations],
-    children: [
-      { id: 'regulation-categories', label: '法規類別', url: '/knowledge/regulation-categories', permissions: [Permission.ManageCategories] },
-      { id: 'regulations', label: '法條內文', url: '/knowledge/regulations', permissions: [Permission.ManageRegulations] },
-    ],
-  },
+  // 「法規」（法規類別、法條內文）：前台沒有任何頁面使用，2026-10-14 先從選單拿掉（後台頁面、路由、資料都還在，
+  // 網址 /knowledge/regulations、/knowledge/regulation-categories 仍可直接開啟）；之後前台要用再把這一組加回來
   {
     id: 'analytics',
     label: '分析報表',
