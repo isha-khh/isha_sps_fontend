@@ -17,6 +17,9 @@ public class ContributePageSettingsDto
     /// <summary>投稿格式（Word，副檔名 .docx）在檔案管理系統裡的檔案 id；空＝沒有提供</summary>
     public Guid? DocxFileId { get; set; }
 
+    /// <summary>「我要投稿」頁主視覺圖片在檔案管理系統裡的檔案 id（必須是圖片）；空＝前台用預設圖片</summary>
+    public Guid? ImageFileId { get; set; }
+
     // ===== 內部欄位：部署時 seed 的版本標記（見 ContributeFormatSeeder），不出現在後台畫面與公開資料 =====
 
     /// <summary>上次 seed 進來的 ODF 檔案雜湊；只有 seed 檔案內容變了（雜湊不同）才會再次套用，後台改選或移除的結果因此不會被每次重啟蓋掉</summary>
@@ -48,6 +51,9 @@ public class ContributePageAdminDto
     public ContributeFormatFileDto? Odt { get; set; }
     public ContributeFormatFileDto? Pdf { get; set; }
     public ContributeFormatFileDto? Docx { get; set; }
+
+    /// <summary>目前選的主視覺圖片（檔案已被刪除或不是圖片時為 null）</summary>
+    public ContributeFormatFileDto? Image { get; set; }
 }
 
 /// <summary>
@@ -61,6 +67,9 @@ public class ContributePagePublicDto
     public string ContactName { get; set; } = string.Empty;
     public string ContactPhone { get; set; } = string.Empty;
     public string ContactEmail { get; set; } = string.Empty;
+
+    /// <summary>主視覺圖片網址（相對於 API）；沒設定或檔案不可用時為空字串，前台用預設圖片</summary>
+    public string ImageUrl { get; set; } = string.Empty;
 }
 
 public class ContributeFormatFileDto
@@ -104,6 +113,7 @@ public static class ContributePageValidator
         OdtFileId = s.OdtFileId,
         PdfFileId = s.PdfFileId,
         DocxFileId = s.DocxFileId,
+        ImageFileId = s.ImageFileId,
         OdtSeedHash = s.OdtSeedHash,
         PdfSeedHash = s.PdfSeedHash,
         DocxSeedHash = s.DocxSeedHash,

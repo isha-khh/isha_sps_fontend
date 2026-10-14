@@ -113,7 +113,8 @@ export default async function PromotionContributePage() {
           </div>
 
           <div className="ratio ratio-4x3">
-            <img className="img-fluid d-block" src={withBasePath("/images/all/new_logo.jpg")} alt="" />
+            {/* 後台「我要投稿」可以替換這張圖片；沒設定就用預設圖片 */}
+            <img className="img-fluid d-block" src={page.imageUrl || withBasePath("/images/all/new_logo.jpg")} alt="我要投稿" />
           </div>
 
           <div className="Contributor">撰稿人 / 設計研發組研究員 郭憶璇、江宛庭</div>

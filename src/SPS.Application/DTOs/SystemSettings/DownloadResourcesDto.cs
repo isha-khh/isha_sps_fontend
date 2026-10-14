@@ -11,24 +11,24 @@ public static class DownloadResourceCatalog
     public static readonly DownloadResourceSlot[] Slots =
     {
         new("register-guide", "會員註冊", "會員申請須知", "會員註冊第一步（使用條款）與資訊填寫頁的「下載會員申請須知」",
-            new[] { ".pdf" }, "register/member-guide", "115年智慧工安技術產業資訊暨媒合平台會員申請須知"),
+            new[] { ".pdf", ".zip" }, "register/member-guide", "115年智慧工安技術產業資訊暨媒合平台會員申請須知"),
         new("register-consent", "會員註冊", "附件一：蒐集個人資料告知事項暨個人資料同意書", "會員註冊第一步（使用條款）",
-            new[] { ".docx", ".odt", ".pdf" }, "register/consent-form", "附件一、蒐集個人資料告知事項暨個人資料同意書"),
+            new[] { ".docx", ".odt", ".pdf", ".zip" }, "register/consent-form", "附件一、蒐集個人資料告知事項暨個人資料同意書"),
         new("register-application", "會員註冊", "附件二：登錄申請書", "會員註冊資訊填寫頁（供給端新興會員要上傳的申請書）",
-            new[] { ".docx", ".odt", ".pdf" }, "register/application-form", "附件二、智慧工安技術產業資訊暨媒合平台登錄申請書"),
+            new[] { ".docx", ".odt", ".pdf", ".zip" }, "register/application-form", "附件二、智慧工安技術產業資訊暨媒合平台登錄申請書"),
         new("register-review", "會員註冊", "附件三：供給端新興會員文件資料審查評定方式", "會員註冊資訊填寫頁（供給端新興會員）",
-            new[] { ".docx", ".odt", ".pdf" }, "register/review-method", "附件三、供給端-新興會員文件資料審查評定方式"),
+            new[] { ".docx", ".odt", ".pdf", ".zip" }, "register/review-method", "附件三、供給端-新興會員文件資料審查評定方式"),
 
         new("support-leaflet", "補助專區", "補助懶人包", "補助專區 /support 下方的「補助懶人包」",
-            new[] { ".pdf" }, "support/subsidy-leaflet", "115年智慧石化安全升級補助懶人包"),
+            new[] { ".pdf", ".zip" }, "support/subsidy-leaflet", "115年智慧石化安全升級補助懶人包"),
         new("support-notice", "補助專區", "申請須知", "補助專區 /support 下方的「申請須知」",
-            new[] { ".pdf" }, "support/subsidy-notice", "115年智慧石化安全升級補助計畫_申請須知"),
+            new[] { ".pdf", ".zip" }, "support/subsidy-notice", "115年智慧石化安全升級補助計畫_申請須知"),
         new("support-plan", "補助專區", "計畫書格式", "補助專區 /support 下方的「計畫書格式」",
-            new[] { ".docx", ".odt", ".pdf" }, "support/subsidy-plan-template", "115年智慧石化安全升級補助計畫_計畫申請書(格式)"),
+            new[] { ".docx", ".odt", ".pdf", ".zip" }, "support/subsidy-plan-template", "115年智慧石化安全升級補助計畫_計畫申請書(格式)"),
         new("support-online-guide", "補助專區", "線上申請說明", "補助專區 /support 下方的「線上申請說明」",
-            new[] { ".pdf" }, "support/subsidy-online-guide", "115智慧石化_線上申請操作說明"),
+            new[] { ".pdf", ".zip" }, "support/subsidy-online-guide", "115智慧石化_線上申請操作說明"),
         new("support-qa", "補助專區", "常見問答", "補助專區 /support 下方的「常見問答」",
-            new[] { ".pdf" }, "support/subsidy-qa", "QA(115年度)申請階段常見問答"),
+            new[] { ".pdf", ".zip" }, "support/subsidy-qa", "QA(115年度)申請階段常見問答"),
 
         // 沒有檔案格式：只能設外部連結（安裝檔太大，通常放在雲端空間）
         new("support-apply-entry", "補助專區", "申請入口", "補助專區 /support 右側欄的「申請入口」按鈕（沒設定就不顯示）",
@@ -61,6 +61,9 @@ public class DownloadResourceEntryDto
     public Guid? OdtFileId { get; set; }
     public Guid? PdfFileId { get; set; }
 
+    /// <summary>壓縮檔（.zip）：多份申請文件打包成一個檔案提供下載時用</summary>
+    public Guid? ZipFileId { get; set; }
+
     /// <summary>外部連結（http／https）；空＝不使用</summary>
     public string ExternalUrl { get; set; } = string.Empty;
 
@@ -68,10 +71,11 @@ public class DownloadResourceEntryDto
     public string? DocxSeedHash { get; set; }
     public string? OdtSeedHash { get; set; }
     public string? PdfSeedHash { get; set; }
+    public string? ZipSeedHash { get; set; }
 
     public Guid? GetFileId(string extension) => extension switch
     {
-        ".docx" => DocxFileId, ".odt" => OdtFileId, ".pdf" => PdfFileId, _ => null
+        ".docx" => DocxFileId, ".odt" => OdtFileId, ".pdf" => PdfFileId, ".zip" => ZipFileId, _ => null
     };
 
     public void SetFileId(string extension, Guid? id)
@@ -81,12 +85,13 @@ public class DownloadResourceEntryDto
             case ".docx": DocxFileId = id; break;
             case ".odt": OdtFileId = id; break;
             case ".pdf": PdfFileId = id; break;
+            case ".zip": ZipFileId = id; break;
         }
     }
 
     public string? GetSeedHash(string extension) => extension switch
     {
-        ".docx" => DocxSeedHash, ".odt" => OdtSeedHash, ".pdf" => PdfSeedHash, _ => null
+        ".docx" => DocxSeedHash, ".odt" => OdtSeedHash, ".pdf" => PdfSeedHash, ".zip" => ZipSeedHash, _ => null
     };
 
     public void SetSeedHash(string extension, string? hash)
@@ -96,6 +101,7 @@ public class DownloadResourceEntryDto
             case ".docx": DocxSeedHash = hash; break;
             case ".odt": OdtSeedHash = hash; break;
             case ".pdf": PdfSeedHash = hash; break;
+            case ".zip": ZipSeedHash = hash; break;
         }
     }
 }
@@ -119,6 +125,7 @@ public class UpdateDownloadResourceItem
     public Guid? DocxFileId { get; set; }
     public Guid? OdtFileId { get; set; }
     public Guid? PdfFileId { get; set; }
+    public Guid? ZipFileId { get; set; }
     public string ExternalUrl { get; set; } = string.Empty;
 }
 
@@ -130,18 +137,20 @@ public class DownloadResourceAdminItemDto
     public string Title { get; set; } = string.Empty;
     public string UsedAt { get; set; } = string.Empty;
 
-    /// <summary>可設定的檔案格式（docx／odt／pdf）；空陣列＝只能設外部連結</summary>
+    /// <summary>可設定的檔案格式（docx／odt／pdf／zip）；空陣列＝只能設外部連結</summary>
     public List<string> Formats { get; set; } = new();
 
     public Guid? DocxFileId { get; set; }
     public Guid? OdtFileId { get; set; }
     public Guid? PdfFileId { get; set; }
+    public Guid? ZipFileId { get; set; }
     public string ExternalUrl { get; set; } = string.Empty;
 
     /// <summary>目前選的檔案（檔案已被刪除或不可用時為 null，畫面顯示「尚未設定」）</summary>
     public DownloadFileDto? Docx { get; set; }
     public DownloadFileDto? Odt { get; set; }
     public DownloadFileDto? Pdf { get; set; }
+    public DownloadFileDto? Zip { get; set; }
 }
 
 // ===== 前台公開 =====
@@ -150,13 +159,13 @@ public class DownloadResourcePublicDto
 {
     public string Title { get; set; } = string.Empty;
 
-    /// <summary>可下載的選項：有外部連結就只有一個 link；否則依 Word、ODF、PDF 的順序列出有檔案的格式；沒有任何東西時是空陣列</summary>
+    /// <summary>可下載的選項：有外部連結就只有一個 link；否則依 Word、ODF、PDF、ZIP 的順序列出有檔案的格式；沒有任何東西時是空陣列</summary>
     public List<DownloadLinkDto> Links { get; set; } = new();
 }
 
 public class DownloadLinkDto
 {
-    /// <summary>docx／odt／pdf／link（外部連結）</summary>
+    /// <summary>docx／odt／pdf／zip／link（外部連結）</summary>
     public string Kind { get; set; } = string.Empty;
 
     public string Url { get; set; } = string.Empty;

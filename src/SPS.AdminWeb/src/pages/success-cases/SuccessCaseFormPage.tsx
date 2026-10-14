@@ -74,7 +74,7 @@ export const SuccessCaseFormPage = () => {
       puckContentRef.current = data.content || '';
     } catch (error) {
       console.error('Failed to fetch success case:', error);
-      await notify.success('無法載入成功案例');
+      await notify.success('無法載入產業案例');
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +121,7 @@ export const SuccessCaseFormPage = () => {
       navigate('/success-cases');
     } catch (error) {
       console.error('Failed to save success case:', error);
-      await notify.success('儲存成功案例失敗');
+      await notify.success('儲存產業案例失敗');
     } finally {
       setIsSaving(false);
     }
@@ -139,9 +139,9 @@ export const SuccessCaseFormPage = () => {
   return (
     <div className="space-y-6">
       <PageTitle
-        title={isEditMode ? '編輯成功案例' : '新增成功案例'}
+        title={isEditMode ? '編輯產業案例' : '新增產業案例'}
         items={[
-          { label: '成功案例', path: '/success-cases' },
+          { label: '產業案例', path: '/success-cases' },
           { label: isEditMode ? '編輯案例' : '新增案例', active: true },
         ]}
       />

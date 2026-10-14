@@ -14,6 +14,8 @@ export interface ContributePageSettings {
   odtFileId: string | null;
   pdfFileId: string | null;
   docxFileId: string | null;
+  /** 主視覺圖片（檔案管理中的圖片檔案 id）；沒設定前台用預設圖片 */
+  imageFileId: string | null;
   contactName: string;
   contactPhone: string;
   contactEmail: string;
@@ -24,11 +26,13 @@ export interface ContributePageAdminData {
   odt: ContributeFormatFile | null;
   pdf: ContributeFormatFile | null;
   docx: ContributeFormatFile | null;
+  /** 目前選的主視覺圖片（檔案已刪除或不是圖片時後端回 null） */
+  image: { fileId: string; fileName: string; formattedFileSize: string; url: string } | null;
 }
 
 /** 下載資源項目目前選到的檔案（檔案已刪除或副檔名不符時後端回 null） */
 export interface DownloadResourceFile {
-  kind: 'docx' | 'odt' | 'pdf';
+  kind: 'docx' | 'odt' | 'pdf' | 'zip';
   fileId: string;
   fileName: string;
   fileSize: number;
@@ -43,14 +47,16 @@ export interface DownloadResourceItem {
   title: string;
   usedAt: string;
   /** 允許的格式（不含點）；空陣列＝只能設外部連結 */
-  formats: Array<'docx' | 'odt' | 'pdf'>;
+  formats: Array<'docx' | 'odt' | 'pdf' | 'zip'>;
   docxFileId: string | null;
   odtFileId: string | null;
   pdfFileId: string | null;
+  zipFileId: string | null;
   externalUrl: string;
   docx: DownloadResourceFile | null;
   odt: DownloadResourceFile | null;
   pdf: DownloadResourceFile | null;
+  zip: DownloadResourceFile | null;
 }
 
 export interface DownloadResourceUpdate {
@@ -58,6 +64,7 @@ export interface DownloadResourceUpdate {
   docxFileId: string | null;
   odtFileId: string | null;
   pdfFileId: string | null;
+  zipFileId: string | null;
   externalUrl: string;
 }
 

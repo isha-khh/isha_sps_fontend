@@ -124,10 +124,10 @@ export const FaqCategoriesPage = () => {
     <>
     <div className="space-y-6">
       <PageTitle
-        title="問題類別"
+        title="常見問題類別"
         items={[
-          { label: '知識庫', path: '/knowledge' },
-          { label: '問題類別', active: true },
+          { label: '常見問題', path: '/knowledge/faq' },
+          { label: '常見問題類別', active: true },
         ]}
       />
 

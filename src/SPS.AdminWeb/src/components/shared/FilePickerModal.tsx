@@ -194,7 +194,7 @@ export const FilePickerModal = ({
       case 'video':
         return 'video/*';
       case 'document':
-        return '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
+        return '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.txt,.csv,.zip';
       default:
         return '*';
     }

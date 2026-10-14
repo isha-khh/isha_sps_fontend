@@ -49,6 +49,7 @@ public class PageSettingsController : ControllerBase
             Odt = await ResolveFormatAsync("odt", settings.OdtFileId, ".odt", cancellationToken),
             Pdf = await ResolveFormatAsync("pdf", settings.PdfFileId, ".pdf", cancellationToken),
             Docx = await ResolveFormatAsync("docx", settings.DocxFileId, ".docx", cancellationToken),
+            Image = await ResolveImageAsync(settings.ImageFileId, cancellationToken),
         });
     }
 
@@ -75,6 +76,9 @@ public class PageSettingsController : ControllerBase
 
         var docxError = await CheckFormatFileAsync("Word 格式", settings.DocxFileId, ".docx", cancellationToken);
         if (docxError != null) return BadRequest(new { error = docxError });
+
+        if (settings.ImageFileId != null && await ResolveImageAsync(settings.ImageFileId, cancellationToken) == null)
+            return BadRequest(new { error = "「主視覺圖片」必須選擇檔案管理中存在的圖片檔案（檔案不存在、是資料夾或不是圖片）" });
 
         // seed 標記是內部欄位，後台畫面不會送；沿用資料庫裡現有的值，否則每次儲存都會把標記清掉，
         // 下次重啟就會把 seed 檔又套回來、蓋掉管理員剛剛的選擇
@@ -116,6 +120,7 @@ public class PageSettingsController : ControllerBase
             ContactName = contactOk ? settings.ContactName : string.Empty,
             ContactPhone = contactOk ? settings.ContactPhone : string.Empty,
             ContactEmail = contactOk ? settings.ContactEmail : string.Empty,
+            ImageUrl = (await ResolveImageAsync(settings.ImageFileId, cancellationToken))?.Url ?? string.Empty,
         });
     }
 
@@ -240,10 +245,12 @@ public class PageSettingsController : ControllerBase
                 DocxFileId = entry.DocxFileId,
                 OdtFileId = entry.OdtFileId,
                 PdfFileId = entry.PdfFileId,
+                ZipFileId = entry.ZipFileId,
                 ExternalUrl = entry.ExternalUrl ?? string.Empty,
                 Docx = await ResolveDownloadAsync(slot, entry, ".docx", cancellationToken),
                 Odt = await ResolveDownloadAsync(slot, entry, ".odt", cancellationToken),
                 Pdf = await ResolveDownloadAsync(slot, entry, ".pdf", cancellationToken),
+                Zip = await ResolveDownloadAsync(slot, entry, ".zip", cancellationToken),
             });
         }
 
@@ -274,7 +281,7 @@ public class PageSettingsController : ControllerBase
 
             var submitted = new (string Extension, Guid? Id)[]
             {
-                (".docx", item.DocxFileId), (".odt", item.OdtFileId), (".pdf", item.PdfFileId)
+                (".docx", item.DocxFileId), (".odt", item.OdtFileId), (".pdf", item.PdfFileId), (".zip", item.ZipFileId)
             };
 
             foreach (var (extension, id) in submitted)
@@ -298,10 +305,12 @@ public class PageSettingsController : ControllerBase
                 DocxFileId = item.DocxFileId,
                 OdtFileId = item.OdtFileId,
                 PdfFileId = item.PdfFileId,
+                ZipFileId = item.ZipFileId,
                 ExternalUrl = item.ExternalUrl?.Trim() ?? string.Empty,
                 DocxSeedHash = existing?.DocxSeedHash,
                 OdtSeedHash = existing?.OdtSeedHash,
                 PdfSeedHash = existing?.PdfSeedHash,
+                ZipSeedHash = existing?.ZipSeedHash,
             };
         }
 
@@ -335,7 +344,7 @@ public class PageSettingsController : ControllerBase
             }
             else
             {
-                foreach (var extension in new[] { ".docx", ".odt", ".pdf" })
+                foreach (var extension in new[] { ".docx", ".odt", ".pdf", ".zip" })
                 {
                     var file = await ResolveDownloadAsync(slot, entry, extension, cancellationToken);
                     if (file == null) continue;
@@ -406,6 +415,29 @@ public class PageSettingsController : ControllerBase
         return new ContributeFormatFileDto
         {
             Kind = kind,
+            FileId = file.Id,
+            FileName = file.OriginalFileName,
+            FileSize = file.FileSize,
+            FormattedFileSize = file.FormattedFileSize,
+            Url = $"/api/FileManagement/{file.Id}/download",
+        };
+    }
+
+    /// <summary>把圖片檔案 id 換成可顯示的資訊；檔案不存在、是資料夾、不是圖片或是會員申請附件，一律回 null</summary>
+    private async Task<ContributeFormatFileDto?> ResolveImageAsync(Guid? fileId, CancellationToken cancellationToken)
+    {
+        if (fileId == null) return null;
+        var info = await _fileService.GetFileByIdAsync(fileId.Value, cancellationToken);
+        if (!info.IsSuccess || info.Data == null) return null;
+
+        var file = info.Data;
+        if (file.IsFolder || file.Status != FileStatus.Active) return null;
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) return null;
+        if (await _fileService.IsApplicationDocumentFileAsync(file.Id, cancellationToken)) return null;
+
+        return new ContributeFormatFileDto
+        {
+            Kind = "image",
             FileId = file.Id,
             FileName = file.OriginalFileName,
             FileSize = file.FileSize,

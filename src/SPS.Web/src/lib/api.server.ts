@@ -557,7 +557,7 @@ const DEFAULT_CONTRIBUTE_PAGE: ContributePage = {
     formats: [],
     contactName: "",
     contactPhone: "+886-7-550-3115",
-    contactEmail: "isha_khh@mail.isha.org.tw",
+    contactEmail: "isha_khh@mail.isha.org.tw",    imageUrl: "",
 };
 
 /**
@@ -571,6 +571,7 @@ export async function fetchContributePage(): Promise<ContributePage> {
             contactName?: string;
             contactPhone?: string;
             contactEmail?: string;
+            imageUrl?: string;
         }>("/api/page-settings/contribute/public", 60);
 
         return {
@@ -581,6 +582,7 @@ export async function fetchContributePage(): Promise<ContributePage> {
             contactName: data.contactName ?? "",
             contactPhone: data.contactPhone ?? "",
             contactEmail: data.contactEmail ?? "",
+            imageUrl: resolveBackendAssetUrl(data.imageUrl) ?? "",
         };
     } catch {
         return DEFAULT_CONTRIBUTE_PAGE;

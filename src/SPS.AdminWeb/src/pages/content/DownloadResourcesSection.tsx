@@ -9,16 +9,17 @@ import {
 import type { FileListItem, FileUploadResponse } from '@/types/files';
 import { useNotify } from '@/hooks/useNotify';
 
-type Kind = 'docx' | 'odt' | 'pdf';
+type Kind = 'docx' | 'odt' | 'pdf' | 'zip';
 
-const KIND_LABEL: Record<Kind, string> = { docx: 'Word（.docx）', odt: 'ODF（.odt）', pdf: 'PDF（.pdf）' };
-const ID_FIELD = { docx: 'docxFileId', odt: 'odtFileId', pdf: 'pdfFileId' } as const;
+const KIND_LABEL: Record<Kind, string> = { docx: 'Word（.docx）', odt: 'ODF（.odt）', pdf: 'PDF（.pdf）', zip: '壓縮檔（.zip）' };
+const ID_FIELD = { docx: 'docxFileId', odt: 'odtFileId', pdf: 'pdfFileId', zip: 'zipFileId' } as const;
 
 /** 編輯中的一個項目：檔案 id + 顯示用檔名 + 外部連結 */
 interface Draft {
   docxFileId: string | null;
   odtFileId: string | null;
   pdfFileId: string | null;
+  zipFileId: string | null;
   names: Record<Kind, string | null>;
   externalUrl: string;
 }
@@ -29,7 +30,8 @@ const toDraft = (item: DownloadResourceItem): Draft => {
     docxFileId: item.docxFileId,
     odtFileId: item.odtFileId,
     pdfFileId: item.pdfFileId,
-    names: { docx: name(item.docx), odt: name(item.odt), pdf: name(item.pdf) },
+    zipFileId: item.zipFileId,
+    names: { docx: name(item.docx), odt: name(item.odt), pdf: name(item.pdf), zip: name(item.zip) },
     externalUrl: item.externalUrl,
   };
 };
@@ -71,7 +73,7 @@ export const DownloadResourcesSection = () => {
   const isDirty = (key: string) => {
     const a = drafts[key];
     const b = saved[key];
-    return !!a && !!b && (a.docxFileId !== b.docxFileId || a.odtFileId !== b.odtFileId || a.pdfFileId !== b.pdfFileId || a.externalUrl.trim() !== b.externalUrl.trim());
+    return !!a && !!b && (a.docxFileId !== b.docxFileId || a.odtFileId !== b.odtFileId || a.pdfFileId !== b.pdfFileId || a.zipFileId !== b.zipFileId || a.externalUrl.trim() !== b.externalUrl.trim());
   };
   const dirtyKeys = items.map((i) => i.key).filter(isDirty);
 
@@ -106,6 +108,7 @@ export const DownloadResourcesSection = () => {
         docxFileId: drafts[key].docxFileId,
         odtFileId: drafts[key].odtFileId,
         pdfFileId: drafts[key].pdfFileId,
+        zipFileId: drafts[key].zipFileId,
         externalUrl: drafts[key].externalUrl.trim(),
       }));
       await pageSettingsApi.updateDownloads(updates);
@@ -161,7 +164,7 @@ export const DownloadResourcesSection = () => {
                   </div>
 
                   {item.formats.length > 0 && (
-                    <div className={`grid grid-cols-1 gap-3 ${item.formats.length > 1 ? 'md:grid-cols-3' : ''}`}>
+                    <div className={`grid grid-cols-1 gap-3 ${item.formats.length > 3 ? 'md:grid-cols-4' : item.formats.length > 1 ? 'md:grid-cols-3' : ''}`}>
                       {item.formats.map((kind) => {
                         const name = draft.names[kind];
                         return (
