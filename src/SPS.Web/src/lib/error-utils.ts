@@ -12,9 +12,17 @@ import { isAxiosError } from "axios";
  */
 export function getApiErrorMessage(error: unknown, fallback = "發生錯誤，請稍後再試"): string {
   if (isAxiosError(error)) {
-    const data = error.response?.data as { error?: string; message?: string } | undefined;
+    const data = error.response?.data as { error?: string; message?: string; errors?: Record<string, string[] | string> } | undefined;
     if (typeof data?.error === "string" && data.error) return data.error;
     if (typeof data?.message === "string" && data.message) return data.message;
+    // ASP.NET 模型驗證失敗（DataAnnotations，例如「密碼長度不能少於8位」）回的是 ProblemDetails：
+    // `{ title: "One or more validation errors occurred.", errors: { "欄位": ["訊息"] } }`，取第一則訊息
+    if (data?.errors && typeof data.errors === "object") {
+      for (const messages of Object.values(data.errors)) {
+        const first = Array.isArray(messages) ? messages[0] : messages;
+        if (typeof first === "string" && first) return first;
+      }
+    }
   }
   return fallback;
 }

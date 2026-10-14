@@ -146,6 +146,9 @@ export default function MemberDetailsForm({
     if (!email || !password || !confirmPassword || !contactName || !phone || !companyName || !industry || !position) {
       return "請完整填寫必填欄位";
     }
+    if (password.length < 8) {
+      return "密碼長度不能少於 8 位";
+    }
     if (password !== confirmPassword) {
       return "兩次密碼輸入不一致";
     }
