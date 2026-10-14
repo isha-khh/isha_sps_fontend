@@ -27,9 +27,12 @@ FROM nginx:stable-alpine
 # Copy the build output to Nginx's html folder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Optional: Copy a custom nginx config if you have SPA routing
-# 將自定義配置複製進去
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# nginx 官方映像啟動時會把 /etc/nginx/templates/*.template 內的 ${變數} 換成環境變數後寫到 conf.d/，
+# 所以後端位址可以在部署時用 API_UPSTREAM 指定，不用為了換位址重新打包。
+# NGINX_ENVSUBST_FILTER 限制只替換名稱含 API_ 的變數，避免誤動 nginx 自己的 $host、$uri 等變數。
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+ENV API_UPSTREAM=http://172.17.0.4:8080 \
+    NGINX_ENVSUBST_FILTER=API_
 
 EXPOSE 80
 

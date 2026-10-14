@@ -16,9 +16,11 @@
 
 | 映像 | 內容 | 來源 |
 |---|---|---|
-| `ghcr.io/<擁有者>/sps-api` | 後端 | `src/Dockerfile`（context `src`） |
-| `ghcr.io/<擁有者>/sps-web` | 前台（Next.js） | `src/SPS.Web/Dockerfile` |
-| `ghcr.io/<擁有者>/sps-admin` | 後台（nginx 靜態檔） | `src/SPS.AdminWeb/Dockerfile` |
+| `ghcr.io/<擁有者>/isha-sps-api` | 後端 | `src/Dockerfile`（context `src`） |
+| `ghcr.io/<擁有者>/isha-sps-web` | 前台（Next.js） | `src/SPS.Web/Dockerfile` |
+| `ghcr.io/<擁有者>/isha-sps-admin` | 後台（nginx 靜態檔） | `src/SPS.AdminWeb/Dockerfile` |
+
+**名稱刻意不用 `sps-*`**：`isha-khh/isha-sps`（舊的正式版 repo，私有）已經用 `ghcr.io/isha-khh/sps-frontend`、`sps-admin`、`sps-backend` 發布映像，GitHub 套件綁定第一次推送它的 repo，同名會因權限被拒（2026-10-13 第一次 Release 就是 `sps-admin` 撞名失敗）。前綴 `isha-sps` 可以用 repo 變數 `IMAGE_PREFIX` 改。**不要把新 repo 加進舊套件的 Actions access**——兩個 repo 會共用同一個套件、互相覆蓋標籤。
 
 `<擁有者>` 是 repo 擁有者的小寫（目前是 `isha-khh`）。標籤：完整版本（`1.1.2`）、`sha-<commit 前 7 碼>`；**正式版本**另外有 `1.1`，勾選 latest（打 tag 時一定會）還有 `latest`；預先發行版本（`1.1.2-rc.1`）只有前兩種。映像內的版本號（後端 `InformationalVersion`、前台 `NEXT_PUBLIC_APP_VERSION`、後台 `VITE_APP_VERSION`）是 `<版本>+<commit>`。
 
@@ -50,15 +52,15 @@ git push origin v1.1.2
 2. **套件可見度**：第一次推送後，套件預設是私有的、權限跟著 repo。要讓伺服器能 `docker pull`：
    - 私有：伺服器上用有 `read:packages` 權限的個人存取權杖登入：`echo <TOKEN> | docker login ghcr.io -u <使用者> --password-stdin`。
    - 或到套件頁 → Package settings 改成 Public（映像內不含任何密鑰：設定值都是啟動時用環境變數注入）。
-3. **選用的 repo 變數**（Settings → Secrets and variables → Actions → Variables）：`WEB_BASE_PATH`（前台網站路徑，預設 `/sps`）、`NEXT_PUBLIC_API_URL`（前台 build 時的 API 位址，預設空，與目前測試機的 Dockerfile 預設一致）。
+3. **選用的 repo 變數**（Settings → Secrets and variables → Actions → Variables）：`IMAGE_PREFIX`（映像名稱前綴，預設 `isha-sps`）、`WEB_BASE_PATH`（前台網站路徑，預設 `/sps`）、`NEXT_PUBLIC_API_URL`（前台 build 時的 API 位址，預設空，與目前測試機的 Dockerfile 預設一致）。
 4. **PR 的 Docker 試建**會用 GitHub Actions 快取，第一次比較慢（前台與後台各約數分鐘），之後有快取就快。
 
 ## 拉映像、部署
 
 ```bash
-docker pull ghcr.io/isha-khh/sps-api:1.1.2
-docker pull ghcr.io/isha-khh/sps-web:1.1.2
-docker pull ghcr.io/isha-khh/sps-admin:1.1.2
+docker pull ghcr.io/isha-khh/isha-sps-api:1.1.2
+docker pull ghcr.io/isha-khh/isha-sps-web:1.1.2
+docker pull ghcr.io/isha-khh/isha-sps-admin:1.1.2
 ```
 
 **目前測試機的部署流程不變**（遠端在伺服器上 `git pull` 後 `docker compose build` 自行建置），這套流程只負責產生套件；若要改成直接用套件部署，需要把測試機 compose 檔裡的 `build:` 換成 `image: ghcr.io/…:<版本>`，那是設定檔的變更，要另外安排，不在這次範圍。
@@ -69,3 +71,7 @@ docker pull ghcr.io/isha-khh/sps-admin:1.1.2
 - 沒有檢查 EF Core 資料庫遷移是否漏產生（`dotnet ef migrations has-pending-model-changes`），可日後加入。
 - 映像沒有漏洞掃描與簽章。
 - 前台映像把 `BASE_PATH` 在 build 時就寫死（Next.js 的 basePath 是 build 時決定的），要換網站路徑需要重新打包。
+
+## 後台映像的後端位址（`API_UPSTREAM`）
+
+後台映像內建的 nginx 會把 `/api/`、`/hubs/` 轉給後端，位址由環境變數 `API_UPSTREAM` 決定（nginx 官方映像啟動時把 `nginx.conf` 內的 `${API_UPSTREAM}` 換成實際值）。預設值 `http://172.17.0.4:8080` 是既有測試機的部署方式；新的部署請設成後端 container 的名稱，例如 `API_UPSTREAM=http://sps-beta-api:8080`，不要依賴 docker 橋接網路的 IP。若前面的反向代理已經直接轉 `/api`、`/hubs` 給後端，這個設定只是讓 nginx 啟動時有合法的上游，不會被用到。

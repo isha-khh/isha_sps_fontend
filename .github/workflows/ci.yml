@@ -27,13 +27,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - image: sps-api
+          - image: api
             context: src
             file: src/Dockerfile
-          - image: sps-web
+          - image: web
             context: src/SPS.Web
             file: src/SPS.Web/Dockerfile
-          - image: sps-admin
+          - image: admin
             context: src/SPS.AdminWeb
             file: src/SPS.AdminWeb/Dockerfile
     steps:

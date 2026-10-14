@@ -1,5 +1,6 @@
 # 打包成 GitHub Package（GitHub Container Registry）：
-#   ghcr.io/<擁有者>/sps-api、sps-web、sps-admin
+#   ghcr.io/<擁有者>/isha-sps-api、isha-sps-web、isha-sps-admin（前綴可用 repo 變數 IMAGE_PREFIX 改；
+#   刻意不用 sps-*：isha-khh/isha-sps 那個舊 repo 已經在用 sps-frontend／sps-admin／sps-backend，名稱會撞）
 #
 # 觸發方式：
 #   1. 打 tag：git tag v1.1.2 && git push origin v1.1.2（tag 必須在 main 上；v1.1.2-rc.1 這種視為預先發行）
@@ -126,22 +127,24 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      IMAGE_PREFIX: ${{ vars.IMAGE_PREFIX || 'isha-sps' }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - image: sps-api
+          - image: api
             context: src
             file: src/Dockerfile
             build_args: ''
-          - image: sps-web
+          - image: web
             context: src/SPS.Web
             file: src/SPS.Web/Dockerfile
             # 前台的網站路徑與（選用）API 位址；可在 repo 的 Settings → Variables 設定 WEB_BASE_PATH、NEXT_PUBLIC_API_URL
             build_args: |
               BASE_PATH=${{ vars.WEB_BASE_PATH || '/sps' }}
               NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-          - image: sps-admin
+          - image: admin
             context: src/SPS.AdminWeb
             file: src/SPS.AdminWeb/Dockerfile
             build_args: ''
@@ -164,7 +167,7 @@ jobs:
         id: tags
         env:
           OWNER: ${{ needs.prepare.outputs.owner }}
-          IMAGE: ${{ matrix.image }}
+          IMAGE: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}
           SUFFIXES: ${{ needs.prepare.outputs.tag_suffixes }}
         run: |
           {
@@ -198,7 +201,7 @@ jobs:
           PUSHED: ${{ needs.prepare.outputs.push }}
         run: |
           {
-            echo "### ${{ matrix.image }}"
+            echo "### ${IMAGE_PREFIX}-${{ matrix.image }}"
             if [ "$PUSHED" = "true" ]; then echo "已推送："; else echo "只試建置，沒有推送。標籤："; fi
             echo '```'
             echo "$TAGS"
@@ -221,6 +224,7 @@ jobs:
           OWNER: ${{ needs.prepare.outputs.owner }}
           VERSION: ${{ needs.prepare.outputs.version }}
           PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+          PREFIX: ${{ vars.IMAGE_PREFIX || 'isha-sps' }}
         run: |
           set -euo pipefail
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
@@ -231,6 +235,6 @@ jobs:
           [ "$PRERELEASE" = "true" ] && FLAGS="--prerelease"
           gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes $FLAGS \
             --notes "容器映像（GitHub Packages）：
-          - ghcr.io/$OWNER/sps-api:$VERSION
-          - ghcr.io/$OWNER/sps-web:$VERSION
-          - ghcr.io/$OWNER/sps-admin:$VERSION"
+          - ghcr.io/$OWNER/$PREFIX-api:$VERSION
+          - ghcr.io/$OWNER/$PREFIX-web:$VERSION
+          - ghcr.io/$OWNER/$PREFIX-admin:$VERSION"
