@@ -46,6 +46,7 @@ public class ActionLogFilter : IAsyncActionFilter
     {
         "/api/Log",           // 日誌 API 本身
         "/api/health",        // 健康檢查
+        "/api/license/v1",    // 軟體授權（裝置高頻呼叫，且內容含序號與授權檔；稽核另外記在 LicenseEvents）
         "/api/swagger",       // Swagger
         "/swagger",
         "/favicon.ico"

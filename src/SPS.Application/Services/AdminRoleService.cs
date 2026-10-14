@@ -143,6 +143,7 @@ public class AdminRoleService : IAdminRoleService
             new() { Name = "ManageSettings", Value = (long)UserPermission.ManageSettings, Description = "系統設定（含系統資訊）", Group = "系統管理" },
             new() { Name = "ViewActionLogs", Value = (long)UserPermission.ViewActionLogs, Description = "檢視操作記錄", Group = "系統管理" },
             new() { Name = "ManageFiles", Value = (long)UserPermission.ManageFiles, Description = "系統檔案管理（搬移／刪除／還原）", Group = "系統管理" },
+            new() { Name = "ManageLicenses", Value = (long)UserPermission.ManageLicenses, Description = "軟體授權（XR）管理：授權、裝置、席次、簽章金鑰、授權設定", Group = "系統管理" },
 
             new() { Name = "ManageApplications", Value = (long)UserPermission.ManageApplications, Description = "會員申請審核（含檢視）", Group = "審核管理" },
             new() { Name = "ViewApplications", Value = (long)UserPermission.ViewApplications, Description = "檢視會員申請（唯讀）", Group = "審核管理" },

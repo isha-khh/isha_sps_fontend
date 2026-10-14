@@ -33,6 +33,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<DemandReply> DemandReplies { get; set; } = null!;
     public DbSet<MemberNotification> MemberNotifications { get; set; } = null!;
 
+    // 軟體授權（XR）
+    public DbSet<License> Licenses { get; set; } = null!;
+    public DbSet<LicenseActivation> LicenseActivations { get; set; } = null!;
+    public DbSet<LicenseEvent> LicenseEvents { get; set; } = null!;
+    public DbSet<LicenseSigningKey> LicenseSigningKeys { get; set; } = null!;
+
     // Attribute Entities
     public DbSet<SPS.Domain.Entities.Attribute> Attributes { get; set; } = null!;
     public DbSet<AttributeValue> AttributeValues { get; set; } = null!;

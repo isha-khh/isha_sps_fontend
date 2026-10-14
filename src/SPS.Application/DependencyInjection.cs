@@ -27,6 +27,10 @@ public static class DependencyInjection
         services.AddScoped<IInquiryService, InquiryService>();
         services.AddScoped<IDemandReplyService, DemandReplyService>();
         services.AddScoped<IMemberNotificationService, MemberNotificationService>();
+
+        // 軟體授權（XR）：授權伺服器邏輯；簽章實作（Cloud KMS）在 Infrastructure
+        services.AddSingleton(TimeProvider.System);
+        services.AddScoped<ILicenseService, SPS.Application.Services.Licensing.LicenseService>();
         services.AddSingleton<IStaffNotifier, StaffNotifier>();
         services.AddScoped<IMemberFavoriteService, MemberFavoriteService>();
         services.AddScoped<IContentIndexingService, ContentIndexingService>();

@@ -43,6 +43,9 @@ public static class DependencyInjection
             }
         });
 
+        // 授權簽章（Google Cloud KMS）；用單例以重複使用 KMS 連線
+        services.AddSingleton<SPS.Application.Interfaces.IServices.ILicenseSigner, SPS.Infrastructure.Services.GoogleKmsLicenseSigner>();
+
         // 工作單元
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

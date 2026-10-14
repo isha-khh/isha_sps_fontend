@@ -145,6 +145,9 @@ public enum UserPermission : long
     /// </summary>
     ManageFiles = 1L << 45,
 
+    /// <summary>軟體授權（XR）管理：授權清單、暫停／撤銷、席次、裝置、簽章金鑰、授權設定</summary>
+    ManageLicenses = 1L << 46,
+
     // ==================== 通訊管理 ====================
     /// <summary>
     /// 發送群發郵件（建立、寄送、排程、取消郵件活動）
@@ -170,7 +173,7 @@ public enum UserPermission : long
           ManageMembers | ManageCompanies | ViewMembers | ViewCompanies | ExportData |
           ManageProducts | ManageDemands | ManageNews | ManageMemos |
           ManageCategories | ManageQuestions | ManageRegulations |
-          ManageBanners | ManageSiteContent | ManageMedia | ManageFiles |
+          ManageBanners | ManageSiteContent | ManageMedia | ManageFiles | ManageLicenses |
           ViewAnalytics | CustomerService |
           SendBulkEmail | ManageMailLogs | ManageEmailTemplates
 }

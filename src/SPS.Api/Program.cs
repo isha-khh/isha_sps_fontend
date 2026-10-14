@@ -48,6 +48,8 @@ builder.Services.AddApplication();
 builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
 builder.Services.AddScoped<SPS.Api.Services.CompanyShowcaseHelper>();
 builder.Services.AddScoped<SPS.Api.Services.AttachmentLinks>();
+// 軟體授權 API（匿名端點）的限流與防序號枚舉；計數存在記憶體
+builder.Services.AddSingleton<SPS.Api.Services.LicenseRateLimiter>();
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
