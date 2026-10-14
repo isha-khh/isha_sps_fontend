@@ -67,7 +67,7 @@ const allMenuItems: MenuItemWithPermission[] = [
     id: 'service-zone',
     label: '服務專區',
     icon: 'lucide--briefcase',
-    permissions: [Permission.ManageNews],
+    permissions: [Permission.ManageNews, Permission.ManageLicenses],
     children: [
       {
         id: 'serve-items',
@@ -81,8 +81,12 @@ const allMenuItems: MenuItemWithPermission[] = [
       {
         id: 'talent-courses',
         label: '人才培育',
-        permissions: [Permission.ManageNews],
-        children: [{ id: 'talent-course-list', label: '課程內容', url: '/talent-courses', permissions: [Permission.ManageNews] }],
+        permissions: [Permission.ManageNews, Permission.ManageLicenses],
+        children: [
+          { id: 'talent-course-list', label: '課程內容', url: '/talent-courses', permissions: [Permission.ManageNews] },
+          { id: 'xr-licenses', label: 'XR 授權', url: '/licenses', permissions: [Permission.ManageLicenses] },
+          { id: 'xr-license-keys', label: 'XR 簽章金鑰', url: '/licenses/keys', permissions: [Permission.ManageLicenses] },
+        ],
       },
       {
         id: 'tutoring-items',

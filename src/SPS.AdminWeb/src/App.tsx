@@ -29,6 +29,9 @@ import { DemandsListPage } from '@/pages/demands/DemandsListPage';
 import { DemandDetailPage } from '@/pages/demands/DemandDetailPage';
 import { DemandFormPage } from '@/pages/demands/DemandFormPage';
 import { InquiriesPage } from '@/pages/inquiries/InquiriesPage';
+import { LicensesListPage } from '@/pages/licenses/LicensesListPage';
+import { LicenseDetailPage } from '@/pages/licenses/LicenseDetailPage';
+import { LicenseKeysPage } from '@/pages/licenses/LicenseKeysPage';
 import { DemandRepliesPage } from '@/pages/demand-replies/DemandRepliesPage';
 import { ChatReportsPage } from '@/pages/chat-reports/ChatReportsPage';
 
@@ -197,6 +200,11 @@ function App() {
           <Route path="demands/:id" element={<DemandDetailPage />} />
           <Route path="demands/:id/edit" element={<DemandFormPage />} />
           <Route path="inquiries" element={<InquiriesPage />} />
+
+          {/* XR 軟體授權 */}
+          <Route path="licenses" element={<LicensesListPage />} />
+          <Route path="licenses/keys" element={<LicenseKeysPage />} />
+          <Route path="licenses/:id" element={<LicenseDetailPage />} />
           <Route path="demand-replies" element={<DemandRepliesPage />} />
           <Route path="chat-reports" element={<ChatReportsPage />} />
 
