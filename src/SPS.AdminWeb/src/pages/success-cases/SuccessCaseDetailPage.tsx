@@ -28,7 +28,7 @@ export const SuccessCaseDetailPage = () => {
       setSuccessCase(data);
     } catch (error) {
       console.error('Failed to fetch success case:', error);
-      await notify.success('無法載入成功案例');
+      await notify.success('無法載入產業案例');
     } finally {
       setIsLoading(false);
     }
@@ -50,8 +50,8 @@ export const SuccessCaseDetailPage = () => {
     if (!successCase) return;
 
     const confirmed = await confirmDialog({
-      cardTitle: '刪除成功案例',
-      message: '確定要刪除此成功案例嗎？',
+      cardTitle: '刪除產業案例',
+      message: '確定要刪除此產業案例嗎？',
       buttonConfirm: '刪除',
       confirmStyle: 'bg-error',
     });
@@ -62,7 +62,7 @@ export const SuccessCaseDetailPage = () => {
       navigate('/success-cases');
     } catch (error) {
       console.error('Failed to delete success case:', error);
-      await notify.success('刪除成功案例失敗');
+      await notify.success('刪除產業案例失敗');
     }
   };
 
@@ -77,7 +77,7 @@ export const SuccessCaseDetailPage = () => {
   if (!successCase) {
     return (
       <div className="text-center py-12">
-        <p className="text-base-content/60">找不到此成功案例</p>
+        <p className="text-base-content/60">找不到此產業案例</p>
         <Link to="/success-cases" className="btn btn-neutral mt-4">
           返回列表
         </Link>
@@ -89,9 +89,9 @@ export const SuccessCaseDetailPage = () => {
     <>
     <div className="space-y-6">
       <PageTitle
-        title="成功案例詳情"
+        title="產業案例詳情"
         items={[
-          { label: '成功案例', path: '/success-cases' },
+          { label: '產業案例', path: '/success-cases' },
           { label: successCase.title, active: true },
         ]}
       />

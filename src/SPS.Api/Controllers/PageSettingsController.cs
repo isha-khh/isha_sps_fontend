@@ -20,6 +20,9 @@ public class PageSettingsController : ControllerBase
 {
     private const string ContributeKey = "PageContribute";
     public const string DownloadsKey = "DownloadResources";
+    private const string AboutKey = "PageAbout";
+    private const string SupportInfoKey = "PageSupportInfo";
+    private const string IndustryAiKey = "PageIndustryAiLink";
 
     private readonly ISystemSettingService _settingService;
     private readonly IFileManagementService _fileService;
@@ -46,6 +49,7 @@ public class PageSettingsController : ControllerBase
             Odt = await ResolveFormatAsync("odt", settings.OdtFileId, ".odt", cancellationToken),
             Pdf = await ResolveFormatAsync("pdf", settings.PdfFileId, ".pdf", cancellationToken),
             Docx = await ResolveFormatAsync("docx", settings.DocxFileId, ".docx", cancellationToken),
+            Image = await ResolveImageAsync(settings.ImageFileId, cancellationToken),
         });
     }
 
@@ -72,6 +76,9 @@ public class PageSettingsController : ControllerBase
 
         var docxError = await CheckFormatFileAsync("Word 格式", settings.DocxFileId, ".docx", cancellationToken);
         if (docxError != null) return BadRequest(new { error = docxError });
+
+        if (settings.ImageFileId != null && await ResolveImageAsync(settings.ImageFileId, cancellationToken) == null)
+            return BadRequest(new { error = "「主視覺圖片」必須選擇檔案管理中存在的圖片檔案（檔案不存在、是資料夾或不是圖片）" });
 
         // seed 標記是內部欄位，後台畫面不會送；沿用資料庫裡現有的值，否則每次儲存都會把標記清掉，
         // 下次重啟就會把 seed 檔又套回來、蓋掉管理員剛剛的選擇
@@ -113,7 +120,100 @@ public class PageSettingsController : ControllerBase
             ContactName = contactOk ? settings.ContactName : string.Empty,
             ContactPhone = contactOk ? settings.ContactPhone : string.Empty,
             ContactEmail = contactOk ? settings.ContactEmail : string.Empty,
+            ImageUrl = (await ResolveImageAsync(settings.ImageFileId, cancellationToken))?.Url ?? string.Empty,
         });
+    }
+
+    // ==================== 關於我們、補助專區資訊區塊（純文字內容）====================
+
+    /// <summary>取得「關於我們」頁的文字內容（後台編輯用）；沒設定過就是預設內容</summary>
+    [HttpGet("about")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得關於我們頁設定（後台）")]
+    public async Task<IActionResult> GetAbout(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<AboutPageSettingsDto>(AboutKey, cancellationToken));
+
+    /// <summary>更新「關於我們」頁的文字內容；欄位長度與筆數有上限，空白的歷程筆數會被丟掉</summary>
+    [HttpPut("about")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新關於我們頁設定（後台）")]
+    public async Task<IActionResult> UpdateAbout([FromBody] AboutPageSettingsDto settings, CancellationToken cancellationToken)
+    {
+        var (normalized, error) = ContentPageValidator.NormalizeAbout(settings);
+        if (error != null) return BadRequest(new { error });
+        var result = await _settingService.UpdateSettingAsync(AboutKey, normalized);
+        return result.IsSuccess ? Ok(new { message = "About page settings updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>取得「關於我們」頁的文字內容（前台使用）</summary>
+    [HttpGet("about/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "取得關於我們頁公開資料")]
+    public async Task<IActionResult> GetAboutPublic(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<AboutPageSettingsDto>(AboutKey, cancellationToken));
+
+    /// <summary>取得補助專區頁首四個資訊區塊（後台編輯用）；沒設定過就是預設內容</summary>
+    [HttpGet("support-info")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得補助專區資訊區塊設定（後台）")]
+    public async Task<IActionResult> GetSupportInfo(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<SupportInfoSettingsDto>(SupportInfoKey, cancellationToken));
+
+    /// <summary>更新補助專區頁首的資訊區塊；圖示必須在可選清單內、「完整內容」連結的下載資源必須存在</summary>
+    [HttpPut("support-info")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新補助專區資訊區塊設定（後台）")]
+    public async Task<IActionResult> UpdateSupportInfo([FromBody] SupportInfoSettingsDto settings, CancellationToken cancellationToken)
+    {
+        var (normalized, error) = ContentPageValidator.NormalizeSupportInfo(settings);
+        if (error != null) return BadRequest(new { error });
+        var result = await _settingService.UpdateSettingAsync(SupportInfoKey, normalized);
+        return result.IsSuccess ? Ok(new { message = "Support info settings updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>取得補助專區頁首四個資訊區塊（前台使用）</summary>
+    [HttpGet("support-info/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "取得補助專區資訊區塊公開資料")]
+    public async Task<IActionResult> GetSupportInfoPublic(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<SupportInfoSettingsDto>(SupportInfoKey, cancellationToken));
+
+    /// <summary>取得「產業AI」外部連結開關（後台編輯用）；沒設定過就是關閉</summary>
+    [HttpGet("industry-ai-link")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得產業AI外部連結設定（後台）")]
+    public async Task<IActionResult> GetIndustryAiLink(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<IndustryAiLinkSettingsDto>(IndustryAiKey, cancellationToken));
+
+    /// <summary>更新「產業AI」外部連結開關；開啟時網址必填且必須是 http／https</summary>
+    [HttpPut("industry-ai-link")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新產業AI外部連結設定（後台）")]
+    public async Task<IActionResult> UpdateIndustryAiLink([FromBody] IndustryAiLinkSettingsDto settings, CancellationToken cancellationToken)
+    {
+        var (normalized, error) = IndustryAiLinkValidator.Normalize(settings);
+        if (error != null) return BadRequest(new { error });
+        var result = await _settingService.UpdateSettingAsync(IndustryAiKey, normalized);
+        return result.IsSuccess ? Ok(new { message = "Industry AI link settings updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>取得「產業AI」外部連結（前台使用）；沒開啟或網址無效時 enabled 一律是 false</summary>
+    [HttpGet("industry-ai-link/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "取得產業AI外部連結公開資料")]
+    public async Task<IActionResult> GetIndustryAiLinkPublic(CancellationToken cancellationToken) =>
+        Ok(IndustryAiLinkValidator.ToPublic(await LoadSettingAsync<IndustryAiLinkSettingsDto>(IndustryAiKey, cancellationToken)));
+
+    private async Task<T> LoadSettingAsync<T>(string key, CancellationToken cancellationToken) where T : class, new()
+    {
+        var result = await _settingService.GetSettingAsync<T>(key, cancellationToken);
+        return result.IsSuccess ? result.Data ?? new T() : new T();
     }
 
     // ==================== 下載資源（固定檔案與外部連結）====================
@@ -145,10 +245,12 @@ public class PageSettingsController : ControllerBase
                 DocxFileId = entry.DocxFileId,
                 OdtFileId = entry.OdtFileId,
                 PdfFileId = entry.PdfFileId,
+                ZipFileId = entry.ZipFileId,
                 ExternalUrl = entry.ExternalUrl ?? string.Empty,
                 Docx = await ResolveDownloadAsync(slot, entry, ".docx", cancellationToken),
                 Odt = await ResolveDownloadAsync(slot, entry, ".odt", cancellationToken),
                 Pdf = await ResolveDownloadAsync(slot, entry, ".pdf", cancellationToken),
+                Zip = await ResolveDownloadAsync(slot, entry, ".zip", cancellationToken),
             });
         }
 
@@ -179,7 +281,7 @@ public class PageSettingsController : ControllerBase
 
             var submitted = new (string Extension, Guid? Id)[]
             {
-                (".docx", item.DocxFileId), (".odt", item.OdtFileId), (".pdf", item.PdfFileId)
+                (".docx", item.DocxFileId), (".odt", item.OdtFileId), (".pdf", item.PdfFileId), (".zip", item.ZipFileId)
             };
 
             foreach (var (extension, id) in submitted)
@@ -203,10 +305,12 @@ public class PageSettingsController : ControllerBase
                 DocxFileId = item.DocxFileId,
                 OdtFileId = item.OdtFileId,
                 PdfFileId = item.PdfFileId,
+                ZipFileId = item.ZipFileId,
                 ExternalUrl = item.ExternalUrl?.Trim() ?? string.Empty,
                 DocxSeedHash = existing?.DocxSeedHash,
                 OdtSeedHash = existing?.OdtSeedHash,
                 PdfSeedHash = existing?.PdfSeedHash,
+                ZipSeedHash = existing?.ZipSeedHash,
             };
         }
 
@@ -240,7 +344,7 @@ public class PageSettingsController : ControllerBase
             }
             else
             {
-                foreach (var extension in new[] { ".docx", ".odt", ".pdf" })
+                foreach (var extension in new[] { ".docx", ".odt", ".pdf", ".zip" })
                 {
                     var file = await ResolveDownloadAsync(slot, entry, extension, cancellationToken);
                     if (file == null) continue;
@@ -311,6 +415,29 @@ public class PageSettingsController : ControllerBase
         return new ContributeFormatFileDto
         {
             Kind = kind,
+            FileId = file.Id,
+            FileName = file.OriginalFileName,
+            FileSize = file.FileSize,
+            FormattedFileSize = file.FormattedFileSize,
+            Url = $"/api/FileManagement/{file.Id}/download",
+        };
+    }
+
+    /// <summary>把圖片檔案 id 換成可顯示的資訊；檔案不存在、是資料夾、不是圖片或是會員申請附件，一律回 null</summary>
+    private async Task<ContributeFormatFileDto?> ResolveImageAsync(Guid? fileId, CancellationToken cancellationToken)
+    {
+        if (fileId == null) return null;
+        var info = await _fileService.GetFileByIdAsync(fileId.Value, cancellationToken);
+        if (!info.IsSuccess || info.Data == null) return null;
+
+        var file = info.Data;
+        if (file.IsFolder || file.Status != FileStatus.Active) return null;
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) return null;
+        if (await _fileService.IsApplicationDocumentFileAsync(file.Id, cancellationToken)) return null;
+
+        return new ContributeFormatFileDto
+        {
+            Kind = "image",
             FileId = file.Id,
             FileName = file.OriginalFileName,
             FileSize = file.FileSize,

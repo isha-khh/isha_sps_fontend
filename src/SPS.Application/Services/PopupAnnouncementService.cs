@@ -59,11 +59,15 @@ public class PopupAnnouncementService : IPopupAnnouncementService
         CreatePopupAnnouncementRequest request,
         CancellationToken cancellationToken = default)
     {
+        var validationError = Validate(request.LinkUrl, request.Routes);
+        if (validationError != null) return Result<PopupAnnouncementResponse>.Failure(validationError);
+
+        var coverId = request.CoverFileId.HasValue ? await CreateImageAsync(request.CoverFileId.Value, cancellationToken) : request.ImageId;
         var entity = new PopupAnnouncement
         {
             Title = request.Title,
             Content = request.Content,
-            ImageId = request.ImageId,
+            ImageId = coverId,
             LinkUrl = request.LinkUrl,
             LinkTarget = request.LinkTarget ?? "_self",
             Routes = JsonSerializer.Serialize(request.Routes),
@@ -100,9 +104,14 @@ public class PopupAnnouncementService : IPopupAnnouncementService
             return Result<PopupAnnouncementResponse>.Failure("彈窗公告不存在");
         }
 
+        var validationError = Validate(request.LinkUrl, request.Routes);
+        if (validationError != null) return Result<PopupAnnouncementResponse>.Failure(validationError);
+
         if (request.Title != null) entity.Title = request.Title;
         if (request.Content != null) entity.Content = request.Content;
-        if (request.ImageId.HasValue) entity.ImageId = request.ImageId;
+        if (request.RemoveCover == true) entity.ImageId = null;
+        else if (request.CoverFileId.HasValue) entity.ImageId = await CreateImageAsync(request.CoverFileId.Value, cancellationToken);
+        else if (request.ImageId.HasValue) entity.ImageId = request.ImageId;
         if (request.LinkUrl != null) entity.LinkUrl = request.LinkUrl;
         if (request.LinkTarget != null) entity.LinkTarget = request.LinkTarget;
         if (request.Routes != null) entity.Routes = JsonSerializer.Serialize(request.Routes);
@@ -152,6 +161,44 @@ public class PopupAnnouncementService : IPopupAnnouncementService
         var entities = await _unitOfWork.PopupAnnouncements.GetActiveByRouteAsync(route, cancellationToken);
         var response = entities.Select(MapToResponse).ToList();
         return Result<List<PopupAnnouncementResponse>>.Success(response);
+    }
+
+    /// <summary>連結只接受 http／https 或站內路徑（/開頭），避免後台誤填 javascript: 之類的值被前台當成連結；適用路由必須是 / 開頭的路徑</summary>
+    private static string? Validate(string? linkUrl, IEnumerable<string>? routes)
+    {
+        var link = linkUrl?.Trim();
+        if (!string.IsNullOrEmpty(link) &&
+            !(link.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+              link.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+              (link.StartsWith('/') && !link.StartsWith("//"))))
+            return "連結網址只能是 http／https 開頭的網址，或站內路徑（以 / 開頭）";
+
+        if (routes != null)
+        {
+            foreach (var route in routes)
+            {
+                if (string.IsNullOrWhiteSpace(route) || !route.StartsWith('/') || route.Length > 200)
+                    return $"適用路由「{route}」格式不正確，必須以 / 開頭（例如 / 或 /news）";
+            }
+        }
+        return null;
+    }
+
+    /// <summary>為檔案管理中的圖片建立圖片紀錄（Uri 指向檔案下載網址），回傳圖片紀錄 Id</summary>
+    private async Task<int> CreateImageAsync(Guid fileId, CancellationToken cancellationToken)
+    {
+        var db = _unitOfWork.GetDbContext();
+        var picture = new Picture
+        {
+            Name = "彈窗公告圖片",
+            Uri = $"/api/FileManagement/{fileId}/download",
+            Published = true,
+            CreatedTime = DateTime.UtcNow,
+            UpdatedTime = DateTime.UtcNow,
+        };
+        db.Set<Picture>().Add(picture);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return picture.Id;
     }
 
     private static PopupAnnouncementResponse MapToResponse(PopupAnnouncement entity)

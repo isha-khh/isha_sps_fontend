@@ -335,7 +335,7 @@ export const CompanyFormPage = () => {
       <PageTitle
         title={isEditMode ? '編輯公司' : '新增公司'}
         items={[
-          { label: '公司管理', path: '/companies' },
+          { label: '企業名錄', path: '/companies' },
           { label: isEditMode ? '編輯' : '新增', active: true },
         ]}
       />

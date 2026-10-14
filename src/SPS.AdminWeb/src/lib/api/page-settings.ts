@@ -14,6 +14,8 @@ export interface ContributePageSettings {
   odtFileId: string | null;
   pdfFileId: string | null;
   docxFileId: string | null;
+  /** 主視覺圖片（檔案管理中的圖片檔案 id）；沒設定前台用預設圖片 */
+  imageFileId: string | null;
   contactName: string;
   contactPhone: string;
   contactEmail: string;
@@ -24,11 +26,13 @@ export interface ContributePageAdminData {
   odt: ContributeFormatFile | null;
   pdf: ContributeFormatFile | null;
   docx: ContributeFormatFile | null;
+  /** 目前選的主視覺圖片（檔案已刪除或不是圖片時後端回 null） */
+  image: { fileId: string; fileName: string; formattedFileSize: string; url: string } | null;
 }
 
 /** 下載資源項目目前選到的檔案（檔案已刪除或副檔名不符時後端回 null） */
 export interface DownloadResourceFile {
-  kind: 'docx' | 'odt' | 'pdf';
+  kind: 'docx' | 'odt' | 'pdf' | 'zip';
   fileId: string;
   fileName: string;
   fileSize: number;
@@ -43,14 +47,16 @@ export interface DownloadResourceItem {
   title: string;
   usedAt: string;
   /** 允許的格式（不含點）；空陣列＝只能設外部連結 */
-  formats: Array<'docx' | 'odt' | 'pdf'>;
+  formats: Array<'docx' | 'odt' | 'pdf' | 'zip'>;
   docxFileId: string | null;
   odtFileId: string | null;
   pdfFileId: string | null;
+  zipFileId: string | null;
   externalUrl: string;
   docx: DownloadResourceFile | null;
   odt: DownloadResourceFile | null;
   pdf: DownloadResourceFile | null;
+  zip: DownloadResourceFile | null;
 }
 
 export interface DownloadResourceUpdate {
@@ -58,6 +64,7 @@ export interface DownloadResourceUpdate {
   docxFileId: string | null;
   odtFileId: string | null;
   pdfFileId: string | null;
+  zipFileId: string | null;
   externalUrl: string;
 }
 
@@ -93,6 +100,13 @@ export interface SupportInfoBlock {
 
 export interface SupportInfoSettings {
   blocks: SupportInfoBlock[];
+}
+
+/** 「產業AI」外部連結開關 */
+export interface IndustryAiLinkSettings {
+  enabled: boolean;
+  url: string;
+  newTab: boolean;
 }
 
 export const pageSettingsApi = {
@@ -154,5 +168,16 @@ export const pageSettingsApi = {
   /** PUT /api/page-settings/support-info（圖示不在清單內、連結的下載資源不存在時後端回 400 `{ error }`） */
   async updateSupportInfo(settings: SupportInfoSettings): Promise<void> {
     await apiClient.put('/api/page-settings/support-info', settings);
+  },
+
+  /** GET /api/page-settings/industry-ai-link */
+  async getIndustryAiLink(): Promise<IndustryAiLinkSettings> {
+    const response = await apiClient.get<IndustryAiLinkSettings>('/api/page-settings/industry-ai-link');
+    return response.data;
+  },
+
+  /** PUT /api/page-settings/industry-ai-link（開啟時沒填網址、網址不是 http／https 時後端回 400 `{ error }`） */
+  async updateIndustryAiLink(settings: IndustryAiLinkSettings): Promise<void> {
+    await apiClient.put('/api/page-settings/industry-ai-link', settings);
   },
 };

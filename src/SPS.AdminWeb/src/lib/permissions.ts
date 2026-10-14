@@ -37,6 +37,7 @@ export const Permission = {
   CustomerService: 1n << 41n,
   ManageMedia: 1n << 42n,
   ManageFiles: 1n << 45n,
+  ManageLicenses: 1n << 46n,
 
   // 通訊管理
   SendBulkEmail: 1n << 50n,
@@ -122,6 +123,7 @@ export const PermissionLabels: Record<PermissionKey, string> = {
   ManageSiteContent: '網站內容管理',
   ManageMedia: '媒體管理',
   ManageFiles: '系統檔案管理',
+  ManageLicenses: '軟體授權（XR）管理',
   ManageMemos: '備忘錄管理',
   ManageCategories: '分類管理',
   ManageQuestions: '常見問題管理',

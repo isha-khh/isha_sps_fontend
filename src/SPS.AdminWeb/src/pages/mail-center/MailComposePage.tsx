@@ -464,6 +464,7 @@ export const MailComposePage = () => {
 
   return (
     <div className="space-y-6">
+      {notify.NotifyComponent}
       <PageTitle
         title="發送郵件"
         items={[

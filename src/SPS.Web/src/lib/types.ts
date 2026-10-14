@@ -611,6 +611,8 @@ export interface ContributePage {
     contactName: string;
     contactPhone: string;
     contactEmail: string;
+    /** 後台設定的主視覺圖片（完整網址）；空字串＝沒設定，前台用預設圖片 */
+    imageUrl: string;
 }
 
 export interface ContributeFormat {
@@ -626,7 +628,7 @@ export interface ContributeFormat {
  * `url` 已經轉成瀏覽器可用的完整網址。
  */
 export interface DownloadLink {
-    kind: "docx" | "odt" | "pdf" | "link";
+    kind: "docx" | "odt" | "pdf" | "zip" | "link";
     url: string;
     fileName: string;
     formattedFileSize: string;

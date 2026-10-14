@@ -1917,6 +1917,217 @@ namespace SPS.Infrastructure.Migrations
                     b.ToTable("Inquiries");
                 });
 
+            modelBuilder.Entity("SPS.Domain.Entities.License", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CompanyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("LeaseDaysOverride")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LicenseKeyHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("LicenseKeyHint")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<int?>("SeatsOverride")
+                        .HasColumnType("integer");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ValidUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("LicenseKeyHash")
+                        .IsUnique();
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("MemberId", "ProductCode")
+                        .IsUnique();
+
+                    b.ToTable("Licenses", (string)null);
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.LicenseActivation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActivationMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("ClientVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeviceHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("DeviceName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("DevicePublicKey")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("FirstActivatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastIp")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("LastSeenAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LeaseUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("LicenseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LicenseId", "DeviceHash")
+                        .IsUnique();
+
+                    b.ToTable("LicenseActivations", (string)null);
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.LicenseEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<Guid?>("ActivationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Detail")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Ip")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid?>("LicenseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedTime");
+
+                    b.HasIndex("LicenseId", "CreatedTime");
+
+                    b.ToTable("LicenseEvents", (string)null);
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.LicenseSigningKey", b =>
+                {
+                    b.Property<string>("Kid")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("KmsKeyVersion")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("NotAfter")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("PublicKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Kid");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("LicenseSigningKeys", (string)null);
+                });
+
             modelBuilder.Entity("SPS.Domain.Entities.MailLog", b =>
                 {
                     b.Property<int>("Id")
@@ -2598,7 +2809,7 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<int?>("IntroductionId")
                         .HasColumnType("integer");
 
-                    b.Property<Dictionary<string, string>>("Meta")
+                    b.Property<string>("Meta")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
@@ -4288,6 +4499,28 @@ namespace SPS.Infrastructure.Migrations
                     b.Navigation("Regulations");
                 });
 
+            modelBuilder.Entity("SPS.Domain.Entities.License", b =>
+                {
+                    b.HasOne("SPS.Domain.Entities.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.LicenseActivation", b =>
+                {
+                    b.HasOne("SPS.Domain.Entities.License", "License")
+                        .WithMany("Activations")
+                        .HasForeignKey("LicenseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("License");
+                });
+
             modelBuilder.Entity("SPS.Domain.Entities.Member", b =>
                 {
                     b.HasOne("SPS.Domain.Entities.MemberApplication", "Application")
@@ -4846,6 +5079,11 @@ namespace SPS.Infrastructure.Migrations
             modelBuilder.Entity("SPS.Domain.Entities.EmailCampaign", b =>
                 {
                     b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.License", b =>
+                {
+                    b.Navigation("Activations");
                 });
 
             modelBuilder.Entity("SPS.Domain.Entities.Member", b =>

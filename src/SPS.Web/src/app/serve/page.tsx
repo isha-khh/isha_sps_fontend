@@ -8,7 +8,9 @@ import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import ServeItemCard from "@/components/serve/ServeItemCard";
 import { toServeCardItem } from "@/lib/serve-data";
-import { fetchBanners, fetchServeCategories, fetchServeItems } from "@/lib/api.server";
+import { redirect } from "next/navigation";
+import { fetchBanners, fetchIndustryAiLink, fetchServeCategories, fetchServeItems } from "@/lib/api.server";
+import { INDUSTRY_AI_CATEGORY } from "@/lib/industry-ai-link";
 
 export const metadata: Metadata = {
   title: "服務專區",
@@ -29,11 +31,16 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
   const sidebarBanners = await fetchBanners("sidebar-serve");
   const { category: rawCategory, q: rawQuery, page: rawPage } = await searchParams;
   const category = typeof rawCategory === "string" && rawCategory ? rawCategory : undefined;
+  // 後台「頁面設定」開啟「產業AI」外部連結時，舊的內部網址（書籤、搜尋結果）也導向外部連結
+  if (category === INDUSTRY_AI_CATEGORY) {
+    const industryAi = await fetchIndustryAiLink();
+    if (industryAi.enabled) redirect(industryAi.url);
+  }
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
   const requestedPage = typeof rawPage === "string" ? Number(rawPage) : 1;
   const page = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.floor(requestedPage) : 1;
 
-  const categories = await fetchServeCategories();
+  const [categories, industryAiLink] = await Promise.all([fetchServeCategories(), fetchIndustryAiLink()]);
   const activeCategory = category ? categories.find((c) => c.name === category) : undefined;
   // 指定了分類名稱卻找不到（後台還沒建立）→ 不顯示任何項目，而不是退回「全部」誤導使用者
   const unknownCategory = category !== undefined && !activeCategory;
@@ -60,7 +67,7 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
 
       <InnerPageShell
         title={category ?? "服務專區"}
-        titleAside={siblingCategories && category ? <ServeSubNav categories={siblingCategories} activeCategory={category} /> : undefined}
+        titleAside={siblingCategories && category ? <ServeSubNav categories={siblingCategories} activeCategory={category} industryAiLink={industryAiLink} /> : undefined}
         breadcrumb={category ? [{ label: "服務專區", href: "/serve" }, { label: category }] : [{ label: "服務專區" }]}
         sidebar={
           <CategoryTabList

@@ -174,10 +174,10 @@ export const VideosPage = () => {
     <>
     <div className="space-y-6 min-h-screen">
       <PageTitle
-        title="影音管理"
+        title="影音專區"
         items={[
           { label: '內容管理', path: '/content/videos' },
-          { label: '影音管理', active: true },
+          { label: '影音專區', active: true },
         ]}
       />
 

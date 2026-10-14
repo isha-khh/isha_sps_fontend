@@ -91,7 +91,7 @@ export const CompanyDetailPage = () => {
       <PageTitle
         title="公司詳情"
         items={[
-          { label: '公司管理', path: '/companies' },
+          { label: '企業名錄', path: '/companies' },
           { label: '詳情', active: true },
         ]}
       />

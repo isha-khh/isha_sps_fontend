@@ -19,6 +19,11 @@ interface MenuItemWithPermission extends ISidebarMenuItem {
   children?: MenuItemWithPermission[];
 }
 
+/**
+ * 後台選單：內容相關的項目照前台主選單（`SPS.Web/src/components/layout/Headers.tsx`）的名稱與階層排列——
+ * 前台選單叫什麼、後台就叫什麼：公告事項、服務專區（技術工具、人才培育、產業輔導、補助資源）、推廣專區、我要媒合、常見問題、關於我們。
+ * 前台改選單名稱時，這裡要一起改。其餘（會員、系統、報表、郵件…）是後台自己的功能，維持原樣。
+ */
 const allMenuItems: MenuItemWithPermission[] = [
   {
     id: 'dashboard',
@@ -37,43 +42,127 @@ const allMenuItems: MenuItemWithPermission[] = [
       { id: 'applications', label: '申請紀錄', url: '/applications', permissions: [Permission.ViewApplications] },
     ],
   },
+  // ───── 前台主選單：關於我們 ─────
   {
-    id: 'companies',
-    label: '公司管理',
-    icon: 'lucide--building-2',
-    permissions: [Permission.ViewCompanies, Permission.ManageProducts],
+    id: 'about',
+    label: '關於我們',
+    icon: 'lucide--info',
+    url: '/content/about',
+    permissions: [Permission.ManageSiteContent],
+  },
+  // ───── 前台主選單：公告事項 ─────
+  {
+    id: 'announcements',
+    label: '公告事項',
+    icon: 'lucide--megaphone',
+    permissions: [Permission.ManageNews],
     children: [
-      { id: 'companies-list', label: '公司列表', url: '/companies', permissions: [Permission.ViewCompanies] },
-      { id: 'products-list', label: '產品管理', url: '/products', permissions: [Permission.ManageProducts] },
+      { id: 'announcement-categories', label: '公告類別', url: '/announcements/categories', permissions: [Permission.ManageCategories] },
+      { id: 'announcement-tags', label: '公告標籤', url: '/announcements/tags', permissions: [Permission.ManageNews] },
+      { id: 'announcement-list', label: '公告內容', url: '/announcements', permissions: [Permission.ManageNews] },
     ],
   },
+  // ───── 前台主選單：服務專區（技術工具、人才培育、產業輔導、補助資源）─────
+  {
+    id: 'service-zone',
+    label: '服務專區',
+    icon: 'lucide--briefcase',
+    permissions: [Permission.ManageNews],
+    children: [
+      {
+        id: 'serve-items',
+        label: '技術工具',
+        permissions: [Permission.ManageNews],
+        children: [
+          { id: 'serve-categories', label: '技術工具分類', url: '/serve-items/categories', permissions: [Permission.ManageCategories] },
+          { id: 'serve-item-list', label: '技術工具內容', url: '/serve-items', permissions: [Permission.ManageNews] },
+        ],
+      },
+      {
+        id: 'talent-courses',
+        label: '人才培育',
+        permissions: [Permission.ManageNews],
+        children: [{ id: 'talent-course-list', label: '課程內容', url: '/talent-courses', permissions: [Permission.ManageNews] }],
+      },
+      {
+        id: 'tutoring-items',
+        label: '產業輔導',
+        permissions: [Permission.ManageNews],
+        children: [
+          { id: 'tutoring-categories', label: '產業別', url: '/tutoring-items/categories', permissions: [Permission.ManageCategories] },
+          { id: 'tutoring-item-list', label: '輔導內容', url: '/tutoring-items', permissions: [Permission.ManageNews] },
+        ],
+      },
+      {
+        id: 'support-zone',
+        label: '補助資源',
+        permissions: [Permission.ManageNews],
+        children: [
+          { id: 'support-notice-list', label: '本計畫補助', url: '/support-notices', permissions: [Permission.ManageNews] },
+          { id: 'support-resource-categories', label: '政府補助資源分類', url: '/support-resources/categories', permissions: [Permission.ManageCategories] },
+          { id: 'support-resource-list', label: '政府補助資源', url: '/support-resources', permissions: [Permission.ManageNews] },
+        ],
+      },
+    ],
+  },
+  // ───── 前台主選單：推廣專區（產業案例、影音專區、我要投稿）─────
+  {
+    id: 'promotion-zone',
+    label: '推廣專區',
+    icon: 'lucide--trophy',
+    permissions: [Permission.ManageSiteContent, Permission.ManageMedia],
+    children: [
+      { id: 'success-cases', label: '產業案例', url: '/success-cases', permissions: [Permission.ManageSiteContent] },
+      { id: 'videos', label: '影音專區', url: '/content/videos', permissions: [Permission.ManageMedia] },
+      { id: 'contribute', label: '我要投稿', url: '/content/contribute', permissions: [Permission.ManageSiteContent] },
+    ],
+  },
+  // ───── 前台主選單：我要媒合（企業名錄、媒合對接）─────
+  {
+    id: 'matching-zone',
+    label: '我要媒合',
+    icon: 'lucide--handshake',
+    permissions: [Permission.ViewCompanies, Permission.ManageProducts, Permission.ManageDemands, Permission.CustomerService],
+    children: [
+      {
+        id: 'companies',
+        label: '企業名錄',
+        permissions: [Permission.ViewCompanies, Permission.ManageProducts],
+        children: [
+          { id: 'companies-list', label: '公司列表', url: '/companies', permissions: [Permission.ViewCompanies] },
+          { id: 'products-list', label: '產品管理', url: '/products', permissions: [Permission.ManageProducts] },
+        ],
+      },
+      {
+        id: 'matching',
+        label: '媒合對接',
+        permissions: [Permission.ManageDemands, Permission.CustomerService],
+        children: [
+          { id: 'demands', label: '需求張貼管理', url: '/demands', permissions: [Permission.ManageDemands] },
+          { id: 'demand-replies', label: '需求回應', url: '/demand-replies', permissions: [Permission.CustomerService] },
+          { id: 'chat-reports', label: '會員檢舉', url: '/chat-reports', permissions: [Permission.CustomerService] },
+        ],
+      },
+    ],
+  },
+  // ───── 前台主選單：常見問題 ─────
+  {
+    id: 'faq-zone',
+    label: '常見問題',
+    icon: 'lucide--circle-help',
+    permissions: [Permission.ManageCategories, Permission.ManageQuestions],
+    children: [
+      { id: 'faq-categories', label: '常見問題類別', url: '/knowledge/faq-categories', permissions: [Permission.ManageCategories] },
+      { id: 'faq', label: '常見問題內容', url: '/knowledge/faq', permissions: [Permission.ManageQuestions] },
+    ],
+  },
+  // ───── 後台自己的功能 ─────
   {
     id: 'mou',
     label: '備忘錄管理',
     icon: 'lucide--file-text',
     url: '/mou',
     permissions: [Permission.ManageMemos],
-  },
-  {
-    id: 'demands',
-    label: '需求張貼管理',
-    icon: 'lucide--megaphone',
-    url: '/demands',
-    permissions: [Permission.ManageDemands],
-  },
-  {
-    id: 'chat-reports',
-    label: '會員檢舉',
-    icon: 'lucide--shield-alert',
-    url: '/chat-reports',
-    permissions: [Permission.CustomerService],
-  },
-  {
-    id: 'demand-replies',
-    label: '需求回應',
-    icon: 'lucide--messages-square',
-    url: '/demand-replies',
-    permissions: [Permission.CustomerService],
   },
   {
     id: 'inquiries',
@@ -101,77 +190,10 @@ const allMenuItems: MenuItemWithPermission[] = [
       { id: 'footer-links', label: '頁尾連結', url: '/content/footer-links', permissions: [Permission.ManageSiteContent] },
       { id: 'files', label: '系統檔案', url: '/content/files', permissions: [Permission.ManageFiles] },
       { id: 'albums', label: '相簿管理', url: '/content/albums', permissions: [Permission.ManageMedia] },
-      { id: 'videos', label: '影音管理', url: '/content/videos', permissions: [Permission.ManageMedia] },
     ],
   },
-  {
-    id: 'serve-items',
-    label: '服務專區',
-    icon: 'lucide--briefcase',
-    permissions: [Permission.ManageNews],
-    children: [
-      { id: 'serve-categories', label: '服務專區分類', url: '/serve-items/categories', permissions: [Permission.ManageCategories] },
-      { id: 'serve-item-list', label: '服務專區內容', url: '/serve-items', permissions: [Permission.ManageNews] },
-    ],
-  },
-  {
-    id: 'talent-courses',
-    label: '人才培育',
-    icon: 'lucide--graduation-cap',
-    permissions: [Permission.ManageNews],
-    children: [{ id: 'talent-course-list', label: '課程內容', url: '/talent-courses', permissions: [Permission.ManageNews] }],
-  },
-  {
-    id: 'tutoring-items',
-    label: '產業輔導',
-    icon: 'lucide--handshake',
-    permissions: [Permission.ManageNews],
-    children: [
-      { id: 'tutoring-categories', label: '產業別', url: '/tutoring-items/categories', permissions: [Permission.ManageCategories] },
-      { id: 'tutoring-item-list', label: '輔導內容', url: '/tutoring-items', permissions: [Permission.ManageNews] },
-    ],
-  },
-  {
-    id: 'support-zone',
-    label: '補助專區',
-    icon: 'lucide--hand-coins',
-    permissions: [Permission.ManageNews],
-    children: [
-      { id: 'support-notice-list', label: '補助公告', url: '/support-notices', permissions: [Permission.ManageNews] },
-      { id: 'support-resource-categories', label: '補助資源分類', url: '/support-resources/categories', permissions: [Permission.ManageCategories] },
-      { id: 'support-resource-list', label: '政府補助資源', url: '/support-resources', permissions: [Permission.ManageNews] },
-    ],
-  },
-  {
-    id: 'announcements',
-    label: '公告管理',
-    icon: 'lucide--megaphone',
-    permissions: [Permission.ManageNews],
-    children: [
-      { id: 'announcement-categories', label: '公告類別', url: '/announcements/categories', permissions: [Permission.ManageCategories] },
-      { id: 'announcement-tags', label: '公告標籤', url: '/announcements/tags', permissions: [Permission.ManageNews] },
-      { id: 'announcement-list', label: '公告內容', url: '/announcements', permissions: [Permission.ManageNews] },
-    ],
-  },
-  {
-    id: 'success-cases',
-    label: '成功案例',
-    icon: 'lucide--trophy',
-    url: '/success-cases',
-    permissions: [Permission.ManageSiteContent],
-  },
-  {
-    id: 'knowledge',
-    label: '知識庫',
-    icon: 'lucide--book-open',
-    permissions: [Permission.ManageRegulations, Permission.ManageQuestions],
-    children: [
-      { id: 'regulation-categories', label: '法規類別', url: '/knowledge/regulation-categories', permissions: [Permission.ManageCategories] },
-      { id: 'regulations', label: '法條內文', url: '/knowledge/regulations', permissions: [Permission.ManageRegulations] },
-      { id: 'faq-categories', label: '問題類別', url: '/knowledge/faq-categories', permissions: [Permission.ManageCategories] },
-      { id: 'faq', label: '問題回覆', url: '/knowledge/faq', permissions: [Permission.ManageQuestions] },
-    ],
-  },
+  // 「法規」（法規類別、法條內文）：前台沒有任何頁面使用，2026-10-14 先從選單拿掉（後台頁面、路由、資料都還在，
+  // 網址 /knowledge/regulations、/knowledge/regulation-categories 仍可直接開啟）；之後前台要用再把這一組加回來
   {
     id: 'analytics',
     label: '分析報表',
@@ -272,7 +294,7 @@ export const AdminLayout = () => {
             <Sidebar menuItems={filteredMenuItems} />
 
             <div className="flex min-h-screen grow flex-col">
-              <Topbar />
+              <Topbar menuItems={filteredMenuItems} />
 
               <main className="grow p-4 md:p-6">
                 <Outlet />

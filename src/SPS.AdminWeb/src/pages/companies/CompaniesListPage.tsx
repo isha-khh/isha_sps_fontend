@@ -257,7 +257,7 @@ export const CompaniesListPage = () => {
       {ConfirmComponent}
       {EditComponent}
       {notify.NotifyComponent}
-      <PageTitle title="公司管理" items={[{ label: '公司管理', active: true }]} />
+      <PageTitle title="企業名錄" items={[{ label: '企業名錄', active: true }]} />
 
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">

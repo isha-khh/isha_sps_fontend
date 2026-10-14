@@ -1,0 +1,145 @@
+# SPS beta（正式機資料的複本，與正式機並存）
+#
+# - 映像從 GitHub Packages 拉（ghcr.io/isha-khh/isha-sps-*），不在這台機器上 build。
+# - **不對主機開任何 port**：三個容器放在自己的網路 sps-beta-net（172.31.50.0/24），固定 IP，
+#   由主機的 nginx 直接轉到容器 IP（設定見 nginx-match.conf）。
+# - 資料庫用複本 SPS_dev（Host 由 .env 的 DB_CONNECTION_STRING 決定），Redis 自己起一個，只在 beta 網路內。
+# - 信件、退信收信、ProTrack 整合在啟動「之前」要先用 sanitize-beta-db.sql 關掉，否則複本裡的設定會對外寄信／連線。
+#
+# 擺放方式照測試機：這個 compose 檔、.env、Uploads/ 都放在專案資料夾（SPS_dev）頂層，程式碼的 git clone 放在 .repo。
+# 在 SPS_dev 下執行 docker compose -f docker-compose.beta.yml …，.env 由 compose 自動讀取（不需要 --env-file）。
+# 用法見 README.md。所有密鑰從 .env 讀（不要把 .env 提交到 git）。
+name: sps-beta
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: sps-beta-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?請在 .env 設定 REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      beta:
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  api:
+    image: ghcr.io/isha-khh/isha-sps-api:${SPS_VERSION:-1.0.0-beta.2}
+    container_name: sps-beta-api
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+
+      # 站點網址（信件連結、登入導向用）
+      App__BaseUrl: https://match.isafe.org.tw/sps
+      App__AdminBaseUrl: https://match-admin.isafe.org.tw
+      App__ApiBaseUrl: https://match.isafe.org.tw
+
+      # 資料庫（SPS_dev 複本）與 Redis
+      ConnectionStrings__DefaultConnection: ${DB_CONNECTION_STRING:?請在 .env 設定 DB_CONNECTION_STRING（資料庫要指到 SPS_dev）}
+      ConnectionStrings__Redis: redis:6379,password=${REDIS_PASSWORD}
+
+      # JWT：beta 一定要用自己的新金鑰，不要沿用正式機的（正式機簽發的登入憑證在 beta 就會無效，這是預期的）
+      JWT_Setting__Key: ${JWT_SECRET_KEY:?請在 .env 設定 JWT_SECRET_KEY（openssl rand -base64 48）}
+      JWT_Setting__Issuer: SPS.API.Beta
+      JWT_Setting__Audience: SPS.API.Beta
+      JWT_Setting__Expires: "1440"
+
+      CORS_Setting__WithOrigins: https://match.isafe.org.tw,https://match-admin.isafe.org.tw
+
+      # 上傳檔案（見 README：要跟正式機實際的存放位置一致後再複製檔案過來）
+      FileStorage__RootPath: /app/Uploads
+
+      # 不設 Email_Setting__*：郵件由資料庫的設定決定，啟動前已用 sanitize-beta-db.sql 停用
+    volumes:
+      - ${UPLOADS_HOST_DIR:-./Uploads}:/app/Uploads
+    networks:
+      beta:
+        ipv4_address: 172.31.50.10
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      # 第一次啟動會自動套用資料庫遷移（正式機複本可能落後很多版），給久一點
+      start_period: 120s
+    logging: *logging
+
+  web:
+    image: ghcr.io/isha-khh/isha-sps-web:${SPS_VERSION:-1.0.0-beta.2}
+    container_name: sps-beta-web
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      # 前台伺服器端（SSR）呼叫後端的內部位址
+      API_URL: http://sps-beta-api:8080
+    networks:
+      beta:
+        ipv4_address: 172.31.50.11
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:3000/sps"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging: *logging
+
+  admin:
+    image: ghcr.io/isha-khh/isha-sps-admin:${SPS_VERSION:-1.0.0-beta.2}
+    container_name: sps-beta-admin
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      # 後台映像內的 nginx 轉 /api、/hubs 的目的地（用容器名稱，不依賴 IP）
+      API_UPSTREAM: http://sps-beta-api:8080
+    networks:
+      beta:
+        ipv4_address: 172.31.50.12
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    logging: *logging
+
+networks:
+  beta:
+    name: sps-beta-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.50.0/24
+
+volumes:
+  redis-data:
+    name: sps-beta-redis-data

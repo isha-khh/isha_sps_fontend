@@ -81,10 +81,10 @@ export const FaqPage = () => {
     <>
     <div className="space-y-6">
       <PageTitle
-        title="問題回覆"
+        title="常見問題內容"
         items={[
-          { label: '知識庫', path: '/knowledge' },
-          { label: '問題回覆', active: true },
+          { label: '常見問題', path: '/knowledge/faq' },
+          { label: '常見問題內容', active: true },
         ]}
       />
 

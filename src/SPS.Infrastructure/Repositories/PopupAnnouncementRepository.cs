@@ -80,7 +80,7 @@ public class PopupAnnouncementRepository : Repository<PopupAnnouncement, int>, I
             .Where(p => p.Routes.Contains($"\"{route}\"")) // JSON array 包含該路由
             .Where(p => !p.StartDate.HasValue || p.StartDate <= now)
             .Where(p => !p.EndDate.HasValue || p.EndDate >= now)
-            .OrderBy(p => p.Priority)
+            .OrderByDescending(p => p.Priority) // 後台寫「數字越大優先顯示」
             .ThenBy(p => p.Ordinal)
             .ToListAsync(cancellationToken);
     }

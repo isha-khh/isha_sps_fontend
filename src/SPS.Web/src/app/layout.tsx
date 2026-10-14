@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import BootstrapModalRouteCleanup from "@/components/BootstrapModalRouteCleanup";
 import SiteVisitTracker from "@/components/SiteVisitTracker";
+import PopupAnnouncements from "@/components/PopupAnnouncements";
+import { SiteLinksProvider } from "@/components/SiteLinksProvider";
+import { fetchIndustryAiLink } from "@/lib/api.server";
 import { notoSansTC } from "@/lib/fonts";
 import "./globals.css";
 import { withBasePath } from "@/lib/api-client";
@@ -95,7 +98,9 @@ export const metadata: Metadata = {
   manifest: withBasePath("/site.webmanifest"),
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // 後台「頁面設定」的「產業AI」外部連結開關（取不到就是關閉）
+  const industryAi = await fetchIndustryAiLink();
   return (
     <html lang="zh-tw" data-scroll-behavior="smooth" className={notoSansTC.variable}>
       <body>
@@ -104,8 +109,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         ))}
         <BootstrapModalRouteCleanup />
         <SiteVisitTracker />
+        <PopupAnnouncements />
 
-        {children}
+        <SiteLinksProvider industryAi={industryAi}>{children}</SiteLinksProvider>
 
         {/* 舊站第三方套件，依照原本的載入順序保留，元件轉換完成後再逐步移除 */}
         <Script src={withBasePath("/js/jquery-3.7.1.min.js")} strategy="beforeInteractive" />

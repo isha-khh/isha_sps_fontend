@@ -125,7 +125,7 @@ export const RegulationFormPage = () => {
       <PageTitle
         title={isEditMode ? '編輯法條' : '新增法條'}
         items={[
-          { label: '知識庫', path: '/knowledge' },
+          { label: '法規', path: '/knowledge' },
           { label: '法條內文', path: '/knowledge/regulations' },
           { label: isEditMode ? '編輯' : '新增', active: true },
         ]}

@@ -1,0 +1,52 @@
+# Pull Request 檢查：三個專案各自編譯，並試建三個 Docker 映像（不推送）確認 Dockerfile 沒壞。
+# 也可以在 Actions 頁面手動執行（Run workflow）對任一分支跑一次。
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# 同一個 PR 又推了新 commit 就取消舊的執行；其他觸發方式每次都是獨立的
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Checks
+    uses: ./.github/workflows/_checks.yml
+
+  docker:
+    name: Docker build (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: api
+            context: src
+            file: src/Dockerfile
+          - image: web
+            context: src/SPS.Web
+            file: src/SPS.Web/Dockerfile
+          - image: admin
+            context: src/SPS.AdminWeb
+            file: src/SPS.AdminWeb/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

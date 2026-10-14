@@ -17,7 +17,7 @@ const CATEGORY_TYPES = [
   { value: 6, label: '企業標籤分類', name: 'CompanyTag' },
   { value: 7, label: '業務屬性類別', name: 'Business' },
   { value: 8, label: '產品類別', name: 'ProductCategory' },
-  { value: 9, label: '服務專區分類', name: 'Serve' },
+  { value: 9, label: '技術工具分類', name: 'Serve' },
   { value: 10, label: '產業輔導產業別', name: 'Tutoring' },
   { value: 11, label: '補助資源分類', name: 'SupportResource' },
 ];

@@ -6,6 +6,7 @@ import ShareBox from "@/components/ui/ShareBox";
 import MoreLink from "@/components/ui/MoreLink";
 import PopularCourses from "@/components/talent/PopularCourses";
 import SidebarBanner from "@/components/layout/SidebarBanner";
+import NewsViewTracker from "@/components/news/NewsViewTracker";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import { toTalentCourse, type TalentCourse } from "@/lib/talent-data";
 import { fetchBanners, fetchSectionDetail, fetchSectionItems, NewsSections } from "@/lib/api.server";
@@ -55,6 +56,7 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
   return (
     <>
       <BodyClass className="talent show" />
+      <NewsViewTracker newsId={detail.id} />
       <InnerPageShell
         breadcrumb={[{ label: "人才培育" }, { label: "人才培訓", href: "/talent" }, { label: course.title }]}
         aside={

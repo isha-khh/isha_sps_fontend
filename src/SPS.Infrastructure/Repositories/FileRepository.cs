@@ -143,7 +143,8 @@ public class FileRepository : IFileRepository
             else if (type == "document" || type == "documents")
             {
                 // ODF（.odt／.ods／.odp）也是文件：後台「頁面設定」的投稿格式要從「文件」類別挑 .odt
-                var docExtensions = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".odt", ".ods", ".odp" };
+                // 壓縮檔（.zip）：後台「頁面設定」的下載資源可以把多份申請文件打包成 zip 提供下載，也要從「文件」類別挑得到
+                var docExtensions = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".odt", ".ods", ".odp", ".zip" };
                 query = query.Where(f => docExtensions.Contains(f.FileExtension.ToLower()));
             }
              else if (type == "other" || type == "others")
@@ -152,7 +153,7 @@ public class FileRepository : IFileRepository
                 {
                     ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg",
                     ".mp4", ".avi", ".mov", ".wmv", ".flv", ".mkv",
-                    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".odt", ".ods", ".odp"
+                    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".odt", ".ods", ".odp", ".zip"
                 };
                 query = query.Where(f => !knownExtensions.Contains(f.FileExtension.ToLower()) && !f.IsFolder);
             }

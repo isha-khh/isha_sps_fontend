@@ -8,6 +8,7 @@ const FORMAT_INFO: Record<DownloadLink["kind"], { label: string; hint: string; i
   docx: { label: "Word 文件格式（.docx）", hint: "適用 Microsoft Word、WPS、LibreOffice 等", icon: "bi-file-earmark-word" },
   odt: { label: "ODF 文件格式（.odt）", hint: "適用 LibreOffice、WPS、Word（另存 ODF）等", icon: "bi-file-earmark-text" },
   pdf: { label: "PDF 格式", hint: "適合直接閱讀與列印", icon: "bi-file-earmark-pdf" },
+  zip: { label: "壓縮檔（.zip）", hint: "多份文件打包，下載後請先解壓縮", icon: "bi-file-earmark-zip" },
   link: { label: "前往下載連結", hint: "會另開新視窗，前往外部網站", icon: "bi-box-arrow-up-right" },
 };
 

@@ -126,7 +126,7 @@ export const AnnouncementTagsPage = () => {
         <PageTitle
           title="公告標籤"
           items={[
-            { label: '公告管理', path: '/announcements' },
+            { label: '公告事項', path: '/announcements' },
             { label: '標籤管理', active: true },
           ]}
         />

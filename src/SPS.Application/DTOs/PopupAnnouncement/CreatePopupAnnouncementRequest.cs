@@ -13,6 +13,9 @@ public class CreatePopupAnnouncementRequest
 
     public string? Content { get; set; }
     public int? ImageId { get; set; }
+
+    /// <summary>圖片：檔案管理中的圖片檔案 Id（Controller 會檢查必須是可用的圖片）；系統會建立對應的圖片紀錄並填入 ImageId</summary>
+    public Guid? CoverFileId { get; set; }
     public string? LinkUrl { get; set; }
     public string? LinkTarget { get; set; } = "_self";
 

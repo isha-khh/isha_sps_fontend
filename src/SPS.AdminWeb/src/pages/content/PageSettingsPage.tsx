@@ -3,6 +3,7 @@ import { PageTitle } from '@/components/PageTitle';
 import { DownloadResourcesSection } from './DownloadResourcesSection';
 import { AboutPageSection } from './AboutPageSection';
 import { SupportInfoSection } from './SupportInfoSection';
+import { IndustryAiLinkSection } from './IndustryAiLinkSection';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import { pageSettingsApi, type ContributeFormatFile, type ContributePageSettings } from '@/lib/api/page-settings';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
@@ -27,6 +28,7 @@ const EMPTY: ContributePageSettings = {
   odtFileId: null,
   pdfFileId: null,
   docxFileId: null,
+  imageFileId: null,
   contactName: '',
   contactPhone: '',
   contactEmail: '',
@@ -52,18 +54,30 @@ function pickedFile(file: FileListItem | FileUploadResponse): { id: string; name
  *
  * 前台有 1 分鐘的快取，儲存後最多 1 分鐘才看得到。需要「網站內容管理」權限。
  */
-export const PageSettingsPage = () => {
+/**
+ * `view` 決定這一頁顯示哪些區塊（同一個元件掛在三個後台選單項目）：
+ * - `misc`（預設，「頁面設定」）：「產業AI」外部連結、補助專區資訊區塊、下載資源
+ * - `contribute`（「我要投稿」）：投稿頁的主視覺圖片、投稿格式檔、聯絡資訊
+ * - `about`（「關於我們」）：關於我們頁的文字內容
+ */
+export const PageSettingsPage = ({ view = 'misc' }: { view?: 'misc' | 'contribute' | 'about' }) => {
   const notify = useNotify();
   const [form, setForm] = useState<ContributePageSettings>(EMPTY);
   // 目前選到的檔案資訊（檔名、大小）；剛從對話框選的檔案還沒儲存前，先用選到的檔名顯示
   const [files, setFiles] = useState<Record<FormatKind, { name: string; size?: string } | null>>({ docx: null, odt: null, pdf: null });
   const [pickerFor, setPickerFor] = useState<FormatKind | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // 主視覺圖片：`imageUrl` 是目前顯示的預覽（原本的圖或剛挑的圖）
+  const [imageName, setImageName] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(view === 'contribute');
   const [isSaving, setIsSaving] = useState(false);
 
   const describe = (f: ContributeFormatFile | null) => (f ? { name: f.fileName, size: f.formattedFileSize } : null);
 
   useEffect(() => {
+    // 只有「我要投稿」這一頁需要載入投稿設定
+    if (view !== 'contribute') return;
     let cancelled = false;
     pageSettingsApi
       .getContribute()
@@ -71,6 +85,8 @@ export const PageSettingsPage = () => {
         if (cancelled) return;
         setForm({ ...EMPTY, ...data.settings });
         setFiles({ docx: describe(data.docx), odt: describe(data.odt), pdf: describe(data.pdf) });
+        setImageName(data.image?.fileName ?? null);
+        setImageUrl(data.image?.url ?? null);
       })
       .catch(async () => {
         if (!cancelled) await notify.error('載入頁面設定失敗');
@@ -94,6 +110,20 @@ export const PageSettingsPage = () => {
     setForm((prev) => ({ ...prev, [ID_FIELD[kind]]: id }));
     setFiles((prev) => ({ ...prev, [kind]: { name, size: 'formattedFileSize' in file ? file.formattedFileSize : undefined } }));
     setPickerFor(null);
+  };
+
+  const handleImagePick = (file: FileListItem | FileUploadResponse) => {
+    const { id, name } = pickedFile(file);
+    setForm((prev) => ({ ...prev, imageFileId: id }));
+    setImageName(name);
+    setImageUrl(`/api/FileManagement/${id}/download`);
+    setIsImagePickerOpen(false);
+  };
+
+  const handleImageClear = () => {
+    setForm((prev) => ({ ...prev, imageFileId: null }));
+    setImageName(null);
+    setImageUrl(null);
   };
 
   const handleClear = (kind: FormatKind) => {
@@ -170,19 +200,23 @@ export const PageSettingsPage = () => {
 
   return (
     <div className="space-y-6">
+      {notify.NotifyComponent}
       <PageTitle
-        title="頁面設定"
-        items={[
-          { label: '內容管理', path: '/content/page-settings' },
-          { label: '頁面設定', active: true },
-        ]}
+        title={view === 'contribute' ? '我要投稿' : view === 'about' ? '關於我們' : '頁面設定'}
+        items={
+          view === 'contribute'
+            ? [{ label: '推廣專區', path: '/content/contribute' }, { label: '我要投稿', active: true }]
+            : view === 'about'
+              ? [{ label: '關於我們', active: true }]
+              : [{ label: '內容管理', path: '/content/page-settings' }, { label: '頁面設定', active: true }]
+        }
       />
 
-      {isLoading ? (
+      {view === 'contribute' && isLoading ? (
         <div className="flex justify-center py-12">
           <span className="loading loading-spinner loading-lg" />
         </div>
-      ) : (
+      ) : view === 'contribute' ? (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body space-y-4">
@@ -191,6 +225,32 @@ export const PageSettingsPage = () => {
                 前台「下載投稿格式」按鈕會開啟對話框，讓使用者選擇下載 Word、ODF 或 PDF 格式。只有設定好的格式會出現；三個都沒設定時，前台顯示「投稿格式準備中」。這三個檔案也可以隨程式碼 seed（放在 API 專案的 wwwroot/seed/contribute/），後台這裡的更換與移除不會被重啟蓋掉。
               </p>
 
+              <h4 className="font-semibold">主視覺圖片</h4>
+              <p className="text-sm text-base-content/70">顯示在前台「我要投稿」頁標題下方；沒有設定就使用預設圖片。建議 4:3 的橫式圖片。</p>
+              {imageUrl ? (
+                <img src={imageUrl} alt="主視覺圖片預覽" className="w-full max-w-md rounded-box border border-base-300 object-cover max-h-64" />
+              ) : (
+                <div className="flex h-32 max-w-md items-center justify-center rounded-box border border-dashed border-base-300 text-sm text-base-content/50">
+                  使用預設圖片
+                </div>
+              )}
+              {imageName && <p className="text-xs text-base-content/60 break-all">{imageName}</p>}
+              <div className="flex gap-2">
+                <button type="button" className="btn btn-sm btn-primary" onClick={() => setIsImagePickerOpen(true)}>
+                  <span className="iconify lucide--folder-open size-4" />
+                  {imageUrl ? '更換圖片' : '選擇圖片'}
+                </button>
+                {imageUrl && (
+                  <button type="button" className="btn btn-sm btn-ghost text-error" onClick={handleImageClear}>
+                    <span className="iconify lucide--x size-4" />
+                    移除（改用預設圖片）
+                  </button>
+                )}
+              </div>
+
+              <div className="divider my-1" />
+
+              <h4 className="font-semibold">投稿格式</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {renderFormat('docx')}
                 {renderFormat('odt')}
@@ -221,14 +281,23 @@ export const PageSettingsPage = () => {
             </button>
           </div>
         </form>
-      )}
+      ) : null}
 
-      {!isLoading && <AboutPageSection />}
+      {view === 'misc' && <IndustryAiLinkSection />}
 
-      {!isLoading && <SupportInfoSection />}
+      {view === 'about' && <AboutPageSection />}
 
-      {!isLoading && <DownloadResourcesSection />}
+      {view === 'misc' && <SupportInfoSection />}
 
+      {view === 'misc' && <DownloadResourcesSection />}
+
+      <FilePickerModal
+        isOpen={isImagePickerOpen}
+        onClose={() => setIsImagePickerOpen(false)}
+        onSelect={(file) => handleImagePick(file)}
+        fileType="image"
+        title="選擇「我要投稿」主視覺圖片"
+      />
       <FilePickerModal
         isOpen={pickerFor !== null}
         onClose={() => setPickerFor(null)}

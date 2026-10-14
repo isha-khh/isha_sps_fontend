@@ -1,3 +1,4 @@
+import { DISABLED_INDUSTRY_AI_LINK, type IndustryAiLink } from "@/lib/industry-ai-link";
 import { cookies, headers } from "next/headers";
 import { ServeCategory,
     BannerItem,
@@ -556,7 +557,7 @@ const DEFAULT_CONTRIBUTE_PAGE: ContributePage = {
     formats: [],
     contactName: "",
     contactPhone: "+886-7-550-3115",
-    contactEmail: "isha_khh@mail.isha.org.tw",
+    contactEmail: "isha_khh@mail.isha.org.tw",    imageUrl: "",
 };
 
 /**
@@ -570,6 +571,7 @@ export async function fetchContributePage(): Promise<ContributePage> {
             contactName?: string;
             contactPhone?: string;
             contactEmail?: string;
+            imageUrl?: string;
         }>("/api/page-settings/contribute/public", 60);
 
         return {
@@ -580,6 +582,7 @@ export async function fetchContributePage(): Promise<ContributePage> {
             contactName: data.contactName ?? "",
             contactPhone: data.contactPhone ?? "",
             contactEmail: data.contactEmail ?? "",
+            imageUrl: resolveBackendAssetUrl(data.imageUrl) ?? "",
         };
     } catch {
         return DEFAULT_CONTRIBUTE_PAGE;
@@ -690,6 +693,19 @@ export async function fetchServeDetail(id: string): Promise<NewsDetail | null> {
 
 
 // ===== 後台「頁面設定」維護的純文字頁面 =====
+
+/** 「產業AI」外部連結開關（後台「頁面設定」）。快取 60 秒；後端連不到、沒設定或網址無效一律當作關閉，維持原本的內部頁面 */
+export async function fetchIndustryAiLink(): Promise<IndustryAiLink> {
+    try {
+        const data = await getBackendJson<Partial<IndustryAiLink>>("/api/page-settings/industry-ai-link/public", 60);
+        const url = typeof data.url === "string" ? data.url.trim() : "";
+        // 前台再擋一次：只接受 http／https，避免髒資料變成可執行的連結
+        if (data.enabled && /^https?:\/\//i.test(url)) return { enabled: true, url, newTab: data.newTab !== false };
+        return DISABLED_INDUSTRY_AI_LINK;
+    } catch {
+        return DISABLED_INDUSTRY_AI_LINK;
+    }
+}
 
 export type AboutPageContent = {
     title: string;

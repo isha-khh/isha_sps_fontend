@@ -8,6 +8,8 @@ import { authApi } from "@/lib/api/auth";
 import { INBOX_CHANGED_EVENT, memberNotificationsApi } from "@/lib/api/member-notifications";
 import { useAuthStore } from "@/store/auth-store";
 import HeaderSearch from "@/components/layout/HeaderSearch";
+import { useIndustryAiLink } from "@/components/SiteLinksProvider";
+import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
 
 /**
  * 過渡期元件：內容照抄舊站的 page/_uc/nav.html，
@@ -142,6 +144,8 @@ function MemberNavItem() {
 }
 
 function NavLinks() {
+  // 「產業AI」可在後台「頁面設定」改成外部連結（關閉時維持站內頁面）
+  const industryAiTarget = resolveServeCategoryLink("產業AI", useIndustryAiLink());
   return (
     <>
       <li className="nav-item">
@@ -203,9 +207,20 @@ function NavLinks() {
             </Link>
             <ul className="dropdown-menu">
               <li>
-                <Link className="dropdown-item" href="/serve?category=產業AI" title="產業AI">
-                  產業AI
-                </Link>
+                {industryAiTarget.external ? (
+                  <a
+                    className="dropdown-item"
+                    href={industryAiTarget.href}
+                    title="產業AI"
+                    {...(industryAiTarget.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  >
+                    產業AI
+                  </a>
+                ) : (
+                  <Link className="dropdown-item" href="/serve?category=產業AI" title="產業AI">
+                    產業AI
+                  </Link>
+                )}
               </li>
               <li>
                 <Link className="dropdown-item" href="/serve?category=技術文件" title="技術文件">

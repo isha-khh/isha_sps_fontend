@@ -8,6 +8,8 @@ import type {
 } from '@/types/popup-announcement';
 import { PopupFrequency } from '@/types/popup-announcement';
 import { useNotify } from '@/hooks/useNotify';
+import { FilePickerModal } from '@/components/shared/FilePickerModal';
+import type { FileListItem, FileUploadResponse } from '@/types/files';
 
 const frequencyOptions = [
   { value: PopupFrequency.Always, label: '每次顯示' },
@@ -25,6 +27,11 @@ export const PopupAnnouncementFormPage = () => {
   const [isLoading, setIsLoading] = useState(!isNew);
   const [isSaving, setIsSaving] = useState(false);
   const [routeInput, setRouteInput] = useState('');
+  // 圖片：從檔案系統挑。`coverUrl` 是目前顯示的預覽，`coverFileId` 只有這次換了新圖才有值，`removeCover` 代表要移除原本的圖
+  const [coverUrl, setCoverUrl] = useState<string | undefined>();
+  const [coverFileId, setCoverFileId] = useState<string | undefined>();
+  const [removeCover, setRemoveCover] = useState(false);
+  const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
 
   const [formData, setFormData] = useState<CreatePopupAnnouncementRequest>({
     title: '',
@@ -69,6 +76,7 @@ export const PopupAnnouncementFormPage = () => {
         published: data.published,
         ordinal: data.ordinal,
       });
+      setCoverUrl(data.imageUrl || undefined);
     } catch (error) {
       console.error('Failed to fetch popup announcement:', error);
       await notify.error('載入彈窗公告失敗');
@@ -89,6 +97,8 @@ export const PopupAnnouncementFormPage = () => {
     try {
       const submitData = {
         ...formData,
+        ...(coverFileId ? { coverFileId } : {}),
+        ...(!isNew && removeCover && !coverFileId ? { removeCover: true } : {}),
         startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
         endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined,
       };
@@ -101,10 +111,25 @@ export const PopupAnnouncementFormPage = () => {
       navigate('/content/popup-announcements');
     } catch (error) {
       console.error('Failed to save popup announcement:', error);
-      await notify.error('儲存彈窗公告失敗');
+      const serverMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      await notify.error(serverMessage || '儲存彈窗公告失敗');
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleCoverPick = (file: FileListItem | FileUploadResponse) => {
+    const fileId = 'fileId' in file ? file.fileId : file.id;
+    setCoverFileId(fileId);
+    setCoverUrl(`/api/FileManagement/${fileId}/download`);
+    setRemoveCover(false);
+    setIsCoverPickerOpen(false);
+  };
+
+  const handleCoverRemove = () => {
+    setCoverFileId(undefined);
+    setCoverUrl(undefined);
+    setRemoveCover(true);
   };
 
   const addRoute = () => {
@@ -305,7 +330,7 @@ export const PopupAnnouncementFormPage = () => {
                     onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })}
                   />
                   <label className="label">
-                    <span className="label-text-alt">數字越大優先顯示</span>
+                    <span className="label-text-alt">數字越大越優先顯示（同分時依排序）</span>
                   </label>
                 </div>
               </div>
@@ -337,6 +362,32 @@ export const PopupAnnouncementFormPage = () => {
                     value={formData.endDate || ''}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value || undefined })}
                   />
+                </div>
+              </div>
+            </div>
+
+            <div className="card bg-base-100 shadow">
+              <div className="card-body">
+                <h3 className="card-title">圖片</h3>
+                <p className="text-sm text-base-content/60">彈窗顯示的圖片（點圖片會前往上方「連結網址」）；不設定就只顯示標題與內容。</p>
+                {coverUrl ? (
+                  <img src={coverUrl} alt="圖片預覽" className="w-full rounded-box border border-base-300 object-cover max-h-56" />
+                ) : (
+                  <div className="flex h-28 items-center justify-center rounded-box border border-dashed border-base-300 text-sm text-base-content/50">
+                    尚未設定圖片
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button type="button" className="btn btn-sm btn-neutral" onClick={() => setIsCoverPickerOpen(true)}>
+                    <span className="iconify lucide--folder-open size-4" />
+                    {coverUrl ? '更換圖片' : '從檔案系統選擇'}
+                  </button>
+                  {coverUrl && (
+                    <button type="button" className="btn btn-sm btn-ghost text-error" onClick={handleCoverRemove}>
+                      <span className="iconify lucide--x size-4" />
+                      移除
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -394,6 +445,14 @@ export const PopupAnnouncementFormPage = () => {
           </button>
         </div>
       </form>
+      {notify.NotifyComponent}
+      <FilePickerModal
+        isOpen={isCoverPickerOpen}
+        onClose={() => setIsCoverPickerOpen(false)}
+        onSelect={(file) => handleCoverPick(file)}
+        fileType="image"
+        title="選擇彈窗公告圖片"
+      />
     </div>
   );
 };

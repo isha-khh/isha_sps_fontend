@@ -112,7 +112,7 @@ export const ContentAnalyticsPage = () => {
 
   const tabs = [
     { id: 'announcements' as const, label: '公告', icon: 'lucide--megaphone' },
-    { id: 'successCases' as const, label: '成功案例', icon: 'lucide--trophy' },
+    { id: 'successCases' as const, label: '產業案例', icon: 'lucide--trophy' },
     { id: 'files' as const, label: '檔案', icon: 'lucide--folder' },
     { id: 'mou' as const, label: 'MOU', icon: 'lucide--file-text' },
   ];
@@ -194,7 +194,7 @@ export const ContentAnalyticsPage = () => {
 
       <div className="card bg-base-100 shadow">
         <div className="card-body">
-          <h3 className="card-title text-base">成功案例發布狀態</h3>
+          <h3 className="card-title text-base">產業案例發布狀態</h3>
           <DonutChart
             data={{
               '已發布': successCaseStats?.publishedCases ?? 0,

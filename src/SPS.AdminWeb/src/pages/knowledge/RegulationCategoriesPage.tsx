@@ -127,7 +127,7 @@ export const RegulationCategoriesPage = () => {
       <PageTitle
         title="法規類別"
         items={[
-          { label: '知識庫', path: '/knowledge' },
+          { label: '法規', path: '/knowledge' },
           { label: '法規類別', active: true },
         ]}
       />

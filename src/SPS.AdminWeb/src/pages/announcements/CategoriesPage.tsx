@@ -133,7 +133,7 @@ export const AnnouncementCategoriesPage = ({ section = 0 }: { section?: NewsSect
       <PageTitle
         title={`${config.noun}分類`}
         items={[
-          { label: config.parentLabel === '內容管理' ? '公告管理' : config.parentLabel, path: config.basePath },
+          { label: config.parentLabel === '內容管理' ? '公告事項' : config.parentLabel, path: config.basePath },
           { label: '類別管理', active: true },
         ]}
       />

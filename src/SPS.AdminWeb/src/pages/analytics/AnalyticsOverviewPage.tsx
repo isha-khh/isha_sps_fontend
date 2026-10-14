@@ -113,7 +113,7 @@ export const AnalyticsOverviewPage = () => {
       },
       {
         title: '內容分析',
-        description: '公告、成功案例、檔案、MOU 統計',
+        description: '公告、產業案例、檔案、MOU 統計',
         icon: 'lucide--file-text',
         url: '/analytics/content',
         color: 'text-warning',

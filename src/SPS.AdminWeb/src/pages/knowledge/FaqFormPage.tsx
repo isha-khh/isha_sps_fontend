@@ -121,8 +121,8 @@ export const FaqFormPage = () => {
       <PageTitle
         title={isEditMode ? '編輯問題' : '新增問題'}
         items={[
-          { label: '知識庫', path: '/knowledge' },
-          { label: '問題回覆', path: '/knowledge/faq' },
+          { label: '常見問題', path: '/knowledge/faq' },
+          { label: '常見問題內容', path: '/knowledge/faq' },
           { label: isEditMode ? '編輯' : '新增', active: true },
         ]}
       />

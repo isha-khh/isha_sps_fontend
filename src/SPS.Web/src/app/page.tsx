@@ -10,7 +10,6 @@ import HomeService from "@/components/home/HomeService";
 import HomeIndustry from "@/components/home/HomeIndustry";
 import HomeEnterprise from "@/components/home/HomeEnterprise";
 import HomeVideo from "@/components/home/HomeVideo";
-import WelcomeModal from "@/components/home/WelcomeModal";
 import { withBasePath } from "@/lib/api-client";
 import { fetchBanners } from "@/lib/api.server";
 
@@ -31,7 +30,6 @@ export default async function HomePage() {
     <>
       <BodyClass className="home" />
       <PageLoader />
-      <WelcomeModal />
 
       <a href="#main-content" className="visually-hidden-focusable">
         跳至主要內容

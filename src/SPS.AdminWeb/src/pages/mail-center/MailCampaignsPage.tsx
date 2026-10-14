@@ -116,6 +116,7 @@ export const MailCampaignsPage = () => {
 
   return (
     <div className="space-y-6">
+      {notify.NotifyComponent}
       <PageTitle
         title="郵件活動"
         items={[

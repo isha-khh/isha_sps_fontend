@@ -19,7 +19,7 @@ export const SuccessCasesListPage = () => {
   const [searchParams, setSearchParams] = useState<SuccessCaseSearchParams>({});
   const [searchText, setSearchText] = useState('');
 
-  // 載入成功案例列表
+  // 載入產業案例列表
   const fetchCases = async () => {
     setIsLoading(true);
     try {
@@ -55,11 +55,11 @@ export const SuccessCasesListPage = () => {
     }
   };
 
-  // 刪除成功案例
+  // 刪除產業案例
   const handleDelete = async (id: number) => {
     const confirmed = await confirmDialog({
-      cardTitle: '刪除成功案例',
-      message: '確定要刪除此成功案例嗎？',
+      cardTitle: '刪除產業案例',
+      message: '確定要刪除此產業案例嗎？',
       buttonConfirm: '刪除',
       confirmStyle: 'bg-error',
     });
@@ -70,7 +70,7 @@ export const SuccessCasesListPage = () => {
       fetchCases();
     } catch (error) {
       console.error('Failed to delete success case:', error);
-      await notify.success('刪除成功案例失敗');
+      await notify.success('刪除產業案例失敗');
     }
   };
 
@@ -80,8 +80,8 @@ export const SuccessCasesListPage = () => {
     <>
     <div className="space-y-6">
       <PageTitle
-        title="成功案例"
-        items={[{ label: '成功案例', path: '/success-cases' }, { label: '案例列表', active: true }]}
+        title="產業案例"
+        items={[{ label: '產業案例', path: '/success-cases' }, { label: '案例列表', active: true }]}
       />
 
       {/* 操作列 */}
@@ -196,7 +196,7 @@ export const SuccessCasesListPage = () => {
         )}
       </div>
 
-      {/* 成功案例網格 */}
+      {/* 產業案例網格 */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {isLoading ? (
           <div className="col-span-full flex justify-center py-12">
@@ -205,7 +205,7 @@ export const SuccessCasesListPage = () => {
         ) : cases.length === 0 ? (
           <div className="col-span-full text-center py-12 text-base-content/60">
             <span className="iconify lucide--award size-16 mb-4" />
-            <p>沒有找到成功案例</p>
+            <p>沒有找到產業案例</p>
           </div>
         ) : (
           cases.map((successCase) => (

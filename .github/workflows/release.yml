@@ -1,0 +1,240 @@
+# 打包成 GitHub Package（GitHub Container Registry）：
+#   ghcr.io/<擁有者>/isha-sps-api、isha-sps-web、isha-sps-admin（前綴可用 repo 變數 IMAGE_PREFIX 改；
+#   刻意不用 sps-*：isha-khh/isha-sps 那個舊 repo 已經在用 sps-frontend／sps-admin／sps-backend，名稱會撞）
+#
+# 觸發方式：
+#   1. 打 tag：git tag v1.1.2 && git push origin v1.1.2（tag 必須在 main 上；v1.1.2-rc.1 這種視為預先發行）
+#   2. 手動：Actions → Release → Run workflow，填版本號（例如 1.1.2-test），可選擇只建置不推送
+# 兩種方式都會先跑 _checks.yml（三個專案編譯），通過才打包。
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本號，例如 1.1.2 或 1.1.2-rc.1（不用加 v）'
+        required: true
+        type: string
+      push:
+        description: '推送到 GitHub Packages（取消勾選＝只試建置，不推送）'
+        required: true
+        type: boolean
+        default: true
+      latest:
+        description: '同時更新 latest 標籤（預先發行版本不會更新）'
+        required: true
+        type: boolean
+        default: false
+      platforms:
+        description: '平台；要同時支援 ARM 填 linux/amd64,linux/arm64（用 QEMU 模擬，會慢很多）'
+        required: true
+        type: string
+        default: linux/amd64
+
+# 同一個版本不要同時打包兩次
+concurrency:
+  group: release-${{ github.ref_name }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      app_version: ${{ steps.meta.outputs.app_version }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+      tag_suffixes: ${{ steps.meta.outputs.tag_suffixes }}
+      owner: ${{ steps.meta.outputs.owner }}
+      push: ${{ steps.meta.outputs.push }}
+      platforms: ${{ steps.meta.outputs.platforms }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version and tags
+        id: meta
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_PUSH: ${{ inputs.push }}
+          INPUT_LATEST: ${{ inputs.latest }}
+          INPUT_PLATFORMS: ${{ inputs.platforms }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT" = "push" ]; then
+            VERSION="${REF_NAME#v}"
+            PUSH=true
+            WANT_LATEST=true
+            PLATFORMS=linux/amd64
+            # 正式發版的 tag 必須已經在 main 上，避免從沒審核過的分支打包
+            git fetch --no-tags origin main
+            if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+              echo "::error::tag $REF_NAME 指向的 commit 不在 main 上，請先合併到 main 再打 tag"
+              exit 1
+            fi
+          else
+            VERSION="${INPUT_VERSION#v}"
+            PUSH="$INPUT_PUSH"
+            WANT_LATEST="$INPUT_LATEST"
+            PLATFORMS="$INPUT_PLATFORMS"
+          fi
+
+          if ! [[ "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::版本號格式不正確：'$VERSION'（應為 1.2.3 或 1.2.3-rc.1）"
+            exit 1
+          fi
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          PRERELEASE=false
+          [ -n "${BASH_REMATCH[4]}" ] && PRERELEASE=true
+
+          SHORT_SHA="${GITHUB_SHA::7}"
+          # 映像標籤：完整版本、commit；正式版本另外加 major.minor，勾選 latest（或打 tag）時加 latest
+          SUFFIXES="$VERSION sha-$SHORT_SHA"
+          if [ "$PRERELEASE" = "false" ]; then
+            SUFFIXES="$SUFFIXES $MAJOR.$MINOR"
+            [ "$WANT_LATEST" = "true" ] && SUFFIXES="$SUFFIXES latest"
+          fi
+
+          {
+            echo "version=$VERSION"
+            echo "app_version=$VERSION+$SHORT_SHA"
+            echo "prerelease=$PRERELEASE"
+            echo "tag_suffixes=$SUFFIXES"
+            echo "owner=${GITHUB_REPOSITORY_OWNER,,}"
+            echo "push=$PUSH"
+            echo "platforms=$PLATFORMS"
+          } >> "$GITHUB_OUTPUT"
+
+  checks:
+    name: Checks
+    uses: ./.github/workflows/_checks.yml
+
+  publish:
+    name: Package (${{ matrix.image }})
+    needs: [prepare, checks]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE_PREFIX: ${{ vars.IMAGE_PREFIX || 'isha-sps' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: api
+            context: src
+            file: src/Dockerfile
+            build_args: ''
+          - image: web
+            context: src/SPS.Web
+            file: src/SPS.Web/Dockerfile
+            # 前台的網站路徑與（選用）API 位址；可在 repo 的 Settings → Variables 設定 WEB_BASE_PATH、NEXT_PUBLIC_API_URL
+            build_args: |
+              BASE_PATH=${{ vars.WEB_BASE_PATH || '/sps' }}
+              NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+          - image: admin
+            context: src/SPS.AdminWeb
+            file: src/SPS.AdminWeb/Dockerfile
+            build_args: ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: needs.prepare.outputs.push == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compose image tags
+        id: tags
+        env:
+          OWNER: ${{ needs.prepare.outputs.owner }}
+          IMAGE: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}
+          SUFFIXES: ${{ needs.prepare.outputs.tag_suffixes }}
+        run: |
+          {
+            echo "list<<EOF"
+            for suffix in $SUFFIXES; do echo "ghcr.io/$OWNER/$IMAGE:$suffix"; done
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          platforms: ${{ needs.prepare.outputs.platforms }}
+          push: ${{ needs.prepare.outputs.push == 'true' }}
+          tags: ${{ steps.tags.outputs.list }}
+          build-args: |
+            APP_VERSION=${{ needs.prepare.outputs.app_version }}
+            ${{ matrix.build_args }}
+          # source 標籤讓 GitHub 把這個套件連結回這個 repo（權限也跟著 repo 走）
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+      - name: Summary
+        env:
+          TAGS: ${{ steps.tags.outputs.list }}
+          PUSHED: ${{ needs.prepare.outputs.push }}
+        run: |
+          {
+            echo "### ${IMAGE_PREFIX}-${{ matrix.image }}"
+            if [ "$PUSHED" = "true" ]; then echo "已推送："; else echo "只試建置，沒有推送。標籤："; fi
+            echo '```'
+            echo "$TAGS"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  github-release:
+    name: GitHub Release
+    # 只有打 tag 才建立 Release；手動執行只產生套件
+    if: github.event_name == 'push' && needs.prepare.outputs.push == 'true'
+    needs: [prepare, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          OWNER: ${{ needs.prepare.outputs.owner }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+          PREFIX: ${{ vars.IMAGE_PREFIX || 'isha-sps' }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG 已存在，略過"
+            exit 0
+          fi
+          FLAGS=""
+          [ "$PRERELEASE" = "true" ] && FLAGS="--prerelease"
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes $FLAGS \
+            --notes "容器映像（GitHub Packages）：
+          - ghcr.io/$OWNER/$PREFIX-api:$VERSION
+          - ghcr.io/$OWNER/$PREFIX-web:$VERSION
+          - ghcr.io/$OWNER/$PREFIX-admin:$VERSION"

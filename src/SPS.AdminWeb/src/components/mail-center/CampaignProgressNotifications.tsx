@@ -141,6 +141,7 @@ export const CampaignProgressNotifications = () => {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-80 max-w-[calc(100vw-2rem)]">
+      {notify.NotifyComponent}
       {visible.map((c) => {
         const s = summarize(c);
         const cls = TONE_CLASSES[s.tone];
