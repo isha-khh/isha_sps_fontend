@@ -1,6 +1,7 @@
 import DownloadDialog from "@/components/ui/DownloadDialog";
 import { fetchDownloadResources } from "@/lib/api.server";
 import { Fragment } from "react";
+import Link from "next/link";
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
@@ -188,6 +189,16 @@ export default async function TalentXrPage() {
                 <li>
                   <i className="bi bi-wifi" />
                   <span>確保網路穩定，建議於安靜環境中進行訓練</span>
+                </li>
+                <li>
+                  <i className="bi bi-key" />
+                  <span>
+                    軟體可自由下載，使用需輸入授權序號；僅企業需求端會員可至{" "}
+                    <Link href="/member?section=license" title="前往會員中心的 XR 授權">
+                      會員中心「XR 授權」
+                    </Link>{" "}
+                    取得
+                  </span>
                 </li>
               </ul>
             </div>

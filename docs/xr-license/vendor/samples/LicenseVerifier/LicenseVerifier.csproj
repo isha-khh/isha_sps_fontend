@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- 範例程式：獨立於平台的解決方案之外，只用 .NET 內建 API，沒有第三方套件 -->
+  </PropertyGroup>
+
+</Project>

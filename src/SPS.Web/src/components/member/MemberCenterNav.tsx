@@ -10,7 +10,8 @@ export type MemberCenterSection =
   | "my_replies"
   | "favorite"
   | "inbox"
-  | "chat";
+  | "chat"
+  | "license";
 
 /** 媒合對接的身分：Buyer＝需求端企業會員、Supplier＝供給端企業會員、空字串＝尚未載入或個人會員 */
 export type MemberCenterRole = "Buyer" | "Supplier" | "";
@@ -62,6 +63,11 @@ export const MEMBER_CENTER_NAV_GROUPS: MemberCenterNavGroup[] = [
       { key: "passkey", label: "Passkey 管理" },
       { key: "upgrade", label: "權益升級", audience: "personal" },
     ],
+  },
+  {
+    // XR 軟體授權：所有會員都看得到入口，不符合資格（個人會員、供給端）的會看到說明，由後端判斷資格
+    groupLabel: "軟體授權",
+    items: [{ key: "license", label: "XR 授權" }],
   },
   {
     groupLabel: "企業會員專屬",

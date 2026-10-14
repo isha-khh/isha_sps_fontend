@@ -1,0 +1,207 @@
+openapi: 3.0.3
+info:
+  title: SPS XR 軟體授權 API
+  version: 1.0.0
+  description: |
+    XR 訓練軟體向平台驗證授權用的 API（廠商整合用）。
+
+    - 皆為 HTTPS、JSON；匿名端點（桌面軟體沒有登入 cookie），身分由序號（啟用）或授權檔（續期、停用）證明。
+    - 回應一律 `Cache-Control: no-store`（`/public-keys` 除外，可快取 5 分鐘）。
+    - 測試環境與正式環境的路徑、請求格式完全相同，只有伺服器網址與簽章金鑰（授權檔的 `kid`）不同。
+    - 授權檔格式與驗簽方式見《整合指南》。
+servers:
+  - url: https://sps.isha.net
+    description: 測試環境（廠商先在這裡整合）
+  - url: https://{production-host}
+    description: 正式環境（上線時確定網域）
+    variables:
+      production-host:
+        default: example.invalid
+tags:
+  - name: license
+paths:
+  /api/license/v1/activate:
+    post:
+      tags: [license]
+      summary: 啟用（序號＋裝置 → 授權檔）
+      description: |
+        使用者在軟體輸入序號後呼叫。成功會佔用一個席次並回傳綁定這台裝置的授權檔。
+        同一台裝置（相同 `device_hash`）重複啟用不會多佔席次。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActivateRequest' }
+            example:
+              license_key: XR-7K2M-9QXA-4T8D-HN3V
+              device_hash: "sha256:9f2a0c11d3e4b5a69788c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6"
+              device_name: 辦公室-RTX3060
+              client_version: 1.0.3
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IssueResponse' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/Error' }
+  /api/license/v1/refresh:
+    post:
+      tags: [license]
+      summary: 續期（舊授權檔 → 新授權檔）
+      description: |
+        用本機現有的授權檔換新的租約（`lease_until` 往後延）。伺服器會重新檢查會員資格與授權狀態。
+        失敗代碼為 `license_*`、`not_eligible`、`device_not_allowed` 時，客戶端應清除本機授權並鎖定；
+        連不上伺服器（網路錯誤、5xx）時不要清除，依離線寬限規則處理。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IssueResponse' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/Error' }
+  /api/license/v1/deactivate:
+    post:
+      tags: [license]
+      summary: 停用這台裝置（釋放席次）
+      description: 使用者換電腦或移除軟體時呼叫。冪等：已停用或找不到也回成功，客戶端清除本機授權即可。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DeactivateRequest' }
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /api/license/v1/public-keys:
+    get:
+      tags: [license]
+      summary: 簽章公鑰清單
+      description: |
+        回傳目前可信任的簽章公鑰（SPKI，base64）。軟體應內嵌測試與正式各自的公鑰；
+        這支端點可用來在金鑰輪替時檢查有沒有新的 `kid`。**不要只信任這支端點回的公鑰而不內嵌**——內嵌的公鑰才是信任根。
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicKeysResponse' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+components:
+  responses:
+    Error:
+      description: 錯誤。`error` 是固定代碼，`message` 是給人看的文字（中文，可直接顯示）。
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    RateLimited:
+      description: 請求太頻繁。依 `Retry-After`（秒）稍後重試。
+      headers:
+        Retry-After:
+          schema: { type: integer, example: 60 }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+  schemas:
+    ActivateRequest:
+      type: object
+      required: [license_key, device_hash, device_name]
+      properties:
+        license_key:
+          type: string
+          description: 使用者輸入的序號，格式 `XR-XXXX-XXXX-XXXX-XXXX`。大小寫、破折號、空白不拘（伺服器會正規化）。
+        device_hash:
+          type: string
+          minLength: 8
+          maxLength: 200
+          description: 這台裝置的穩定指紋（由客戶端組合多個硬體因子後雜湊）。建議格式 `sha256:<hex>`。
+        device_name:
+          type: string
+          maxLength: 200
+          description: 顯示在會員中心的裝置名稱（例如電腦名稱）。
+        client_version:
+          type: string
+          maxLength: 50
+    RefreshRequest:
+      type: object
+      required: [license, device_hash]
+      properties:
+        license: { type: string, description: 本機現有的授權檔 }
+        device_hash: { type: string, minLength: 8, maxLength: 200 }
+        client_version: { type: string, maxLength: 50 }
+    DeactivateRequest:
+      type: object
+      required: [license, device_hash]
+      properties:
+        license: { type: string }
+        device_hash: { type: string, minLength: 8, maxLength: 200 }
+    IssueResponse:
+      type: object
+      properties:
+        license:
+          type: string
+          description: 授權檔 `base64url(payload).base64url(signature)`。整段原樣保存在本機。
+        server_time:
+          type: string
+          format: date-time
+          description: 伺服器目前時間（UTC）。客戶端應保存，用來偵測時鐘倒轉。
+    PublicKeysResponse:
+      type: object
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            properties:
+              kid: { type: string, example: test-2026-10 }
+              alg: { type: string, example: ES256 }
+              spki: { type: string, description: SubjectPublicKeyInfo（DER）的 base64 }
+              status: { type: string, enum: [active, standby, retiring, retired] }
+              not_after: { type: string, format: date-time, nullable: true }
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          enum: [invalid_request, invalid_key, invalid_license, not_eligible, seats_exceeded, license_expired, license_suspended, license_revoked, device_not_allowed, rate_limited, service_unavailable]
+        message: { type: string }
+    LicensePayload:
+      description: 授權檔解開後的 payload（供參考；簽章簽的是原始位元組，請勿重新序列化）
+      type: object
+      properties:
+        kid: { type: string }
+        license_id: { type: string, format: uuid }
+        product: { type: string, example: xr }
+        customer: { type: string, description: 公司名稱 }
+        member_id: { type: string }
+        edition: { type: string, example: standard }
+        features: { type: array, items: { type: string } }
+        seats: { type: integer }
+        device_hash: { type: string }
+        issued_at: { type: string, format: date-time }
+        valid_until: { type: string, format: date-time }
+        lease_until: { type: string, format: date-time }
+        server_time: { type: string, format: date-time }

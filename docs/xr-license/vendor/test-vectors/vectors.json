@@ -1,0 +1,64 @@
+{
+  "description": "XR 授權驗簽測試向量。此公鑰與私鑰只用於測試向量，與任何真實環境無關。",
+  "algorithm": "ECDSA P-256 + SHA-256，簽章為 IEEE P1363（r||s，64 位元組）",
+  "public_key": {
+    "kid": "vector-1",
+    "spki_base64": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE30V9sG7m3gyzWQWhiO9EkCT9kWkTWyY12+anghaG6jSKc+1K6FP29lSErj1sAzsCDObyeSAnnG+/Y8D/RaOZ0w=="
+  },
+  "device_hash": "sha256:9f2a0c11d3e4b5a69788c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6",
+  "cases": [
+    {
+      "name": "valid",
+      "license": "eyJraWQiOiJ2ZWN0b3ItMSIsImxpY2Vuc2VfaWQiOiJiN2MxZDNmMC01YTJlLTRjMWItOWQzZi0wMTIzNDU2Nzg5YWIiLCJwcm9kdWN0IjoieHIiLCJjdXN0b21lciI6IuevhOS-i-iCoeS7veaciemZkOWFrOWPuCIsIm1lbWJlcl9pZCI6IjNmMWMyYjRhLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsImVkaXRpb24iOiJzdGFuZGFyZCIsImZlYXR1cmVzIjpbXSwic2VhdHMiOjIsImRldmljZV9oYXNoIjoic2hhMjU2OjlmMmEwYzExZDNlNGI1YTY5Nzg4YzdkNmU1ZjRhM2IyYzFkMGU5ZjhhN2I2YzVkNGUzZjJhMWIwYzlkOGU3ZjYiLCJpc3N1ZWRfYXQiOiIyMDI2LTEwLTIwVDAwOjAwOjAwWiIsInZhbGlkX3VudGlsIjoiMjAyNi0xMS0xOVQwMDowMDowMFoiLCJsZWFzZV91bnRpbCI6IjIwMjYtMTEtMTlUMDA6MDA6MDBaIiwic2VydmVyX3RpbWUiOiIyMDI2LTEwLTIwVDAwOjAwOjAwWiJ9.ZEimz52vskjJMRRa0__malbHh5YxnrllD8bXPnzbnb95zGMJMeLmKCyg8PdDlwATXuuLUwdZtgdKebu11Dxucw",
+      "expect": {
+        "signature_valid": true,
+        "device_hash_matches": true,
+        "payload": {
+          "kid": "vector-1",
+          "license_id": "b7c1d3f0-5a2e-4c1b-9d3f-0123456789ab",
+          "product": "xr",
+          "customer": "範例股份有限公司",
+          "member_id": "3f1c2b4a-0000-4000-8000-000000000001",
+          "edition": "standard",
+          "features": [],
+          "seats": 2,
+          "device_hash": "sha256:9f2a0c11d3e4b5a69788c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6",
+          "issued_at": "2026-10-20T00:00:00Z",
+          "valid_until": "2026-11-19T00:00:00Z",
+          "lease_until": "2026-11-19T00:00:00Z",
+          "server_time": "2026-10-20T00:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "tampered_payload",
+      "license": "eyJraWQiOiJ2ZWN0b3ItMSIsImxpY2Vuc2VfaWQiOiJiN2MxZDNmMC01YTJlLTRjMWItOWQzZi0wMTIzNDU2Nzg5YWIiLCJwcm9kdWN0IjoieHIiLCJjdXN0b21lciI6IuevhOS-i-iCoeS7veaciemZkOWFrOWPuCIsIm1lbWJlcl9pZCI6IjNmMWMyYjRhLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsImVkaXRpb24iOiJzdGFuZGFyZCIsImZlYXR1cmVzIjpbXSwic2VhdHMiOjk5LCJkZXZpY2VfaGFzaCI6InNoYTI1Njo5ZjJhMGMxMWQzZTRiNWE2OTc4OGM3ZDZlNWY0YTNiMmMxZDBlOWY4YTdiNmM1ZDRlM2YyYTFiMGM5ZDhlN2Y2IiwiaXNzdWVkX2F0IjoiMjAyNi0xMC0yMFQwMDowMDowMFoiLCJ2YWxpZF91bnRpbCI6IjIwMjYtMTEtMTlUMDA6MDA6MDBaIiwibGVhc2VfdW50aWwiOiIyMDI2LTExLTE5VDAwOjAwOjAwWiIsInNlcnZlcl90aW1lIjoiMjAyNi0xMC0yMFQwMDowMDowMFoifQ.ZEimz52vskjJMRRa0__malbHh5YxnrllD8bXPnzbnb95zGMJMeLmKCyg8PdDlwATXuuLUwdZtgdKebu11Dxucw",
+      "expect": {
+        "signature_valid": false
+      }
+    },
+    {
+      "name": "wrong_device",
+      "license": "eyJraWQiOiJ2ZWN0b3ItMSIsImxpY2Vuc2VfaWQiOiJiN2MxZDNmMC01YTJlLTRjMWItOWQzZi0wMTIzNDU2Nzg5YWIiLCJwcm9kdWN0IjoieHIiLCJjdXN0b21lciI6IuevhOS-i-iCoeS7veaciemZkOWFrOWPuCIsIm1lbWJlcl9pZCI6IjNmMWMyYjRhLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsImVkaXRpb24iOiJzdGFuZGFyZCIsImZlYXR1cmVzIjpbXSwic2VhdHMiOjIsImRldmljZV9oYXNoIjoic2hhMjU2OjlmMmEwYzExZDNlNGI1YTY5Nzg4YzdkNmU1ZjRhM2IyYzFkMGU5ZjhhN2I2YzVkNGUzZjJhMWIwYzlkOGU3ZjYiLCJpc3N1ZWRfYXQiOiIyMDI2LTEwLTIwVDAwOjAwOjAwWiIsInZhbGlkX3VudGlsIjoiMjAyNi0xMS0xOVQwMDowMDowMFoiLCJsZWFzZV91bnRpbCI6IjIwMjYtMTEtMTlUMDA6MDA6MDBaIiwic2VydmVyX3RpbWUiOiIyMDI2LTEwLTIwVDAwOjAwOjAwWiJ9.ZEimz52vskjJMRRa0__malbHh5YxnrllD8bXPnzbnb95zGMJMeLmKCyg8PdDlwATXuuLUwdZtgdKebu11Dxucw",
+      "device_hash_local": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "expect": {
+        "signature_valid": true,
+        "device_hash_matches": false
+      }
+    },
+    {
+      "name": "lease_expired_at_2026-10-30",
+      "license": "eyJraWQiOiJ2ZWN0b3ItMSIsImxpY2Vuc2VfaWQiOiJiN2MxZDNmMC01YTJlLTRjMWItOWQzZi0wMTIzNDU2Nzg5YWIiLCJwcm9kdWN0IjoieHIiLCJjdXN0b21lciI6IuevhOS-i-iCoeS7veaciemZkOWFrOWPuCIsIm1lbWJlcl9pZCI6IjNmMWMyYjRhLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsImVkaXRpb24iOiJzdGFuZGFyZCIsImZlYXR1cmVzIjpbXSwic2VhdHMiOjIsImRldmljZV9oYXNoIjoic2hhMjU2OjlmMmEwYzExZDNlNGI1YTY5Nzg4YzdkNmU1ZjRhM2IyYzFkMGU5ZjhhN2I2YzVkNGUzZjJhMWIwYzlkOGU3ZjYiLCJpc3N1ZWRfYXQiOiIyMDI2LTEwLTIwVDAwOjAwOjAwWiIsInZhbGlkX3VudGlsIjoiMjAyNi0xMS0xOVQwMDowMDowMFoiLCJsZWFzZV91bnRpbCI6IjIwMjYtMTAtMjVUMDA6MDA6MDBaIiwic2VydmVyX3RpbWUiOiIyMDI2LTEwLTIwVDAwOjAwOjAwWiJ9.0-4aLc-0WlE7S_el3WAZJQ7bZ8ZWgRtF8cuyzRIjecXkwmOnnOPyWSUyoUrdLO0Mt422-DLWvMWJbEb5biNcPQ",
+      "now": "2026-10-30T00:00:00Z",
+      "expect": {
+        "signature_valid": true,
+        "device_hash_matches": true,
+        "lease_expired": true
+      }
+    }
+  ],
+  "notes": {
+    "der_signature_for_valid_case_base64": "MEQCIGRIps+dr7JIyTEUWtP/5mpWx4eWMZ65ZQ/G1z58252/AiB5zGMJMeLmKCyg8PdDlwATXuuLUwdZtgdKebu11Dxucw==",
+    "explain": "der_signature_for_valid_case_base64 是同一份簽章的 DER 編碼（例如 Cloud KMS、OpenSSL 直接輸出的格式）；本系統的授權檔一律用 P1363，不是這個。"
+  }
+}
