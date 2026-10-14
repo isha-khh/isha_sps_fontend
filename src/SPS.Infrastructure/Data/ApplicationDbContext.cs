@@ -38,6 +38,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<LicenseActivation> LicenseActivations { get; set; } = null!;
     public DbSet<LicenseEvent> LicenseEvents { get; set; } = null!;
     public DbSet<LicenseSigningKey> LicenseSigningKeys { get; set; } = null!;
+    public DbSet<LicenseOfflineNonce> LicenseOfflineNonces { get; set; } = null!;
 
     // Attribute Entities
     public DbSet<SPS.Domain.Entities.Attribute> Attributes { get; set; } = null!;

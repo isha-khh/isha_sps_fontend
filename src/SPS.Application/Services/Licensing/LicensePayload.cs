@@ -23,6 +23,12 @@ public class LicensePayload
     [JsonPropertyName("lease_until")] public string LeaseUntil { get; set; } = string.Empty;
     [JsonPropertyName("server_time")] public string ServerTime { get; set; } = string.Empty;
 
+    /// <summary>啟用方式：online／offline。（第二期新增；舊客戶端忽略即可）</summary>
+    [JsonPropertyName("mode")] public string Mode { get; set; } = "online";
+
+    /// <summary>離線啟用的授權檔會帶上請求檔裡的 nonce，客戶端匯入時要比對與自己產生的相同（防止拿別人的授權檔匯入）。線上簽發沒有此欄位。</summary>
+    [JsonPropertyName("nonce"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Nonce { get; set; }
+
     private static readonly JsonSerializerOptions Options = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.Never,

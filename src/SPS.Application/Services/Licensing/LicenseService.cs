@@ -117,10 +117,12 @@ public class LicenseService : ILicenseService
 
     /// <summary>組出並簽章授權檔；同時算出這次的租約到期時間。簽章失敗丟出例外，由呼叫端轉成 service_unavailable</summary>
     private async Task<(string License, DateTime LeaseUntil, DateTime ServerTime)> IssueAsync(
-        License license, string deviceHash, Member member, Company? company, LicenseSigningKey key, LicenseSettingsDto settings, CancellationToken ct)
+        License license, string deviceHash, Member member, Company? company, LicenseSigningKey key, LicenseSettingsDto settings, string mode, string? nonce, CancellationToken ct)
     {
         var now = Now;
-        var leaseUntil = now.AddDays(license.LeaseDaysOverride ?? settings.LeaseDays);
+        // 離線授權的租約比較長（離線電腦沒有網路可以自動續期，要靠會員定期帶回平台換發）；線上授權沿用個別覆寫或全域設定
+        var leaseDays = mode == ModeOffline ? settings.OfflineLeaseDays : license.LeaseDaysOverride ?? settings.LeaseDays;
+        var leaseUntil = now.AddDays(leaseDays);
         // 沒有手動設定期限＝跟著會員資格走（每次續期往後滾動）；有設定就是上限
         var validUntil = license.ValidUntil ?? leaseUntil;
         if (license.ValidUntil.HasValue && validUntil < leaseUntil) leaseUntil = validUntil;
@@ -140,6 +142,8 @@ public class LicenseService : ILicenseService
             ValidUntil = LicensePayload.FormatTime(validUntil),
             LeaseUntil = LicensePayload.FormatTime(leaseUntil),
             ServerTime = LicensePayload.FormatTime(now),
+            Mode = mode,
+            Nonce = nonce,
         };
         var bytes = payload.ToBytes();
         var signature = await _signer.SignAsync(key.KmsKeyVersion, bytes, ct);
@@ -186,11 +190,31 @@ public class LicenseService : ILicenseService
         if (license == null)
             return LicenseResult<LicenseIssueResponse>.Fail(LicenseErrors.InvalidKey, "序號不存在", 404);
 
+        var core = await ActivateCoreAsync(license, deviceHash, deviceName, request.ClientVersion, ModeOnline, null, "device", ip, ct);
+        return core.Success
+            ? LicenseResult<LicenseIssueResponse>.Ok(new LicenseIssueResponse { License = core.Data!.License, ServerTime = LicensePayload.FormatTime(core.Data.ServerTime) })
+            : LicenseResult<LicenseIssueResponse>.Fail(core.ErrorCode, core.Message, core.HttpStatus);
+    }
+
+    /// <summary>啟用的共用流程結果</summary>
+    private sealed record ActivationOutcome(string License, DateTime ServerTime, DateTime LeaseUntil, bool Renewed, string DeviceName);
+
+    /// <summary>
+    /// 啟用／離線啟用共用：檢查資格與席次（鎖住授權避免同時啟用超過席次）、簽發授權檔、寫入裝置與事件。
+    /// 離線啟用（<paramref name="mode"/> 為 offline）會帶 <paramref name="nonce"/>：一次性，與裝置寫入同一個交易，重複使用回 request_used。
+    /// 同一台裝置（相同 device_hash）已經啟用時視為續期／換發，不多佔席次。
+    /// </summary>
+    private async Task<LicenseResult<ActivationOutcome>> ActivateCoreAsync(
+        License license, string deviceHash, string deviceName, string? clientVersion, string mode, string? nonce, string actor, string? ip, CancellationToken ct)
+    {
+        var offline = mode == ModeOffline;
+        var denyEvent = offline ? Events.OfflineDenied : Events.ActivateDenied;
+
         var (member, company) = await LoadMemberAsync(license.MemberId, ct);
-        var denied = CheckUsable<LicenseIssueResponse>(license, member, company);
+        var denied = CheckUsable<ActivationOutcome>(license, member, company);
         if (denied != null)
         {
-            AddEvent(license.Id, null, Events.ActivateDenied, "device", new { code = denied.ErrorCode, device = deviceName }, ip);
+            AddEvent(license.Id, null, denyEvent, actor, new { code = denied.ErrorCode, device = deviceName }, ip);
             await Db.SaveChangesAsync(ct);
             return denied;
         }
@@ -199,7 +223,7 @@ public class LicenseService : ILicenseService
         if (key == null)
         {
             _logger.LogError("授權簽發失敗：沒有可用的簽章金鑰（後台「XR 授權 → 簽章金鑰」尚未登錄或已過期）");
-            return SigningUnavailable<LicenseIssueResponse>();
+            return SigningUnavailable<ActivationOutcome>();
         }
 
         var settings = await GetSettingsAsync(ct);
@@ -212,33 +236,41 @@ public class LicenseService : ILicenseService
         await Db.Entry(license).Collection(l => l.Activations).LoadAsync(ct);
         foreach (var tracked in license.Activations.ToList()) await Db.Entry(tracked).ReloadAsync(ct);
 
+        if (nonce != null && await Db.Set<LicenseOfflineNonce>().AnyAsync(n => n.Nonce == nonce, ct))
+        {
+            AddEvent(license.Id, null, denyEvent, actor, new { code = LicenseErrors.RequestUsed, device = deviceName }, ip);
+            await Db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return LicenseResult<ActivationOutcome>.Fail(LicenseErrors.RequestUsed, "這份請求檔已經使用過，請在離線電腦重新產生請求檔", 409);
+        }
+
         var activation = license.Activations.FirstOrDefault(a => a.DeviceHash == deviceHash);
         if (activation is { Status: ActivationStatus.Revoked })
         {
-            AddEvent(license.Id, activation.Id, Events.ActivateDenied, "device", new { code = LicenseErrors.DeviceNotAllowed, device = deviceName }, ip);
+            AddEvent(license.Id, activation.Id, denyEvent, actor, new { code = LicenseErrors.DeviceNotAllowed, device = deviceName }, ip);
             await Db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
-            return LicenseResult<LicenseIssueResponse>.Fail(LicenseErrors.DeviceNotAllowed, "這台裝置已被停用，請聯絡客服", 403);
+            return LicenseResult<ActivationOutcome>.Fail(LicenseErrors.DeviceNotAllowed, "這台裝置已被停用，請聯絡客服", 403);
         }
 
         var isNewSeat = activation is not { Status: ActivationStatus.Active };
         if (isNewSeat && license.Activations.Count(a => a.Status == ActivationStatus.Active) >= seats)
         {
-            AddEvent(license.Id, null, Events.ActivateDenied, "device", new { code = LicenseErrors.SeatsExceeded, device = deviceName, seats }, ip);
+            AddEvent(license.Id, null, denyEvent, actor, new { code = LicenseErrors.SeatsExceeded, device = deviceName, seats }, ip);
             await Db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
-            return LicenseResult<LicenseIssueResponse>.Fail(LicenseErrors.SeatsExceeded, "席次已滿，請到會員中心停用不用的裝置", 409);
+            return LicenseResult<ActivationOutcome>.Fail(LicenseErrors.SeatsExceeded, "席次已滿，請到會員中心停用不用的裝置", 409);
         }
 
         (string License, DateTime LeaseUntil, DateTime ServerTime) issued;
         try
         {
-            issued = await IssueAsync(license, deviceHash, member!, company, key, settings, ct);
+            issued = await IssueAsync(license, deviceHash, member!, company, key, settings, mode, nonce, ct);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "授權簽章失敗（kid={Kid}）", key.Kid);
-            return SigningUnavailable<LicenseIssueResponse>();
+            return SigningUnavailable<ActivationOutcome>();
         }
 
         var now = Now;
@@ -253,18 +285,32 @@ public class LicenseService : ILicenseService
         }
         activation.DeviceName = deviceName;
         activation.Status = ActivationStatus.Active;
-        activation.ActivationMode = ModeOnline;
+        activation.ActivationMode = mode;
         activation.LastSeenAt = now;
         activation.LastIp = ip;
-        activation.ClientVersion = request.ClientVersion?.Trim() is { Length: > 0 } v ? v[..Math.Min(v.Length, 50)] : null;
+        activation.ClientVersion = clientVersion?.Trim() is { Length: > 0 } v ? v[..Math.Min(v.Length, 50)] : null;
         activation.LeaseUntil = issued.LeaseUntil;
         activation.UpdatedTime = now;
 
-        AddEvent(license.Id, activation.Id, Events.Activated, "device", new { device = deviceName, kid = key.Kid, lease_until = LicensePayload.FormatTime(issued.LeaseUntil), reactivated = !isNewSeat }, ip);
-        await Db.SaveChangesAsync(ct);
+        if (nonce != null)
+            Db.Set<LicenseOfflineNonce>().Add(new LicenseOfflineNonce { Nonce = nonce, LicenseId = license.Id, DeviceHash = deviceHash, CreatedTime = now });
+
+        var eventType = offline ? (isNewSeat ? Events.OfflineActivated : Events.OfflineRenewed) : Events.Activated;
+        AddEvent(license.Id, activation.Id, eventType, actor, new { device = deviceName, kid = key.Kid, lease_until = LicensePayload.FormatTime(issued.LeaseUntil), reactivated = !isNewSeat }, ip);
+        try
+        {
+            await Db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException) when (nonce != null)
+        {
+            // 兩個請求同時用同一個 nonce：唯一鍵擋下後到的那個
+            await tx.RollbackAsync(ct);
+            Db.ChangeTracker.Clear();
+            return LicenseResult<ActivationOutcome>.Fail(LicenseErrors.RequestUsed, "這份請求檔已經使用過，請在離線電腦重新產生請求檔", 409);
+        }
         await tx.CommitAsync(ct);
 
-        return LicenseResult<LicenseIssueResponse>.Ok(new LicenseIssueResponse { License = issued.License, ServerTime = LicensePayload.FormatTime(issued.ServerTime) });
+        return LicenseResult<ActivationOutcome>.Ok(new ActivationOutcome(issued.License, issued.ServerTime, issued.LeaseUntil, !isNewSeat, deviceName));
     }
 
     public async Task<LicenseResult<LicenseIssueResponse>> RefreshAsync(LicenseRefreshRequest request, string? ip, CancellationToken ct = default)
@@ -310,7 +356,8 @@ public class LicenseService : ILicenseService
         (string License, DateTime LeaseUntil, DateTime ServerTime) issued;
         try
         {
-            issued = await IssueAsync(license, deviceHash, member!, company, key, settings, ct);
+            // 離線啟用過的裝置之後若連上網路續期，仍沿用離線租約（不因為偶爾連網就縮短它的租約）
+            issued = await IssueAsync(license, deviceHash, member!, company, key, settings, activation.ActivationMode, null, ct);
         }
         catch (Exception ex)
         {
@@ -489,6 +536,11 @@ public class LicenseService : ILicenseService
         if (license == null || activation == null)
             return LicenseResult<MemberLicenseDto>.Fail(LicenseErrors.DeviceNotAllowed, "找不到這台裝置", 404);
 
+        // 離線裝置要上傳「離線停用憑證」才能釋放席次——否則會員可以一邊在舊電腦保留離線授權檔、一邊停用後到新電腦再啟用。
+        // 機器遺失或損壞無法產生憑證時，請客服從後台停用（後台停用不受此限）
+        if (activation.Status == ActivationStatus.Active && activation.ActivationMode == ModeOffline)
+            return LicenseResult<MemberLicenseDto>.Fail(LicenseErrors.OfflineDevice, "這是離線啟用的裝置，請在該電腦產生「離線停用憑證」後上傳；若電腦已遺失或損壞，請聯絡客服由管理員停用", 409);
+
         if (activation.Status == ActivationStatus.Active)
         {
             activation.Status = ActivationStatus.Deactivated;
@@ -502,9 +554,80 @@ public class LicenseService : ILicenseService
         return LicenseResult<MemberLicenseDto>.Ok(ToMemberDto(license, eligible, reason, await GetSettingsAsync(ct), null));
     }
 
+    public async Task<LicenseResult<OfflineLicenseResponse>> OfflineActivateAsync(Guid memberId, string? requestText, string? ip, CancellationToken ct = default)
+    {
+        var settings = await GetSettingsAsync(ct);
+        if (!settings.OfflineEnabled)
+            return LicenseResult<OfflineLicenseResponse>.Fail(LicenseErrors.OfflineNotAllowed, "目前未開放離線啟用", 403);
+
+        var (member, company) = await LoadMemberAsync(memberId, ct);
+        var (eligible, reason) = EvaluateEligibility(member, company);
+        if (!eligible)
+            return LicenseResult<OfflineLicenseResponse>.Fail(LicenseErrors.NotEligible, reason ?? "目前不具備使用資格", 403);
+
+        var request = LicenseOfflineFormat.Parse<OfflineActivationRequest>(requestText);
+        if (request is not { Version: LicenseOfflineFormat.Version } || request.Type != LicenseOfflineFormat.TypeActivate)
+            return LicenseResult<OfflineLicenseResponse>.Fail(LicenseErrors.InvalidRequest, "無法讀取請求檔，請確認上傳的是離線電腦產生的 .req 檔案", 400);
+        if (!LicenseOfflineFormat.IsValidNonce(request.Nonce))
+            return LicenseResult<OfflineLicenseResponse>.Fail(LicenseErrors.InvalidRequest, "請求檔內容不完整（nonce），請重新產生", 400);
+        var timeError = LicenseOfflineFormat.CheckCreatedAt(request.CreatedAt, Now);
+        if (timeError != null)
+            return LicenseResult<OfflineLicenseResponse>.Fail(LicenseErrors.RequestExpired, timeError, 400);
+        var deviceError = ValidateDevice(request.DeviceHash, request.DeviceName);
+        if (deviceError != null)
+            return LicenseResult<OfflineLicenseResponse>.Fail(LicenseErrors.InvalidRequest, "請求檔內容不完整：" + deviceError, 400);
+
+        var license = await Db.Set<License>().Include(l => l.Activations).FirstOrDefaultAsync(l => l.MemberId == memberId && l.ProductCode == ProductXr, ct);
+        if (license == null)
+            return LicenseResult<OfflineLicenseResponse>.Fail(LicenseErrors.InvalidKey, "尚未建立授權，請先到上方取得授權序號", 404);
+        var normalized = LicenseKeyGenerator.Normalize(request.LicenseKey);
+        if (normalized == null || LicenseCrypto.Sha256Hex(normalized) != license.LicenseKeyHash)
+            return LicenseResult<OfflineLicenseResponse>.Fail(LicenseErrors.InvalidKey, "請求檔中的序號與您帳號的授權不符（序號可能已重新產生）", 400);
+
+        var core = await ActivateCoreAsync(license, request.DeviceHash!.Trim(), request.DeviceName!.Trim(), request.ClientVersion, ModeOffline, request.Nonce, $"member:{memberId}", ip, ct);
+        return core.Success
+            ? LicenseResult<OfflineLicenseResponse>.Ok(new OfflineLicenseResponse { License = core.Data!.License, DeviceName = core.Data.DeviceName, LeaseUntil = core.Data.LeaseUntil, Renewed = core.Data.Renewed })
+            : LicenseResult<OfflineLicenseResponse>.Fail(core.ErrorCode, core.Message, core.HttpStatus);
+    }
+
+    public async Task<LicenseResult<MemberLicenseDto>> OfflineDeactivateAsync(Guid memberId, string? certificateText, string? ip, CancellationToken ct = default)
+    {
+        var certificate = LicenseOfflineFormat.Parse<OfflineDeactivationCertificate>(certificateText);
+        if (certificate is not { Version: LicenseOfflineFormat.Version } || certificate.Type != LicenseOfflineFormat.TypeDeactivate
+            || string.IsNullOrWhiteSpace(certificate.DeviceHash) || string.IsNullOrWhiteSpace(certificate.License))
+            return LicenseResult<MemberLicenseDto>.Fail(LicenseErrors.InvalidRequest, "無法讀取停用憑證，請確認上傳的是離線電腦產生的 .deact 檔案", 400);
+
+        var deviceHash = certificate.DeviceHash.Trim();
+        var verified = await VerifyTokenAsync(certificate.License, deviceHash, ct);
+        if (!verified.Success)
+            return LicenseResult<MemberLicenseDto>.Fail(verified.ErrorCode, "停用憑證內的授權檔無效（" + verified.Message + "）", verified.HttpStatus);
+
+        var license = await Db.Set<License>().Include(l => l.Activations).FirstOrDefaultAsync(l => l.Id == verified.Data && l.ProductCode == ProductXr, ct);
+        if (license == null || license.MemberId != memberId)
+            return LicenseResult<MemberLicenseDto>.Fail(LicenseErrors.InvalidLicense, "這份停用憑證不屬於您的授權", 403);
+
+        var activation = license.Activations.FirstOrDefault(a => a.DeviceHash == deviceHash);
+        // 已經停用或找不到：視為成功（冪等）
+        if (activation is { Status: ActivationStatus.Active })
+        {
+            activation.Status = ActivationStatus.Deactivated;
+            activation.UpdatedTime = Now;
+            AddEvent(license.Id, activation.Id, Events.OfflineDeactivated, $"member:{memberId}", new { device = activation.DeviceName, mode = activation.ActivationMode }, ip);
+            await Db.SaveChangesAsync(ct);
+        }
+
+        var (member, company) = await LoadMemberAsync(memberId, ct);
+        var (eligible, reason) = EvaluateEligibility(member, company);
+        return LicenseResult<MemberLicenseDto>.Ok(ToMemberDto(license, eligible, reason, await GetSettingsAsync(ct), null));
+    }
+
     private MemberLicenseDto ToMemberDto(License? license, bool eligible, string? reason, LicenseSettingsDto settings, string? newKey)
     {
-        var dto = new MemberLicenseDto { Eligible = eligible, IneligibleReason = eligible ? null : reason, LeaseDays = settings.LeaseDays, Seats = settings.DefaultSeats, NewKey = newKey };
+        var dto = new MemberLicenseDto
+        {
+            Eligible = eligible, IneligibleReason = eligible ? null : reason, LeaseDays = settings.LeaseDays, Seats = settings.DefaultSeats, NewKey = newKey,
+            OfflineEnabled = settings.OfflineEnabled, OfflineLeaseDays = settings.OfflineLeaseDays,
+        };
         if (license == null) return dto;
 
         dto.HasLicense = true;
@@ -519,7 +642,7 @@ public class LicenseService : ILicenseService
             .Select(a => new MemberLicenseDeviceDto
             {
                 Id = a.Id, DeviceName = a.DeviceName, Status = a.Status.ToString().ToLowerInvariant(),
-                FirstActivatedAt = a.FirstActivatedAt, LastSeenAt = a.LastSeenAt, LeaseUntil = a.LeaseUntil,
+                FirstActivatedAt = a.FirstActivatedAt, LastSeenAt = a.LastSeenAt, LeaseUntil = a.LeaseUntil, Mode = a.ActivationMode,
             }).ToList();
         return dto;
     }
@@ -621,7 +744,7 @@ public class LicenseService : ILicenseService
                 Id = a.Id, DeviceName = a.DeviceName, Status = a.Status.ToString().ToLowerInvariant(),
                 FirstActivatedAt = a.FirstActivatedAt, LastSeenAt = a.LastSeenAt, LeaseUntil = a.LeaseUntil,
                 DeviceHashPreview = a.DeviceHash.Length > 16 ? a.DeviceHash[..16] + "…" : a.DeviceHash,
-                LastIp = a.LastIp, ClientVersion = a.ClientVersion, ActivationMode = a.ActivationMode,
+                LastIp = a.LastIp, ClientVersion = a.ClientVersion, ActivationMode = a.ActivationMode, Mode = a.ActivationMode,
             }).ToList(),
         };
     }

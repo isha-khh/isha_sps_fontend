@@ -5,6 +5,7 @@
 本文件是單檔版，涵蓋整合所需的全部內容。同目錄另附：
 
 - `openapi.yaml`：OpenAPI 3 規格，可匯入 Postman／Swagger UI。
+- `離線授權.md`：完全沒有網路的電腦的離線啟用／續期／停用流程（第二期）。
 - `samples/LicenseVerifier/`：C# 驗簽範例（只用 .NET 內建 API，`dotnet run` 即可跑）。
 - `test-vectors/vectors.json`：驗簽測試向量。
 
@@ -168,7 +169,8 @@ payload 是 UTF-8 JSON：
   "issued_at": "2026-10-14T10:02:53Z",
   "valid_until": "2026-11-13T10:02:53Z",
   "lease_until": "2026-11-13T10:02:53Z",
-  "server_time": "2026-10-14T10:02:53Z"
+  "server_time": "2026-10-14T10:02:53Z",
+  "mode": "online"
 }
 ```
 
@@ -184,6 +186,8 @@ payload 是 UTF-8 JSON：
 | `valid_until` | 有沒有權利使用的期限。預設隨會員資格滾動（每次續期往後延），也可能被管理員設上限 |
 | `lease_until` | 多久要連線確認一次。**超過這個時間必須先 `/refresh` 才能繼續使用**（離線寬限見 §6） |
 | `server_time` | 簽發當下的伺服器時間，用來偵測時鐘倒轉 |
+| `mode` | `online` 或 `offline`（離線啟用，見《離線授權》）。舊版沒有此欄位就當作 `online` |
+| `nonce` | 只有離線授權檔有；匯入時要與你產生 `.req` 時的 nonce 比對 |
 
 ## 6. 驗簽與使用判斷
 
@@ -230,7 +234,7 @@ now > valid_until                               →  連線 /refresh；通常會
 2. 伺服器**明確拒絕**（HTTP 4xx，`error` 為 `license_suspended`、`license_revoked`、`license_expired`、`not_eligible`、`device_not_allowed`、`invalid_license`）→ 清除本機授權、鎖定、顯示 `message`。
 3. **連不上**（網路錯誤、逾時、5xx、429）→ **不要清除**。從 `lease_until` 起算 **7 天內**仍可使用，但每次啟動要顯示警告「請連線以更新授權」；超過 7 天要求連線。
 
-「離線啟用／離線停用碼」（完全無網路的電腦）排在第二期，屆時另行提供，第一期請預留設計。
+完全沒有網路的電腦請走「離線啟用」流程，見 `離線授權.md`。
 
 ## 7. 錯誤
 
@@ -320,6 +324,7 @@ curl -s -X POST $BASE/deactivate -H 'Content-Type: application/json' \
 | 日期 | 版本 | 說明 |
 |---|---|---|
 | 2026-10-14 | 1.0 | 第一期線上授權：activate、refresh、deactivate、public-keys |
+| 2026-10-14 | 1.1 | 第二期離線授權（見 `離線授權.md`）；授權檔 payload 新增 `mode`、`nonce` |
 
 ## 13. 聯絡窗口
 

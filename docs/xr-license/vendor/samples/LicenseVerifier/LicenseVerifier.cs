@@ -21,6 +21,12 @@ public sealed class LicensePayload
     [JsonPropertyName("valid_until")] public DateTime ValidUntil { get; set; }
     [JsonPropertyName("lease_until")] public DateTime LeaseUntil { get; set; }
     [JsonPropertyName("server_time")] public DateTime ServerTime { get; set; }
+
+    /// <summary>"online"（線上啟用／續期）或 "offline"（離線啟用）。舊版授權檔沒有這個欄位，視為 online。</summary>
+    [JsonPropertyName("mode")] public string Mode { get; set; } = "online";
+
+    /// <summary>離線啟用的授權檔才有：等於你產生 .req 時放進去的 nonce。匯入時必須比對。</summary>
+    [JsonPropertyName("nonce")] public string? Nonce { get; set; }
 }
 
 public enum VerifyStatus
@@ -35,6 +41,8 @@ public enum VerifyStatus
     ClockRollback,
     /// <summary>授權檔不是這台裝置的（device_hash 不符）</summary>
     DeviceMismatch,
+    /// <summary>離線匯入時，授權檔裡的 nonce 與你產生 .req 時的不同：這不是你剛才請求的那份授權檔，拒絕匯入</summary>
+    NonceMismatch,
     /// <summary>格式錯誤、kid 不認得、簽章不符、產品不符：視為沒有授權</summary>
     Invalid,
 }
@@ -69,7 +77,10 @@ public sealed class LicenseVerifier
     /// <param name="localDeviceHash">這台裝置目前算出的 device_hash</param>
     /// <param name="nowUtc">目前時間（UTC）</param>
     /// <param name="lastSeenServerTime">本機上次記錄到的 server_time（每次收到新授權檔就更新並保存）；沒有就傳 null</param>
-    public VerifyResult Verify(string license, string localDeviceHash, DateTime nowUtc, DateTime? lastSeenServerTime = null)
+    /// <param name="expectedNonce">
+    /// 只有「匯入使用者帶回來的離線授權檔」時才傳：你產生 .req 時保存的 nonce。啟動時的例行驗證與線上續期取得的授權檔不要傳。
+    /// </param>
+    public VerifyResult Verify(string license, string localDeviceHash, DateTime nowUtc, DateTime? lastSeenServerTime = null, string? expectedNonce = null)
     {
         var parts = license.Trim().Split('.');
         if (parts.Length != 2) return new(VerifyStatus.Invalid, null, "格式錯誤");
@@ -100,6 +111,8 @@ public sealed class LicenseVerifier
         if (!string.Equals(payload.Product, "xr", StringComparison.Ordinal)) return new(VerifyStatus.Invalid, payload, "產品不符");
         if (!string.Equals(payload.DeviceHash, localDeviceHash, StringComparison.Ordinal)) return new(VerifyStatus.DeviceMismatch, payload);
 
+        if (expectedNonce is not null && !string.Equals(payload.Nonce, expectedNonce, StringComparison.Ordinal)) return new(VerifyStatus.NonceMismatch, payload);
+
         // 時鐘倒轉：現在比上次記錄的伺服器時間還早（容忍 5 分鐘誤差）
         if (lastSeenServerTime is { } last && nowUtc < last.AddMinutes(-5)) return new(VerifyStatus.ClockRollback, payload);
         if (nowUtc < payload.ServerTime.AddMinutes(-5)) return new(VerifyStatus.ClockRollback, payload);
@@ -115,4 +128,47 @@ public sealed class LicenseVerifier
         s = s.PadRight(s.Length + (4 - s.Length % 4) % 4, '=');
         return Convert.FromBase64String(s);
     }
+}
+
+/// <summary>
+/// 離線啟用／離線停用的檔案產生（離線電腦上的 XR 軟體執行）。檔案內容都是 base64url(JSON) 的單行文字，
+/// 存成 .req／.deact 檔或讓使用者複製貼上均可。格式見《離線授權》文件。
+/// </summary>
+public static class OfflineFiles
+{
+    private static string Base64Url(byte[] data) => Convert.ToBase64String(data).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+    private static string Encode(object value) => Base64Url(JsonSerializer.SerializeToUtf8Bytes(value));
+
+    /// <summary>產生一次性 nonce（16 位元組隨機，22 個字元）。請保存起來，匯入授權檔時用來比對。</summary>
+    public static string NewNonce() => Base64Url(RandomNumberGenerator.GetBytes(16));
+
+    /// <summary>
+    /// 產生離線啟用請求（.req）。<paramref name="nonce"/> 請用 <see cref="NewNonce"/> 產生並保存到匯入授權檔為止。
+    /// 同一台裝置要「續期」時也是產生新的請求檔（新的 nonce）。
+    /// </summary>
+    public static string CreateActivationRequest(string licenseKey, string deviceHash, string deviceName, string clientVersion, string nonce, DateTime nowUtc)
+        => Encode(new Dictionary<string, object>
+        {
+            ["v"] = 1,
+            ["type"] = "activate",
+            ["license_key"] = licenseKey,
+            ["device_hash"] = deviceHash,
+            ["device_name"] = deviceName,
+            ["client_version"] = clientVersion,
+            ["nonce"] = nonce,
+            ["created_at"] = nowUtc.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", System.Globalization.CultureInfo.InvariantCulture),
+        });
+
+    /// <summary>產生離線停用憑證（.deact）。產生後軟體要立刻清除本機授權檔並鎖定。</summary>
+    public static string CreateDeactivationCertificate(string currentLicenseFile, string deviceHash, DateTime nowUtc)
+        => Encode(new Dictionary<string, object>
+        {
+            ["v"] = 1,
+            ["type"] = "deactivate",
+            ["license"] = currentLicenseFile,
+            ["device_hash"] = deviceHash,
+            ["nonce"] = NewNonce(),
+            ["created_at"] = nowUtc.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", System.Globalization.CultureInfo.InvariantCulture),
+        });
 }

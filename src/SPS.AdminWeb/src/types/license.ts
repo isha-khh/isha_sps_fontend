@@ -62,6 +62,10 @@ export interface LicenseStats {
 export interface LicenseSettings {
   defaultSeats: number;
   leaseDays: number;
+  /** 是否開放離線啟用（會員中心上傳 .req 換 .lic） */
+  offlineEnabled: boolean;
+  /** 離線授權的租約天數 */
+  offlineLeaseDays: number;
 }
 
 export interface UpdateLicenseRequest {
@@ -113,6 +117,10 @@ export const LICENSE_STATUS_BADGE: Record<LicenseStatus, string> = {
 };
 
 export const LICENSE_EVENT_LABEL: Record<string, string> = {
+  offline_activated: '離線啟用',
+  offline_renewed: '離線換發授權檔',
+  offline_deactivated: '離線停用（停用憑證）',
+  offline_denied: '離線啟用被拒',
   created: '建立授權',
   key_regenerated: '重新產生／作廢序號',
   activated: '裝置啟用',

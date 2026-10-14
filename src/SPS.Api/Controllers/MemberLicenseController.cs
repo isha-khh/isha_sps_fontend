@@ -24,7 +24,7 @@ public class MemberLicenseController : ControllerBase
     private Guid? GetMemberId() => Guid.TryParse(User.FindFirst("MemberId")?.Value, out var id) ? id : null;
     private string? ClientIp => HttpContext.Connection.RemoteIpAddress?.ToString();
 
-    private IActionResult From(LicenseResult<MemberLicenseDto> result)
+    private IActionResult From<T>(LicenseResult<T> result)
     {
         Response.Headers.CacheControl = "no-store";
         return result.Success ? Ok(result.Data) : StatusCode(result.HttpStatus, new { error = result.ErrorCode, message = result.Message });
@@ -56,6 +56,24 @@ public class MemberLicenseController : ControllerBase
         var memberId = GetMemberId();
         if (memberId == null) return Unauthorized(new { error = "Invalid token" });
         return From(await _licenses.RegenerateMyKeyAsync(memberId.Value, ClientIp, ct));
+    }
+
+    /// <summary>離線啟用／續期：上傳 .req，回傳離線授權檔內容（會員中心存成 license.lic）</summary>
+    [HttpPost("offline/activate")]
+    public async Task<IActionResult> OfflineActivate([FromBody] OfflineActivateRequest request, CancellationToken ct)
+    {
+        var memberId = GetMemberId();
+        if (memberId == null) return Unauthorized(new { error = "Invalid token" });
+        return From(await _licenses.OfflineActivateAsync(memberId.Value, request.Request, ClientIp, ct));
+    }
+
+    /// <summary>離線停用：上傳 .deact 停用憑證，釋放席次</summary>
+    [HttpPost("offline/deactivate")]
+    public async Task<IActionResult> OfflineDeactivate([FromBody] OfflineDeactivateRequest request, CancellationToken ct)
+    {
+        var memberId = GetMemberId();
+        if (memberId == null) return Unauthorized(new { error = "Invalid token" });
+        return From(await _licenses.OfflineDeactivateAsync(memberId.Value, request.Certificate, ClientIp, ct));
     }
 
     /// <summary>停用自己的某一台裝置（釋放席次）</summary>

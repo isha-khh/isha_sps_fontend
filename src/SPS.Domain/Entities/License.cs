@@ -111,3 +111,20 @@ public class LicenseSigningKey
     public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedTime { get; set; } = DateTime.UtcNow;
 }
+
+/// <summary>
+/// 離線啟用請求（.req）用過的 nonce：一次性，同一個 nonce 只能換一份離線授權檔，避免請求檔被重複使用。
+/// 只增不改；可定期清理太舊的（超過請求有效期就不可能再被接受，留著只是稽核用途）。
+/// </summary>
+public class LicenseOfflineNonce
+{
+    /// <summary>nonce 本身（客戶端產生的隨機字串，全域唯一）</summary>
+    public string Nonce { get; set; } = string.Empty;
+
+    public Guid LicenseId { get; set; }
+
+    /// <summary>請求中的裝置指紋</summary>
+    public string DeviceHash { get; set; } = string.Empty;
+
+    public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
+}

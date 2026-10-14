@@ -205,3 +205,5 @@ components:
         valid_until: { type: string, format: date-time }
         lease_until: { type: string, format: date-time }
         server_time: { type: string, format: date-time }
+        mode: { type: string, enum: [online, offline], description: 啟用方式（舊版授權檔沒有此欄位，視為 online） }
+        nonce: { type: string, description: 只有離線授權檔有；匯入時要與產生 .req 時的 nonce 比對 }

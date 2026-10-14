@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getLicenseErrorMessage, memberLicenseApi, type MemberLicense } from "@/lib/api/member-license";
+import OfflineLicenseSection from "@/components/member/panels/OfflineLicenseSection";
 
 const STATUS_LABEL: Record<string, string> = { active: "使用中", suspended: "已暫停", revoked: "已撤銷", expired: "已過期" };
 const DEVICE_STATUS_LABEL: Record<string, string> = { active: "使用中", deactivated: "已停用", revoked: "已被停用" };
@@ -189,18 +190,29 @@ export default function LicensePanel() {
                   <div>
                     <strong>{device.deviceName || "未命名裝置"}</strong>
                     <span className="badge text-bg-light ms-2">{DEVICE_STATUS_LABEL[device.status] ?? device.status}</span>
+                    {device.mode === "offline" && <span className="badge text-bg-info ms-1">離線</span>}
                     <div className="small text-muted">
                       首次啟用 {formatDateTime(device.firstActivatedAt)}　最近連線 {formatDateTime(device.lastSeenAt)}
                     </div>
-                    <div className="small text-muted">離線可用至 {formatDateTime(device.leaseUntil)}（連線時自動延長，租約 {data.leaseDays} 天）</div>
+                    {device.mode === "offline" ? (
+                      <div className="small text-muted">離線授權有效至 {formatDateTime(device.leaseUntil)}，到期前請帶回平台換發（見下方「離線啟用／續期」）</div>
+                    ) : (
+                      <div className="small text-muted">離線可用至 {formatDateTime(device.leaseUntil)}（連線時自動延長，租約 {data.leaseDays} 天）</div>
+                    )}
                   </div>
-                  <button type="button" className="tier-reset-btn text-danger" onClick={() => deactivate(device.id, device.deviceName || "未命名裝置")} disabled={busy}>
-                    停用
-                  </button>
+                  {device.mode === "offline" ? (
+                    <span className="small text-muted">請用「離線停用憑證」釋放</span>
+                  ) : (
+                    <button type="button" className="tier-reset-btn text-danger" onClick={() => deactivate(device.id, device.deviceName || "未命名裝置")} disabled={busy}>
+                      停用
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           )}
+
+          {usable && data.offlineEnabled && <OfflineLicenseSection data={data} onChanged={setData} />}
 
           <button type="button" className="tier-reset-btn" onClick={regenerate} disabled={busy}>
             <i className="bi bi-arrow-repeat me-1" aria-hidden="true"></i>

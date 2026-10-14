@@ -19,6 +19,12 @@ public interface ILicenseService
     /// <summary>重新產生序號：舊序號立即失效（已啟用的裝置不受影響，只是舊序號不能再啟用新裝置）</summary>
     Task<LicenseResult<MemberLicenseDto>> RegenerateMyKeyAsync(Guid memberId, string? ip, CancellationToken ct = default);
 
+    /// <summary>離線啟用／離線續期：會員上傳離線電腦產生的 .req，換回離線授權檔（.lic）。同一台裝置重複上傳是換發，不多佔席次</summary>
+    Task<LicenseResult<OfflineLicenseResponse>> OfflineActivateAsync(Guid memberId, string? requestText, string? ip, CancellationToken ct = default);
+
+    /// <summary>離線停用：會員上傳離線電腦產生的停用憑證（.deact），釋放該裝置的席次</summary>
+    Task<LicenseResult<MemberLicenseDto>> OfflineDeactivateAsync(Guid memberId, string? certificateText, string? ip, CancellationToken ct = default);
+
     Task<LicenseResult<MemberLicenseDto>> DeactivateMyDeviceAsync(Guid memberId, Guid activationId, string? ip, CancellationToken ct = default);
 
     // ---------- 後台 ----------

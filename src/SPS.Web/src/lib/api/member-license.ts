@@ -10,6 +10,17 @@ export interface MemberLicenseDevice {
   firstActivatedAt: string;
   lastSeenAt: string;
   leaseUntil?: string | null;
+  /** 啟用方式：online／offline。離線裝置要上傳停用憑證才能釋放席次 */
+  mode: string;
+}
+
+/** 離線啟用／續期的結果：授權檔（.lic）的內容 */
+export interface OfflineLicenseResult {
+  license: string;
+  deviceName: string;
+  leaseUntil: string;
+  /** true＝這台裝置原本就已離線啟用，這次是換發新的授權檔（不佔新席次） */
+  renewed: boolean;
 }
 
 export interface MemberLicense {
@@ -24,6 +35,10 @@ export interface MemberLicense {
   activeDevices: number;
   validUntil?: string | null;
   leaseDays: number;
+  /** 是否開放離線啟用 */
+  offlineEnabled: boolean;
+  /** 離線授權的租約天數 */
+  offlineLeaseDays: number;
   devices: MemberLicenseDevice[];
   /** 只有剛建立或剛重新產生時才有值，序號明文只顯示這一次 */
   newKey?: string | null;
@@ -51,6 +66,14 @@ export const memberLicenseApi = {
   /** 重新產生序號：舊序號立即失效，已啟用的裝置不受影響 */
   async regenerate(): Promise<MemberLicense> {
     return (await apiClient.post("/api/member/license/regenerate")).data;
+  },
+  /** 離線啟用／續期：上傳離線電腦產生的 .req（文字內容），換回授權檔 */
+  async offlineActivate(request: string): Promise<OfflineLicenseResult> {
+    return (await apiClient.post("/api/member/license/offline/activate", { request })).data;
+  },
+  /** 離線停用：上傳離線電腦產生的 .deact（文字內容），釋放該裝置的席次 */
+  async offlineDeactivate(certificate: string): Promise<MemberLicense> {
+    return (await apiClient.post("/api/member/license/offline/deactivate", { certificate })).data;
   },
   /** 停用自己的某一台裝置，釋出席次 */
   async deactivateDevice(activationId: string): Promise<MemberLicense> {

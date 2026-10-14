@@ -70,3 +70,17 @@ public class LicenseSigningKeyConfiguration : IEntityTypeConfiguration<LicenseSi
         builder.HasIndex(k => k.Status);
     }
 }
+
+public class LicenseOfflineNonceConfiguration : IEntityTypeConfiguration<LicenseOfflineNonce>
+{
+    public void Configure(EntityTypeBuilder<LicenseOfflineNonce> builder)
+    {
+        builder.ToTable("LicenseOfflineNonces");
+        builder.HasKey(n => n.Nonce);
+        builder.Property(n => n.Nonce).HasMaxLength(64);
+        builder.Property(n => n.DeviceHash).HasMaxLength(200).IsRequired();
+        builder.HasIndex(n => n.LicenseId);
+        builder.HasIndex(n => n.CreatedTime);
+        builder.HasOne<License>().WithMany().HasForeignKey(n => n.LicenseId).OnDelete(DeleteBehavior.Cascade);
+    }
+}

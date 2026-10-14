@@ -2089,6 +2089,32 @@ namespace SPS.Infrastructure.Migrations
                     b.ToTable("LicenseEvents", (string)null);
                 });
 
+            modelBuilder.Entity("SPS.Domain.Entities.LicenseOfflineNonce", b =>
+                {
+                    b.Property<string>("Nonce")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeviceHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("LicenseId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Nonce");
+
+                    b.HasIndex("CreatedTime");
+
+                    b.HasIndex("LicenseId");
+
+                    b.ToTable("LicenseOfflineNonces", (string)null);
+                });
+
             modelBuilder.Entity("SPS.Domain.Entities.LicenseSigningKey", b =>
                 {
                     b.Property<string>("Kid")
@@ -4519,6 +4545,15 @@ namespace SPS.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("License");
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.LicenseOfflineNonce", b =>
+                {
+                    b.HasOne("SPS.Domain.Entities.License", null)
+                        .WithMany()
+                        .HasForeignKey("LicenseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SPS.Domain.Entities.Member", b =>

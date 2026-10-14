@@ -123,7 +123,7 @@ export const LicenseDetailPage = () => {
       if (!id || !detail) return;
       const seatsNum = Number(seats);
       const leaseNum = Number(leaseDays);
-      if (!Number.isInteger(seatsNum) || seatsNum < 0 || seatsNum > 1000) throw { response: { data: { error: '席次需為 0～1000 的整數（0＝使用預設）' } } };
+      if (!Number.isInteger(seatsNum) || seatsNum < 0 || seatsNum > 100) throw { response: { data: { error: '席次需為 0～100 的整數（0＝使用預設）' } } };
       if (!Number.isInteger(leaseNum) || leaseNum < 0 || leaseNum > 365) throw { response: { data: { error: '租約天數需為 0～365 的整數（0＝使用預設）' } } };
       const hadCap = !!detail.validUntil;
       // 日期沒動就不送，避免把原本精確到秒的期限改成當天 23:59:59
@@ -269,7 +269,7 @@ export const LicenseDetailPage = () => {
           <div className="grid gap-4 md:grid-cols-4">
             <label className="form-control">
               <span className="label-text mb-1 text-sm">席次（0＝使用預設 {detail.defaultSeats}）</span>
-              <input type="number" min={0} max={1000} className="input input-bordered input-sm" value={seats} disabled={terminal} onChange={(e) => setSeats(e.target.value)} />
+              <input type="number" min={0} max={100} className="input input-bordered input-sm" value={seats} disabled={terminal} onChange={(e) => setSeats(e.target.value)} />
             </label>
             <label className="form-control">
               <span className="label-text mb-1 text-sm">租約天數（0＝使用預設）</span>
@@ -322,6 +322,7 @@ export const LicenseDetailPage = () => {
                 <tr>
                   <th>名稱</th>
                   <th>狀態</th>
+                  <th>方式</th>
                   <th>首次啟用</th>
                   <th>最後連線</th>
                   <th>租約到期</th>
@@ -332,7 +333,7 @@ export const LicenseDetailPage = () => {
               <tbody>
                 {detail.devices.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-6 text-center text-base-content/60">
+                    <td colSpan={8} className="py-6 text-center text-base-content/60">
                       尚無裝置啟用
                     </td>
                   </tr>
@@ -345,6 +346,9 @@ export const LicenseDetailPage = () => {
                     </td>
                     <td>
                       <span className={`badge badge-sm ${d.status === 'active' ? 'badge-success' : 'badge-ghost'}`}>{DEVICE_STATUS_LABEL[d.status] ?? d.status}</span>
+                    </td>
+                    <td>
+                      <span className={`badge badge-sm ${d.activationMode === 'offline' ? 'badge-info' : 'badge-ghost'}`}>{d.activationMode === 'offline' ? '離線' : '線上'}</span>
                     </td>
                     <td className="text-xs">{formatDateTime(d.firstActivatedAt)}</td>
                     <td className="text-xs">{formatDateTime(d.lastSeenAt)}</td>

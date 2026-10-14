@@ -57,5 +57,9 @@ public static class LicenseConstants
         public const string KeyRegistered = "signing_key_registered";
         public const string KeyStatusChanged = "signing_key_status_changed";
         public const string SettingsChanged = "settings_changed";
+        public const string OfflineActivated = "offline_activated";
+        public const string OfflineRenewed = "offline_renewed";
+        public const string OfflineDeactivated = "offline_deactivated";
+        public const string OfflineDenied = "offline_denied";
     }
 }

@@ -67,12 +67,16 @@ export const LicensesListPage = () => {
 
   const saveSettings = async () => {
     if (!settings || isSavingSettings) return;
-    if (!Number.isInteger(settings.defaultSeats) || settings.defaultSeats < 1 || settings.defaultSeats > 1000) {
-      await notify.error('預設席次需為 1～1000 的整數');
+    if (!Number.isInteger(settings.defaultSeats) || settings.defaultSeats < 1 || settings.defaultSeats > 100) {
+      await notify.error('預設席次需為 1～100 的整數');
       return;
     }
     if (!Number.isInteger(settings.leaseDays) || settings.leaseDays < 1 || settings.leaseDays > 365) {
       await notify.error('租約天數需為 1～365 的整數');
+      return;
+    }
+    if (!Number.isInteger(settings.offlineLeaseDays) || settings.offlineLeaseDays < 1 || settings.offlineLeaseDays > 365) {
+      await notify.error('離線租約天數需為 1～365 的整數');
       return;
     }
     const ok = await confirmDialog({
@@ -171,7 +175,7 @@ export const LicensesListPage = () => {
                 <input
                   type="number"
                   min={1}
-                  max={1000}
+                  max={100}
                   className="input input-bordered input-sm w-40"
                   value={settings.defaultSeats}
                   onChange={(e) => setSettings({ ...settings, defaultSeats: Number(e.target.value) })}
@@ -187,6 +191,26 @@ export const LicensesListPage = () => {
                   value={settings.leaseDays}
                   onChange={(e) => setSettings({ ...settings, leaseDays: Number(e.target.value) })}
                 />
+              </label>
+              <label className="form-control">
+                <span className="label-text text-sm mb-1">離線租約天數（離線電腦需在期限內帶回平台換發）</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  className="input input-bordered input-sm w-40"
+                  value={settings.offlineLeaseDays}
+                  onChange={(e) => setSettings({ ...settings, offlineLeaseDays: Number(e.target.value) })}
+                />
+              </label>
+              <label className="label cursor-pointer gap-2 pb-1">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-sm toggle-primary"
+                  checked={settings.offlineEnabled}
+                  onChange={(e) => setSettings({ ...settings, offlineEnabled: e.target.checked })}
+                />
+                <span className="label-text text-sm">開放離線啟用</span>
               </label>
               <button type="button" className="btn btn-primary btn-sm" disabled={isSavingSettings} onClick={() => void saveSettings()}>
                 {isSavingSettings ? <span className="loading loading-spinner loading-xs" /> : '儲存設定'}
