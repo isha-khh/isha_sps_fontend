@@ -6,6 +6,8 @@
 # - 資料庫用複本 SPS_dev（Host 由 .env 的 DB_CONNECTION_STRING 決定），Redis 自己起一個，只在 beta 網路內。
 # - 信件、退信收信、ProTrack 整合在啟動「之前」要先用 sanitize-beta-db.sql 關掉，否則複本裡的設定會對外寄信／連線。
 #
+# 擺放方式照測試機：這個 compose 檔、.env、Uploads/ 都放在專案資料夾（SPS_dev）頂層，程式碼的 git clone 放在 .repo。
+# 在 SPS_dev 下執行 docker compose -f docker-compose.beta.yml …，.env 由 compose 自動讀取（不需要 --env-file）。
 # 用法見 README.md。所有密鑰從 .env 讀（不要把 .env 提交到 git）。
 name: sps-beta
 
@@ -66,7 +68,7 @@ services:
 
       # 不設 Email_Setting__*：郵件由資料庫的設定決定，啟動前已用 sanitize-beta-db.sql 停用
     volumes:
-      - ${UPLOADS_HOST_DIR:-./data/Uploads}:/app/Uploads
+      - ${UPLOADS_HOST_DIR:-./Uploads}:/app/Uploads
     networks:
       beta:
         ipv4_address: 172.31.50.10

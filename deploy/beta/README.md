@@ -23,40 +23,51 @@
 所以必須在第一次啟動**之前**執行 `sanitize-beta-db.sql`（只改這三項設定，其他資料不動），並確認輸出的每一列都是 `false`／`t`。
 之後若在 beta 後台開啟郵件服務，會用複本裡的正式 SMTP 設定真的寄信，**測試期間不要打開**。
 
+## 擺放方式（照測試機）
+
+```
+/home/shareproject/SPS_dev/
+├── docker-compose.beta.yml   ← 從 .repo/deploy/beta/ 複製出來
+├── .env                      ← 設定檔（密鑰，不在 git 裡；由 compose 自動讀取，不用 --env-file）
+├── Uploads/                  ← 上傳檔案（從正式機 SPS 複製；掛到容器內 /app/Uploads）
+└── .repo/                    ← git clone，只有程式碼與 deploy/beta 的範本
+```
+
+所有 docker compose 指令都在 `SPS_dev` 頂層執行：`docker compose -f docker-compose.beta.yml <up -d|ps|logs|pull>`。
+
 ## 步驟
 
-在正式機主機上（資料夾 `SPS_dev`）：
-
 ```bash
+cd /home/shareproject/SPS_dev
+
 # 1. 只取 deploy/beta（repo 裡有很大的舊站靜態檔，不需要）
-cd SPS_dev
 git clone --depth 1 --filter=blob:none --sparse https://github.com/isha-khh/isha_sps_fontend.git .repo
 git -C .repo sparse-checkout set deploy/beta
-cd .repo/deploy/beta
+cp .repo/deploy/beta/docker-compose.beta.yml .
+cp .repo/deploy/beta/env.beta.example .env && chmod 600 .env
 
-# 2. 環境變數
-cp env.beta.example .env && chmod 600 .env
-#   填 DB_CONNECTION_STRING（Database=SPS_dev）、REDIS_PASSWORD（openssl rand -hex 24）、JWT_SECRET_KEY（openssl rand -base64 48）
+# 2. 環境變數：編輯 .env
+#   DB_CONNECTION_STRING（Database=SPS_dev）、REDIS_PASSWORD（openssl rand -hex 24）、JWT_SECRET_KEY（openssl rand -base64 48）
 
 # 3. 上傳檔案：從正式機複製既有檔案到 beta 的上傳資料夾（來源位置先確認，見下方「上傳檔案」）
-mkdir -p data/Uploads
-cp -a <正式機上傳檔案資料夾>/. data/Uploads/
+mkdir -p Uploads
+cp -a <正式機上傳檔案資料夾>/. Uploads/
 
 # 4. 資料庫：關掉寄信、收信、ProTrack（必做，啟動前）
-psql "host=10.19.80.11 dbname=SPS_dev user=<有權限的帳號>" -f sanitize-beta-db.sql
+psql "host=10.19.80.11 dbname=SPS_dev user=<有權限的帳號>" -f .repo/deploy/beta/sanitize-beta-db.sql
 
 # 5. 拉映像並啟動（第一次啟動會自動套用資料庫遷移，看日誌確認）
-docker compose -f docker-compose.beta.yml --env-file .env pull
-docker compose -f docker-compose.beta.yml --env-file .env up -d
+docker compose -f docker-compose.beta.yml pull
+docker compose -f docker-compose.beta.yml up -d
 docker logs -f sps-beta-api        # 看到「資料庫遷移完成」與沒有 error 之後 Ctrl+C
 
-# 6. 主機 nginx：把 nginx-match.conf 的內容加進設定（match.isafe.org.tw 加 location、match-admin 新增 server），
+# 6. 主機 nginx：把 .repo/deploy/beta/nginx-match.conf 的內容加進設定（match.isafe.org.tw 加 location、match-admin 新增 server），
 #    nginx -t 通過才 reload
 ```
 
 ### 上傳檔案
 
-後端把上傳檔案存在 `FileStorage__RootPath`（beta 設為容器內 `/app/Uploads`，掛載到 `data/Uploads`）。
+後端把上傳檔案存在 `FileStorage__RootPath`（beta 設為容器內 `/app/Uploads`，掛載到 `SPS_dev/Uploads`）。
 **請先確認正式機實際把檔案放在哪裡**（`docker inspect <正式機後端容器名稱> --format '{{json .Mounts}}'`，或 `SPS` 資料夾裡看），
 來源若是別的容器路徑（例如 `wwwroot`），把 compose 的掛載與 `FileStorage__RootPath` 調成與正式機一致再複製。
 
@@ -76,8 +87,8 @@ docker exec sps-beta-api sh -c 'env | grep -i email'    # 不應有任何 SMTP �
 
 ```bash
 # SPS_VERSION 改成新的標籤（.env 或 shell），然後
-docker compose -f docker-compose.beta.yml --env-file .env pull
-docker compose -f docker-compose.beta.yml --env-file .env up -d
+docker compose -f docker-compose.beta.yml pull
+docker compose -f docker-compose.beta.yml up -d
 ```
 
 新版若含資料庫遷移，會在後端啟動時自動套用到 `SPS_dev`。
@@ -85,8 +96,8 @@ docker compose -f docker-compose.beta.yml --env-file .env up -d
 ## 還原／移除 beta
 
 ```bash
-docker compose -f docker-compose.beta.yml --env-file .env down      # 停掉並移除容器（資料與 volume 保留）
+docker compose -f docker-compose.beta.yml down      # 停掉並移除容器（資料與 volume 保留）
 # 再把 nginx 裡加的 location／server 拿掉並 reload
 ```
 
-`SPS_dev` 資料庫與 `data/Uploads` 不會被刪，要清掉請另外手動處理。
+`SPS_dev` 資料庫與 `Uploads/` 不會被刪，要清掉請另外手動處理。
