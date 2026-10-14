@@ -9,6 +9,7 @@ import ZoomableImage from "@/components/ui/ZoomableImage";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import DownloadRequestForm from "@/components/serve/DownloadRequestForm";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
+import NewsViewTracker from "@/components/news/NewsViewTracker";
 import { withBasePath } from "@/lib/api-client";
 import { fetchBanners, fetchServeDetail } from "@/lib/api.server";
 import { formatIsoDate } from "@/lib/content-list-utils";
@@ -40,6 +41,7 @@ export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">
   return (
     <>
       <BodyClass className="serve show" />
+      <NewsViewTracker newsId={item.id} />
       <InnerPageShell
         breadcrumb={[{ label: "服務專區", href: "/serve" }, ...(item.categoryName ? [{ label: item.categoryName, href: `/serve?category=${encodeURIComponent(item.categoryName)}` }] : []), { label: item.title }]}
         aside={<SidebarBanner banners={sidebarBanners} />}

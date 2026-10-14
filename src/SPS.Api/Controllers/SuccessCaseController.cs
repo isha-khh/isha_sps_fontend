@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Mvc;
 using SPS.Application.DTOs.SuccessCase;
 using SPS.Application.Interfaces.IServices;
@@ -20,16 +21,22 @@ public class SuccessCaseController : ControllerBase
 {
     private readonly ISuccessCaseService _successCaseService;
     private readonly ILogger<SuccessCaseController> _logger;
+    private readonly IMemoryCache _cache;
+
+    /// <summary>同一個來源 IP 對同一個案例，這段時間內只累計一次瀏覽數（與公告相同）</summary>
+    private static readonly TimeSpan ViewDedupeWindow = TimeSpan.FromMinutes(30);
 
     /// <summary>
     /// 初始化 SuccessCaseController 的新實例
     /// </summary>
     /// <param name="successCaseService">成功案例服務接口</param>
     /// <param name="logger">日誌記錄器</param>
-    public SuccessCaseController(ISuccessCaseService successCaseService, ILogger<SuccessCaseController> logger)
+    /// <param name="cache">記憶體快取（瀏覽數去重用）</param>
+    public SuccessCaseController(ISuccessCaseService successCaseService, ILogger<SuccessCaseController> logger, IMemoryCache cache)
     {
         _successCaseService = successCaseService;
         _logger = logger;
+        _cache = cache;
     }
 
     /// <summary>
@@ -165,8 +172,15 @@ public class SuccessCaseController : ControllerBase
     [SwaggerOperation(Summary = "增加瀏覽次數", Description = "增加指定成功案例的瀏覽次數")]
     public async Task<IActionResult> IncrementViewCount(int id)
     {
+        // 匿名、不需要 CSRF token 的計數 API：後台使用者預覽不算，同 IP 同案例 30 分鐘內只算一次，避免被拿來灌「熱門案例」排名
+        if (User.IsInRole("Admin")) return Ok();
+        var dedupeKey = $"case-view:{HttpContext.Connection.RemoteIpAddress}:{id}";
+        if (_cache.TryGetValue(dedupeKey, out _)) return Ok();
+
         var result = await _successCaseService.IncrementViewCountAsync(id);
-        return result.IsSuccess ? Ok() : BadRequest(result.Error);
+        if (!result.IsSuccess) return BadRequest(result.Error);
+        _cache.Set(dedupeKey, true, ViewDedupeWindow);
+        return Ok();
     }
 
     /// <summary>

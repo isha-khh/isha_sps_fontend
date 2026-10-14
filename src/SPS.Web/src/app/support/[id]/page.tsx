@@ -6,6 +6,7 @@ import MoreLink from "@/components/ui/MoreLink";
 import ShareBox from "@/components/ui/ShareBox";
 import ZoomableImage from "@/components/ui/ZoomableImage";
 import SidebarBanner from "@/components/layout/SidebarBanner";
+import NewsViewTracker from "@/components/news/NewsViewTracker";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import { fetchBanners, fetchSectionDetail, NewsSections } from "@/lib/api.server";
 import { formatIsoDate } from "@/lib/content-list-utils";
@@ -31,6 +32,7 @@ export default async function SupportNoticePage({ params }: PageProps<"/support/
   return (
     <>
       <BodyClass className="support show" />
+      <NewsViewTracker newsId={detail.id} />
       <InnerPageShell breadcrumb={[{ label: "補助資源" }, { label: "本計畫補助", href: "/support" }, { label: detail.title }]} aside={<SidebarBanner banners={sidebarBanners} />}>
         <div className="column_box">
           <div className="tit">

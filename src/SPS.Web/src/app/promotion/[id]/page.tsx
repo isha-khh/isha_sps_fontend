@@ -8,6 +8,7 @@ import ZoomableImage from "@/components/ui/ZoomableImage";
 import MoreLink from "@/components/ui/MoreLink";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
+import NewsViewTracker from "@/components/news/NewsViewTracker";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import { fetchPromotionCases, fetchPromotionCaseDetail, fetchBanners } from "@/lib/api.server";
 import { formatIsoDate, sortByViewCount } from "@/lib/content-list-utils";
@@ -78,6 +79,7 @@ export default async function PromotionShowPage({ params }: PageProps<"/promotio
   return (
     <>
       <BodyClass className="news serve promotion show" />
+      <NewsViewTracker newsId={item.id} kind="SuccessCase" />
       <InnerPageShell
         breadcrumb={[
           { label: "推廣專區" },

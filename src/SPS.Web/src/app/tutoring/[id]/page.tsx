@@ -8,6 +8,7 @@ import ShareBox from "@/components/ui/ShareBox";
 import ZoomableImage from "@/components/ui/ZoomableImage";
 import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
+import NewsViewTracker from "@/components/news/NewsViewTracker";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import { toTutoringItem } from "@/lib/tutoring-data";
 import { fetchBanners, fetchSectionDetail, fetchSectionItems, NewsSections } from "@/lib/api.server";
@@ -45,6 +46,7 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
   return (
     <>
       <BodyClass className="tutoring show" />
+      <NewsViewTracker newsId={detail.id} />
       <InnerPageShell
         breadcrumb={[{ label: "產業輔導", href: "/tutoring" }, ...(item.industry ? [{ label: item.industry, href: `/tutoring?category=${encodeURIComponent(item.industry)}` }] : []), { label: item.title }]}
         aside={
