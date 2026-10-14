@@ -6,7 +6,7 @@
 | 檔案 | 用途 |
 |---|---|
 | `docker-compose.beta.yml` | 三個應用容器＋beta 專用 Redis，固定 IP、**不對主機開 port** |
-| `.env.beta.example` | 環境變數範本（複製成 `.env` 填值，不要提交） |
+| `env.beta.example` | 環境變數範本（複製成 `.env` 填值，不要提交） |
 | `sanitize-beta-db.sql` | 在 `SPS_dev` 上關掉寄信、退信收信、ProTrack（**第一次啟動前必做**） |
 | `nginx-match.conf` | 主機 nginx 設定（直接轉到容器 IP） |
 
@@ -35,7 +35,7 @@ git -C .repo sparse-checkout set deploy/beta
 cd .repo/deploy/beta
 
 # 2. 環境變數
-cp .env.beta.example .env && chmod 600 .env
+cp env.beta.example .env && chmod 600 .env
 #   填 DB_CONNECTION_STRING（Database=SPS_dev）、REDIS_PASSWORD（openssl rand -hex 24）、JWT_SECRET_KEY（openssl rand -base64 48）
 
 # 3. 上傳檔案：從正式機複製既有檔案到 beta 的上傳資料夾（來源位置先確認，見下方「上傳檔案」）
