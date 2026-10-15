@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Modal from "@/components/ui/Modal";
+import SubmitResultModal from "@/components/matching/SubmitResultModal";
+import { swapModal } from "@/lib/bootstrap-modal";
 import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
 import { apiClient } from "@/lib/api-client";
 import { getApiErrorMessage } from "@/lib/error-utils";
@@ -39,6 +41,11 @@ export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonom
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submittedNumber, setSubmittedNumber] = useState<string | null>(null);
+  // 連點「刊登」時，state 還沒更新就會再進來一次，用 ref 同步擋掉（防止重複送出）
+  const submittingRef = useRef(false);
+  // 彈窗開不起來（bootstrap 沒載入）時的退路：把成功訊息顯示在表單底下
+  const [inlineNotice, setInlineNotice] = useState(false);
+  const resultId = `${id}-result`;
 
   function toggle(value: string) {
     setChecked((prev) => ({ ...prev, [value]: !prev[value] }));
@@ -48,7 +55,7 @@ export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonom
   const techIds = taxonomy.techGroups.flatMap((group) => group.sections.flatMap((section) => section.options.map((option) => option.value)));
 
   async function submit() {
-    if (submitting) return;
+    if (submittingRef.current) return;
     setError(null);
     if (!title.trim()) return setError("請輸入需求標題");
     if (!hasAny(taxonomy.scenarios.map((tag) => String(tag.id)))) return setError("請至少選擇一個應用情境");
@@ -56,6 +63,7 @@ export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonom
     if (!hasAny(techIds)) return setError("請至少選擇一個智慧技術");
     if (!agreed) return setError("請勾選同意免責聲明");
 
+    submittingRef.current = true;
     setSubmitting(true);
     try {
       const response = await apiClient.post<{ number: string }>("/api/Demand/submit", {
@@ -71,15 +79,19 @@ export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonom
       setContent("");
       setChecked({});
       setAgreed(false);
+      // 送出成功就關掉表單視窗（防止重複送出），改開醒目的結果視窗
+      setInlineNotice(!swapModal(id, resultId));
     } catch (err) {
       const status = (err as { response?: { status?: number } }).response?.status;
       setError(status === 403 ? "僅企業會員可以刊登需求。" : getApiErrorMessage(err, "刊登失敗，請稍後再試"));
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   }
 
   return (
+    <>
     <Modal id={id} title="我要刊登" dialogClassName="modal-dialog_w7">
       <div className="form-group">
         <label className="mb-2" htmlFor={`${id}-title`}>
@@ -178,7 +190,7 @@ export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonom
           {error}
         </p>
       )}
-      {submittedNumber && <p className="text-success mb-3">已收到您的刊登需求（編號 {submittedNumber}），將於審核後上架。</p>}
+      {inlineNotice && submittedNumber && <p className="text-success mb-3">已收到您的刊登需求（編號 {submittedNumber}），將於審核後上架。</p>}
 
       <div className="card-footer d-flex justify-content-center">
         <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
@@ -197,5 +209,10 @@ export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonom
         </a>
       </div>
     </Modal>
+    <SubmitResultModal id={resultId} title="我要刊登">
+      <p className="mb-1">已收到您的刊登需求{submittedNumber ? `（編號 ${submittedNumber}）` : ""}。</p>
+      <p className="mb-0">平台審核通過後才會上架。</p>
+    </SubmitResultModal>
+    </>
   );
 }

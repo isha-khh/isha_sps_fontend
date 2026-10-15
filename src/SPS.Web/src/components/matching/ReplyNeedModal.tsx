@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
 import Modal from "@/components/ui/Modal";
+import SubmitResultModal from "@/components/matching/SubmitResultModal";
+import { swapModal } from "@/lib/bootstrap-modal";
 import { demandRepliesApi } from "@/lib/api/demand-replies";
 
 /**
@@ -32,15 +34,20 @@ export default function ReplyNeedModal({ id, demandId, demandTitle, followerCoun
   const [acknowledged, setAcknowledged] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 彈窗開不起來（bootstrap 沒載入）時的退路：把成功訊息顯示在表單底下
   const [submitted, setSubmitted] = useState(false);
+  // 連點「送出回應」時，state 還沒更新就會再進來一次，用 ref 同步擋掉（防止重複送出）
+  const submittingRef = useRef(false);
+  const resultId = `${id}-result`;
 
   async function submit() {
-    if (submitting) return;
+    if (submittingRef.current) return;
     setError(null);
     if (!name.trim() || !email.trim()) return setError("請填寫聯絡人姓名與信箱");
     if (!content.trim()) return setError("請輸入回應內容");
     if (!acknowledged) return setError("請勾選「我了解以上收件對象」");
 
+    submittingRef.current = true;
     setSubmitting(true);
     const message = await demandRepliesApi.create(demandId, {
       contactName: name.trim(),
@@ -49,14 +56,17 @@ export default function ReplyNeedModal({ id, demandId, demandTitle, followerCoun
       content: content.trim(),
       acknowledged,
     });
+    submittingRef.current = false;
     setSubmitting(false);
     if (message) return setError(message);
-    setSubmitted(true);
     setContent("");
     setAcknowledged(false);
+    // 送出成功就關掉表單視窗（防止重複送出），改開醒目的結果視窗
+    setSubmitted(!swapModal(id, resultId));
   }
 
   return (
+    <>
     <Modal id={id} title="我要回應">
       <p className="mb-3">
         <b>需求：</b>
@@ -123,5 +133,10 @@ export default function ReplyNeedModal({ id, demandId, demandTitle, followerCoun
         </a>
       </div>
     </Modal>
+    <SubmitResultModal id={resultId} title="我要回應">
+      <p className="mb-1">已收到您的回應，審核通過後會寄給刊登者與追蹤者。</p>
+      <p className="mb-0">可以到會員中心「我的回應」查看審核狀態。</p>
+    </SubmitResultModal>
+    </>
   );
 }
