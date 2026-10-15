@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Puck, Render, type Data } from '@puckeditor/core';
 import "@puckeditor/core/puck.css";
 import { puckConfig } from '@/lib/puck/config';
@@ -14,6 +14,8 @@ export const PuckEditor = ({ initialContent, onChange, onSave }: PuckEditorProps
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  // 全螢幕編輯器的外層容器：下面用原生事件擋掉裡面的表單送出（見 useEffect）
+  const editorContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Only load initial content once
@@ -77,6 +79,19 @@ export const PuckEditor = ({ initialContent, onChange, onSave }: PuckEditorProps
     setLoading(false);
     setInitialized(true);
   }, [initialContent, initialized]);
+
+  // Puck 右側欄位面板本身就是一個 <form>（class 開頭 _PuckFields），而它的富文字工具列按鈕（粗體、斜體、底線、標題、清單、對齊）
+  // 沒有設 type 屬性，預設會當成「送出」按鈕：點下去瀏覽器對目前網址做原生送出（網址後面多一串 ?fontSize=…），
+  // 整頁重新載入，編輯到一半的內容就丟了（GitHub issue #16）。畫布裡的行內工具列在表單外面，所以沒事。
+  // 編輯器裡不會用到原生送出（發布與儲存都是外面頁面的按鈕），所以在容器上用原生事件擋掉所有送出；
+  // 用原生監聽而不是 React 的 onSubmit：Puck 的面板送出事件不會經過外層頁面的 React onSubmit（實測過）。
+  useEffect(() => {
+    const container = editorContainerRef.current;
+    if (!container) return;
+    const blockSubmit = (e: Event) => e.preventDefault();
+    container.addEventListener('submit', blockSubmit);
+    return () => container.removeEventListener('submit', blockSubmit);
+  }, [isFullscreen, loading]);
 
   // Handle ESC key to exit fullscreen
   useEffect(() => {
@@ -149,7 +164,7 @@ export const PuckEditor = ({ initialContent, onChange, onSave }: PuckEditorProps
       {/* 全螢幕編輯器 */}
       {isFullscreen && (
         <>
-          <div className="fixed inset-0 z-[9999] overflow-hidden">
+          <div ref={editorContainerRef} className="fixed inset-0 z-[9999] overflow-hidden">
             <Puck
               config={puckConfig}
               data={data}
