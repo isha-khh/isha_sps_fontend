@@ -146,7 +146,13 @@ export const SuccessCaseFormPage = () => {
         ]}
       />
 
-      <form className="space-y-6">
+      {/*
+        視覺化編輯器（Puck）整個放在這個 <form> 裡，而它的富文字工具列按鈕（粗體、斜體、底線、標題、清單、對齊）
+        沒有設 type 屬性：<form> 裡沒寫 type 的 <button> 預設是 type="submit"，點下去會觸發表單的原生送出，
+        瀏覽器重新載入頁面，編輯到一半的內容就丟了（GitHub issue #16：「選取文字按粗體會跳出頁面無法暫存」）。
+        這個頁面的儲存都是靠按鈕的 onClick，沒有用原生送出，所以直接擋掉；也順便擋掉在輸入框按 Enter 造成的原生送出。
+      */}
+      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 主要內容 */}
           <div className="lg:col-span-2 space-y-6">
