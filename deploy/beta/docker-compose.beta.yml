@@ -129,7 +129,8 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:80/"]
+      # 用 127.0.0.1 不用 localhost：容器內 localhost 會先解析成 ::1（IPv6），但後台映像的 nginx 只聽 IPv4 的 80，會一直 Connection refused
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:80/"]
       interval: 30s
       timeout: 5s
       retries: 5
