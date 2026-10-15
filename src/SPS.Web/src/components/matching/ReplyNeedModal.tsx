@@ -110,7 +110,15 @@ export default function ReplyNeedModal({ id, demandId, demandTitle, followerCoun
         <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
           取消
         </a>
-        <a href="javascript:void(0)" className="btn-theme mat_Send" aria-disabled={submitting} onClick={() => void submit()}>
+        <a
+          href="#"
+          className="btn-theme mat_Send"
+          aria-disabled={submitting}
+          onClick={(event) => {
+            event.preventDefault();
+            void submit();
+          }}
+        >
           {submitting ? "送出中…" : "送出回應"}
         </a>
       </div>

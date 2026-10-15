@@ -44,41 +44,14 @@ const nextConfig: NextConfig = {
     //  - nosniff：瀏覽器不要自己猜內容型別；
     //  - SAMEORIGIN：只有自己的網站可以用 iframe 嵌入頁面（防點擊劫持）；
     //  - Referrer-Policy：跨站連出去時只帶來源網域，不帶完整路徑與查詢字串。
-    // CSP：2026-10-15 在測試機以 `Content-Security-Policy-Report-Only` 觀察（公開頁面、登入後的會員中心都沒有違規）後，改為正式的
-    // `Content-Security-Policy`（會擋）。違規仍會 POST 到 `/csp-report`（見 src/app/csp-report/route.ts，寫進伺服器日誌）；
-    // 日後新增外部來源（例如新的嵌入影片網站、外部圖片）若被擋，要回來這裡的白名單補上。
-    // 想暫時改回只回報、不擋：把下面標頭名稱改成 `Content-Security-Policy-Report-Only`。
-    // `script-src` 目前必須允許 'unsafe-inline'（Next.js 的頁面資料用行內腳本）；2026-10-15 已拿掉 'unsafe-eval'（ZAP 掃描：中風險，實測沒有用到）。
-    // 所以它擋得住「外部腳本來源、iframe、object、base 標籤、eval」，擋不住行內腳本注入；要完全擋住需改 nonce 方案（頁面要改成動態渲染）。
-    // `style-src` 的 'unsafe-inline' 保留：舊站標記與 React 都大量使用 style 屬性，改掉的成本遠高於風險。
-    const basePath = process.env.VERCEL ? "" : "/sps";
-    const csp = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' data: https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://placehold.co",
-      "media-src 'self' blob:",
-      "connect-src 'self'",
-      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'self'",
-      // report-to 是新標準（Chromium 系列使用 Reporting-Endpoints 標頭的端點名稱）；report-uri 已被標為過時，但 Firefox／Safari 還在用，兩個都留。
-      "report-to csp-endpoint",
-      `report-uri ${basePath}/csp-report`,
-    ].join("; ");
+    // CSP（含 nonce）與 Reporting-Endpoints 不在這裡設：每個請求要產生不同的 nonce，由 `src/proxy.ts` 負責。
     const securityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "SAMEORIGIN" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     ];
     return [
-      {
-        source: "/:path*",
-        headers: [...securityHeaders, { key: "Content-Security-Policy", value: csp }, { key: "Reporting-Endpoints", value: `csp-endpoint="${basePath}/csp-report"` }],
-      },
+      { source: "/:path*", headers: securityHeaders },
       { source: "/images/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
       { source: "/data/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
     ];

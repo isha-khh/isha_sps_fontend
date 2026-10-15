@@ -50,7 +50,15 @@ export default function FollowButton({ demandId, variant }: { demandId: number; 
     }
     return (
       <>
-        <a href="javascript:void(0)" title={followed ? "取消追蹤此需求" : "追蹤此需求"} className="connec_s more_x more_x_gu" onClick={() => void toggle()}>
+        <a
+          href="#"
+          title={followed ? "取消追蹤此需求" : "追蹤此需求"}
+          className="connec_s more_x more_x_gu"
+          onClick={(event) => {
+            event.preventDefault();
+            void toggle();
+          }}
+        >
           <span>{label}</span>
           <i className={`bi ${followed ? "bi-check2" : "bi-arrow-right"}`} aria-hidden="true" />
         </a>

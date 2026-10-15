@@ -184,7 +184,15 @@ export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonom
         <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
           取消
         </a>
-        <a href="javascript:void(0)" className="btn-theme mat_Send" aria-disabled={submitting} onClick={() => void submit()}>
+        <a
+          href="#"
+          className="btn-theme mat_Send"
+          aria-disabled={submitting}
+          onClick={(event) => {
+            event.preventDefault();
+            void submit();
+          }}
+        >
           {submitting ? "送出中…" : "刊登"}
         </a>
       </div>

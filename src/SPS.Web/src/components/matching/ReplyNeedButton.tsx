@@ -15,7 +15,7 @@ export default function ReplyNeedButton({ modalId }: { modalId: string }) {
 
   if (ready && role === "supplier") {
     return (
-      <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target={`#${modalId}`} className="me_Publish more_x">
+      <a href="#" data-bs-toggle="modal" data-bs-target={`#${modalId}`} className="me_Publish more_x">
         <span>我要回應</span>
         <i className="bi bi-pencil-square" aria-hidden="true" />
       </a>
@@ -33,7 +33,7 @@ export default function ReplyNeedButton({ modalId }: { modalId: string }) {
 
   return (
     <>
-      <a href="javascript:void(0)" className="me_Publish more_x is-disabled" aria-disabled="true">
+      <a href="#" className="me_Publish more_x is-disabled" aria-disabled="true" onClick={(event) => event.preventDefault()}>
         <span>我要回應</span>
         <i className="bi bi-pencil-square" aria-hidden="true" />
       </a>

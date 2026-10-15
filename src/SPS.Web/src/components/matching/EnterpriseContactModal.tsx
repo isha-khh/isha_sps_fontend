@@ -91,12 +91,15 @@ export default function EnterpriseContactModal({ id, companyId }: { id: string; 
           取消
         </a>
         <a
-          href="javascript:void(0)"
+          href="#"
           className="btn-theme mat_Send"
           aria-expanded={contact !== null}
           aria-controls={`${id}-contact-info`}
           aria-disabled={loading}
-          onClick={() => void requestContact()}
+          onClick={(event) => {
+            event.preventDefault();
+            void requestContact();
+          }}
         >
           {loading ? "送出中…" : "送出"}
         </a>

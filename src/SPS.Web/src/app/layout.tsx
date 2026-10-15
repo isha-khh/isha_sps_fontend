@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { connection } from "next/server";
 import BootstrapModalRouteCleanup from "@/components/BootstrapModalRouteCleanup";
 import SiteVisitTracker from "@/components/SiteVisitTracker";
 import PopupAnnouncements from "@/components/PopupAnnouncements";
@@ -99,6 +100,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // CSP 用 nonce（`src/proxy.ts` 每個請求產生一組）：Next.js 只有在「伺服器端渲染當下」才能把 nonce 加到行內腳本上，
+  // 靜態預先產生的頁面沒有請求標頭、沒有 nonce，所以整站要動態渲染。
+  await connection();
   // 後台「頁面設定」的「產業AI」外部連結開關（取不到就是關閉）
   const industryAi = await fetchIndustryAiLink();
   return (

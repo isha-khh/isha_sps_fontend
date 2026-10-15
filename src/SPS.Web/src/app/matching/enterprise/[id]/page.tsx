@@ -70,7 +70,7 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
     icon: "bi-envelope-at",
     label: "聯繫窗口",
     content: (
-      <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target={`#${modalId}`} className="connec_s" title="取得聯絡方式">
+      <a href="#" data-bs-toggle="modal" data-bs-target={`#${modalId}`} className="connec_s" title="取得聯絡方式">
         取得聯絡方式
       </a>
     ),

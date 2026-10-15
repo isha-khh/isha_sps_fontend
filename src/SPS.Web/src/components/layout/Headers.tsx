@@ -551,7 +551,7 @@ export default function Headers() {
             <div className="small-btn-box nav-3 d-flex align-items-center">
               <HeaderSearch />
 
-              <a href="javascript:void(0);" className="btn btn-light rounded-pill btn-scroll-newsletter" title="訂閱電子報">
+              <a href="#" className="btn btn-light rounded-pill btn-scroll-newsletter" title="訂閱電子報">
                 <span>訂閱電子報</span>
               </a>
 
