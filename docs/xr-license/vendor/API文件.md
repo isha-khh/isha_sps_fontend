@@ -33,7 +33,7 @@ XR 軟體可以公開下載，但**必須有授權才能使用**。授權由平�
 | 環境 | 基底網址 | 簽章金鑰 `kid` |
 |---|---|---|
 | 測試 | `https://sps.isha.net` | `test-2026-10` |
-| 正式 | 上線時通知 | `prod-…` |
+| 正式 | 上線時通知 | `prod-2026-10` |
 
 - 所有端點的路徑與格式在兩個環境**完全相同**，請把「基底網址」與「公鑰集合」做成可設定。
 - **請同時內嵌測試與正式兩把公鑰**，依授權檔的 `kid` 選用。測試環境簽的授權在正式環境驗不過，反之亦然。
@@ -49,7 +49,18 @@ XR 軟體可以公開下載，但**必須有授權才能使用**。授權由平�
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEr8n/5rdlKZC9i7u/4IeJlQ5sBO3tfgQGgX3GCXisl8ycAC5OA0FwIIzJOVcslLk8Ajsh6SnNDa/edrpbnCeYGA==
 ```
 
-也可以從 `GET /api/license/v1/public-keys` 取得。正式環境公鑰上線時另行提供。
+也可以從 `GET /api/license/v1/public-keys` 取得。
+
+### 正式環境簽章公鑰
+
+- `kid`：`prod-2026-10`
+- 演算法：ECDSA P-256 + SHA-256（ES256）；格式同上（SPKI DER 的 base64）
+
+```
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWamL0FnWMf9s3bAbn+NHKGYpI4BdgSbl1HW2dEu3N902pM++JQV+7Ow/+/C/x6UuOQj6xZD5ORKLWDn04tKymg==
+```
+
+正式環境的伺服器網址上線時另行通知。測試與正式的公鑰不同，**請兩把都內嵌**，依授權檔的 `kid` 選用。
 
 ## 3. 通用規則
 
