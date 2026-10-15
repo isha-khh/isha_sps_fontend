@@ -44,14 +44,33 @@ const nextConfig: NextConfig = {
     //  - nosniff：瀏覽器不要自己猜內容型別；
     //  - SAMEORIGIN：只有自己的網站可以用 iframe 嵌入頁面（防點擊劫持）；
     //  - Referrer-Policy：跨站連出去時只帶來源網域，不帶完整路徑與查詢字串。
-    // CSP 另外處理（要先用 Report-Only 觀察，不然很容易把頁面弄壞）。
+    // CSP：先用 `Content-Security-Policy-Report-Only`（只回報、不擋），違規會 POST 到 `/csp-report`（見 src/app/csp-report/route.ts，
+    // 寫進伺服器日誌）；觀察一段時間、把需要的來源都放行之後，再把名稱改成 `Content-Security-Policy` 正式啟用。
+    // `script-src` 目前必須允許 'unsafe-inline'／'unsafe-eval'（Next.js 的頁面資料與舊站 jQuery 外掛都用到），
+    // 所以它擋得住「外部腳本來源、iframe、object、base 標籤」，擋不住行內腳本注入；之後要更嚴格可改 nonce 方案。
+    const basePath = process.env.VERCEL ? "" : "/sps";
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://placehold.co",
+      "media-src 'self' blob:",
+      "connect-src 'self'",
+      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'self'",
+      `report-uri ${basePath}/csp-report`,
+    ].join("; ");
     const securityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "SAMEORIGIN" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     ];
     return [
-      { source: "/:path*", headers: securityHeaders },
+      { source: "/:path*", headers: [...securityHeaders, { key: "Content-Security-Policy-Report-Only", value: csp }] },
       { source: "/images/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
       { source: "/data/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
     ];
