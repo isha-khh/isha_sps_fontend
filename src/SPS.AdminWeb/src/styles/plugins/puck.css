@@ -29,3 +29,13 @@
   --puck-color-white: #181818;
   --puck-color-black: #fafafa;
 }
+
+/*
+ * Puck 全螢幕編輯器（PuckEditor.tsx 的容器是 fixed、z-index 9999）裡面，右側欄位工具列的下拉選單（標題 H、清單、對齊）
+ * 是 Radix popover：它被掛到 <body> 最後面，外層 wrapper 的 z-index 是 auto，所以整個被編輯器的 z-index 9999 蓋住——
+ * 按下去選單其實有開，但看不見也點不到（GitHub issue #16 後續：「H 標籤、清單、縮排無作用」；粗體、斜體、底線沒有下拉選單所以正常）。
+ * 把 popper 的 wrapper 拉到編輯器上面。
+ */
+[data-radix-popper-content-wrapper] {
+  z-index: 10001 !important;
+}
