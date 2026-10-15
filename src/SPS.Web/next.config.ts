@@ -44,8 +44,10 @@ const nextConfig: NextConfig = {
     //  - nosniff：瀏覽器不要自己猜內容型別；
     //  - SAMEORIGIN：只有自己的網站可以用 iframe 嵌入頁面（防點擊劫持）；
     //  - Referrer-Policy：跨站連出去時只帶來源網域，不帶完整路徑與查詢字串。
-    // CSP：先用 `Content-Security-Policy-Report-Only`（只回報、不擋），違規會 POST 到 `/csp-report`（見 src/app/csp-report/route.ts，
-    // 寫進伺服器日誌）；觀察一段時間、把需要的來源都放行之後，再把名稱改成 `Content-Security-Policy` 正式啟用。
+    // CSP：2026-10-15 在測試機以 `Content-Security-Policy-Report-Only` 觀察（公開頁面、登入後的會員中心都沒有違規）後，改為正式的
+    // `Content-Security-Policy`（會擋）。違規仍會 POST 到 `/csp-report`（見 src/app/csp-report/route.ts，寫進伺服器日誌）；
+    // 日後新增外部來源（例如新的嵌入影片網站、外部圖片）若被擋，要回來這裡的白名單補上。
+    // 想暫時改回只回報、不擋：把下面標頭名稱改成 `Content-Security-Policy-Report-Only`。
     // `script-src` 目前必須允許 'unsafe-inline'／'unsafe-eval'（Next.js 的頁面資料與舊站 jQuery 外掛都用到），
     // 所以它擋得住「外部腳本來源、iframe、object、base 標籤」，擋不住行內腳本注入；之後要更嚴格可改 nonce 方案。
     const basePath = process.env.VERCEL ? "" : "/sps";
@@ -70,7 +72,7 @@ const nextConfig: NextConfig = {
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     ];
     return [
-      { source: "/:path*", headers: [...securityHeaders, { key: "Content-Security-Policy-Report-Only", value: csp }] },
+      { source: "/:path*", headers: [...securityHeaders, { key: "Content-Security-Policy", value: csp }] },
       { source: "/images/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
       { source: "/data/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
     ];
