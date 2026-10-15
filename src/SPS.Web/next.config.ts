@@ -33,21 +33,14 @@ const nextConfig: NextConfig = {
   // 改了要馬上生效（見 docs 的 public/css 同步說明）。`/_next/static` 本來就是一年 immutable。
   // 後台上傳的圖片走 API 的 `/api/FileManagement/{id}/download`，快取標頭在後端那邊設。
   // 2026-10-15：關掉 `X-Powered-By: Next.js`（ZAP 掃描：洩漏使用的框架）。
+  // 安全標頭（nosniff、X-Frame-Options、HSTS、Referrer-Policy、CSP…）【不在這裡設】：系統已經有後台
+  // 「HTTP 安全設定」，由後端 `NginxConfigGenerator` 產生 nginx 設定檔（`SecuritySettings__NginxConfigPath`）
+  // 給 nginx include；在這裡再加一份會讓同一個標頭出現兩次（測試機實測過，已移除）。
+  // 沒有 include 那個檔案的主機 nginx（例如正式機上的 beta）要自己在 `/sps` 的 location 補上，見 deploy/beta/nginx-match.conf。
   poweredByHeader: false,
   async headers() {
     const oneDay = "public, max-age=86400, stale-while-revalidate=604800";
-    // 2026-10-15 ZAP 掃描建議的基本安全標頭（只影響前台 `/sps` 底下的回應）：
-    //  - nosniff：瀏覽器不要自己猜內容型別；
-    //  - SAMEORIGIN：只有自己的網站可以用 iframe 嵌入頁面（防點擊劫持）；
-    //  - Referrer-Policy：跨站連出去時只帶來源網域，不帶完整路徑與查詢字串。
-    // CSP 與 HSTS 另外處理（CSP 要先用 Report-Only 觀察，HSTS 在主機 nginx 設定）。
-    const securityHeaders = [
-      { key: "X-Content-Type-Options", value: "nosniff" },
-      { key: "X-Frame-Options", value: "SAMEORIGIN" },
-      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-    ];
     return [
-      { source: "/:path*", headers: securityHeaders },
       { source: "/images/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
       { source: "/data/:path*", headers: [{ key: "Cache-Control", value: oneDay }] },
     ];
