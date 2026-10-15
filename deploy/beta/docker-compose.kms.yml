@@ -1,0 +1,14 @@
+# XR 授權的 Cloud KMS 憑證（疊加在 docker-compose.beta.yml 上）。
+# 把「只能用正式環境那把金鑰」的服務帳號金鑰檔（JSON）放在 SPS_dev/secrets/，以唯讀掛進 api 容器，
+# 後端用 Application Default Credentials 自動讀取（GOOGLE_APPLICATION_CREDENTIALS）。
+#
+# 之後所有 docker compose 指令都要同時帶兩個檔，漏帶這個檔 api 會被重建成沒有憑證的版本（XR 授權簽章會失敗）：
+#   docker compose -f docker-compose.beta.yml -f docker-compose.kms.yml <up -d|ps|logs|pull> ...
+#
+# 金鑰檔不要提交到 git、不要貼到對話。檔名固定為 sps-license-prod-sa.json。
+services:
+  api:
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp-kms.json
+    volumes:
+      - ./secrets/sps-license-prod-sa.json:/run/secrets/gcp-kms.json:ro
