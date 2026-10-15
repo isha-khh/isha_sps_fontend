@@ -9,7 +9,9 @@ import { NextResponse, type NextRequest } from "next/server";
  *
  * `script-src` 仍保留 'self'：舊站的第三方套件（jQuery、Bootstrap、Fancybox…，`public/js/`）是同網域的外部檔案，不需要 nonce。
  * `style-src` 保留 'unsafe-inline'：全站有大量 `style` 屬性（React 與舊站標記），無法用 nonce 涵蓋；樣式注入的風險遠小於腳本。
- * 違規回報：`report-to`（Reporting-Endpoints，新標準）與 `report-uri`（Firefox／Safari 還在用）都指向 /csp-report，寫進伺服器日誌。
+ * 違規回報：只用 `report-uri` 指向 /csp-report，寫進伺服器日誌。ZAP 會提示 report-uri 已過時（低風險），但 2026-10-15 在測試機實測：
+ * 同時加 `report-to` 之後，瀏覽器（優先用 report-to，走批次的 Reporting API）送的違規一直沒有到伺服器；只用 `report-uri` 時瀏覽器的回報會立刻送達。
+ * 可靠的違規回報比消掉一則低風險提示重要，所以拿掉 report-to。
  */
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
@@ -30,7 +32,6 @@ export function proxy(request: NextRequest) {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'self'",
-    "report-to csp-endpoint",
     `report-uri ${basePath}/csp-report`,
   ].join("; ");
 
@@ -40,7 +41,6 @@ export function proxy(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
-  response.headers.set("Reporting-Endpoints", `csp-endpoint="${basePath}/csp-report"`);
   return response;
 }
 
