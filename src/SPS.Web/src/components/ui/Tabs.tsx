@@ -38,17 +38,20 @@ export default function Tabs({
   ariaLabel,
   items,
   defaultActiveId,
+  listClassName = "mb-3",
 }: {
   id: string;
   ariaLabel: string;
   items: TabItem[];
   defaultActiveId?: string;
+  /** 頁籤列（`ul.nav-pills`）除了 `nav nav-pills` 之外的 class，預設 `mb-3`；XR 頁的設計稿用 `mb-md-5 mb-4` */
+  listClassName?: string;
 }) {
   const activeId = defaultActiveId ?? items[0]?.id;
 
   return (
     <>
-      <ul className="nav nav-pills mb-3" id={id} role="tablist" aria-label={ariaLabel}>
+      <ul className={`nav nav-pills ${listClassName}`} id={id} role="tablist" aria-label={ariaLabel}>
         {items.map((item) => {
           const isActive = item.id === activeId;
           return (

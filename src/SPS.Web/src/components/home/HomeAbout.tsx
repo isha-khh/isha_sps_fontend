@@ -19,7 +19,7 @@ export default function HomeAbout() {
           需求的橋樑，支持企業形成在地供應鏈。
         </p>
 
-        <MoreLink href="#" label="查看看多" title="前往查看看多" />
+        <MoreLink href="/about" label="查看看多" title="前往查看看多" />
       </div>
 
       <div className="tit_right">

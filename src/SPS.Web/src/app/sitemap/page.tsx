@@ -56,7 +56,7 @@ const SERVICE_LINKS = [
     href: "/talent",
     children: [
       { label: "知識加值", href: "/talent" },
-      { label: "xr", href: "/talent/xr" },
+      { label: "XR", href: "/talent/xr" },
     ],
   },
   {

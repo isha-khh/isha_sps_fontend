@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
+import PersonalDataConsentNotice from "@/components/member/PersonalDataConsentNotice";
 import { requestServeDownload, type ServeDownloadLink } from "@/lib/api/inquiries";
 import { resolveBackendAssetUrl } from "@/lib/content-list-utils";
 
@@ -176,8 +177,10 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
       </div>
       )}
 
-      <Modal id="privacyConsentModal" title="個資蒐集條款">
-        <p>內容內容內容內容內容</p>
+      {/* 2026-10-14 設計稿：標題改為「蒐集個人資料告知事項暨個人資料同意書」，內文與註冊流程共用同一份（官方《附件一》逐字） */}
+      <Modal id="privacyConsentModal" title="蒐集個人資料告知事項暨個人資料同意書">
+        <h5>蒐集個人資料告知事項：</h5>
+        <PersonalDataConsentNotice />
       </Modal>
     </div>
   );

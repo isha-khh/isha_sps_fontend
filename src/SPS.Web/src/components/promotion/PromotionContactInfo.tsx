@@ -1,5 +1,5 @@
 /**
- * 積木元件：「我要投稿」頁的聯繫人資訊，對應舊站
+ * 積木元件：「我要投稿」頁的聯絡資訊（2026-10-14 設計稿由「聯繫人資訊」改名），對應舊站
  * page/promotion/_uc/cont.html——跟 news 的
  * [ArticleContactInfo](../news/ArticleContactInfo.tsx) 是不同資料
  * （多一個「聯絡人」姓名欄位、信箱標籤是「投稿信箱」），沒有共用。
@@ -24,7 +24,7 @@ export default function PromotionContactInfo({
     <div className="dow_t">
       <div className="dow-name">
         <i className="bi bi-person-vcard me-2" aria-hidden="true"></i>
-        <span>聯繫人資訊</span>
+        <span>聯絡資訊</span>
       </div>
 
       <div className="dow_box">

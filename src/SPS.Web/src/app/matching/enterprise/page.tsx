@@ -80,6 +80,15 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
             return qs ? `/matching/enterprise?${qs}` : "/matching/enterprise";
           }}
         />
+
+        {/* 2026-10-14 設計稿：這張橫幅從「我要媒合」首頁搬到企業名錄頁 */}
+        <div className="publish_banner mt-md-5 mt-4 mb-4">
+          <a href="#" className="video-card" title="石化產業智慧轉型——從數據到決策（另開視窗）" target="_blank" rel="noopener noreferrer">
+            <div className="pic">
+              <img className="img-fluid d-block" src={withBasePath("/images/banner/b1.jpg")} alt="石化產業智慧轉型——從數據到決策" />
+            </div>
+          </a>
+        </div>
       </InnerPageShell>
     </>
   );

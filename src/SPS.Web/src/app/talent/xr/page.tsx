@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
+import Tabs from "@/components/ui/Tabs";
 import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
@@ -55,6 +56,9 @@ const TRAINING_OUTCOMES = [
  * XR 訓練介紹頁，對應設計稿 page/talent/xr.html——純行銷/說明用的
  * 靜態頁，沒有列表也沒有後端資料，跟 talent 列表頁是同一組（人才培育）
  * 底下的兩個平行頁面，不是 talent 的詳情頁。
+ *
+ * 2026-10-14 設計稿改版：內容分成兩個頁籤——「動火作業」（原本整頁的內容）與「有機電操作」（目前只有
+ * 「敬請期待」）。頁籤用共用的 `Tabs`（bootstrap pill，切換由 bootstrap 接手）。
  */
 export default async function TalentXrPage() {
   // 「立即下載」的連結由後台「頁面設定 → 下載資源」維護（XR 訓練模組只能設外部連結）
@@ -77,151 +81,179 @@ export default async function TalentXrPage() {
           </>
         }
       >
-        <h3 className="xr_h">
-          <span>為什麼需要XR</span>
-        </h3>
-        <div className="xr_list1 mb-md-5 mb-4">
-          <div className="d-flex">
-            <div className="xr_le">
-              <h4>傳統訓練痛點</h4>
-              <ul className="nav d-block">
-                {TRADITIONAL_PAIN_POINTS.map((item) => (
-                  <li key={item.text}>
-                    <i className={`bi ${item.icon}`} />
-                    <span>{item.text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="xr_tri">
-              <img className="img-fluid d-block" src={withBasePath("/images/all/xr_tri.svg")} aria-hidden="true" alt="" />
-            </div>
-            <div className="xr_ri">
-              <h4>XR訓練優勢</h4>
-              <ul className="nav d-block">
-                {XR_ADVANTAGES.map((item) => (
-                  <li key={item.text}>
-                    <i className={`bi ${item.icon}`} />
-                    <span>{item.text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+        <Tabs
+          id="ser-pills-tab"
+          ariaLabel="XR分類頁籤"
+          listClassName="mb-md-5 mb-4"
+          items={[
+            {
+              id: "ser-home-01",
+              ariaLabel: "動火作業",
+              label: <span>動火作業</span>,
+              content: (
+                <>
+                  <h3 className="xr_h">
+                    <span>為什麼需要XR</span>
+                  </h3>
+                  <div className="xr_list1 mb-md-5 mb-4">
+                    <div className="d-flex">
+                      <div className="xr_le">
+                        <h4>傳統訓練痛點</h4>
+                        <ul className="nav d-block">
+                          {TRADITIONAL_PAIN_POINTS.map((item) => (
+                            <li key={item.text}>
+                              <i className={`bi ${item.icon}`} />
+                              <span>{item.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="xr_tri">
+                        <img className="img-fluid d-block" src={withBasePath("/images/all/xr_tri.svg")} aria-hidden="true" alt="" />
+                      </div>
+                      <div className="xr_ri">
+                        <h4>XR訓練優勢</h4>
+                        <ul className="nav d-block">
+                          {XR_ADVANTAGES.map((item) => (
+                            <li key={item.text}>
+                              <i className={`bi ${item.icon}`} />
+                              <span>{item.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
 
-        <h3 className="xr_h">
-          <span>XR訓練情境</span>
-        </h3>
-        <div className="xr_list2 mb-md-5 mb-4">
-          <ul className="nav">
-            {TRAINING_SCENARIOS.map((item, index) => (
-              <Fragment key={item.label}>
-                <li>
-                  <img className="img-fluid d-block img-small mx-auto" src={withBasePath(item.icon)} aria-hidden="true" alt="" />
-                  <span>{item.label}</span>
-                </li>
-                {index < TRAINING_SCENARIOS.length - 1 && (
-                  <li className="xr_tri">
-                    <img className="img-fluid d-block" src={withBasePath("/images/all/xr_tri.svg")} aria-hidden="true" alt="" />
-                  </li>
-                )}
-              </Fragment>
-            ))}
-          </ul>
-        </div>
+                  <h3 className="xr_h">
+                    <span>XR訓練情境</span>
+                  </h3>
+                  <div className="xr_list2 mb-md-5 mb-4">
+                    <ul className="nav">
+                      {TRAINING_SCENARIOS.map((item, index) => (
+                        <Fragment key={item.label}>
+                          <li>
+                            <img className="img-fluid d-block img-small mx-auto" src={withBasePath(item.icon)} aria-hidden="true" alt="" />
+                            <span>{item.label}</span>
+                          </li>
+                          {index < TRAINING_SCENARIOS.length - 1 && (
+                            <li className="xr_tri">
+                              <img className="img-fluid d-block" src={withBasePath("/images/all/xr_tri.svg")} aria-hidden="true" alt="" />
+                            </li>
+                          )}
+                        </Fragment>
+                      ))}
+                    </ul>
+                  </div>
 
-        <h3 className="xr_h">
-          <span>六階段沉浸式訓練流程</span>
-        </h3>
-        <div className="xr_list3 mb-md-5 mb-4">
-          <ul className="nav">
-            {TRAINING_STEPS.map((step, index) => (
-              <li key={step.title}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <div className="pic">
-                  <img className="img-fluid d-block img-small mx-auto" src={withBasePath(step.icon)} aria-hidden="true" alt="" />
-                </div>
-                <div className="tit">
-                  <h4>{step.title}</h4>
-                  <p className="mb-0">{step.desc}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+                  <h3 className="xr_h xr_h_s">
+                    <span>六階段沉浸式訓練流程</span>
+                  </h3>
+                  <div className="xr_list3 mb-md-5 mb-4">
+                    <ul className="nav">
+                      {TRAINING_STEPS.map((step, index) => (
+                        <li key={step.title}>
+                          <span>{String(index + 1).padStart(2, "0")}</span>
+                          <div className="pic">
+                            <img className="img-fluid d-block img-small mx-auto" src={withBasePath(step.icon)} aria-hidden="true" alt="" />
+                          </div>
+                          <div className="tit">
+                            <h4>{step.title}</h4>
+                            <p className="mb-0">{step.desc}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-        <h3 className="xr_h">
-          <span>訓練成效與智慧管理</span>
-        </h3>
-        <div className="xr_list4 mb-md-5 mb-4">
-          <ul className="nav">
-            {TRAINING_OUTCOMES.map((item) => (
-              <li key={item.title}>
-                <div className="pic mb-3">
-                  <img className="img-fluid d-block img-small mx-auto" src={withBasePath(item.icon)} aria-hidden="true" alt="" />
-                </div>
-                <div className="tit">
-                  <h4 className="blue">{item.title}</h4>
-                  <p className="mb-0">{item.desc}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+                  <h3 className="xr_h">
+                    <span>訓練成效與智慧管理</span>
+                  </h3>
+                  <div className="xr_list4 mb-md-5 mb-4">
+                    <ul className="nav">
+                      {TRAINING_OUTCOMES.map((item) => (
+                        <li key={item.title}>
+                          <div className="pic mb-3">
+                            <img className="img-fluid d-block img-small mx-auto" src={withBasePath(item.icon)} aria-hidden="true" alt="" />
+                          </div>
+                          <div className="tit">
+                            <h4 className="blue">{item.title}</h4>
+                            <p className="mb-0">{item.desc}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-        <h3 className="xr_h">
-          <span>使用須知與下載</span>
-        </h3>
-        <div className="xr_list1 xr_list5 mb-md-5 mb-4">
-          <div className="d-flex">
-            <div className="xr_le">
-              <h4>使用須知</h4>
-              <ul className="nav d-block">
-                <li>
-                  <i className="bi bi-laptop" />
-                  <span>建議使用具備 NVIDIA GeForce RTX 3060 或以上之電腦</span>
-                </li>
-                <li>
-                  <i className="bi bi-headset-vr" />
-                  <span>建議搭配 VR 頭盔使用，以獲得最佳沉浸式訓練體驗</span>
-                </li>
-                <li>
-                  <i className="bi bi-wifi" />
-                  <span>確保網路穩定，建議於安靜環境中進行訓練</span>
-                </li>
-                <li>
-                  <i className="bi bi-key" />
-                  <span>
-                    軟體可自由下載，使用需輸入授權序號；僅企業需求端會員可至{" "}
-                    <Link href="/member?section=license" title="前往會員中心的 XR 授權">
-                      會員中心「XR 授權」
-                    </Link>{" "}
-                    取得
-                  </span>
-                </li>
-              </ul>
-            </div>
-            <div className="xr_ri">
-              <h4>下載區</h4>
-              <div className="xr_cloud">
-                <i className="bi bi-cloud-arrow-down" />
-              </div>
-              <ul className="nav d-block">
-                <li>
-                  <span>
-                    <b>下載 XR 訓練模組</b>安裝後即可開始體驗訓練內容
-                  </span>
-                </li>
-                <li>
-                  <DownloadDialog links={downloads["talent-xr"]?.links ?? []} dialogTitle="下載 XR 訓練模組" className="more_x" emptyLabel="下載連結準備中">
-                    <span>立即下載</span> <i className="bi bi-arrow-right" aria-hidden="true" />
-                  </DownloadDialog>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+                  <h3 className="xr_h">
+                    <span>使用須知與下載</span>
+                  </h3>
+                  <div className="xr_list1 xr_list5 mb-md-5 mb-4">
+                    <div className="d-flex">
+                      <div className="xr_le mb-md-0 mb-4">
+                        <h4>使用須知</h4>
+                        <ul className="nav d-block">
+                          <li>
+                            <i className="bi bi-laptop" />
+                            <span>建議使用具備 NVIDIA GeForce RTX 3060 或以上之電腦</span>
+                          </li>
+                          <li>
+                            <i className="bi bi-headset-vr" />
+                            <span>建議搭配 VR 頭盔使用，以獲得最佳沉浸式訓練體驗</span>
+                          </li>
+                          <li>
+                            <i className="bi bi-wifi" />
+                            <span>確保網路穩定，建議於安靜環境中進行訓練</span>
+                          </li>
+                          <li>
+                            <i className="bi bi-key" />
+                            <span>
+                              軟體可自由下載，使用需輸入授權序號；僅企業需求端會員可至{" "}
+                              <Link href="/member?section=license" title="前往會員中心的 XR 授權">
+                                會員中心「XR 授權」
+                              </Link>{" "}
+                              取得
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="xr_ri">
+                        <h4>下載區</h4>
+                        <div className="xr_cloud">
+                          <i className="bi bi-cloud-arrow-down" />
+                        </div>
+                        <ul className="nav d-block">
+                          <li>
+                            <span>
+                              <b>下載 XR 訓練模組</b>安裝後即可開始體驗訓練內容
+                            </span>
+                          </li>
+                          <li className="mb-md-0 mb-4">
+                            <DownloadDialog links={downloads["talent-xr"]?.links ?? []} dialogTitle="下載 XR 訓練模組" className="more_x" emptyLabel="下載連結準備中">
+                              <span>立即下載</span> <i className="bi bi-arrow-right" aria-hidden="true" />
+                            </DownloadDialog>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ),
+            },
+            {
+              id: "ser-home-02",
+              ariaLabel: "有機電操作",
+              label: <span>有機電操作</span>,
+              content: (
+                <div className="Stay_tuned">
+                  <h3 className="xr_h">
+                    <span>敬請期待</span>
+                  </h3>
+                </div>
+              ),
+            },
+          ]}
+        />
       </InnerPageShell>
     </>
   );
