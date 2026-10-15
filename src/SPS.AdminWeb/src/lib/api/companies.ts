@@ -131,6 +131,7 @@ export const companiesApi = {
         name: c.name ?? '',
         parentId: c.parentId,
         ordinal: c.ordinal,
+        remark: c.remark,
       }));
   },
 

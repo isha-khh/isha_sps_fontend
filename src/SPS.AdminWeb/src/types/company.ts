@@ -216,6 +216,8 @@ export interface CompanyTagOption {
   /** 上層節點 ID；root 節點為 undefined */
   parentId?: number;
   ordinal?: number;
+  /** 根節點的分類標記：「應用情境」「應用範疇」，其他（智慧技術）為空或其他文字 */
+  remark?: string;
 }
 
 /** 企業標籤綁定結果 (GET/PUT /api/Company/{id}/tags) */
