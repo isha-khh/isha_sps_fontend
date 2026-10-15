@@ -751,7 +751,7 @@ export async function fetchAboutPage(): Promise<AboutPageContent> {
 export type SupportInfoBlockContent = {
     icon: string;
     title: string;
-    items: { label: string; children?: string[] }[];
+    items: { label: string; children?: string[]; phone?: string; email?: string }[];
     /** 區塊底部的「完整內容請參閱〈…〉」：連到對應的下載資源（後台「下載資源」的 key） */
     fullTextLink?: { resourceKey: string; label: string };
 };
@@ -760,13 +760,13 @@ export type SupportInfoBlockContent = {
 export async function fetchSupportInfoBlocks(): Promise<SupportInfoBlockContent[] | null> {
     try {
         const data = await getBackendJson<{
-            blocks?: { icon: string; title: string; items?: { label: string; children?: string[] }[]; fullTextResourceKey?: string | null; fullTextLabel?: string | null }[];
+            blocks?: { icon: string; title: string; items?: { label: string; children?: string[]; phone?: string | null; email?: string | null }[]; fullTextResourceKey?: string | null; fullTextLabel?: string | null }[];
         }>("/api/page-settings/support-info/public", 60);
         if (!data.blocks) return null;
         return data.blocks.map((b) => ({
             icon: b.icon,
             title: b.title,
-            items: (b.items ?? []).map((i) => ({ label: i.label, children: i.children?.length ? i.children : undefined })),
+            items: (b.items ?? []).map((i) => ({ label: i.label, children: i.children?.length ? i.children : undefined, phone: i.phone || undefined, email: i.email || undefined })),
             fullTextLink: b.fullTextResourceKey && b.fullTextLabel ? { resourceKey: b.fullTextResourceKey, label: b.fullTextLabel } : undefined,
         }));
     } catch {

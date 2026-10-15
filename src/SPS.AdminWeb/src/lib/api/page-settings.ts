@@ -88,6 +88,10 @@ export interface AboutPageSettings {
 export interface SupportInfoItem {
   label: string;
   children: string[];
+  /** 聯絡電話（選填）；有填電話或信箱時，前台用「姓名＋電話＋信箱」的聯絡人版面 */
+  phone?: string | null;
+  /** 聯絡信箱（選填） */
+  email?: string | null;
 }
 
 export interface SupportInfoBlock {

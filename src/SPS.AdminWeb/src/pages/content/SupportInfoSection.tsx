@@ -29,7 +29,7 @@ const LINK_TARGETS: Array<{ value: string; label: string }> = [
 interface Draft {
   icon: string;
   title: string;
-  items: Array<{ label: string; children: string }>;
+  items: Array<{ label: string; children: string; phone: string; email: string }>;
   linkKey: string;
   linkLabel: string;
 }
@@ -37,7 +37,7 @@ interface Draft {
 const toDraft = (b: SupportInfoBlock): Draft => ({
   icon: b.icon,
   title: b.title,
-  items: b.items.map((i) => ({ label: i.label, children: i.children.join('\n') })),
+  items: b.items.map((i) => ({ label: i.label, children: i.children.join('\n'), phone: i.phone ?? '', email: i.email ?? '' })),
   linkKey: b.fullTextResourceKey ?? '',
   linkLabel: b.fullTextLabel ?? '',
 });
@@ -91,7 +91,7 @@ export const SupportInfoSection = () => {
         blocks: drafts.map((d) => ({
           icon: d.icon,
           title: d.title,
-          items: d.items.map((i) => ({ label: i.label, children: i.children.split('\n').map((c) => c.trim()).filter(Boolean) })),
+          items: d.items.map((i) => ({ label: i.label, children: i.children.split('\n').map((c) => c.trim()).filter(Boolean), phone: i.phone.trim() || null, email: i.email.trim() || null })),
           fullTextResourceKey: d.linkKey || null,
           fullTextLabel: d.linkKey ? d.linkLabel : null,
         })),
@@ -119,7 +119,7 @@ export const SupportInfoSection = () => {
       <div className="card-body space-y-4">
         <h3 className="card-title text-lg">補助專區頁首的資訊區塊（前台 /support）</h3>
         <p className="text-sm text-base-content/70">
-          每個區塊一個圖示與標題，底下是項目清單；項目的「子項目」一行一個。整個空白的區塊儲存時會被丟掉。
+          每個區塊一個圖示與標題，底下是項目清單；項目的「子項目」一行一個。聯絡人（例如「聯繫諮詢」）請把姓名填在項目文字，再填電話與信箱——前台會顯示成「姓名、電話、信箱」三行並可直接撥打／寄信。整個空白的區塊儲存時會被丟掉。
         </p>
 
         {drafts.map((d, index) => (
@@ -181,9 +181,26 @@ export const SupportInfoSection = () => {
                     value={item.children}
                     onChange={(e) => patchItem(index, itemIndex, { children: e.target.value })}
                   />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <input
+                      className="input input-bordered input-sm"
+                      placeholder="電話（選填，例如 02-2755-5615 #37）"
+                      maxLength={50}
+                      value={item.phone}
+                      onChange={(e) => patchItem(index, itemIndex, { phone: e.target.value })}
+                    />
+                    <input
+                      className="input input-bordered input-sm"
+                      type="email"
+                      placeholder="信箱（選填）"
+                      maxLength={100}
+                      value={item.email}
+                      onChange={(e) => patchItem(index, itemIndex, { email: e.target.value })}
+                    />
+                  </div>
                 </div>
               ))}
-              <button type="button" className="btn btn-xs btn-neutral" disabled={d.items.length >= 20} onClick={() => patch(index, { items: [...d.items, { label: '', children: '' }] })}>
+              <button type="button" className="btn btn-xs btn-neutral" disabled={d.items.length >= 20} onClick={() => patch(index, { items: [...d.items, { label: '', children: '', phone: '', email: '' }] })}>
                 <span className="iconify lucide--plus size-3" />
                 新增項目
               </button>
@@ -214,7 +231,7 @@ export const SupportInfoSection = () => {
             type="button"
             className="btn btn-sm btn-neutral"
             disabled={drafts.length >= 8}
-            onClick={() => setDrafts((prev) => [...prev, { icon: 'bi-info-circle', title: '', items: [{ label: '', children: '' }], linkKey: '', linkLabel: '' }])}
+            onClick={() => setDrafts((prev) => [...prev, { icon: 'bi-info-circle', title: '', items: [{ label: '', children: '', phone: '', email: '' }], linkKey: '', linkLabel: '' }])}
           >
             <span className="iconify lucide--plus size-4" />
             新增區塊

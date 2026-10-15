@@ -21,7 +21,7 @@ export interface SupportApplicantRequirement {
 export interface SupportInfoBlock {
   icon: string;
   title: string;
-  items: { label: string; children?: string[] }[];
+  items: { label: string; children?: string[]; phone?: string; email?: string }[];
   /** 區塊底部的「完整內容請參閱〈…〉」：連到對應的下載資源（後台「下載資源」的 key） */
   fullTextLink?: { resourceKey: string; label: string };
 }
@@ -48,16 +48,16 @@ export const SUPPORT_INFO_BLOCKS: SupportInfoBlock[] = [
     icon: "bi-currency-dollar",
     title: "補助金額",
     items: [
-      { label: "基礎升級 - 上限400萬元" },
-      { label: "進階升級 - 上限800萬元" },
+      { label: "基礎升級 - 上限400萬元", children: ["每案申請補助款以新臺幣400萬元為上限，且政府經費不得超過總計畫經費之50%"] },
+      { label: "進階升級 - 上限800萬元", children: ["每案申請補助款以新臺幣800萬元為上限，且政府經費不得超過總計畫經費之50%"] },
     ],
   },
   {
     icon: "bi-telephone",
     title: "聯繫諮詢",
     items: [
-      { label: "李先生 - 02-2755-5615 #37" },
-      { label: "吳小姐 - 02-2755-5615 #53" },
+      { label: "李先生", phone: "02-2755-5615 #37", email: "03421@cpc.org.tw" },
+      { label: "吳小姐", phone: "02-2755-5615 #53", email: "03398@cpc.org.tw" },
     ],
   },
 ];

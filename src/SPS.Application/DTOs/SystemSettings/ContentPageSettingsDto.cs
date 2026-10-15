@@ -65,12 +65,20 @@ public class SupportInfoSettingsDto
         new()
         {
             Icon = "bi-currency-dollar", Title = "補助金額",
-            Items = new() { new() { Label = "基礎升級 - 上限400萬元" }, new() { Label = "進階升級 - 上限800萬元" } },
+            Items = new()
+            {
+                new() { Label = "基礎升級 - 上限400萬元", Children = new() { "每案申請補助款以新臺幣400萬元為上限，且政府經費不得超過總計畫經費之50%" } },
+                new() { Label = "進階升級 - 上限800萬元", Children = new() { "每案申請補助款以新臺幣800萬元為上限，且政府經費不得超過總計畫經費之50%" } },
+            },
         },
         new()
         {
             Icon = "bi-telephone", Title = "聯繫諮詢",
-            Items = new() { new() { Label = "李先生 - 02-2755-5615 #37" }, new() { Label = "吳小姐 - 02-2755-5615 #53" } },
+            Items = new()
+            {
+                new() { Label = "李先生", Phone = "02-2755-5615 #37", Email = "03421@cpc.org.tw" },
+                new() { Label = "吳小姐", Phone = "02-2755-5615 #53", Email = "03398@cpc.org.tw" },
+            },
         },
     };
 }
@@ -94,6 +102,12 @@ public class SupportInfoItemDto
 {
     public string Label { get; set; } = string.Empty;
     public List<string> Children { get; set; } = new();
+
+    /// <summary>聯絡電話（選填，例如「02-2755-5615 #37」）；有填電話或信箱時，前台改用「姓名＋電話＋信箱」的聯絡人版面</summary>
+    public string? Phone { get; set; }
+
+    /// <summary>聯絡信箱（選填）</summary>
+    public string? Email { get; set; }
 }
 
 /// <summary>「關於我們」與補助專區資訊區塊設定的驗證與整理：去頭尾空白、丟掉空白項目、限制數量與長度</summary>
@@ -104,6 +118,9 @@ public static class ContentPageValidator
         "bi-person", "bi-card-checklist", "bi-currency-dollar", "bi-telephone", "bi-geo-alt",
         "bi-building", "bi-info-circle", "bi-calendar4-week", "bi-file-earmark-text", "bi-clipboard-check",
     };
+
+    private static readonly System.Text.RegularExpressions.Regex PhoneFormat = new(@"^[0-9+\-#()\s,./]+$", System.Text.RegularExpressions.RegexOptions.Compiled);
+    private static readonly System.Text.RegularExpressions.Regex EmailFormat = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", System.Text.RegularExpressions.RegexOptions.Compiled);
 
     private const int MaxText = 500;
     private const int MaxMilestones = 12;
@@ -170,12 +187,17 @@ public static class ContentPageValidator
             {
                 var label = Clean(item?.Label);
                 var children = (item?.Children ?? new()).Select(Clean).Where(c => c.Length > 0).ToList();
-                if (label.Length == 0 && children.Count == 0) continue;
+                var phone = Clean(item?.Phone);
+                var email = Clean(item?.Email);
+                if (label.Length == 0 && children.Count == 0 && phone.Length == 0 && email.Length == 0) continue;
                 if (label.Length == 0) return (s, $"區塊「{title}」的項目要填文字");
                 if (children.Count > MaxItems) return (s, $"區塊「{title}」的子項目最多 {MaxItems} 個");
-                var error = TooLong("項目文字", label) ?? children.Select(c => TooLong("子項目文字", c)).FirstOrDefault(e => e != null);
+                var error = TooLong("項目文字", label) ?? children.Select(c => TooLong("子項目文字", c)).FirstOrDefault(e => e != null)
+                            ?? TooLong("電話", phone, 50) ?? TooLong("信箱", email, 100);
                 if (error != null) return (s, error);
-                items.Add(new SupportInfoItemDto { Label = label, Children = children });
+                if (phone.Length > 0 && !PhoneFormat.IsMatch(phone)) return (s, $"「{label}」的電話格式不正確（只能有數字與 + - # ( ) 空白，例如 02-2755-5615 #37）");
+                if (email.Length > 0 && !EmailFormat.IsMatch(email)) return (s, $"「{label}」的信箱格式不正確");
+                items.Add(new SupportInfoItemDto { Label = label, Children = children, Phone = phone.Length > 0 ? phone : null, Email = email.Length > 0 ? email : null });
             }
 
             var linkKey = Clean(b.FullTextResourceKey);

@@ -16,6 +16,28 @@ export const metadata: Metadata = {
 
 // 對應設計稿 page/_uc/side2_banner2.html（標題「產業輔導」，疑似
 // 跨單元互相導流的廣告位）＋ page/_uc/side2_banner.html（一般廣告）。
+/** `tel:` 連結：分機用逗號（撥號時暫停再撥分機），例如「02-2755-5615 #37」→ `tel:0227555615,37` */
+function toTelHref(phone: string): string {
+  const [main, ext] = phone.split("#");
+  const digits = main.replace(/[^0-9+]/g, "");
+  const extension = (ext ?? "").replace(/[^0-9]/g, "");
+  return `tel:${digits}${extension ? `,${extension}` : ""}`;
+}
+
+/** 補助金額的項目文字（例如「基礎升級 - 上限400萬元」）把金額加粗，與設計稿 `上限<b>400萬元</b>` 一致；其他文字照常顯示 */
+function AmountLabel({ label }: { label: string }) {
+  const match = label.match(/^(.*?)\s*-\s*上限(.+)$/);
+  if (!match) return <span>{label}</span>;
+  return (
+    <>
+      {match[1]}-{" "}
+      <span>
+        上限<b>{match[2]}</b>
+      </span>
+    </>
+  );
+}
+
 /**
  * 「本計畫補助」，對應設計稿 page/support/index.html——「補助資源」
  * 底下兩個平行頁面之一（另一個是 /support/resources，對應
@@ -84,19 +106,47 @@ export default async function SupportPage({ searchParams }: PageProps<"/support"
                   <span>{block.title}</span>
                 </h3>
                 <ul className="nav d-block">
-                  {block.items.map((item) => (
-                    <li key={item.label}>
-                      <i className="bi bi-caret-right-fill me-1 blue" />
-                      <span>{item.label}</span>
-                      {item.children && (
+                  {block.items.map((item) =>
+                    item.phone || item.email ? (
+                      // 聯絡人：姓名一行、電話一行、信箱一行（2026-10-14 設計稿，`con_4`）
+                      <li className="con_4" key={item.label}>
+                        <p className="mb-0">
+                          <i className="bi bi-caret-right-fill me-1 blue" />
+                          <b>{item.label}</b>
+                        </p>
                         <ul className="nav d-block">
-                          {item.children.map((child) => (
-                            <li key={child}>{child}</li>
-                          ))}
+                          {item.phone && (
+                            <li>
+                              <i className="bi bi-telephone me-1" />
+                              <a href={toTelHref(item.phone)} title={`撥打電話至 ${item.phone}`}>
+                                {item.phone}
+                              </a>
+                            </li>
+                          )}
+                          {item.email && (
+                            <li>
+                              <i className="bi bi-envelope me-1" />
+                              <a href={`mailto:${item.email}`} title={`信箱 ${item.email}`}>
+                                {item.email}
+                              </a>
+                            </li>
+                          )}
                         </ul>
-                      )}
-                    </li>
-                  ))}
+                      </li>
+                    ) : (
+                      <li key={item.label}>
+                        <i className="bi bi-caret-right-fill me-1 blue" />
+                        <AmountLabel label={item.label} />
+                        {item.children && (
+                          <ul className="nav d-block">
+                            {item.children.map((child) => (
+                              <li key={child}>{child}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ),
+                  )}
                 </ul>
                 {block.fullTextLink && (
                   <div>
