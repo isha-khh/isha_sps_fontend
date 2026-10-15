@@ -9,6 +9,7 @@
 | `env.beta.example` | 環境變數範本（複製成 `.env` 填值，不要提交） |
 | `sanitize-beta-db.sql` | 在 `SPS_dev` 上關掉寄信、退信收信、ProTrack（**第一次啟動前必做**） |
 | `nginx-match.conf` | 主機 nginx 設定（直接轉到容器 IP） |
+| `update-beta.sh` | 檢查 ghcr 有沒有新映像並詢問是否更新（`--check` 只檢查、`-y` 直接更新、帶版本號則指定版本）；複製到 `SPS_dev` 頂層執行 |
 
 ## 不能碰正式機的保證
 
