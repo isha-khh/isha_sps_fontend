@@ -66,7 +66,10 @@ services:
       # 上傳檔案（見 README：要跟正式機實際的存放位置一致後再複製檔案過來）
       FileStorage__RootPath: /app/Uploads
 
-      # 不設 Email_Setting__*：郵件由資料庫的設定決定，啟動前已用 sanitize-beta-db.sql 停用
+      # 郵件由資料庫的設定決定，啟動前已用 sanitize-beta-db.sql 停用，所以不設 SMTP 主機／帳密。
+      # 但映像裡 Email_Setting__SmtpPort 預設是空字串，.NET 綁定成整數時會丟例外，
+      # 造成後台登入等 API 回 500，所以一定要給一個數值（不會用來寄信）。
+      Email_Setting__SmtpPort: "587"
     volumes:
       - ${UPLOADS_HOST_DIR:-./Uploads}:/app/Uploads
     networks:
