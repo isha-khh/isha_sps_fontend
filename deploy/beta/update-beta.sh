@@ -45,6 +45,21 @@ for cmd in docker curl python3; do
 done
 [ -f docker-compose.beta.yml ] || { red "請在 SPS_dev 頂層執行（找不到 docker-compose.beta.yml）"; exit 1; }
 
+# 啟動前先確認 .env 在這個資料夾、必要的變數都有（只檢查變數名稱，不印內容）
+echo "工作資料夾：$PWD"
+if [ ! -f .env ]; then
+  red "這個資料夾沒有 .env，compose 讀不到密鑰變數。請把腳本放在 .env 所在的 SPS_dev 頂層。"
+  exit 1
+fi
+missing=()
+for key in DB_CONNECTION_STRING REDIS_PASSWORD JWT_SECRET_KEY; do
+  grep -qE "^${key}=.+" .env || missing+=("$key")
+done
+if [ "${#missing[@]}" -gt 0 ]; then
+  red ".env 缺少或沒有值：${missing[*]}"
+  exit 1
+fi
+
 # 目前版本：.env 的 SPS_VERSION；沒有就讀正在跑的 api 容器的映像 tag
 current_version() {
   local v=""
@@ -150,11 +165,12 @@ if [ -f .env ]; then
 fi
 export SPS_VERSION="$LATEST"
 
-# 3. 拉映像並重建
+# 3. 拉映像並重建（任何一步失敗就把 .env 還原，容器維持原狀）
+restore_env() { [ -f .env.bak ] && cp -p .env.bak .env && echo "已還原 .env（SPS_VERSION 回到 ${CURRENT}）"; }
 echo "→ 拉映像 ..."
-docker compose "${COMPOSE_FILES[@]}" pull
+docker compose "${COMPOSE_FILES[@]}" pull || { red "拉映像失敗，容器沒有被動到。"; restore_env; exit 1; }
 echo "→ 重建容器 ..."
-docker compose "${COMPOSE_FILES[@]}" up -d
+docker compose "${COMPOSE_FILES[@]}" up -d || { red "重建容器失敗，請看上面的訊息。"; restore_env; exit 1; }
 
 # 4. 等健康
 echo "→ 等容器就緒（最多 3 分鐘）..."
