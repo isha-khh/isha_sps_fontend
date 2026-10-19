@@ -50,7 +50,7 @@ public class InquiryService : IInquiryService
         [InquiryType.ProposeSolution] = new(Who.EnterpriseMember, "我要提案", true, true, true, true, false, false, true),
         [InquiryType.SubscribeSolution] = new(Who.Member, "訂閱解方", false, false, false, false, false, false, false),
         [InquiryType.DownloadRequest] = new(Who.Anyone, "下載申請", true, true, true, true, true, true, false),
-        [InquiryType.SupportRequest] = new(Who.Anyone, "索取補助資料", true, false, true, false, false, false, true),
+        [InquiryType.SupportRequest] = new(Who.Anyone, "索取補助資料", true, true, true, true, false, false, true),
         [InquiryType.Newsletter] = new(Who.Anyone, "訂閱電子報", false, true, false, false, false, false, false),
     };
 

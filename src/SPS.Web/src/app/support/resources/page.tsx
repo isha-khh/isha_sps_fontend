@@ -198,8 +198,6 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
                     </a>
                   </div>
                 </div>
-
-                <SupportRequestModal id={modalId} resourceId={resource.id} resourceTitle={resource.title} />
               </div>
             );
           })}
@@ -207,6 +205,15 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
 
         <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(target) => buildListHref("/support/resources", { category: activeName, industry: activeIndustryName, q: query, page: target })} />
       </InnerPageShell>
+
+      {/*
+        彈窗必須放在 `<main>` 外面（issue #26）：`<main>` 有 `position:relative; z-index:10`，自成一個堆疊層，
+        放在裡面的彈窗（z-index 1055）永遠比掛在 `<body>` 底下的背景遮罩（1050）低，遮罩會蓋住彈窗、攔截所有點擊，
+        整個彈窗點不動。其他頁（媒合對接）的彈窗也都是放在頁面最外層。
+      */}
+      {filteredResources.map((resource) => (
+        <SupportRequestModal key={resource.id} id={`support-request-${resource.id}`} resourceId={resource.id} resourceTitle={resource.title} />
+      ))}
     </>
   );
 }

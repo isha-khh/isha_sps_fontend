@@ -11,6 +11,8 @@ import { InquiryType, submitInquiry } from "@/lib/api/inquiries";
  *
  * 2026-10-06 接上真後端：送出呼叫 `POST /api/Inquiry`（種類＝索取補助資料，匿名也可以，要勾選同意蒐集聯絡資料），
  * 存進後台「詢問單」收件匣，記錄是針對哪一個補助資源（`resourceId`／`resourceTitle`）。
+ * 2026-10-19（issue #27）：聯絡人姓名上面多一個「工廠名稱」（存成詢問單的公司名稱）、聯絡電話下面多一個「電子信箱」，
+ * 四個欄位都必填（後端規則同步改為必填）。
  *
  * 「送出」維持 `<button type="submit">`（不像其他同類彈窗改成
  * `<a>`）：這裡是真的 `<form onSubmit>` 搭配 HTML5 `required` 驗證，
@@ -21,8 +23,10 @@ import { InquiryType, submitInquiry } from "@/lib/api/inquiries";
  */
 export default function SupportRequestModal({ id, resourceId, resourceTitle }: { id: string; resourceId: string; resourceTitle: string }) {
   const [submitted, setSubmitted] = useState(false);
+  const [factory, setFactory] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,8 +39,10 @@ export default function SupportRequestModal({ id, resourceId, resourceTitle }: {
     setSubmitting(true);
     const message = await submitInquiry({
       type: InquiryType.SupportRequest,
+      companyName: factory.trim(),
       name: name.trim(),
       phone: phone.trim(),
+      email: email.trim(),
       targetType: "SupportResource",
       targetKey: resourceId,
       targetTitle: resourceTitle,
@@ -57,6 +63,21 @@ export default function SupportRequestModal({ id, resourceId, resourceTitle }: {
       ) : (
         <form onSubmit={handleSubmit}>
           <p>請留下您的聯絡方式，我們將協助評估「{resourceTitle}」的申請資格。</p>
+
+          <div className="form-group mb-3">
+            <label className="form-label" htmlFor={`${id}-factory`}>
+              工廠名稱
+            </label>
+            <input
+              id={`${id}-factory`}
+              className="form-control"
+              type="text"
+              required
+              maxLength={200}
+              value={factory}
+              onChange={(event) => setFactory(event.target.value)}
+            />
+          </div>
 
           <div className="form-group mb-3">
             <label className="form-label" htmlFor={`${id}-name`}>
@@ -83,6 +104,21 @@ export default function SupportRequestModal({ id, resourceId, resourceTitle }: {
               required
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
+            />
+          </div>
+
+          <div className="form-group mb-3">
+            <label className="form-label" htmlFor={`${id}-email`}>
+              電子信箱
+            </label>
+            <input
+              id={`${id}-email`}
+              className="form-control"
+              type="email"
+              required
+              maxLength={320}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
             />
           </div>
 
