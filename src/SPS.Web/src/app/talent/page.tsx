@@ -15,7 +15,7 @@ import { buildListHref, readListQuery } from "@/lib/list-query";
 import { sortByViewCount } from "@/lib/content-list-utils";
 
 export const metadata: Metadata = {
-  title: "人才培訓",
+  title: "知識加值",
 };
 
 const TALENT_PAGE_SIZE = 10;
@@ -41,9 +41,9 @@ export default async function TalentIndexPage({ searchParams }: PageProps<"/tale
     <>
       <BodyClass className="talent" />
       <InnerPageShell
-        title="人才培訓"
+        title="知識加值"
         titleAside={<PageSubNav links={TALENT_SUB_NAV} activeHref="/talent" />}
-        breadcrumb={[{ label: "人才培育" }, { label: "人才培訓" }]}
+        breadcrumb={[{ label: "人才培育" }, { label: "知識加值" }]}
         banner={topBanners.some((b) => b.uri) ? <NewsBanner id="talent-banner" banners={topBanners} /> : undefined}
         aside={
           <>

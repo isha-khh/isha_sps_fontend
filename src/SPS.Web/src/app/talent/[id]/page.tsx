@@ -58,7 +58,7 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
       <BodyClass className="talent show" />
       <NewsViewTracker newsId={detail.id} />
       <InnerPageShell
-        breadcrumb={[{ label: "人才培育" }, { label: "人才培訓", href: "/talent" }, { label: course.title }]}
+        breadcrumb={[{ label: "人才培育" }, { label: "知識加值", href: "/talent" }, { label: course.title }]}
         aside={
           <>
             {popularCourses.length > 0 && <PopularCourses courses={popularCourses} />}
