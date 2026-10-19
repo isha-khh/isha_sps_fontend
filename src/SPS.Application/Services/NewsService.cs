@@ -30,6 +30,8 @@ public class NewsService : INewsService
         var tagsByNewsId = await _unitOfWork.News.GetNewsTagsBatchAsync(
             pagedResult.Items.Select(n => n.Id).ToList(), cancellationToken);
 
+        var categoryNames = await GetCategoryNamesAsync(pagedResult.Items.SelectMany(AllCategoryIds), cancellationToken);
+
         var response = new PagedResult<NewsListItemResponse>
         {
             Items = pagedResult.Items.Select(n => new NewsListItemResponse
@@ -42,6 +44,8 @@ public class NewsService : INewsService
                 Published = n.Published,
                 CategoryId = n.CategoryId,
                 CategoryName = n.Category?.Name,
+                CategoryIds = AllCategoryIds(n).ToList(),
+                CategoryNames = AllCategoryIds(n).Where(categoryNames.ContainsKey).Select(cid => categoryNames[cid]).ToList(),
                 ViewCount = n.ViewCount,
                 Type = n.Type,
                 Section = n.Section,
@@ -67,6 +71,8 @@ public class NewsService : INewsService
 
         // 查詢標簽
         var tags = await _unitOfWork.News.GetNewsTagsAsync(id, cancellationToken);
+        var detailCategoryIds = AllCategoryIds(news).ToList();
+        var detailCategoryNames = await GetCategoryNamesAsync(detailCategoryIds, cancellationToken);
 
         return Result<NewsResponse>.Success(new NewsResponse
         {
@@ -80,6 +86,8 @@ public class NewsService : INewsService
             Ordinal = news.Ordinal,
             CategoryId = news.CategoryId,
             CategoryName = news.Category?.Name,
+            CategoryIds = detailCategoryIds,
+            CategoryNames = detailCategoryIds.Where(detailCategoryNames.ContainsKey).Select(cid => detailCategoryNames[cid]).ToList(),
             Type = news.Type,
             Section = news.Section,
             ViewCount = news.ViewCount,
@@ -101,13 +109,10 @@ public class NewsService : INewsService
         await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
         try
         {
-            // 驗證 CategoryId 是否存在（如果提供了的話）
-            if (request.CategoryId.HasValue)
-            {
-                var categoryExists = await _unitOfWork.Categories.GetByIdAsync(request.CategoryId.Value, cancellationToken);
-                if (categoryExists == null)
-                    return Result<NewsResponse>.Failure($"分類 ID {request.CategoryId.Value} 不存在，請選擇有效的分類");
-            }
+            // 驗證分類是否存在（如果提供了的話）；CategoryIds 優先，沒帶才用單一的 CategoryId
+            var (categoryIds, categoryError) = await ResolveCategoryIdsAsync(request.CategoryIds, request.CategoryId, cancellationToken);
+            if (categoryError != null)
+                return Result<NewsResponse>.Failure(categoryError);
 
             var (meta, metaError) = NormalizeMeta(request.Section, request.Meta);
             if (metaError != null)
@@ -143,7 +148,8 @@ public class NewsService : INewsService
                 EndDate = request.EndDate,
                 Published = request.Published,
                 Ordinal = request.Ordinal,
-                CategoryId = request.CategoryId,
+                CategoryId = categoryIds?.FirstOrDefault() is { } primary and > 0 ? primary : null,
+                CategoryIds = categoryIds ?? new List<int>(),
                 Type = request.Type,
                 Section = request.Section,
                 AttachmentFileIds = request.AttachmentFileIds?.Distinct().ToList() ?? new List<Guid>(),
@@ -176,6 +182,7 @@ public class NewsService : INewsService
                 Published = news.Published,
                 Ordinal = news.Ordinal,
                 CategoryId = news.CategoryId,
+                CategoryIds = AllCategoryIds(news).ToList(),
                 Type = news.Type,
                 Section = news.Section,
                 ViewCount = news.ViewCount,
@@ -205,13 +212,10 @@ public class NewsService : INewsService
         if (news == null)
             return Result<NewsResponse>.Failure("新聞不存在");
 
-        // 驗證 CategoryId 是否存在
-        if (request.CategoryId.HasValue)
-        {
-            var categoryExists = await _unitOfWork.Categories.GetByIdAsync(request.CategoryId.Value, cancellationToken);
-            if (categoryExists == null)
-                return Result<NewsResponse>.Failure($"分類 ID {request.CategoryId.Value} 不存在，請選擇有效的分類");
-        }
+        // 驗證分類是否存在；CategoryIds 優先（空陣列 = 清空），沒帶才看單一的 CategoryId，兩者都沒帶 = 不動
+        var (newCategoryIds, categoryError) = await ResolveCategoryIdsAsync(request.CategoryIds, request.CategoryId, cancellationToken);
+        if (categoryError != null)
+            return Result<NewsResponse>.Failure(categoryError);
 
         // 專區改了、或有帶 Meta 時，都要重新檢查欄位名稱是否屬於（新的）專區
         var targetSection = request.Section ?? news.Section;
@@ -297,7 +301,12 @@ public class NewsService : INewsService
         if (request.EndDate.HasValue) news.EndDate = request.EndDate;
         if (request.Published.HasValue) news.Published = request.Published.Value;
         if (request.Ordinal.HasValue) news.Ordinal = request.Ordinal.Value;
-        if (request.CategoryId.HasValue) news.CategoryId = request.CategoryId;
+        if (newCategoryIds != null)
+        {
+            news.CategoryIds = newCategoryIds;
+            news.CategoryId = newCategoryIds.Count > 0 ? newCategoryIds[0] : null;
+            news.Category = null; // 主分類換了，別讓舊的導覽屬性蓋掉
+        }
         if (request.Type.HasValue) news.Type = request.Type.Value;
         if (request.Section.HasValue) news.Section = request.Section.Value;
         if (request.AttachmentFileIds != null) news.AttachmentFileIds = request.AttachmentFileIds.Distinct().ToList();
@@ -323,6 +332,7 @@ public class NewsService : INewsService
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         var updatedTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
+        var updatedCategoryNames = await GetCategoryNamesAsync(AllCategoryIds(news), cancellationToken);
 
         return Result<NewsResponse>.Success(new NewsResponse
         {
@@ -335,7 +345,9 @@ public class NewsService : INewsService
             Published = news.Published,
             Ordinal = news.Ordinal,
             CategoryId = news.CategoryId,
-            CategoryName = news.Category?.Name,
+            CategoryName = updatedCategoryNames.GetValueOrDefault(news.CategoryId ?? 0),
+            CategoryIds = AllCategoryIds(news).ToList(),
+            CategoryNames = AllCategoryIds(news).Where(updatedCategoryNames.ContainsKey).Select(cid => updatedCategoryNames[cid]).ToList(),
             Type = news.Type,
             Section = news.Section,
             ViewCount = news.ViewCount,
@@ -348,6 +360,38 @@ public class NewsService : INewsService
             UpdatedTime = news.UpdatedTime,
             ImageUrl = news.Picture?.DefaultImageUri
         });
+    }
+
+    /// <summary>這則內容的所有分類 Id：CategoryIds 優先；舊資料（尚未回填）退回單一的 CategoryId</summary>
+    private static IEnumerable<int> AllCategoryIds(News news)
+    {
+        if (news.CategoryIds is { Count: > 0 }) return news.CategoryIds;
+        return news.CategoryId.HasValue ? new[] { news.CategoryId.Value } : Array.Empty<int>();
+    }
+
+    /// <summary>
+    /// 整理要寫入的分類：<paramref name="ids"/> 有帶就用（去重、保留順序），否則用單一的 <paramref name="single"/>；
+    /// 兩者都沒帶回傳 null（建立時代表沒分類、更新時代表不動）。每個分類都要實際存在。
+    /// </summary>
+    private async Task<(List<int>? Ids, string? Error)> ResolveCategoryIdsAsync(List<int>? ids, int? single, CancellationToken cancellationToken)
+    {
+        var wanted = ids != null ? ids.Distinct().ToList() : single.HasValue ? new List<int> { single.Value } : null;
+        if (wanted == null) return (null, null);
+        foreach (var categoryId in wanted)
+        {
+            if (await _unitOfWork.Categories.GetByIdAsync(categoryId, cancellationToken) == null)
+                return (null, $"分類 ID {categoryId} 不存在，請選擇有效的分類");
+        }
+        return (wanted, null);
+    }
+
+    private async Task<Dictionary<int, string>> GetCategoryNamesAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
+    {
+        var wanted = ids.Distinct().ToList();
+        if (wanted.Count == 0) return new Dictionary<int, string>();
+        return await _unitOfWork.GetDbContext().Set<Category>()
+            .Where(c => wanted.Contains(c.Id))
+            .ToDictionaryAsync(c => c.Id, c => c.Name ?? string.Empty, cancellationToken);
     }
 
     /// <summary>封面圖：為檔案管理的檔案建立一筆新的圖片紀錄（每次都新建，不改既有的，避免動到別處共用的圖片）</summary>

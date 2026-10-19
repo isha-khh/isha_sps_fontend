@@ -63,7 +63,7 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
 
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">
-                  <div className="tag-wrap">{item.industry && <Badge>{item.industry}</Badge>}</div>
+                  <div className="tag-wrap">{item.industries.map((name) => <Badge key={name}>{name}</Badge>)}</div>
                   <div className="part-line"></div>
                   <div className="date">{item.date}</div>
                 </div>

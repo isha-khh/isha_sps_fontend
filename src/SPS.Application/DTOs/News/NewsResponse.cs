@@ -15,6 +15,10 @@ public class NewsResponse
     public int Ordinal { get; set; }
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
+
+    /// <summary>所有分類 Id 與名稱（依選擇順序，與 <see cref="CategoryId"/>／<see cref="CategoryName"/> 的第一個一致）</summary>
+    public List<int> CategoryIds { get; set; } = new();
+    public List<string> CategoryNames { get; set; } = new();
     public short Type { get; set; }
 
     /// <summary>所屬專區：0 公告、1 服務專區</summary>
@@ -65,6 +69,10 @@ public class NewsListItemResponse
     public bool Published { get; set; }
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
+
+    /// <summary>所有分類 Id 與名稱（依選擇順序，與 <see cref="CategoryId"/>／<see cref="CategoryName"/> 的第一個一致）</summary>
+    public List<int> CategoryIds { get; set; } = new();
+    public List<string> CategoryNames { get; set; } = new();
     public int ViewCount { get; set; }
     public short Type { get; set; }
     public short Section { get; set; }

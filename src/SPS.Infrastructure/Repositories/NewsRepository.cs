@@ -61,7 +61,8 @@ public class NewsRepository : Repository<News, int>, INewsRepository
         // 分類過濾
         if (parameters.CategoryId.HasValue)
         {
-            query = query.Where(n => n.CategoryId == parameters.CategoryId.Value);
+            var categoryId = parameters.CategoryId.Value;
+            query = query.Where(n => n.CategoryId == categoryId || n.CategoryIds.Contains(categoryId));
         }
 
         // 類型過濾

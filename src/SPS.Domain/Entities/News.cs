@@ -12,7 +12,14 @@ public class News : BaseEntity<int>
     public int? IntroductionId { get; set; }
     public int? ContentId { get; set; }
     public int? PictureId { get; set; }
+    /// <summary>主分類（<see cref="CategoryIds"/> 的第一個）。舊資料與只認單一分類的地方（後台列表、麵包屑）沿用這個欄位</summary>
     public int? CategoryId { get; set; }
+
+    /// <summary>
+    /// 所有分類 Id（依選擇順序）。產業輔導的「產業別」可以多選，一則輔導可以屬於多個產業別；沒有多選需求的專區就只有一個，
+    /// 內容與 <see cref="CategoryId"/> 一致。依分類篩選時兩個欄位都要比對（見 NewsRepository）
+    /// </summary>
+    public List<int> CategoryIds { get; set; } = new();
     public short Type { get; set; }
 
     /// <summary>所屬專區（<see cref="SPS.Domain.Enums.NewsSection"/>）：0 公告、1 服務專區。與 <see cref="Type"/>（一般／重要／緊急）是不同的東西</summary>

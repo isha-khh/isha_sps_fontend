@@ -201,6 +201,8 @@ export type NewsItem = {
     published: boolean;
     categoryId: number;
     categoryName: string;
+    /** 所有分類名稱（產業輔導的產業別可多選；第一個就是 categoryName） */
+    categoryNames?: string[];
     createdTime: string;
     // 對到真後端 NewsListItemResponse.Tags，原本列表 API 沒有這個
     // 欄位、只有詳情有，2026-09-08 已請後端一起補上
@@ -244,6 +246,8 @@ export type NewsDetail = {
     published: boolean;
     categoryId: number;
     categoryName: string;
+    /** 所有分類名稱（產業輔導的產業別可多選；第一個就是 categoryName） */
+    categoryNames?: string[];
     createdTime: string;
     // 對到真後端 NewsResponse.Tags，拿來當詳情頁「關鍵字」區塊用
     tags?: string[];

@@ -2823,6 +2823,12 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
 
+                    b.PrimitiveCollection<List<int>>("CategoryIds")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer[]")
+                        .HasDefaultValueSql("'{}'::integer[]");
+
                     b.Property<int?>("ContentId")
                         .HasColumnType("integer");
 

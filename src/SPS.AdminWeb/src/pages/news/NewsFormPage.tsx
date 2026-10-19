@@ -34,6 +34,8 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  // 多選分類（config.multiCategory 的專區，例如產業輔導的產業別）；其他專區仍用 formData.categoryId 單選
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   // 封面圖：從檔案系統挑圖片。`coverUrl` 是目前顯示的預覽（原本的封面或剛挑的圖），
   // `coverFileId` 只有這次換了新圖才有值，`removeCover` 代表要移除原本的封面
   const [coverUrl, setCoverUrl] = useState<string | undefined>();
@@ -103,6 +105,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
         setMeta(data.meta ?? {});
         setCoverUrl(data.imageUrl || undefined);
         setSelectedTagIds((data.tagItems ?? []).map((t) => t.id));
+        setSelectedCategoryIds(data.categoryIds && data.categoryIds.length > 0 ? data.categoryIds : data.categoryId ? [data.categoryId] : []);
         // 初始化 ref
         puckContentRef.current = data.content || '';
         console.log('[NewsFormPage] Loaded existing content, length:', data.content?.length || 0);
@@ -156,7 +159,8 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           endDate: formData.endDate,
           published: publish,
           ordinal: formData.ordinal,
-          categoryId: formData.categoryId,
+          categoryId: config.multiCategory ? selectedCategoryIds[0] : formData.categoryId,
+          ...(config.multiCategory ? { categoryIds: selectedCategoryIds } : {}),
           type: formData.type,
           section,
           tagIds: selectedTagIds,
@@ -177,7 +181,8 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           endDate: formData.endDate,
           published: publish,
           ordinal: formData.ordinal,
-          categoryId: formData.categoryId,
+          categoryId: config.multiCategory ? selectedCategoryIds[0] : formData.categoryId,
+          ...(config.multiCategory ? { categoryIds: selectedCategoryIds } : {}),
           type: formData.type,
           section,
           tagIds: selectedTagIds,
@@ -420,7 +425,36 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                   )}
 
                   {/* 公告分類 */}
-                  {config.categoryType !== undefined && (
+                  {config.categoryType !== undefined && config.multiCategory && (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">{config.categoryLabel ?? `${config.noun}分類`}</span>
+                      <span className="label-text-alt text-base-content/60">可多選</span>
+                    </label>
+                    {categories.length === 0 ? (
+                      <p className="text-sm text-base-content/60">尚未建立{config.categoryLabel ?? '分類'}</p>
+                    ) : (
+                      <div className="flex flex-wrap gap-x-5 gap-y-2">
+                        {categories.map((category) => (
+                          <label key={category.id} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="checkbox checkbox-sm checkbox-primary"
+                              checked={selectedCategoryIds.includes(category.id)}
+                              onChange={() =>
+                                setSelectedCategoryIds((prev) =>
+                                  prev.includes(category.id) ? prev.filter((x) => x !== category.id) : [...prev, category.id],
+                                )
+                              }
+                            />
+                            <span className="text-sm">{category.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  )}
+                  {config.categoryType !== undefined && !config.multiCategory && (
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-medium">{config.categoryLabel ?? `${config.noun}分類`}</span>

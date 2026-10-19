@@ -30,6 +30,8 @@ export interface NewsSectionConfig {
   listCrumb: string;
   /** 分類欄位的名稱（例如產業輔導叫「產業別」） */
   categoryLabel?: string;
+  /** 分類可以多選（產業輔導的產業別）；沒設就是單選下拉 */
+  multiCategory?: boolean;
   /** 只有公告有「一般／重要／緊急」類型 */
   hasSeverityType: boolean;
   /** 只有服務專區有附件（填完下載表單才給下載連結） */
@@ -121,6 +123,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
     listTitle: '產業輔導管理',
     listCrumb: '輔導內容',
     categoryLabel: '產業別',
+    multiCategory: true,
     hasSeverityType: false,
     hasAttachments: false,
     hasTags: true,

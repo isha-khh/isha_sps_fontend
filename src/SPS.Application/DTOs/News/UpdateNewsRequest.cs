@@ -13,6 +13,9 @@ public class UpdateNewsRequest
     public bool? Published { get; set; }
     public int? Ordinal { get; set; }
     public int? CategoryId { get; set; }
+
+    /// <summary>多個分類ID；沒帶（null）= 不更新分類，帶空陣列 = 清空分類。有帶就以這個為準</summary>
+    public List<int>? CategoryIds { get; set; }
     public short? Type { get; set; }
 
     /// <summary>所屬專區；沒帶（null）= 不更新</summary>

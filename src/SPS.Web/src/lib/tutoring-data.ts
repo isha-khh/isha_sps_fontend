@@ -18,8 +18,10 @@ export interface TutoringItem {
   organizer: string;
   contactPhone: string;
   date: string;
-  /** 產業別（後台「產業別」分類名稱） */
+  /** 產業別（後台「產業別」分類名稱）；多選時是第一個 */
   industry: string;
+  /** 所有產業別（一則輔導可以屬於多個） */
+  industries: string[];
   contributor?: string;
 }
 
@@ -36,6 +38,7 @@ export function toTutoringItem(item: NewsItem | NewsDetail): TutoringItem {
     contactPhone: meta.contactPhone ?? "",
     date: formatIsoDate(item.startDate ?? item.createdTime),
     industry: item.categoryName ?? "",
+    industries: item.categoryNames && item.categoryNames.length > 0 ? item.categoryNames : item.categoryName ? [item.categoryName] : [],
     contributor: meta.contributor || undefined,
   };
 }

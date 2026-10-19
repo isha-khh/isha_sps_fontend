@@ -25,6 +25,11 @@ public class NewsConfiguration : IEntityTypeConfiguration<News>
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null).GetHashCode(),
                     v => new Dictionary<string, string>(v)));
 
+        // 多選分類：integer[]，既有資料由遷移用 CategoryId 回填
+        builder.Property(n => n.CategoryIds)
+            .HasColumnType("integer[]")
+            .HasDefaultValueSql("'{}'::integer[]");
+
         builder.HasOne(n => n.Title)
             .WithMany(mt => mt.NewsTitles)
             .HasForeignKey(n => n.TitleId)

@@ -226,7 +226,13 @@ export const NewsDetailPage = ({ section = 0 }: { section?: NewsSection }) => {
               <div className="space-y-4">
                 {config.categoryType !== undefined && <div>
                   <div className="text-sm font-medium text-base-content/60 mb-2">{config.categoryLabel ?? `${config.noun}分類`}</div>
-                  {news.categoryName ? (
+                  {news.categoryNames && news.categoryNames.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {news.categoryNames.map((name) => (
+                        <span key={name} className="badge badge-outline badge-lg">{name}</span>
+                      ))}
+                    </div>
+                  ) : news.categoryName ? (
                     <span className="badge badge-outline badge-lg">{news.categoryName}</span>
                   ) : (
                     <span className="text-base-content/50">未分類</span>
