@@ -643,11 +643,11 @@ export const SectionCategoryTypes = { Serve: 9, Tutoring: 10, SupportResource: 1
 /** 某個專區用的分類（後台維護），依排序回傳已發布的 */
 export async function fetchSectionCategories(categoryType: number): Promise<ServeCategory[]> {
     try {
-        const response = await apiClient.get<{ id: number; name?: string; published: boolean; ordinal: number }[]>(`/api/Category/type/${categoryType}`);
+        const response = await apiClient.get<{ id: number; name?: string; published: boolean; ordinal: number; parentId?: number | null }[]>(`/api/Category/type/${categoryType}`);
         return (response.data ?? [])
             .filter((c) => c.published && c.name)
             .sort((a, b) => a.ordinal - b.ordinal || a.id - b.id)
-            .map((c) => ({ id: c.id, name: c.name! }));
+            .map((c) => ({ id: c.id, name: c.name!, ...(c.parentId ? { parentId: c.parentId } : {}) }));
     } catch {
         return [];
     }

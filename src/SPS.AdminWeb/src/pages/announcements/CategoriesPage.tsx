@@ -12,6 +12,8 @@ interface CategoryFormData {
   remark: string;
   ordinal: number;
   published: boolean;
+  /** 上層分類 id（只有 config.hasSubCategories 的專區用；空＝最上層） */
+  parentId?: number;
 }
 
 /** `section`：0 公告分類（預設）、1 服務專區分類；兩者共用這個頁面，差異見 `lib/news-section.ts`（服務專區分類的名稱要對上前台選單：產業AI、技術文件） */
@@ -51,6 +53,15 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
     }
   };
 
+  // 兩層分類：上層在前，子分類緊跟在自己的上層底下
+  const orderedCategories = config.hasSubCategories && !industry
+    ? [...categories]
+        .filter((c) => !c.parentId)
+        .sort((a, b) => a.ordinal - b.ordinal || a.id - b.id)
+        .flatMap((top) => [top, ...categories.filter((c) => c.parentId === top.id).sort((a, b) => a.ordinal - b.ordinal || a.id - b.id)])
+        .concat(categories.filter((c) => c.parentId && !categories.some((t) => t.id === c.parentId)))
+    : categories;
+
   const handleOpenModal = (category?: CategoryResponse) => {
     if (category) {
       setEditingCategory(category);
@@ -59,6 +70,7 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
         remark: category.remark || '',
         ordinal: category.ordinal,
         published: category.published,
+        parentId: category.parentId,
       });
     } else {
       setEditingCategory(null);
@@ -89,6 +101,7 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
           remark: formData.remark,
           ordinal: formData.ordinal,
           published: formData.published,
+          ...(config.hasSubCategories && !industry && formData.parentId ? { parentId: formData.parentId } : {}),
         };
         await categoriesApi.updateCategory(editingCategory.id, updateRequest);
       } else {
@@ -98,6 +111,7 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
           remark: formData.remark,
           ordinal: formData.ordinal,
           published: formData.published,
+          ...(config.hasSubCategories && !industry && formData.parentId ? { parentId: formData.parentId } : {}),
         };
         await categoriesApi.createCategory(createRequest);
       }
@@ -175,10 +189,18 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
                   </tr>
                 </thead>
                 <tbody>
-                  {categories.map((category) => (
+                  {orderedCategories.map((category) => (
                     <tr key={category.id}>
                       <td>
-                        <div className="font-semibold">{category.name}</div>
+                        {category.parentId && config.hasSubCategories ? (
+                          <div className="pl-6">
+                            <span className="text-base-content/40 mr-1">└</span>
+                            <span className="font-medium">{category.name}</span>
+                            <span className="ml-2 text-xs text-base-content/50">子分類（{category.parentName}）</span>
+                          </div>
+                        ) : (
+                          <div className="font-semibold">{category.name}</div>
+                        )}
                       </td>
                       <td>
                         <div className="text-sm text-base-content/70 max-w-md line-clamp-2">
@@ -253,6 +275,29 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
                     required
                   />
                 </div>
+
+                {config.hasSubCategories && !industry && (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">上層分類</span>
+                      <span className="label-text-alt text-base-content/60">子分類會顯示在前台左側選單</span>
+                    </label>
+                    <select
+                      className="select select-bordered"
+                      value={formData.parentId ?? ''}
+                      onChange={(e) => setFormData({ ...formData, parentId: e.target.value ? Number(e.target.value) : undefined })}
+                    >
+                      <option value="">無（最上層，例如「技術文件」「產業AI」）</option>
+                      {categories
+                        .filter((c) => !c.parentId && c.id !== editingCategory?.id)
+                        .map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
 
                 <div className="form-control">
                   <label className="label">

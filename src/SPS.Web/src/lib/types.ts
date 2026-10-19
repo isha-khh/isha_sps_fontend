@@ -662,4 +662,6 @@ export type DownloadResources = Record<string, { title: string; links: DownloadL
 export type ServeCategory = {
     id: number;
     name: string;
+    /** 上層分類 id；最上層是 undefined（目前只有服務專區的分類有兩層） */
+    parentId?: number;
 };

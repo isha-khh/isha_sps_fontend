@@ -62,7 +62,8 @@ public class NewsRepository : Repository<News, int>, INewsRepository
         if (parameters.CategoryId.HasValue)
         {
             var categoryId = parameters.CategoryId.Value;
-            query = query.Where(n => n.CategoryId == categoryId || n.CategoryIds.Contains(categoryId));
+            // 也包含「上層分類是這個分類」的內容：服務專區的分類有兩層（技術文件 → 子分類），選上層要看到底下子分類的項目
+            query = query.Where(n => n.CategoryId == categoryId || n.CategoryIds.Contains(categoryId) || (n.Category != null && n.Category.ParentId == categoryId));
         }
 
         // 適用產業過濾（政府補助資源）

@@ -500,7 +500,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                       <option value="">未分類</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
-                          {category.name}
+                          {config.hasSubCategories && category.parentName ? `${category.parentName} › ${category.name}` : category.name}
                         </option>
                       ))}
                     </select>

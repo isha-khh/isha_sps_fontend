@@ -30,6 +30,8 @@ export interface NewsSectionConfig {
   listCrumb: string;
   /** 分類欄位的名稱（例如產業輔導叫「產業別」） */
   categoryLabel?: string;
+  /** 分類有兩層（服務專區：技術文件／產業AI 底下可以有子分類，前台左側選單顯示子分類）；沒設就只有一層 */
+  hasSubCategories?: boolean;
   /** 分類可以多選（產業輔導的產業別）；沒設就是單選下拉 */
   multiCategory?: boolean;
   /** 前台「立即下載」「索取資料」表單送出後存成詢問單，針對的對象種類（後端 `Inquiry.TargetType`，`TargetKey` 是項目編號）；有設就會在列表顯示回應數量、詳情頁顯示回應表格並可匯出 */
@@ -72,6 +74,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
   1: {
     section: 1,
     categoryType: 9,
+    hasSubCategories: true,
     inquiryTargetType: 'ServeItem',
     basePath: '/serve-items',
     categoriesPath: '/serve-items/categories',
