@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
+import PageSubNav, { TALENT_SUB_NAV } from "@/components/layout/PageSubNav";
 import BodyClass from "@/components/BodyClass";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
@@ -41,6 +42,7 @@ export default async function TalentIndexPage({ searchParams }: PageProps<"/tale
       <BodyClass className="talent" />
       <InnerPageShell
         title="人才培訓"
+        titleAside={<PageSubNav links={TALENT_SUB_NAV} activeHref="/talent" />}
         breadcrumb={[{ label: "人才培育" }, { label: "人才培訓" }]}
         banner={topBanners.some((b) => b.uri) ? <NewsBanner id="talent-banner" banners={topBanners} /> : undefined}
         aside={

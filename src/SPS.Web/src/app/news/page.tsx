@@ -102,8 +102,11 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
   const items = backendAvailable ? backendItems : NEWS_ARTICLES;
   const categories = deriveNewsCategories(items);
 
-  const requestedId = rawCategory ? Number(rawCategory) : NaN;
-  const activeCategory = categories.find((c) => c.id === requestedId);
+  // `?category=` 兩種寫法都接：分類 id（頁籤、分頁連結用）與分類名稱（導覽列「公告事項」下拉選單與網站導覽用，
+  // 例如 `?category=活動資訊`）——原本只認 id，導覽列的連結點了沒有跳到那個分類（issue #29）
+  const requestedId = typeof rawCategory === "string" && rawCategory ? Number(rawCategory) : NaN;
+  const activeCategory =
+    categories.find((c) => c.id === requestedId) ?? (typeof rawCategory === "string" && rawCategory ? categories.find((c) => c.name === rawCategory) : undefined);
   const activeHref = activeCategory ? `/news?category=${activeCategory.id}` : "/news";
   const articles = activeCategory ? items.filter((item) => item.categoryId === activeCategory.id) : items;
   // 標籤名稱從結果裡的 tagItems 找；篩選結果剛好 0 筆時找不到名稱，退回通用說法

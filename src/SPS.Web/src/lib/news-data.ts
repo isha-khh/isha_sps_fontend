@@ -58,6 +58,17 @@ export function deriveNewsCategories(items: NewsItem[]): NewsCategory[] {
  */
 
 /**
+ * 後台日期欄位只選「日期」，存進資料庫是那天的 UTC 零點（台灣時間早上 8 點）。直接拿來跟現在比，結束日當天 8 點之後就會顯示
+ * 「活動已結束」、開始日當天 8 點前還是「即將開始」（issue #30）。所以日期是 UTC 零點時，視為台灣時間的整天：
+ * 開始＝當天 00:00（台灣）、結束＝當天 23:59:59.999（台灣）；有填時間的就照原本的時間。
+ */
+const TAIPEI_OFFSET_MS = 8 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+function isUtcMidnight(ms: number): boolean {
+  return ms % DAY_MS === 0;
+}
+
+/**
  * 「活動進行中／即將開始／已結束」這個狀態標籤不是後端另外存一個狀態
  * 欄位，是前台自己用 `startDate`／`endDate` 跟現在時間比對算出來的：
  * - 沒有 `endDate`：不是「活動」類公告（沒有起訖區間），不顯示標籤
@@ -76,8 +87,11 @@ export function getNewsActivityStatus(startDate: string | null, endDate?: string
   if (!startDate || !endDate) return undefined;
 
   const now = Date.now();
-  const start = new Date(startDate).getTime();
-  const end = new Date(endDate).getTime();
+  const startRaw = new Date(startDate).getTime();
+  const endRaw = new Date(endDate).getTime();
+  if (Number.isNaN(startRaw) || Number.isNaN(endRaw)) return undefined;
+  const start = isUtcMidnight(startRaw) ? startRaw - TAIPEI_OFFSET_MS : startRaw;
+  const end = isUtcMidnight(endRaw) ? endRaw + DAY_MS - TAIPEI_OFFSET_MS - 1 : endRaw;
 
   if (now < start) return "即將開始";
   if (now > end) return "活動已結束";

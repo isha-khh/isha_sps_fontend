@@ -4,6 +4,7 @@ import { Fragment } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
+import PageSubNav, { TALENT_SUB_NAV } from "@/components/layout/PageSubNav";
 import BodyClass from "@/components/BodyClass";
 import Tabs from "@/components/ui/Tabs";
 import { withBasePath } from "@/lib/api-client";
@@ -69,6 +70,7 @@ export default async function TalentXrPage() {
       <BodyClass className="talent xr" />
       <InnerPageShell
         title="XR"
+        titleAside={<PageSubNav links={TALENT_SUB_NAV} activeHref="/talent/xr" />}
         breadcrumb={[{ label: "人才培訓", href: "/talent" }, { label: "XR" }]}
         decorations={
           <>

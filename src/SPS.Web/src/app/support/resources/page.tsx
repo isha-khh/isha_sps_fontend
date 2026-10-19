@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
+import PageSubNav, { SUPPORT_SUB_NAV } from "@/components/layout/PageSubNav";
 import BodyClass from "@/components/BodyClass";
 import CategoryTabList from "@/components/layout/CategoryTabList";
 import SearchBar from "@/components/ui/SearchBar";
@@ -66,6 +67,7 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
       <BodyClass className="support resources" />
       <InnerPageShell
         title="政府補助資源"
+        titleAside={<PageSubNav links={SUPPORT_SUB_NAV} activeHref="/support/resources" />}
         breadcrumb={[{ label: "補助資源" }, { label: "政府補助資源" }]}
         sidebar={
           categories.length > 0 ? (

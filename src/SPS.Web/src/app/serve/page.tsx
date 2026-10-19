@@ -51,7 +51,8 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
   const currentPage = Math.min(page, totalPages);
 
   const currentHref = category ? `/serve?category=${encodeURIComponent(category)}` : "/serve";
-  const siblingCategories = category && categories.length > 1 ? categories.map((c) => c.name) : undefined;
+  // 沒帶 `?category=`（直接進 /serve）也要有子選單，設計稿 page/serve/index.html 的跑馬燈標題旁一直都有（issue #28）；這時沒有項目是 active
+  const siblingCategories = categories.length > 1 ? categories.map((c) => c.name) : undefined;
   const getPageHref = (target: number) => {
     const params = new URLSearchParams();
     if (category) params.set("category", category);
@@ -67,7 +68,7 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
 
       <InnerPageShell
         title={category ?? "服務專區"}
-        titleAside={siblingCategories && category ? <ServeSubNav categories={siblingCategories} activeCategory={category} industryAiLink={industryAiLink} /> : undefined}
+        titleAside={siblingCategories ? <ServeSubNav categories={siblingCategories} activeCategory={category ?? ""} industryAiLink={industryAiLink} /> : undefined}
         breadcrumb={category ? [{ label: "服務專區", href: "/serve" }, { label: category }] : [{ label: "服務專區" }]}
         sidebar={
           <CategoryTabList

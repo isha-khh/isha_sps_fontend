@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
+import PageSubNav, { SUPPORT_SUB_NAV } from "@/components/layout/PageSubNav";
 import BodyClass from "@/components/BodyClass";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import NewsBanner from "@/components/news/NewsBanner";
@@ -69,6 +70,7 @@ export default async function SupportPage({ searchParams }: PageProps<"/support"
       <BodyClass className="support" />
       <InnerPageShell
         title="本計畫補助"
+        titleAside={<PageSubNav links={SUPPORT_SUB_NAV} activeHref="/support" />}
         breadcrumb={[{ label: "補助資源" }, { label: "本計畫補助" }]}
         banner={topBanners.some((b) => b.uri) ? <NewsBanner id="support-banner" banners={topBanners} /> : undefined}
         aside={
