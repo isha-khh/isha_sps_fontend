@@ -65,7 +65,7 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
                 <div className="tit_three_left">
                   {/* 設計稿的 `.tit_three_left .tag-wrap span` 是 display:block，多個產業別會一個一行；用 flex 讓它們排在同一行、太長自動換行 */}
                   <div className="tag-wrap" style={{ display: "flex", flexWrap: "wrap", columnGap: "0.75rem" }}>
-                    {item.industries.length > 0 && <span>適用對象：</span>}
+                    {item.industries.length > 0 && <span>產業別：</span>}
                     {item.industries.map((name) => (
                       <Badge key={name}>{name}</Badge>
                     ))}
