@@ -39,6 +39,22 @@ public class ContributePageSettingsDto
 
     /// <summary>投稿信箱；空＝前台不顯示這一列</summary>
     public string ContactEmail { get; set; } = "isha_khh@mail.isha.org.tw";
+
+    // ===== 頁面文字（原本寫死在前台，預設值就是原本的文字；空＝前台不顯示那一塊）=====
+
+    /// <summary>標題下方的分類標籤，例如「案例徵稿」</summary>
+    public string Tag { get; set; } = "案例徵稿";
+
+    /// <summary>標題下方顯示的日期文字（自由文字，例如 2026-04-15）</summary>
+    public string Date { get; set; } = "2026-04-15";
+
+    /// <summary>撰稿人；前台顯示成「撰稿人 / …」</summary>
+    public string Contributor { get; set; } = "設計研發組研究員 郭憶璇、江宛庭";
+
+    /// <summary>投稿說明文字；空白行分段，每一段前台顯示成一個段落</summary>
+    public string Introduction { get; set; } =
+        "歡迎業界夥伴投稿分享智慧化導入經驗、技術案例或創新應用，協助更多企業借鏡實務作法、加速智慧工安轉型。投稿內容經審核通過後，將刊登於「產業案例」專區，並視情況邀請於「影音專區」錄製分享影片。\n\n" +
+        "投稿前請先下載投稿格式，依格式填寫案例背景、導入內容與成效說明，並附上相關佐證圖片，寄至下方投稿信箱即可完成投稿。";
 }
 
 /// <summary>
@@ -67,6 +83,11 @@ public class ContributePagePublicDto
     public string ContactName { get; set; } = string.Empty;
     public string ContactPhone { get; set; } = string.Empty;
     public string ContactEmail { get; set; } = string.Empty;
+
+    public string Tag { get; set; } = string.Empty;
+    public string Date { get; set; } = string.Empty;
+    public string Contributor { get; set; } = string.Empty;
+    public string Introduction { get; set; } = string.Empty;
 
     /// <summary>主視覺圖片網址（相對於 API）；沒設定或檔案不可用時為空字串，前台用預設圖片</summary>
     public string ImageUrl { get; set; } = string.Empty;
@@ -105,6 +126,11 @@ public static class ContributePageValidator
             (email.Length > 320 || !System.Net.Mail.MailAddress.TryCreate(email, out var parsed) || parsed.Address != email))
             return "「投稿信箱」格式不正確";
 
+        if ((s.Tag?.Trim().Length ?? 0) > 30) return "「分類標籤」太長（上限 30 字元）";
+        if ((s.Date?.Trim().Length ?? 0) > 30) return "「日期」太長（上限 30 字元）";
+        if ((s.Contributor?.Trim().Length ?? 0) > 100) return "「撰稿人」太長（上限 100 字元）";
+        if ((s.Introduction?.Trim().Length ?? 0) > 3000) return "「投稿說明」太長（上限 3000 字元）";
+
         return null;
     }
 
@@ -120,5 +146,9 @@ public static class ContributePageValidator
         ContactName = s.ContactName?.Trim() ?? string.Empty,
         ContactPhone = s.ContactPhone?.Trim() ?? string.Empty,
         ContactEmail = s.ContactEmail?.Trim() ?? string.Empty,
+        Tag = s.Tag?.Trim() ?? string.Empty,
+        Date = s.Date?.Trim() ?? string.Empty,
+        Contributor = s.Contributor?.Trim() ?? string.Empty,
+        Introduction = s.Introduction?.Trim() ?? string.Empty,
     };
 }

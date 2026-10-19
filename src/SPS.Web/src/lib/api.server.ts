@@ -557,7 +557,13 @@ const DEFAULT_CONTRIBUTE_PAGE: ContributePage = {
     formats: [],
     contactName: "",
     contactPhone: "+886-7-550-3115",
-    contactEmail: "isha_khh@mail.isha.org.tw",    imageUrl: "",
+    contactEmail: "isha_khh@mail.isha.org.tw",
+    tag: "案例徵稿",
+    date: "2026-04-15",
+    contributor: "設計研發組研究員 郭憶璇、江宛庭",
+    introduction:
+        "歡迎業界夥伴投稿分享智慧化導入經驗、技術案例或創新應用，協助更多企業借鏡實務作法、加速智慧工安轉型。投稿內容經審核通過後，將刊登於「產業案例」專區，並視情況邀請於「影音專區」錄製分享影片。\n\n投稿前請先下載投稿格式，依格式填寫案例背景、導入內容與成效說明，並附上相關佐證圖片，寄至下方投稿信箱即可完成投稿。",
+    imageUrl: "",
 };
 
 /**
@@ -571,6 +577,10 @@ export async function fetchContributePage(): Promise<ContributePage> {
             contactName?: string;
             contactPhone?: string;
             contactEmail?: string;
+            tag?: string;
+            date?: string;
+            contributor?: string;
+            introduction?: string;
             imageUrl?: string;
         }>("/api/page-settings/contribute/public", 60);
 
@@ -582,6 +592,10 @@ export async function fetchContributePage(): Promise<ContributePage> {
             contactName: data.contactName ?? "",
             contactPhone: data.contactPhone ?? "",
             contactEmail: data.contactEmail ?? "",
+            tag: data.tag ?? "",
+            date: data.date ?? "",
+            contributor: data.contributor ?? "",
+            introduction: data.introduction ?? "",
             imageUrl: resolveBackendAssetUrl(data.imageUrl) ?? "",
         };
     } catch {

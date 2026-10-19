@@ -617,6 +617,11 @@ export interface ContributePage {
     contactName: string;
     contactPhone: string;
     contactEmail: string;
+    /** 頁面文字（後台維護，空字串＝不顯示）：分類標籤、日期、撰稿人、投稿說明（空白行分段） */
+    tag: string;
+    date: string;
+    contributor: string;
+    introduction: string;
     /** 後台設定的主視覺圖片（完整網址）；空字串＝沒設定，前台用預設圖片 */
     imageUrl: string;
 }

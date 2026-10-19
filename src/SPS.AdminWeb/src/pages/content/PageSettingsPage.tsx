@@ -32,6 +32,10 @@ const EMPTY: ContributePageSettings = {
   contactName: '',
   contactPhone: '',
   contactEmail: '',
+  tag: '',
+  date: '',
+  contributor: '',
+  introduction: '',
 };
 
 /** 從選到的檔案（檔案管理清單或剛上傳的）取出 id 與檔名 */
@@ -180,7 +184,12 @@ export const PageSettingsPage = ({ view = 'misc' }: { view?: 'misc' | 'contribut
     );
   };
 
-  const textField = (key: 'contactName' | 'contactPhone' | 'contactEmail', label: string, placeholder: string, hint?: string) => (
+  const textField = (
+    key: 'contactName' | 'contactPhone' | 'contactEmail' | 'tag' | 'date' | 'contributor',
+    label: string,
+    placeholder: string,
+    hint?: string,
+  ) => (
     <div className="form-control" key={key}>
       <label className="label" htmlFor={`page-${key}`}>
         <span className="label-text font-medium">{label}</span>
@@ -190,7 +199,7 @@ export const PageSettingsPage = ({ view = 'misc' }: { view?: 'misc' | 'contribut
         type="text"
         className="input input-bordered w-full"
         placeholder={placeholder}
-        maxLength={key === 'contactEmail' ? 320 : 50}
+        maxLength={key === 'contactEmail' ? 320 : key === 'contributor' ? 100 : key === 'tag' || key === 'date' ? 30 : 50}
         value={form[key]}
         onChange={(e) => setForm({ ...form, [key]: e.target.value })}
       />
@@ -246,6 +255,30 @@ export const PageSettingsPage = ({ view = 'misc' }: { view?: 'misc' | 'contribut
                     移除（改用預設圖片）
                   </button>
                 )}
+              </div>
+
+              <div className="divider my-1" />
+
+              <h4 className="font-semibold">頁面文字</h4>
+              <p className="text-sm text-base-content/70">顯示在前台標題下方與內文；欄位留空，前台就不顯示那一塊。</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {textField('tag', '分類標籤', '例如 案例徵稿')}
+                {textField('date', '日期', '例如 2026-04-15', '自由文字，前台原樣顯示。')}
+                {textField('contributor', '撰稿人', '例如 設計研發組研究員 王小明', '前台顯示成「撰稿人 / …」。')}
+              </div>
+              <div className="form-control">
+                <label className="label" htmlFor="page-introduction">
+                  <span className="label-text font-medium">投稿說明</span>
+                </label>
+                <textarea
+                  id="page-introduction"
+                  className="textarea textarea-bordered w-full"
+                  rows={8}
+                  maxLength={3000}
+                  value={form.introduction}
+                  onChange={(e) => setForm({ ...form, introduction: e.target.value })}
+                />
+                <p className="text-xs text-base-content/60 mt-1">用空白行分段，每一段前台顯示成一個段落。</p>
               </div>
 
               <div className="divider my-1" />

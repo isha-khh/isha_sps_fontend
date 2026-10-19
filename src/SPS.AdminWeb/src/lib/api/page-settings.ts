@@ -19,6 +19,11 @@ export interface ContributePageSettings {
   contactName: string;
   contactPhone: string;
   contactEmail: string;
+  /** 頁面文字：分類標籤、日期、撰稿人、投稿說明（空白行分段）；留空前台不顯示那一塊 */
+  tag: string;
+  date: string;
+  contributor: string;
+  introduction: string;
 }
 
 export interface ContributePageAdminData {

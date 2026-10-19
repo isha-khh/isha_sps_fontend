@@ -41,6 +41,11 @@ export default async function PromotionContributePage() {
     fetchPromotionCases(),
     fetchIndustryAiLink(),
   ]);
+  // 投稿說明以空白行分段，每段一個 <p>（段內的換行保留成空白，交給瀏覽器排版）
+  const introParagraphs = page.introduction
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.replace(/\s*\n\s*/g, " ").trim())
+    .filter(Boolean);
   const industryAi = resolveServeCategoryLink("產業AI", industryAiLink);
   const popularSource = cases.backendAvailable ? cases.items : INDUSTRY_CASES;
   const popularItems = sortByViewCount(popularSource)
@@ -82,11 +87,13 @@ export default async function PromotionContributePage() {
               <h3>我要投稿</h3>
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">
-                  <div className="tag-wrap">
-                    <Badge>案例徵稿</Badge>
-                  </div>
-                  <div className="part-line"></div>
-                  <div className="date">2026-04-15</div>
+                  {page.tag && (
+                    <div className="tag-wrap">
+                      <Badge>{page.tag}</Badge>
+                    </div>
+                  )}
+                  {page.tag && page.date && <div className="part-line"></div>}
+                  {page.date && <div className="date">{page.date}</div>}
                 </div>
                 <ShareBox />
               </div>
@@ -117,14 +124,15 @@ export default async function PromotionContributePage() {
             <img className="img-fluid d-block" src={page.imageUrl || withBasePath("/images/all/new_logo.jpg")} alt="我要投稿" />
           </div>
 
-          <div className="Contributor">撰稿人 / 設計研發組研究員 郭憶璇、江宛庭</div>
+          {page.contributor && <div className="Contributor">撰稿人 / {page.contributor}</div>}
 
-          <div className="txt editor mb-md-5 mb-4">
-            <p>
-              歡迎業界夥伴投稿分享智慧化導入經驗、技術案例或創新應用，協助更多企業借鏡實務作法、加速智慧工安轉型。投稿內容經審核通過後，將刊登於「產業案例」專區，並視情況邀請於「影音專區」錄製分享影片。
-            </p>
-            <p>投稿前請先下載投稿格式，依格式填寫案例背景、導入內容與成效說明，並附上相關佐證圖片，寄至下方投稿信箱即可完成投稿。</p>
-          </div>
+          {introParagraphs.length > 0 && (
+            <div className="txt editor mb-md-5 mb-4">
+              {introParagraphs.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          )}
 
           <div className="dk_conbo mb-md-5 mb-4">
             <PromotionContactInfo name={page.contactName} phone={page.contactPhone} email={page.contactEmail} />

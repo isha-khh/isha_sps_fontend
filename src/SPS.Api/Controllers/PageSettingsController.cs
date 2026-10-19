@@ -120,6 +120,10 @@ public class PageSettingsController : ControllerBase
             ContactName = contactOk ? settings.ContactName : string.Empty,
             ContactPhone = contactOk ? settings.ContactPhone : string.Empty,
             ContactEmail = contactOk ? settings.ContactEmail : string.Empty,
+            Tag = contactOk ? settings.Tag : string.Empty,
+            Date = contactOk ? settings.Date : string.Empty,
+            Contributor = contactOk ? settings.Contributor : string.Empty,
+            Introduction = contactOk ? settings.Introduction : string.Empty,
             ImageUrl = (await ResolveImageAsync(settings.ImageFileId, cancellationToken))?.Url ?? string.Empty,
         });
     }
