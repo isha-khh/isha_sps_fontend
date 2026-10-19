@@ -208,6 +208,10 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
                 status: getNewsActivityStatus(article.startDate, article.endDate),
                 title: article.title,
                 description: article.introduction,
+                meta: [
+                  ...(article.meta?.eventTime ? [{ icon: "calendar" as const, text: article.meta.eventTime }] : []),
+                  ...(article.meta?.location ? [{ icon: "geo" as const, text: article.meta.location }] : []),
+                ],
                 keywords: article.tagItems?.map((t) => ({ label: t.name, href: `/news?tag=${t.id}` })) ?? article.tags?.map((label) => ({ label })),
               }}
             />

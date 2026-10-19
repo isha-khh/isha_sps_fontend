@@ -57,6 +57,11 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
     hasSeverityType: true,
     hasAttachments: false,
     hasTags: true,
+    metaTitle: '活動資訊',
+    metaFields: [
+      { key: 'eventTime', label: '活動時間', placeholder: '例如：2026.4.15(四)09:00-16:30', hint: '前台公告列表卡片上的時間列；不填就不顯示' },
+      { key: 'location', label: '活動地點', placeholder: '例如：台北國際會議中心101會議室', hint: '前台公告列表卡片上的地點列；不填就不顯示' },
+    ],
   },
   1: {
     section: 1,

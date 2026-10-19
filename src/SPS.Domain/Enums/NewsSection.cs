@@ -29,6 +29,8 @@ public static class NewsSection
     /// <summary>各專區 <c>News.Meta</c> 允許的欄位名稱；其他欄位名稱後端一律拒絕</summary>
     public static readonly IReadOnlyDictionary<short, string[]> MetaKeys = new Dictionary<short, string[]>
     {
+        // 公告的活動資訊：列表卡片上的時間與地點（設計稿 page/news/index.html 的 calendar／geo 兩列），兩個都選填
+        [Announcement] = new[] { "eventTime", "location" },
         [Talent] = new[]
         {
             "organizer", "dateStart", "dateEnd", "city", "contactName", "contactPhone", "courseCode", "courseDate", "courseTime",
