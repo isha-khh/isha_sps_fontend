@@ -157,6 +157,9 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           content: latestContent, // 使用 ref 中的最新值
           startDate: formData.startDate,
           endDate: formData.endDate,
+          // 欄位清空時 startDate／endDate 不會出現在送出的內容（undefined），後端會當成「不更新」而保留舊日期，要另外告知清除
+          clearStartDate: !formData.startDate,
+          clearEndDate: !formData.endDate,
           published: publish,
           ordinal: formData.ordinal,
           categoryId: config.multiCategory ? selectedCategoryIds[0] : formData.categoryId,

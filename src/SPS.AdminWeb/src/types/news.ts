@@ -64,6 +64,9 @@ export interface UpdateNewsRequest {
   published?: boolean;
   ordinal?: number;
   categoryId?: number;
+  /** 日期欄位沒帶＝不更新，所以清除日期要另外帶 true */
+  clearStartDate?: boolean;
+  clearEndDate?: boolean;
   /** 沒帶＝不動分類；帶空陣列＝清空分類 */
   categoryIds?: number[];
   type?: number;

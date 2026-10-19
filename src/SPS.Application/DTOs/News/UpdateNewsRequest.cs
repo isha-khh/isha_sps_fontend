@@ -10,6 +10,12 @@ public class UpdateNewsRequest
     public string? Content { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
+
+    /// <summary>true＝清除開始日期（<see cref="StartDate"/> 沒帶代表「不更新」，所以要清掉得另外說明）</summary>
+    public bool? ClearStartDate { get; set; }
+
+    /// <summary>true＝清除結束日期（同 <see cref="ClearStartDate"/>）</summary>
+    public bool? ClearEndDate { get; set; }
     public bool? Published { get; set; }
     public int? Ordinal { get; set; }
     public int? CategoryId { get; set; }

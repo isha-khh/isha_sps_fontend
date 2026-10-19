@@ -297,8 +297,10 @@ public class NewsService : INewsService
         }
 
         // 更新其他欄位
-        if (request.StartDate.HasValue) news.StartDate = request.StartDate;
-        if (request.EndDate.HasValue) news.EndDate = request.EndDate;
+        if (request.ClearStartDate == true) news.StartDate = null;
+        else if (request.StartDate.HasValue) news.StartDate = request.StartDate;
+        if (request.ClearEndDate == true) news.EndDate = null;
+        else if (request.EndDate.HasValue) news.EndDate = request.EndDate;
         if (request.Published.HasValue) news.Published = request.Published.Value;
         if (request.Ordinal.HasValue) news.Ordinal = request.Ordinal.Value;
         if (newCategoryIds != null)
