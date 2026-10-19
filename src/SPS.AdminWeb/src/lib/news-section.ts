@@ -32,6 +32,8 @@ export interface NewsSectionConfig {
   categoryLabel?: string;
   /** 分類可以多選（產業輔導的產業別）；沒設就是單選下拉 */
   multiCategory?: boolean;
+  /** 前台「立即下載」「索取資料」表單送出後存成詢問單，針對的對象種類（後端 `Inquiry.TargetType`，`TargetKey` 是項目編號）；有設就會在列表顯示回應數量、詳情頁顯示回應表格並可匯出 */
+  inquiryTargetType?: string;
   /** 另一組「適用產業」（可多選，政府補助資源用）：後端 CategoryType、管理頁路徑與欄位名稱；沒設就沒有這個欄位 */
   industryCategoryType?: number;
   industryCategoriesPath?: string;
@@ -70,6 +72,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
   1: {
     section: 1,
     categoryType: 9,
+    inquiryTargetType: 'ServeItem',
     basePath: '/serve-items',
     categoriesPath: '/serve-items/categories',
     parentLabel: '技術工具',
@@ -147,6 +150,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
   5: {
     section: 5,
     categoryType: 11,
+    inquiryTargetType: 'SupportResource',
     basePath: '/support-resources',
     categoriesPath: '/support-resources/categories',
     parentLabel: '補助資源',

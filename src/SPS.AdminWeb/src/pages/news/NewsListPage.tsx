@@ -7,6 +7,7 @@ import { categoriesApi } from '@/lib/api/category';
 import type { News, NewsSearchParams } from '@/types/news';
 import type { CategoryResponse } from '@/types/category';
 import { useNotify } from '@/hooks/useNotify';
+import { inquiriesApi } from '@/lib/api/inquiries';
 import { NEWS_SECTIONS, type NewsSection } from '@/lib/news-section';
 
 /** `section`：0 公告（預設）、1 服務專區，兩者共用這個頁面，差異見 `lib/news-section.ts` */
@@ -23,6 +24,8 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
   const [searchParams, setSearchParams] = useState<NewsSearchParams>({ section });
   const [searchText, setSearchText] = useState('');
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  // 前台表單回應（詢問單）數量：服務專區、補助資源這類有「立即下載」「索取資料」表單的專區才有
+  const [responseCounts, setResponseCounts] = useState<Record<string, number> | undefined>();
 
   // 載入公告列表
   const fetchNews = async () => {
@@ -56,6 +59,23 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
   useEffect(() => {
     fetchNews();
   }, [currentPage, searchParams]);
+
+  // 回應數量需要「客服服務」權限；沒有權限（或失敗）就不顯示這一欄，不影響列表
+  useEffect(() => {
+    if (!config.inquiryTargetType) return;
+    inquiriesApi
+      .getCountsByTarget(config.inquiryTargetType)
+      .then(setResponseCounts)
+      .catch(() => setResponseCounts(undefined));
+  }, []);
+
+  const handleExportResponses = async (id: number) => {
+    try {
+      await inquiriesApi.exportToExcel({ targetType: config.inquiryTargetType, targetKey: String(id) });
+    } catch {
+      await notify.error('匯出回應失敗（需要「客服服務」權限）');
+    }
+  };
 
   // 搜尋處理
   const handleSearch = (e: React.FormEvent) => {
@@ -245,6 +265,8 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
             onDelete={handleDelete}
             basePath={config.basePath}
             noun={config.noun}
+            responseCounts={responseCounts}
+            onExportResponses={responseCounts ? handleExportResponses : undefined}
           />
         </div>
       </div>

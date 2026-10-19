@@ -12,9 +12,13 @@ interface NewsTableProps {
   basePath?: string;
   /** 項目名稱（空列表與刪除確認的文字） */
   noun?: string;
+  /** 每個項目收到的回應（詢問單）數量，key 是項目編號；有給才顯示「回應數量」欄 */
+  responseCounts?: Record<string, number>;
+  /** 匯出某個項目的回應；有給才在「⋯」選單出現「匯出回應」 */
+  onExportResponses?: (id: number) => void;
 }
 
-export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete, basePath = '/announcements', noun = '公告' }: NewsTableProps) => {
+export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete, basePath = '/announcements', noun = '公告', responseCounts, onExportResponses }: NewsTableProps) => {
   const { confirmDialog, ConfirmComponent } = useConfirm();
 
   const columns: Column<News>[] = [
@@ -82,6 +86,21 @@ export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete, basePath
         </div>
       ),
     },
+    ...(responseCounts
+      ? [
+          {
+            key: 'responseCount',
+            title: '回應數量',
+            className: 'text-center',
+            render: (item: News) => (
+              <div className="flex items-center justify-center gap-1">
+                <span className="iconify lucide--inbox size-4 text-base-content/50" />
+                <span className="font-medium">{(responseCounts[String(item.id)] ?? 0).toLocaleString()}</span>
+              </div>
+            ),
+          } as Column<News>,
+        ]
+      : []),
     {
       key: 'published',
       title: '狀態',
@@ -123,6 +142,15 @@ export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete, basePath
             icon: 'lucide--edit',
             to: (item) => `${basePath}/${item.id}/edit`,
           },
+          ...(onExportResponses
+            ? [
+                {
+                  label: '匯出回應（Excel）',
+                  icon: 'lucide--download',
+                  onClick: (item: News) => onExportResponses(item.id),
+                },
+              ]
+            : []),
           ...(onTogglePublish
             ? [
                 {

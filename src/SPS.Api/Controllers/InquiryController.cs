@@ -131,6 +131,72 @@ public class InquiryController : ControllerBase
         return r.IsSuccess ? Ok(r.Data) : BadRequest(new { error = r.Error });
     }
 
+    /// <summary>
+    /// 後台：某一類對象底下每個項目收到的詢問單數量（例如 targetType=SupportResource，補助資源列表的「回應數量」），
+    /// 回傳 { 項目編號: 數量 }
+    /// </summary>
+    [HttpGet("counts-by-target")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.CustomerService)]
+    public async Task<IActionResult> GetCountsByTarget([FromQuery] string targetType, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(targetType)) return BadRequest(new { error = "請指定 targetType" });
+        var r = await _inquiryService.GetCountsByTargetAsync(targetType, ct);
+        return r.IsSuccess ? Ok(r.Data) : BadRequest(new { error = r.Error });
+    }
+
+    /// <summary>
+    /// 後台：匯出詢問單為 Excel。可用 targetType／targetKey 只匯出某一個項目的回應（例如某筆補助資源），
+    /// 也可再用 type／status／search 縮小範圍；最多 10000 筆
+    /// </summary>
+    [HttpGet("export")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.CustomerService)]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Export([FromQuery] InquiryQueryParameters parameters, CancellationToken ct)
+    {
+        var r = await _inquiryService.ListForExportAsync(parameters, 10000, ct);
+        if (!r.IsSuccess) return BadRequest(new { error = r.Error });
+
+        using var workbook = new ClosedXML.Excel.XLWorkbook();
+        var ws = workbook.Worksheets.Add("回應");
+        var headers = new[] { "送出時間", "種類", "針對項目", "工廠／公司名稱", "姓名", "電話", "信箱", "單位", "職稱", "補充說明", "處理狀態", "處理備註" };
+        for (var c = 0; c < headers.Length; c++)
+        {
+            var cell = ws.Cell(1, c + 1);
+            cell.Value = headers[c];
+            cell.Style.Font.Bold = true;
+            cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+        }
+
+        var row = 2;
+        foreach (var i in r.Data!)
+        {
+            var values = new string?[]
+            {
+                // 資料庫存 UTC，匯出用台灣時間
+                i.CreatedTime.ToUniversalTime().AddHours(8).ToString("yyyy-MM-dd HH:mm"),
+                i.TypeName, i.TargetTitle, i.CompanyName, i.Name, i.Phone, i.Email, i.Unit, i.JobTitle, i.Message,
+                i.Status switch { InquiryStatus.New => "新進", InquiryStatus.InProgress => "處理中", _ => "已結案" },
+                i.HandlerNote,
+            };
+            for (var c = 0; c < values.Length; c++)
+            {
+                var text = values[c] ?? string.Empty;
+                // 欄位值以 = + - @ 開頭，Excel 會當成公式執行：加單引號前綴擋掉（CSV／Excel 注入）
+                if (text.Length > 0 && "=+-@".Contains(text[0])) text = "'" + text;
+                ws.Cell(row, c + 1).Value = text;
+            }
+            row++;
+        }
+        ws.Columns().AdjustToContents(1, row, 10, 50);
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        var name = string.IsNullOrWhiteSpace(parameters.TargetKey) ? "詢問單回應" : $"回應_{parameters.TargetType}_{parameters.TargetKey}";
+        return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{name}_{DateTime.UtcNow.AddHours(8):yyyyMMdd}.xlsx");
+    }
+
     /// <summary>後台：承辦人員通知設定（有新的詢問單或會員刊登需求時寄信給哪些信箱）</summary>
     [HttpGet("notification-settings")]
     [Authorize(Roles = "Admin")]

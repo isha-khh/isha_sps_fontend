@@ -239,6 +239,12 @@ public class InquiryService : IInquiryService
         return Result<bool>.Success(true);
     }
 
+    public async Task<Result<Dictionary<string, int>>> GetCountsByTargetAsync(string targetType, CancellationToken ct = default) =>
+        Result<Dictionary<string, int>>.Success(await _unitOfWork.Inquiries.GetCountsByTargetAsync(targetType, ct));
+
+    public async Task<Result<List<InquiryResponse>>> ListForExportAsync(InquiryQueryParameters parameters, int max, CancellationToken ct = default) =>
+        Result<List<InquiryResponse>>.Success((await _unitOfWork.Inquiries.ListAsync(parameters, max, ct)).Select(Map).ToList());
+
     public async Task<Result<InquiryCountsResponse>> GetCountsAsync(CancellationToken ct = default) =>
         Result<InquiryCountsResponse>.Success(await _unitOfWork.Inquiries.GetCountsAsync(ct));
 

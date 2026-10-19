@@ -7,6 +7,7 @@ import type { News } from '@/types/news';
 import { PuckRenderer } from '@/components/puck/PuckRenderer';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useNotify } from '@/hooks/useNotify';
+import { NewsResponsesCard } from '@/components/news/NewsResponsesCard';
 
 /** `section`：0 公告（預設）、1 服務專區，共用這個頁面，差異見 `lib/news-section.ts` */
 export const NewsDetailPage = ({ section = 0 }: { section?: NewsSection }) => {
@@ -328,6 +329,8 @@ export const NewsDetailPage = ({ section = 0 }: { section?: NewsSection }) => {
           </div>
         </div>
       </div>
+
+      {config.inquiryTargetType && <NewsResponsesCard targetType={config.inquiryTargetType} targetKey={String(news.id)} noun={config.noun} />}
     </div>
     {ConfirmComponent}
       {notify.NotifyComponent}

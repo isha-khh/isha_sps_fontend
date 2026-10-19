@@ -16,4 +16,10 @@ public interface IInquiryService
     Task<Result<InquiryResponse>> ReplyAsync(Guid id, ReplyInquiryRequest request, Guid? repliedByUserId, CancellationToken ct = default);
     Task<Result<bool>> DeleteAsync(Guid id, CancellationToken ct = default);
     Task<Result<InquiryCountsResponse>> GetCountsAsync(CancellationToken ct = default);
+
+    /// <summary>某一類對象底下每個項目收到的詢問單數量（後台列表的「回應數量」），key 是 TargetKey</summary>
+    Task<Result<Dictionary<string, int>>> GetCountsByTargetAsync(string targetType, CancellationToken ct = default);
+
+    /// <summary>符合條件的詢問單（不分頁，匯出用），最多 <paramref name="max"/> 筆</summary>
+    Task<Result<List<InquiryResponse>>> ListForExportAsync(InquiryQueryParameters parameters, int max, CancellationToken ct = default);
 }

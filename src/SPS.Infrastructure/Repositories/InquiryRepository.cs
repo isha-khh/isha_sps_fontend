@@ -13,11 +13,13 @@ public class InquiryRepository : Repository<Inquiry, Guid>, IInquiryRepository
 {
     public InquiryRepository(ApplicationDbContext context) : base(context) { }
 
-    public async Task<PagedResult<Inquiry>> GetPagedAsync(InquiryQueryParameters parameters, CancellationToken ct = default)
+    private IQueryable<Inquiry> Filter(InquiryQueryParameters parameters)
     {
         var query = _dbSet.AsQueryable();
         if (parameters.Type.HasValue) query = query.Where(i => i.Type == parameters.Type.Value);
         if (parameters.Status.HasValue) query = query.Where(i => i.Status == parameters.Status.Value);
+        if (!string.IsNullOrWhiteSpace(parameters.TargetType)) query = query.Where(i => i.TargetType == parameters.TargetType);
+        if (!string.IsNullOrWhiteSpace(parameters.TargetKey)) query = query.Where(i => i.TargetKey == parameters.TargetKey);
         if (!string.IsNullOrWhiteSpace(parameters.Search))
         {
             var keyword = parameters.Search.Trim();
@@ -28,6 +30,25 @@ public class InquiryRepository : Repository<Inquiry, Guid>, IInquiryRepository
                 (i.CompanyName != null && i.CompanyName.Contains(keyword)) ||
                 (i.TargetTitle != null && i.TargetTitle.Contains(keyword)));
         }
+        return query;
+    }
+
+    public Task<List<Inquiry>> ListAsync(InquiryQueryParameters parameters, int max, CancellationToken ct = default) =>
+        Filter(parameters).OrderByDescending(i => i.CreatedTime).Take(max).ToListAsync(ct);
+
+    public async Task<Dictionary<string, int>> GetCountsByTargetAsync(string targetType, CancellationToken ct = default)
+    {
+        var groups = await _dbSet
+            .Where(i => i.TargetType == targetType && i.TargetKey != null)
+            .GroupBy(i => i.TargetKey!)
+            .Select(g => new { Key = g.Key, Count = g.Count() })
+            .ToListAsync(ct);
+        return groups.ToDictionary(g => g.Key, g => g.Count);
+    }
+
+    public async Task<PagedResult<Inquiry>> GetPagedAsync(InquiryQueryParameters parameters, CancellationToken ct = default)
+    {
+        var query = Filter(parameters);
 
         var page = Math.Max(1, parameters.Page);
         var pageSize = Math.Clamp(parameters.PageSize, 1, 100);

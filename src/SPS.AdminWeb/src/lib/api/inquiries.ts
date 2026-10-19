@@ -6,7 +6,15 @@ import type { PagedResponse } from '@/types/api';
 export const inquiriesApi = {
   async getInquiries(page = 1, pageSize = 20, params?: InquirySearchParams): Promise<PagedResponse<Inquiry>> {
     const response = await apiClient.get('/api/Inquiry', {
-      params: { Page: page, PageSize: pageSize, Type: params?.type, Status: params?.status, Search: params?.search },
+      params: {
+        Page: page,
+        PageSize: pageSize,
+        Type: params?.type,
+        Status: params?.status,
+        Search: params?.search,
+        TargetType: params?.targetType,
+        TargetKey: params?.targetKey,
+      },
     });
     return response.data;
   },
@@ -14,6 +22,29 @@ export const inquiriesApi = {
   async getCounts(): Promise<InquiryCounts> {
     const response = await apiClient.get('/api/Inquiry/counts');
     return response.data;
+  },
+
+  // 某一類對象底下每個項目收到的詢問單數量（key 是項目編號），列表的「回應數量」用
+  async getCountsByTarget(targetType: string): Promise<Record<string, number>> {
+    const response = await apiClient.get('/api/Inquiry/counts-by-target', { params: { targetType } });
+    return response.data;
+  },
+
+  // 匯出詢問單為 Excel（可只匯出某一個項目的回應）
+  async exportToExcel(params: InquirySearchParams): Promise<void> {
+    const response = await apiClient.get('/api/Inquiry/export', {
+      params: { Type: params.type, Status: params.status, Search: params.search, TargetType: params.targetType, TargetKey: params.targetKey },
+      responseType: 'blob',
+    });
+    const blob = new Blob([response.data as BlobPart], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const date = new Date().toLocaleDateString('zh-TW').replace(/\//g, '');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${params.targetKey ? '回應' : '詢問單'}_${date}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
   },
 
   async update(id: string, data: { status: InquiryStatus; handlerNote?: string }): Promise<Inquiry> {

@@ -62,6 +62,13 @@ public class InquiryQueryParameters
     public InquiryType? Type { get; set; }
     public InquiryStatus? Status { get; set; }
     public string? Search { get; set; }
+
+    /// <summary>只列針對某一類對象的詢問單（例如 SupportResource、ServeItem）</summary>
+    public string? TargetType { get; set; }
+
+    /// <summary>只列針對某一個對象（例如某筆補助資源的 Id）的詢問單；要搭配 <see cref="TargetType"/></summary>
+    public string? TargetKey { get; set; }
+
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 20;
 }

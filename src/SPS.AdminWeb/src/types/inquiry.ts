@@ -57,6 +57,9 @@ export interface InquirySearchParams {
   type?: InquiryType;
   status?: InquiryStatus;
   search?: string;
+  /** 只看針對某個對象的詢問單（例如 SupportResource 底下的某一筆補助資源） */
+  targetType?: string;
+  targetKey?: string;
 }
 
 /** 承辦人員通知設定：有新的詢問單（提案、下載申請、索取補助資料）或會員刊登需求時寄信給這些信箱 */
