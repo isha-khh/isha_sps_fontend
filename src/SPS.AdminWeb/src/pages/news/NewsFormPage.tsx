@@ -36,6 +36,9 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   // 多選分類（config.multiCategory 的專區，例如產業輔導的產業別）；其他專區仍用 formData.categoryId 單選
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  // 適用產業（config.industryCategoryType 的專區，例如政府補助資源）：另一組可多選的分類
+  const [industries, setIndustries] = useState<CategoryResponse[]>([]);
+  const [selectedIndustryIds, setSelectedIndustryIds] = useState<number[]>([]);
   // 封面圖：從檔案系統挑圖片。`coverUrl` 是目前顯示的預覽（原本的封面或剛挑的圖），
   // `coverFileId` 只有這次換了新圖才有值，`removeCover` 代表要移除原本的封面
   const [coverUrl, setCoverUrl] = useState<string | undefined>();
@@ -65,6 +68,16 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
       }
     };
     fetchCategories();
+  }, []);
+
+  // 載入「適用產業」可選項目
+  useEffect(() => {
+    if (config.industryCategoryType === undefined) return;
+    const industryType = config.industryCategoryType;
+    categoriesApi
+      .getCategoriesByType(industryType)
+      .then((data) => setIndustries(data.filter((c) => c.published)))
+      .catch((error) => console.error('Failed to fetch industries:', error));
   }, []);
 
   // 載入可選的公告標籤（到「公告標籤」頁維護）
@@ -105,6 +118,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
         setMeta(data.meta ?? {});
         setCoverUrl(data.imageUrl || undefined);
         setSelectedTagIds((data.tagItems ?? []).map((t) => t.id));
+        setSelectedIndustryIds(data.industryIds ?? []);
         setSelectedCategoryIds(data.categoryIds && data.categoryIds.length > 0 ? data.categoryIds : data.categoryId ? [data.categoryId] : []);
         // 初始化 ref
         puckContentRef.current = data.content || '';
@@ -164,6 +178,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           ordinal: formData.ordinal,
           categoryId: config.multiCategory ? selectedCategoryIds[0] : formData.categoryId,
           ...(config.multiCategory ? { categoryIds: selectedCategoryIds } : {}),
+          ...(config.industryCategoryType !== undefined ? { industryIds: selectedIndustryIds } : {}),
           type: formData.type,
           section,
           tagIds: selectedTagIds,
@@ -186,6 +201,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           ordinal: formData.ordinal,
           categoryId: config.multiCategory ? selectedCategoryIds[0] : formData.categoryId,
           ...(config.multiCategory ? { categoryIds: selectedCategoryIds } : {}),
+          ...(config.industryCategoryType !== undefined ? { industryIds: selectedIndustryIds } : {}),
           type: formData.type,
           section,
           tagIds: selectedTagIds,
@@ -432,7 +448,15 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-medium">{config.categoryLabel ?? `${config.noun}分類`}</span>
-                      <span className="label-text-alt text-base-content/60">可多選</span>
+                      <span className="label-text-alt text-base-content/60">
+                        可多選
+                        {config.categoriesPath && (
+                          <>
+                            {' · '}
+                            <a href={config.categoriesPath} target="_blank" rel="noreferrer" className="link link-primary">管理{config.categoryLabel ?? '分類'}</a>
+                          </>
+                        )}
+                      </span>
                     </label>
                     {categories.length === 0 ? (
                       <p className="text-sm text-base-content/60">尚未建立{config.categoryLabel ?? '分類'}</p>
@@ -480,6 +504,45 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                         </option>
                       ))}
                     </select>
+                  </div>
+                  )}
+
+                  {/* 適用產業（可多選，政府補助資源） */}
+                  {config.industryCategoryType !== undefined && (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">{config.industryLabel ?? '適用產業'}</span>
+                      <span className="label-text-alt text-base-content/60">
+                        可多選
+                        {config.industryCategoriesPath && (
+                          <>
+                            {' · '}
+                            <a href={config.industryCategoriesPath} target="_blank" rel="noreferrer" className="link link-primary">管理{config.industryLabel ?? '適用產業'}</a>
+                          </>
+                        )}
+                      </span>
+                    </label>
+                    {industries.length === 0 ? (
+                      <p className="text-sm text-base-content/60">尚未建立{config.industryLabel ?? '適用產業'}</p>
+                    ) : (
+                      <div className="flex flex-wrap gap-x-5 gap-y-2">
+                        {industries.map((industry) => (
+                          <label key={industry.id} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="checkbox checkbox-sm checkbox-primary"
+                              checked={selectedIndustryIds.includes(industry.id)}
+                              onChange={() =>
+                                setSelectedIndustryIds((prev) =>
+                                  prev.includes(industry.id) ? prev.filter((x) => x !== industry.id) : [...prev, industry.id],
+                                )
+                              }
+                            />
+                            <span className="text-sm">{industry.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   )}
 

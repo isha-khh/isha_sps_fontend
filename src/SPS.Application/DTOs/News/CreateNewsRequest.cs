@@ -48,6 +48,9 @@ public class CreateNewsRequest
     /// <summary>多個分類ID（產業輔導的「產業別」可多選）。有帶就以這個為準，<see cref="CategoryId"/> 取第一個；沒帶則沿用 <see cref="CategoryId"/></summary>
     public List<int>? CategoryIds { get; set; }
 
+    /// <summary>適用產業（政府補助資源，可多選）</summary>
+    public List<int>? IndustryIds { get; set; }
+
     /// <summary>
     /// 類型（0=公告，1=新聞等）
     /// </summary>

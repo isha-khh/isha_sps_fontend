@@ -19,6 +19,10 @@ public class NewsResponse
     /// <summary>所有分類 Id 與名稱（依選擇順序，與 <see cref="CategoryId"/>／<see cref="CategoryName"/> 的第一個一致）</summary>
     public List<int> CategoryIds { get; set; } = new();
     public List<string> CategoryNames { get; set; } = new();
+
+    /// <summary>適用產業（政府補助資源）的 Id 與名稱</summary>
+    public List<int> IndustryIds { get; set; } = new();
+    public List<string> IndustryNames { get; set; } = new();
     public short Type { get; set; }
 
     /// <summary>所屬專區：0 公告、1 服務專區</summary>
@@ -73,6 +77,10 @@ public class NewsListItemResponse
     /// <summary>所有分類 Id 與名稱（依選擇順序，與 <see cref="CategoryId"/>／<see cref="CategoryName"/> 的第一個一致）</summary>
     public List<int> CategoryIds { get; set; } = new();
     public List<string> CategoryNames { get; set; } = new();
+
+    /// <summary>適用產業（政府補助資源）的 Id 與名稱</summary>
+    public List<int> IndustryIds { get; set; } = new();
+    public List<string> IndustryNames { get; set; } = new();
     public int ViewCount { get; set; }
     public short Type { get; set; }
     public short Section { get; set; }

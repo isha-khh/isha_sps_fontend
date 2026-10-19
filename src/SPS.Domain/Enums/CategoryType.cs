@@ -57,5 +57,8 @@ public enum CategoryType
     Tutoring = 10,
 
     /// <summary>政府補助資源的分類（數位轉型、設備升級…）</summary>
-    SupportResource = 11
+    SupportResource = 11,
+
+    /// <summary>政府補助資源的產業別（石化業、食品業…），補助資源可以多選，前台「適用產業」依它篩選</summary>
+    SupportResourceIndustry = 12
 }

@@ -99,6 +99,8 @@ export interface SupportResource {
   keywords: string[];
   /** 後台「補助資源分類」名稱 */
   category: string;
+  /** 後台「補助資源產業別」名稱（可多個） */
+  industries: string[];
 }
 
 /**
@@ -118,5 +120,6 @@ export function toSupportResource(item: NewsItem): SupportResource {
     period: meta.period ?? "",
     keywords: item.tags ?? [],
     category: item.categoryName ?? "",
+    industries: item.industryNames ?? [],
   };
 }

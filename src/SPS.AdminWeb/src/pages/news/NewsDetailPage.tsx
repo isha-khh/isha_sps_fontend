@@ -239,6 +239,19 @@ export const NewsDetailPage = ({ section = 0 }: { section?: NewsSection }) => {
                   )}
                 </div>}
 
+                {config.industryCategoryType !== undefined && <div>
+                  <div className="text-sm font-medium text-base-content/60 mb-2">{config.industryLabel ?? '適用產業'}</div>
+                  {news.industryNames && news.industryNames.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {news.industryNames.map((name) => (
+                        <span key={name} className="badge badge-outline badge-lg">{name}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-base-content/50">未設定</span>
+                  )}
+                </div>}
+
                 <div>
                   <div className="text-sm font-medium text-base-content/60 mb-2">標籤</div>
                   {news.tags && news.tags.length > 0 ? (

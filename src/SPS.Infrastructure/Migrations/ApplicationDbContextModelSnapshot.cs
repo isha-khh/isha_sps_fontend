@@ -2838,6 +2838,12 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.PrimitiveCollection<List<int>>("IndustryIds")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer[]")
+                        .HasDefaultValueSql("'{}'::integer[]");
+
                     b.Property<int?>("IntroductionId")
                         .HasColumnType("integer");
 

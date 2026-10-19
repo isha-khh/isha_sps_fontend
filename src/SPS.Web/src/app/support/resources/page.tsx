@@ -24,7 +24,9 @@ export const metadata: Metadata = {
  * 漏看了，2026-09-16 補上。
  *
  * 2026-10-13 起資料來自後台「補助專區 → 政府補助資源」（跟公告共用 News 資料表，見 `lib/support-data.ts`），
- * 左側分類是後台「補助資源分類」；沒帶 `?category=` 時預設第一個分類（後台還沒建立任何分類時顯示全部）。
+ * 左側分類是後台「補助資源分類」。2026-10-19（issue #24、#25）：搜尋列兩個下拉原本是空的——「補助類型」現在列出
+ * 補助資源分類（跟左側同一個 `?category=`），「適用產業」列出後台「補助資源產業別」（`?industry=`，一個資源可以屬於多個產業別）；
+ * 沒帶 `?category=` 時顯示全部（原本預設第一個分類，使用者以為只有那幾筆），左側分類多了「全部」。
  */
 const SUPPORT_RESOURCE_PAGE_SIZE = 9;
 
@@ -32,16 +34,29 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
   const params = await searchParams;
   const { query, page } = readListQuery(params);
   const rawCategory = params.category;
-  const categories = await fetchSectionCategories(SectionCategoryTypes.SupportResource);
+  const rawIndustry = params.industry;
+  const [categories, industries] = await Promise.all([
+    fetchSectionCategories(SectionCategoryTypes.SupportResource),
+    fetchSectionCategories(SectionCategoryTypes.SupportResourceIndustry),
+  ]);
   const requestedName = typeof rawCategory === "string" && rawCategory ? rawCategory : undefined;
-  const activeCategory = requestedName ? categories.find((c) => c.name === requestedName) : categories[0];
-  // 指定了分類卻找不到 → 不顯示任何項目，而不是退回「全部」誤導使用者
-  const unknownCategory = requestedName !== undefined && !activeCategory;
+  const requestedIndustry = typeof rawIndustry === "string" && rawIndustry ? rawIndustry : undefined;
+  const activeCategory = requestedName ? categories.find((c) => c.name === requestedName) : undefined;
+  const activeIndustry = requestedIndustry ? industries.find((c) => c.name === requestedIndustry) : undefined;
+  // 指定了分類或產業別卻找不到 → 不顯示任何項目，而不是退回「全部」誤導使用者
+  const unknownFilter = (requestedName !== undefined && !activeCategory) || (requestedIndustry !== undefined && !activeIndustry);
   const activeName = activeCategory?.name ?? requestedName;
+  const activeIndustryName = activeIndustry?.name ?? requestedIndustry;
 
-  const result = unknownCategory
+  const result = unknownFilter
     ? { items: [], totalCount: 0, backendAvailable: true }
-    : await fetchSectionItems(NewsSections.SupportResource, { search: query || undefined, categoryId: activeCategory?.id, page, pageSize: SUPPORT_RESOURCE_PAGE_SIZE });
+    : await fetchSectionItems(NewsSections.SupportResource, {
+        search: query || undefined,
+        categoryId: activeCategory?.id,
+        industryId: activeIndustry?.id,
+        page,
+        pageSize: SUPPORT_RESOURCE_PAGE_SIZE,
+      });
   const filteredResources = result.items.map(toSupportResource);
   const totalPages = Math.max(1, Math.ceil(result.totalCount / SUPPORT_RESOURCE_PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -55,11 +70,14 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
         sidebar={
           categories.length > 0 ? (
             <CategoryTabList
-              activeHref={`/support/resources?category=${encodeURIComponent(activeName ?? "")}`}
-              items={categories.map((category) => ({
-                label: category.name,
-                href: `/support/resources?category=${encodeURIComponent(category.name)}`,
-              }))}
+              activeHref={activeName ? `/support/resources?category=${encodeURIComponent(activeName)}` : "/support/resources"}
+              items={[
+                { label: "全部", href: "/support/resources" },
+                ...categories.map((category) => ({
+                  label: category.name,
+                  href: `/support/resources?category=${encodeURIComponent(category.name)}`,
+                })),
+              ]}
             />
           ) : undefined
         }
@@ -76,19 +94,22 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
       >
         <div className="search mb-4">
           <SearchBar
-            years={[]}
-            yearLabel="補助類型"
-            typeOptions={[]}
-            typeLabel="適用產業"
+            years={categories.map((category) => category.name)}
+            yearLabel="全部補助類型"
+            yearParamName="category"
+            defaultYear={activeName ?? ""}
+            typeOptions={industries.map((industry) => industry.name)}
+            typeLabel="全部適用產業"
+            typeParamName="industry"
+            defaultType={activeIndustryName ?? ""}
             keywordPlaceholder="請輸入關鍵字"
             defaultKeyword={query}
-            hiddenFields={activeName ? { category: activeName } : undefined}
           />
         </div>
 
         <div className="row">
           {!result.backendAvailable && <p>目前無法載入補助資源，請稍後再試。</p>}
-          {result.backendAvailable && filteredResources.length === 0 && <p>{query ? "沒有符合的補助資源。" : "目前這個分類還沒有補助資源。"}</p>}
+          {result.backendAvailable && filteredResources.length === 0 && <p>{query || activeName || activeIndustryName ? "沒有符合的補助資源。" : "目前還沒有補助資源。"}</p>}
           {filteredResources.map((resource) => {
             const modalId = `support-request-${resource.id}`;
             return (
@@ -108,6 +129,15 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
                       </div>
                       <p>{resource.description}</p>
                       <ul className="nav d-block mb-3">
+                        {resource.industries.length > 0 && (
+                          <li className="mb-2">
+                            <i className="bi bi-buildings" />
+                            <span>
+                              <b>適用產業 : </b>
+                              {resource.industries.join("、")}
+                            </span>
+                          </li>
+                        )}
                         {resource.applicant && (
                           <li className="mb-2">
                             <i className="bi bi-person" />
@@ -175,7 +205,7 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
           })}
         </div>
 
-        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(target) => buildListHref("/support/resources", { category: activeName, q: query, page: target })} />
+        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(target) => buildListHref("/support/resources", { category: activeName, industry: activeIndustryName, q: query, page: target })} />
       </InnerPageShell>
     </>
   );

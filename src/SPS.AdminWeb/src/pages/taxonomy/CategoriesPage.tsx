@@ -20,6 +20,7 @@ const CATEGORY_TYPES = [
   { value: 9, label: '技術工具分類', name: 'Serve' },
   { value: 10, label: '產業輔導產業別', name: 'Tutoring' },
   { value: 11, label: '補助資源分類', name: 'SupportResource' },
+  { value: 12, label: '補助資源產業別', name: 'SupportResourceIndustry' },
 ];
 
 export const CategoriesPage = () => {

@@ -15,9 +15,11 @@ interface CategoryFormData {
 }
 
 /** `section`：0 公告分類（預設）、1 服務專區分類；兩者共用這個頁面，差異見 `lib/news-section.ts`（服務專區分類的名稱要對上前台選單：產業AI、技術文件） */
-export const AnnouncementCategoriesPage = ({ section = 0 }: { section?: NewsSection }) => {
+export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { section?: NewsSection; industry?: boolean }) => {
   const config = NEWS_SECTIONS[section];
-  const NEWS_CATEGORY_TYPE = config.categoryType ?? 1;
+  // `industry`：管理該專區的「適用產業」（例如政府補助資源的產業別），而不是主分類
+  const NEWS_CATEGORY_TYPE = industry ? (config.industryCategoryType ?? 1) : (config.categoryType ?? 1);
+  const noun = industry ? `${config.noun}${config.industryLabel ?? '產業別'}` : `${config.noun}分類`;
   const notify = useNotify();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -131,7 +133,7 @@ export const AnnouncementCategoriesPage = ({ section = 0 }: { section?: NewsSect
     <>
     <div className="space-y-6">
       <PageTitle
-        title={`${config.noun}分類`}
+        title={noun}
         items={[
           { label: config.parentLabel === '內容管理' ? '公告事項' : config.parentLabel, path: config.basePath },
           { label: '類別管理', active: true },
@@ -244,7 +246,7 @@ export const AnnouncementCategoriesPage = ({ section = 0 }: { section?: NewsSect
                   </label>
                   <input
                     type="text"
-                    placeholder={config.section === 0 ? '例如：系統公告' : config.section === 1 ? '例如：產業AI、技術文件' : config.section === 4 ? '例如：石化業、塑膠製品、化學材料' : '例如：數位轉型、設備升級、工安改善'}
+                    placeholder={config.section === 0 ? '例如：系統公告' : config.section === 1 ? '例如：產業AI、技術文件' : config.section === 4 || industry ? '例如：石化業、塑膠製品、化學材料' : '例如：數位轉型、設備升級、工安改善'}
                     className="input input-bordered"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}

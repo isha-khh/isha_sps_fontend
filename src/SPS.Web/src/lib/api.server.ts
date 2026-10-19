@@ -638,7 +638,7 @@ export const NewsSections = { Serve: 1, Support: 2, Talent: 3, Tutoring: 4, Supp
 export type NewsSectionId = (typeof NewsSections)[keyof typeof NewsSections];
 
 /** 後端 `CategoryType`：服務專區 9、產業輔導的產業別 10、補助資源分類 11 */
-export const SectionCategoryTypes = { Serve: 9, Tutoring: 10, SupportResource: 11 } as const;
+export const SectionCategoryTypes = { Serve: 9, Tutoring: 10, SupportResource: 11, SupportResourceIndustry: 12 } as const;
 
 /** 某個專區用的分類（後台維護），依排序回傳已發布的 */
 export async function fetchSectionCategories(categoryType: number): Promise<ServeCategory[]> {
@@ -659,7 +659,7 @@ export async function fetchSectionCategories(categoryType: number): Promise<Serv
  */
 export async function fetchSectionItems(
     section: NewsSectionId,
-    options?: { search?: string; categoryId?: number; page?: number; pageSize?: number },
+    options?: { search?: string; categoryId?: number; industryId?: number; page?: number; pageSize?: number },
 ): Promise<{ items: NewsItem[]; totalCount: number; backendAvailable: boolean }> {
     try {
         const response = await apiClient.get<PagedResult<NewsItem>>("/api/News", {
@@ -669,6 +669,7 @@ export async function fetchSectionItems(
                 pageSize: options?.pageSize ?? 9,
                 search: options?.search || undefined,
                 categoryId: options?.categoryId || undefined,
+                industryId: options?.industryId || undefined,
             },
         });
         const items = (response.data.items ?? []).filter((n) => n.published).map((n) => ({ ...n, imageUrl: resolveBackendAssetUrl(n.imageUrl) }));

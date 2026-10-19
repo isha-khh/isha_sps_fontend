@@ -15,6 +15,9 @@ public class NewsQueryParameters
     /// </summary>
     public int? CategoryId { get; set; }
 
+    /// <summary>適用產業ID篩選（政府補助資源）：該內容的適用產業包含這個ID</summary>
+    public int? IndustryId { get; set; }
+
     /// <summary>
     /// 類型篩選
     /// </summary>

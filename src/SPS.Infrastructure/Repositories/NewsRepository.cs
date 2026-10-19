@@ -65,6 +65,13 @@ public class NewsRepository : Repository<News, int>, INewsRepository
             query = query.Where(n => n.CategoryId == categoryId || n.CategoryIds.Contains(categoryId));
         }
 
+        // 適用產業過濾（政府補助資源）
+        if (parameters.IndustryId.HasValue)
+        {
+            var industryId = parameters.IndustryId.Value;
+            query = query.Where(n => n.IndustryIds.Contains(industryId));
+        }
+
         // 類型過濾
         if (parameters.Type.HasValue)
         {

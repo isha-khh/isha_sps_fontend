@@ -30,6 +30,10 @@ public class NewsConfiguration : IEntityTypeConfiguration<News>
             .HasColumnType("integer[]")
             .HasDefaultValueSql("'{}'::integer[]");
 
+        builder.Property(n => n.IndustryIds)
+            .HasColumnType("integer[]")
+            .HasDefaultValueSql("'{}'::integer[]");
+
         builder.HasOne(n => n.Title)
             .WithMany(mt => mt.NewsTitles)
             .HasForeignKey(n => n.TitleId)

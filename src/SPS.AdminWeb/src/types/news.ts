@@ -14,6 +14,9 @@ export interface News {
   /** 所有分類（依選擇順序；產業輔導的產業別可多選，第一個就是 categoryId） */
   categoryIds?: number[];
   categoryNames?: string[];
+  /** 適用產業（政府補助資源，可多選） */
+  industryIds?: number[];
+  industryNames?: string[];
   type: number;
   /** 所屬專區：0 公告、1 服務專區 */
   section?: number;
@@ -43,6 +46,7 @@ export interface CreateNewsRequest {
   categoryId?: number;
   /** 多個分類；有帶就以這個為準（categoryId 取第一個） */
   categoryIds?: number[];
+  industryIds?: number[];
   type: number;
   section?: number;
   /** 附件：檔案管理中的檔案 Id（服務專區用） */
@@ -69,6 +73,8 @@ export interface UpdateNewsRequest {
   clearEndDate?: boolean;
   /** 沒帶＝不動分類；帶空陣列＝清空分類 */
   categoryIds?: number[];
+  /** 沒帶＝不動適用產業；帶空陣列＝清空 */
+  industryIds?: number[];
   type?: number;
   section?: number;
   /** 沒帶＝不動附件；帶空陣列＝清空附件 */

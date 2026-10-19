@@ -244,6 +244,7 @@ function App() {
           <Route path="tutoring-items/:id" element={<NewsDetailPage section={4} />} />
           <Route path="tutoring-items/:id/edit" element={<NewsFormPage section={4} />} />
           <Route path="support-resources/categories" element={<AnnouncementCategoriesPage section={5} />} />
+          <Route path="support-resources/industries" element={<AnnouncementCategoriesPage section={5} industry />} />
           <Route path="support-resources" element={<NewsListPage section={5} />} />
           <Route path="support-resources/:id" element={<NewsDetailPage section={5} />} />
           <Route path="support-resources/:id/edit" element={<NewsFormPage section={5} />} />

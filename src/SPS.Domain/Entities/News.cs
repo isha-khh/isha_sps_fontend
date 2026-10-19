@@ -20,6 +20,12 @@ public class News : BaseEntity<int>
     /// 內容與 <see cref="CategoryId"/> 一致。依分類篩選時兩個欄位都要比對（見 NewsRepository）
     /// </summary>
     public List<int> CategoryIds { get; set; } = new();
+
+    /// <summary>
+    /// 適用產業（可多選，政府補助資源用，分類種類 <see cref="SPS.Domain.Enums.CategoryType.SupportResourceIndustry"/>）。
+    /// 跟 <see cref="CategoryId"/>（補助類型）是不同的分類，所以另外存；其他專區用不到，空陣列
+    /// </summary>
+    public List<int> IndustryIds { get; set; } = new();
     public short Type { get; set; }
 
     /// <summary>所屬專區（<see cref="SPS.Domain.Enums.NewsSection"/>）：0 公告、1 服務專區。與 <see cref="Type"/>（一般／重要／緊急）是不同的東西</summary>

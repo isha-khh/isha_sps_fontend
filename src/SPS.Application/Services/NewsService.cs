@@ -30,7 +30,7 @@ public class NewsService : INewsService
         var tagsByNewsId = await _unitOfWork.News.GetNewsTagsBatchAsync(
             pagedResult.Items.Select(n => n.Id).ToList(), cancellationToken);
 
-        var categoryNames = await GetCategoryNamesAsync(pagedResult.Items.SelectMany(AllCategoryIds), cancellationToken);
+        var categoryNames = await GetCategoryNamesAsync(pagedResult.Items.SelectMany(n => AllCategoryIds(n).Concat(n.IndustryIds)), cancellationToken);
 
         var response = new PagedResult<NewsListItemResponse>
         {
@@ -46,6 +46,8 @@ public class NewsService : INewsService
                 CategoryName = n.Category?.Name,
                 CategoryIds = AllCategoryIds(n).ToList(),
                 CategoryNames = AllCategoryIds(n).Where(categoryNames.ContainsKey).Select(cid => categoryNames[cid]).ToList(),
+                IndustryIds = n.IndustryIds.ToList(),
+                IndustryNames = n.IndustryIds.Where(categoryNames.ContainsKey).Select(cid => categoryNames[cid]).ToList(),
                 ViewCount = n.ViewCount,
                 Type = n.Type,
                 Section = n.Section,
@@ -72,7 +74,7 @@ public class NewsService : INewsService
         // 查詢標簽
         var tags = await _unitOfWork.News.GetNewsTagsAsync(id, cancellationToken);
         var detailCategoryIds = AllCategoryIds(news).ToList();
-        var detailCategoryNames = await GetCategoryNamesAsync(detailCategoryIds, cancellationToken);
+        var detailCategoryNames = await GetCategoryNamesAsync(detailCategoryIds.Concat(news.IndustryIds), cancellationToken);
 
         return Result<NewsResponse>.Success(new NewsResponse
         {
@@ -88,6 +90,8 @@ public class NewsService : INewsService
             CategoryName = news.Category?.Name,
             CategoryIds = detailCategoryIds,
             CategoryNames = detailCategoryIds.Where(detailCategoryNames.ContainsKey).Select(cid => detailCategoryNames[cid]).ToList(),
+            IndustryIds = news.IndustryIds.ToList(),
+            IndustryNames = news.IndustryIds.Where(detailCategoryNames.ContainsKey).Select(cid => detailCategoryNames[cid]).ToList(),
             Type = news.Type,
             Section = news.Section,
             ViewCount = news.ViewCount,
@@ -113,6 +117,9 @@ public class NewsService : INewsService
             var (categoryIds, categoryError) = await ResolveCategoryIdsAsync(request.CategoryIds, request.CategoryId, cancellationToken);
             if (categoryError != null)
                 return Result<NewsResponse>.Failure(categoryError);
+            var (industryIds, industryError) = await ResolveCategoryIdsAsync(request.IndustryIds, null, cancellationToken);
+            if (industryError != null)
+                return Result<NewsResponse>.Failure(industryError);
 
             var (meta, metaError) = NormalizeMeta(request.Section, request.Meta);
             if (metaError != null)
@@ -150,6 +157,7 @@ public class NewsService : INewsService
                 Ordinal = request.Ordinal,
                 CategoryId = categoryIds?.FirstOrDefault() is { } primary and > 0 ? primary : null,
                 CategoryIds = categoryIds ?? new List<int>(),
+                IndustryIds = industryIds ?? new List<int>(),
                 Type = request.Type,
                 Section = request.Section,
                 AttachmentFileIds = request.AttachmentFileIds?.Distinct().ToList() ?? new List<Guid>(),
@@ -183,6 +191,7 @@ public class NewsService : INewsService
                 Ordinal = news.Ordinal,
                 CategoryId = news.CategoryId,
                 CategoryIds = AllCategoryIds(news).ToList(),
+                IndustryIds = news.IndustryIds.ToList(),
                 Type = news.Type,
                 Section = news.Section,
                 ViewCount = news.ViewCount,
@@ -216,6 +225,9 @@ public class NewsService : INewsService
         var (newCategoryIds, categoryError) = await ResolveCategoryIdsAsync(request.CategoryIds, request.CategoryId, cancellationToken);
         if (categoryError != null)
             return Result<NewsResponse>.Failure(categoryError);
+        var (newIndustryIds, industryError) = await ResolveCategoryIdsAsync(request.IndustryIds, null, cancellationToken);
+        if (industryError != null)
+            return Result<NewsResponse>.Failure(industryError);
 
         // 專區改了、或有帶 Meta 時，都要重新檢查欄位名稱是否屬於（新的）專區
         var targetSection = request.Section ?? news.Section;
@@ -309,6 +321,7 @@ public class NewsService : INewsService
             news.CategoryId = newCategoryIds.Count > 0 ? newCategoryIds[0] : null;
             news.Category = null; // 主分類換了，別讓舊的導覽屬性蓋掉
         }
+        if (newIndustryIds != null) news.IndustryIds = newIndustryIds;
         if (request.Type.HasValue) news.Type = request.Type.Value;
         if (request.Section.HasValue) news.Section = request.Section.Value;
         if (request.AttachmentFileIds != null) news.AttachmentFileIds = request.AttachmentFileIds.Distinct().ToList();
@@ -334,7 +347,7 @@ public class NewsService : INewsService
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         var updatedTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
-        var updatedCategoryNames = await GetCategoryNamesAsync(AllCategoryIds(news), cancellationToken);
+        var updatedCategoryNames = await GetCategoryNamesAsync(AllCategoryIds(news).Concat(news.IndustryIds), cancellationToken);
 
         return Result<NewsResponse>.Success(new NewsResponse
         {
@@ -350,6 +363,8 @@ public class NewsService : INewsService
             CategoryName = updatedCategoryNames.GetValueOrDefault(news.CategoryId ?? 0),
             CategoryIds = AllCategoryIds(news).ToList(),
             CategoryNames = AllCategoryIds(news).Where(updatedCategoryNames.ContainsKey).Select(cid => updatedCategoryNames[cid]).ToList(),
+            IndustryIds = news.IndustryIds.ToList(),
+            IndustryNames = news.IndustryIds.Where(updatedCategoryNames.ContainsKey).Select(cid => updatedCategoryNames[cid]).ToList(),
             Type = news.Type,
             Section = news.Section,
             ViewCount = news.ViewCount,

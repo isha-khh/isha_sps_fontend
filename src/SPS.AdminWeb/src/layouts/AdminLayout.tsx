@@ -104,6 +104,7 @@ const allMenuItems: MenuItemWithPermission[] = [
         children: [
           { id: 'support-notice-list', label: '本計畫補助', url: '/support-notices', permissions: [Permission.ManageNews] },
           { id: 'support-resource-categories', label: '政府補助資源分類', url: '/support-resources/categories', permissions: [Permission.ManageCategories] },
+          { id: 'support-resource-industries', label: '政府補助資源產業別', url: '/support-resources/industries', permissions: [Permission.ManageCategories] },
           { id: 'support-resource-list', label: '政府補助資源', url: '/support-resources', permissions: [Permission.ManageNews] },
         ],
       },

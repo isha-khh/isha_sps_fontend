@@ -32,6 +32,10 @@ export interface NewsSectionConfig {
   categoryLabel?: string;
   /** 分類可以多選（產業輔導的產業別）；沒設就是單選下拉 */
   multiCategory?: boolean;
+  /** 另一組「適用產業」（可多選，政府補助資源用）：後端 CategoryType、管理頁路徑與欄位名稱；沒設就沒有這個欄位 */
+  industryCategoryType?: number;
+  industryCategoriesPath?: string;
+  industryLabel?: string;
   /** 只有公告有「一般／重要／緊急」類型 */
   hasSeverityType: boolean;
   /** 只有服務專區有附件（填完下載表單才給下載連結） */
@@ -150,6 +154,9 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
     listTitle: '政府補助資源',
     listCrumb: '政府補助資源',
     categoryLabel: '補助類型',
+    industryCategoryType: 12,
+    industryCategoriesPath: '/support-resources/industries',
+    industryLabel: '產業別',
     hasSeverityType: false,
     hasAttachments: false,
     hasTags: true,
