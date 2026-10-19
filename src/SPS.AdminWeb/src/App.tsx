@@ -227,30 +227,30 @@ function App() {
           <Route path="content/popup-announcements/:id/edit" element={<PopupAnnouncementFormPage />} />
 
           {/* 公告管理 */}
-          <Route path="announcements/categories" element={<AnnouncementCategoriesPage />} />
+          <Route path="announcements/categories" element={<AnnouncementCategoriesPage key="AnnouncementCategoriesPage-0" />} />
           <Route path="announcements/tags" element={<AnnouncementTagsPage />} />
-          <Route path="serve-items/categories" element={<AnnouncementCategoriesPage section={1} />} />
-          <Route path="serve-items" element={<NewsListPage section={1} />} />
-          <Route path="serve-items/:id" element={<NewsDetailPage section={1} />} />
-          <Route path="serve-items/:id/edit" element={<NewsFormPage section={1} />} />
-          <Route path="support-notices" element={<NewsListPage section={2} />} />
-          <Route path="support-notices/:id" element={<NewsDetailPage section={2} />} />
-          <Route path="support-notices/:id/edit" element={<NewsFormPage section={2} />} />
-          <Route path="talent-courses" element={<NewsListPage section={3} />} />
-          <Route path="talent-courses/:id" element={<NewsDetailPage section={3} />} />
-          <Route path="talent-courses/:id/edit" element={<NewsFormPage section={3} />} />
-          <Route path="tutoring-items/categories" element={<AnnouncementCategoriesPage section={4} />} />
-          <Route path="tutoring-items" element={<NewsListPage section={4} />} />
-          <Route path="tutoring-items/:id" element={<NewsDetailPage section={4} />} />
-          <Route path="tutoring-items/:id/edit" element={<NewsFormPage section={4} />} />
-          <Route path="support-resources/categories" element={<AnnouncementCategoriesPage section={5} />} />
-          <Route path="support-resources/industries" element={<AnnouncementCategoriesPage section={5} industry />} />
-          <Route path="support-resources" element={<NewsListPage section={5} />} />
-          <Route path="support-resources/:id" element={<NewsDetailPage section={5} />} />
-          <Route path="support-resources/:id/edit" element={<NewsFormPage section={5} />} />
-          <Route path="announcements" element={<NewsListPage />} />
-          <Route path="announcements/:id" element={<NewsDetailPage />} />
-          <Route path="announcements/:id/edit" element={<NewsFormPage />} />
+          <Route path="serve-items/categories" element={<AnnouncementCategoriesPage key="AnnouncementCategoriesPage-1" section={1} />} />
+          <Route path="serve-items" element={<NewsListPage key="NewsListPage-1" section={1} />} />
+          <Route path="serve-items/:id" element={<NewsDetailPage key="NewsDetailPage-1" section={1} />} />
+          <Route path="serve-items/:id/edit" element={<NewsFormPage key="NewsFormPage-1" section={1} />} />
+          <Route path="support-notices" element={<NewsListPage key="NewsListPage-2" section={2} />} />
+          <Route path="support-notices/:id" element={<NewsDetailPage key="NewsDetailPage-2" section={2} />} />
+          <Route path="support-notices/:id/edit" element={<NewsFormPage key="NewsFormPage-2" section={2} />} />
+          <Route path="talent-courses" element={<NewsListPage key="NewsListPage-3" section={3} />} />
+          <Route path="talent-courses/:id" element={<NewsDetailPage key="NewsDetailPage-3" section={3} />} />
+          <Route path="talent-courses/:id/edit" element={<NewsFormPage key="NewsFormPage-3" section={3} />} />
+          <Route path="tutoring-items/categories" element={<AnnouncementCategoriesPage key="AnnouncementCategoriesPage-4" section={4} />} />
+          <Route path="tutoring-items" element={<NewsListPage key="NewsListPage-4" section={4} />} />
+          <Route path="tutoring-items/:id" element={<NewsDetailPage key="NewsDetailPage-4" section={4} />} />
+          <Route path="tutoring-items/:id/edit" element={<NewsFormPage key="NewsFormPage-4" section={4} />} />
+          <Route path="support-resources/categories" element={<AnnouncementCategoriesPage key="AnnouncementCategoriesPage-5" section={5} />} />
+          <Route path="support-resources/industries" element={<AnnouncementCategoriesPage key="AnnouncementCategoriesPage-5-industry" section={5} industry />} />
+          <Route path="support-resources" element={<NewsListPage key="NewsListPage-5" section={5} />} />
+          <Route path="support-resources/:id" element={<NewsDetailPage key="NewsDetailPage-5" section={5} />} />
+          <Route path="support-resources/:id/edit" element={<NewsFormPage key="NewsFormPage-5" section={5} />} />
+          <Route path="announcements" element={<NewsListPage key="NewsListPage-0" />} />
+          <Route path="announcements/:id" element={<NewsDetailPage key="NewsDetailPage-0" />} />
+          <Route path="announcements/:id/edit" element={<NewsFormPage key="NewsFormPage-0" />} />
 
           {/* 成功案例 */}
           <Route path="success-cases" element={<SuccessCasesListPage />} />
