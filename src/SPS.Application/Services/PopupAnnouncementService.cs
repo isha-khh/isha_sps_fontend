@@ -117,8 +117,10 @@ public class PopupAnnouncementService : IPopupAnnouncementService
         if (request.Routes != null) entity.Routes = JsonSerializer.Serialize(request.Routes);
         if (request.Frequency.HasValue) entity.Frequency = request.Frequency.Value;
         if (request.Priority.HasValue) entity.Priority = request.Priority.Value;
-        if (request.StartDate.HasValue) entity.StartDate = request.StartDate;
-        if (request.EndDate.HasValue) entity.EndDate = request.EndDate;
+        if (request.ClearStartDate == true) entity.StartDate = null;
+        else if (request.StartDate.HasValue) entity.StartDate = request.StartDate;
+        if (request.ClearEndDate == true) entity.EndDate = null;
+        else if (request.EndDate.HasValue) entity.EndDate = request.EndDate;
         if (request.ShowCloseButton.HasValue) entity.ShowCloseButton = request.ShowCloseButton.Value;
         if (request.ShowDontShowToday.HasValue) entity.ShowDontShowToday = request.ShowDontShowToday.Value;
         if (request.Published.HasValue) entity.Published = request.Published.Value;

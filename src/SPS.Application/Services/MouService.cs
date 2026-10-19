@@ -140,11 +140,17 @@ public class MouService : IMouService
                 mou.Title = request.Title;
             if (request.CompanyId.HasValue)
                 mou.CompanyId = request.CompanyId.Value;
-            if (request.SignDate.HasValue)
+            if (request.ClearSignDate == true)
+                mou.SignDate = null;
+            else if (request.SignDate.HasValue)
                 mou.SignDate = request.SignDate;
-            if (request.StartDate.HasValue)
+            if (request.ClearStartDate == true)
+                mou.StartDate = null;
+            else if (request.StartDate.HasValue)
                 mou.StartDate = request.StartDate;
-            if (request.EndDate.HasValue)
+            if (request.ClearEndDate == true)
+                mou.EndDate = null;
+            else if (request.EndDate.HasValue)
                 mou.EndDate = request.EndDate;
             if (request.Status.HasValue)
                 mou.Status = request.Status.Value;

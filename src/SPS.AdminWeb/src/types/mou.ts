@@ -41,6 +41,10 @@ export interface UpdateMouRequest {
   signDate?: string;
   startDate?: string;
   endDate?: string;
+  /** 日期沒帶＝不更新，所以清除日期要另外帶 true */
+  clearSignDate?: boolean;
+  clearStartDate?: boolean;
+  clearEndDate?: boolean;
   status?: MouStatusType;
   description?: string;
   attachments?: string[];

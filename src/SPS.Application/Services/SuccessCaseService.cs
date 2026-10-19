@@ -163,10 +163,15 @@ public class SuccessCaseService : ISuccessCaseService
                 successCase.CoverImageUrl = request.CoverImageUrl;
             if (request.Tags != null)
                 successCase.Tags = JsonSerializer.Serialize(request.Tags);
-            if (request.PublishedDate.HasValue)
+            if (request.ClearPublishedDate == true)
+                successCase.PublishedDate = null;
+            else if (request.PublishedDate.HasValue)
                 successCase.PublishedDate = request.PublishedDate;
             if (request.IsPublished.HasValue)
                 successCase.IsPublished = request.IsPublished.Value;
+            // 已發布的案例一定要有發布日期（排序與前台顯示用）：清除後仍是發布狀態就補上當下時間
+            if (successCase.IsPublished && !successCase.PublishedDate.HasValue)
+                successCase.PublishedDate = DateTime.UtcNow;
 
             // 更新多語言文本
             if (!string.IsNullOrEmpty(request.Title))

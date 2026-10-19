@@ -76,6 +76,9 @@ export interface UpdatePopupAnnouncementRequest {
   priority?: number;
   startDate?: string;
   endDate?: string;
+  /** 日期沒帶＝不更新，所以清除日期要另外帶 true */
+  clearStartDate?: boolean;
+  clearEndDate?: boolean;
   showCloseButton?: boolean;
   showDontShowToday?: boolean;
   published?: boolean;

@@ -109,11 +109,13 @@ export const SuccessCaseFormPage = () => {
         ...formData,
         content: latestContent,
         isPublished: publish,
-        publishedDate: publish && !formData.publishedDate ? new Date().toISOString() : formData.publishedDate,
+        // 清除發布日期時是空字串，不能直接送給後端（日期欄位）；發布時沒有日期就補上現在
+        publishedDate: publish && !formData.publishedDate ? new Date().toISOString() : formData.publishedDate || undefined,
       };
 
       if (isEditMode && id) {
-        await successCasesApi.updateSuccessCase(Number(id), submitData);
+        // 欄位清空時 publishedDate 不會出現在送出的內容，後端會當成「不更新」而保留舊日期，要另外告知清除
+        await successCasesApi.updateSuccessCase(Number(id), { ...submitData, clearPublishedDate: !submitData.publishedDate });
       } else {
         await successCasesApi.createSuccessCase(submitData);
       }

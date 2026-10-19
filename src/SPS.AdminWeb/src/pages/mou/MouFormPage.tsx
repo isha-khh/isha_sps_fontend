@@ -73,6 +73,10 @@ export const MouFormPage = () => {
           signDate: formData.signDate,
           startDate: formData.startDate,
           endDate: formData.endDate,
+          // 欄位清空時日期不會出現在送出的內容（undefined），後端會當成「不更新」而保留舊日期，要另外告知清除
+          clearSignDate: !formData.signDate,
+          clearStartDate: !formData.startDate,
+          clearEndDate: !formData.endDate,
           status: formData.status,
           description: formData.description,
           attachments: formData.attachments,

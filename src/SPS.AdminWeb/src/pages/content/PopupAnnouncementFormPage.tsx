@@ -106,7 +106,12 @@ export const PopupAnnouncementFormPage = () => {
       if (isNew) {
         await popupAnnouncementApi.create(submitData);
       } else {
-        await popupAnnouncementApi.update(parseInt(id!), submitData as UpdatePopupAnnouncementRequest);
+        await popupAnnouncementApi.update(parseInt(id!), {
+          ...submitData,
+          // 欄位清空時日期不會出現在送出的內容（undefined），後端會當成「不更新」而保留舊日期，要另外告知清除
+          clearStartDate: !formData.startDate,
+          clearEndDate: !formData.endDate,
+        } as UpdatePopupAnnouncementRequest);
       }
       navigate('/content/popup-announcements');
     } catch (error) {

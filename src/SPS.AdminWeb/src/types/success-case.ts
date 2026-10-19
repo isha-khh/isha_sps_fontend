@@ -37,6 +37,8 @@ export interface UpdateSuccessCaseRequest {
   content?: string;
   tags?: string[];
   publishedDate?: string;
+  /** 發布日期沒帶＝不更新，所以清除要另外帶 true（已發布的案例後端會補上當下時間） */
+  clearPublishedDate?: boolean;
   isPublished?: boolean;
 }
 

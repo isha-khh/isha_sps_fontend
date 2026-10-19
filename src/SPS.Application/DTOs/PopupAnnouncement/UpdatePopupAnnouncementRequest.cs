@@ -23,6 +23,12 @@ public class UpdatePopupAnnouncementRequest
     public int? Priority { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
+
+    /// <summary>true＝清除開始日期（日期沒帶代表「不更新」，所以要清掉得另外說明）</summary>
+    public bool? ClearStartDate { get; set; }
+
+    /// <summary>true＝清除結束日期</summary>
+    public bool? ClearEndDate { get; set; }
     public bool? ShowCloseButton { get; set; }
     public bool? ShowDontShowToday { get; set; }
     public bool? Published { get; set; }

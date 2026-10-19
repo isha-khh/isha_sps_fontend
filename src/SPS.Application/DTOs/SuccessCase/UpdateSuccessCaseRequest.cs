@@ -52,6 +52,9 @@ public class UpdateSuccessCaseRequest
     /// </summary>
     public DateTime? PublishedDate { get; set; }
 
+    /// <summary>true＝清除發布日期（沒帶 <see cref="PublishedDate"/> 代表「不更新」）。清除後若案例是已發布狀態，之後重新發布時會自動補上當下時間</summary>
+    public bool? ClearPublishedDate { get; set; }
+
     /// <summary>
     /// 是否已發布
     /// </summary>
