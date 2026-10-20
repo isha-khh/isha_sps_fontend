@@ -70,7 +70,7 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
       <InnerPageShell
         title="政府補助資源"
         titleAside={<PageSubNav links={SUPPORT_SUB_NAV} activeHref="/support/resources" />}
-        breadcrumb={[{ label: "補助資源" }, { label: "政府補助資源" }]}
+        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "補助資源", href: "/support" }, { label: "政府補助資源" }]}
         sidebar={
           categories.length > 0 ? (
             <CategoryTabList

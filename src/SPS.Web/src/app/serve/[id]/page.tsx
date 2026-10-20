@@ -40,10 +40,11 @@ export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">
 
   return (
     <>
-      <BodyClass className="serve show" />
+      {/* 設計稿詳情頁的 body 是 `news serve show`：`.news.show .breadcrumb { margin-top:110px }` 把麵包屑推到固定導覽列下面，少了 `news` 標題會壓到導覽列（issue #39） */}
+      <BodyClass className="news serve show" />
       <NewsViewTracker newsId={item.id} />
       <InnerPageShell
-        breadcrumb={[{ label: "服務專區", href: "/serve" }, ...(item.categoryName ? [{ label: item.categoryName, href: `/serve?category=${encodeURIComponent(item.categoryName)}` }] : []), { label: item.title }]}
+        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "技術工具", href: "/serve" }, ...(item.categoryName ? [{ label: item.categoryName, href: `/serve?category=${encodeURIComponent(item.categoryName)}` }] : []), { label: item.title }]}
         aside={<SidebarBanner banners={sidebarBanners} />}
         decorations={
           <>

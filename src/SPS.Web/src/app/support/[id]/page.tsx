@@ -31,9 +31,10 @@ export default async function SupportNoticePage({ params }: PageProps<"/support/
 
   return (
     <>
-      <BodyClass className="support show" />
+      {/* 設計稿詳情頁的 body 是 `news support show`：`.news.show .breadcrumb { margin-top:110px }` 把麵包屑推到固定導覽列下面，少了 `news` 標題會壓到導覽列（issue #39） */}
+      <BodyClass className="news support show" />
       <NewsViewTracker newsId={detail.id} />
-      <InnerPageShell breadcrumb={[{ label: "補助資源" }, { label: "本計畫補助", href: "/support" }, { label: detail.title }]} aside={<SidebarBanner banners={sidebarBanners} />}>
+      <InnerPageShell breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "補助資源", href: "/support" }, { label: "本計畫補助", href: "/support" }, { label: detail.title }]} aside={<SidebarBanner banners={sidebarBanners} />}>
         <div className="column_box">
           <div className="tit">
             <div className="tit_nsl">

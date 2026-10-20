@@ -61,7 +61,7 @@ export default async function TutoringIndexPage({ searchParams }: PageProps<"/tu
       <BodyClass className="tutoring" />
       <InnerPageShell
         title="輔導"
-        breadcrumb={[{ label: "產業輔導" }, { label: "輔導" }]}
+        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "產業輔導", href: "/tutoring" }, { label: "輔導" }]}
         sidebar={
           industries.length > 0 ? (
             <CategoryTabList

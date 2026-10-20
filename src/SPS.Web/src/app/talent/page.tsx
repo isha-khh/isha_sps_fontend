@@ -43,7 +43,7 @@ export default async function TalentIndexPage({ searchParams }: PageProps<"/tale
       <InnerPageShell
         title="知識加值"
         titleAside={<PageSubNav links={TALENT_SUB_NAV} activeHref="/talent" />}
-        breadcrumb={[{ label: "人才培育" }, { label: "知識加值" }]}
+        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "人才培育", href: "/talent" }, { label: "知識加值" }]}
         banner={topBanners.some((b) => b.uri) ? <NewsBanner id="talent-banner" banners={topBanners} /> : undefined}
         aside={
           <>

@@ -55,10 +55,11 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
 
   return (
     <>
-      <BodyClass className="talent show" />
+      {/* 設計稿詳情頁的 body 是 `news talent show`：`.news.show .breadcrumb { margin-top:110px }` 把麵包屑推到固定導覽列下面，少了 `news` 標題會壓到導覽列（issue #39） */}
+      <BodyClass className="news talent show" />
       <NewsViewTracker newsId={detail.id} />
       <InnerPageShell
-        breadcrumb={[{ label: "人才培育" }, { label: "知識加值", href: "/talent" }, { label: course.title }]}
+        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "人才培育", href: "/talent" }, { label: "知識加值", href: "/talent" }, { label: course.title }]}
         aside={
           <>
             {popularCourses.length > 0 && <PopularCourses courses={popularCourses} />}

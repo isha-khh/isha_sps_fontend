@@ -52,7 +52,7 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
       <BodyClass className="news matching index show" />
 
       <InnerPageShell
-        breadcrumb={[{ label: "媒合對接", href: "/matching" }, { label: need.title }]}
+        breadcrumb={[{ label: "我要媒合", href: "/matching/enterprise" }, { label: "媒合對接", href: "/matching" }, { label: need.title }]}
         aside={
           <>
             <ReplyNeedButton modalId={modalId} />

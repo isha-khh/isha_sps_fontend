@@ -45,10 +45,11 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
 
   return (
     <>
-      <BodyClass className="tutoring show" />
+      {/* 設計稿詳情頁的 body 是 `news tutoring show`：`.news.show .breadcrumb { margin-top:110px }` 把麵包屑推到固定導覽列下面，少了 `news` 標題會壓到導覽列（issue #39） */}
+      <BodyClass className="news tutoring show" />
       <NewsViewTracker newsId={detail.id} />
       <InnerPageShell
-        breadcrumb={[{ label: "產業輔導", href: "/tutoring" }, ...(item.industry ? [{ label: item.industry, href: `/tutoring?category=${encodeURIComponent(item.industry)}` }] : []), { label: item.title }]}
+        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "產業輔導", href: "/tutoring" }, ...(item.industry ? [{ label: item.industry, href: `/tutoring?category=${encodeURIComponent(item.industry)}` }] : []), { label: item.title }]}
         aside={
           <>
             {popularItems.length > 0 && <PopularPosts items={popularItems} heading="熱門輔導" />}

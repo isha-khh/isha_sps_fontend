@@ -82,7 +82,7 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
       <InnerPageShell
         title={category ?? "服務專區"}
         titleAside={siblingCategories ? <ServeSubNav categories={siblingCategories} activeCategory={category ?? ""} industryAiLink={industryAiLink} /> : undefined}
-        breadcrumb={category ? [{ label: "服務專區", href: "/serve" }, { label: category }] : [{ label: "服務專區" }]}
+        breadcrumb={category ? [{ label: "服務專區", href: "/serve" }, { label: "技術工具", href: "/serve" }, { label: category }] : [{ label: "服務專區" }]}
         sidebar={
           // 後台在這個分類底下建立了子分類才顯示左側選單；沒有就整塊不顯示（issue #32，原本是設計稿的「分類1／分類2」假連結）
           subCategories.length > 0 ? (

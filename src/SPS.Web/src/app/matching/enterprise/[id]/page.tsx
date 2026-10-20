@@ -95,7 +95,7 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
   return (
     <>
       <BodyClass className="matching enterprise show" />
-      <InnerPageShell breadcrumb={[{ label: "企業名錄", href: "/matching/enterprise" }, { label: company.name }]}>
+      <InnerPageShell breadcrumb={[{ label: "我要媒合", href: "/matching/enterprise" }, { label: "企業名錄", href: "/matching/enterprise" }, { label: company.name }]}>
         <div className="ente_box">
           <div className="item_box d-flex mb-4">
             <div className="pic">
