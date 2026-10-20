@@ -4,7 +4,7 @@ import BodyClass from "@/components/BodyClass";
 import FaqCategoryList from "@/components/faq/FaqCategoryList";
 import FaqAccordion from "@/components/faq/FaqAccordion";
 import SearchBar from "@/components/ui/SearchBar";
-import { fetchFaq } from "@/lib/api.server";
+import { fetchFaq, fetchSectionCategories } from "@/lib/api.server";
 import { FAQ_ITEMS, deriveFaqCategories } from "@/lib/faq-data";
 import { withBasePath } from "@/lib/api-client";
 
@@ -43,7 +43,14 @@ export default async function FaqPage({ searchParams }: PageProps<"/faq">) {
   // 沒搜尋時：後端沒資料（或不可用）退回假資料，見 FAQ_ITEMS 註解。有搜尋關鍵字時不退回——
   // 0 筆就是「查無符合的問題」，不能拿假資料頂替讓使用者以為那是搜尋結果。
   const items = query ? backendItems : backendItems.length > 0 ? backendItems : FAQ_ITEMS;
-  const categories = deriveFaqCategories(items);
+  // 分類是從題目反推的（只列有題目的分類），順序卻不能跟著題目走：照後台「常見問題類別」設定的排序（issue #46，
+  // 原本第一個分類被排到最後）；後台排序查不到的分類排在最後
+  const categoryOrder = (await fetchSectionCategories(3)).map((c) => c.id);
+  const rankOf = (id: number) => {
+    const index = categoryOrder.indexOf(id);
+    return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+  };
+  const categories = deriveFaqCategories(items).sort((a, b) => rankOf(a.id) - rankOf(b.id));
 
   const requestedId = rawCategory ? Number(rawCategory) : NaN;
   const explicitCategory = categories.find((c) => c.id === requestedId);
