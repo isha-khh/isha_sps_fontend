@@ -11,7 +11,8 @@ export const ChatBubble = () => {
   const {
     isOpen,
     activeTab,
-    totalUnreadCount,
+    totalUnreadCount: unreadMessageCount,
+    waitingChats,
     visitorTotalUnread,
     memberTotalUnread,
     // 訪客
@@ -36,6 +37,8 @@ export const ChatBubble = () => {
 
   const { user } = useAuthStore();
   const [isMinimized, setIsMinimized] = useState(false);
+  // 泡泡與標題上的數字＝未讀訊息＋待領收的客服對話（issue #49：原本只算未讀訊息，會員剛發起客服對話、還沒人領取時完全沒有數字，看不出有新的）
+  const totalUnreadCount = unreadMessageCount + waitingChats.length;
 
   // 連接兩個 Hub
   useEffect(() => {
@@ -209,9 +212,9 @@ export const ChatBubble = () => {
                     >
                       <span className="iconify lucide--users size-4 inline-block mr-1 align-text-bottom" />
                       會員聊天
-                      {memberTotalUnread > 0 && (
+                      {memberTotalUnread + waitingChats.length > 0 && (
                         <span className="badge badge-error badge-xs ml-1">
-                          {memberTotalUnread}
+                          {memberTotalUnread + waitingChats.length}
                         </span>
                       )}
                     </button>

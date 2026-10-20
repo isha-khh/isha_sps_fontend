@@ -1,3 +1,5 @@
+"use client";
+
 export type MemberCenterSection =
   | "profile"
   | "password"
@@ -114,6 +116,33 @@ export const MEMBER_CENTER_NAV_GROUPS: MemberCenterNavGroup[] = [
  * `<a>` 只是為了套上一樣的視覺，不是真的要導頁，所以要
  * `preventDefault()`。
  */
+import { useEffect, useState } from "react";
+import { INBOX_CHANGED_EVENT, memberNotificationsApi } from "@/lib/api/member-notifications";
+
+/** 側邊欄項目旁的未讀數：「收件匣」＝系統通知未讀、「對話訊息」＝客服與會員對話的未讀（issue #49，原本沒有任何數字，看不出有新通知） */
+function useUnreadBadges(): Partial<Record<MemberCenterSection, number>> {
+  const [counts, setCounts] = useState({ unreadCount: 0, chatUnreadCount: 0 });
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      memberNotificationsApi
+        .getUnreadCount()
+        .then((data) => active && setCounts(data))
+        .catch(() => {});
+    };
+    refresh();
+    // 有新的通知／客服回覆要自己跳出來：每 30 秒查一次，並在收件匣或對話標已讀時立刻更新
+    const timer = window.setInterval(refresh, 30000);
+    window.addEventListener(INBOX_CHANGED_EVENT, refresh);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener(INBOX_CHANGED_EVENT, refresh);
+    };
+  }, []);
+  return { inbox: counts.unreadCount, chat: counts.chatUnreadCount };
+}
+
 export default function MemberCenterNav({
   active,
   onSelect,
@@ -126,6 +155,7 @@ export default function MemberCenterNav({
   isEnterprise: boolean;
   role?: MemberCenterRole;
 }) {
+  const badges = useUnreadBadges();
   return (
     <nav className="member-center-nav" aria-label="會員中心選單">
       {getNavGroups(isEnterprise, role).map((group) => (
@@ -145,6 +175,11 @@ export default function MemberCenterNav({
                   }}
                 >
                   {item.label}
+                  {(badges[item.key] ?? 0) > 0 && (
+                    <span className="badge rounded-pill bg-danger ms-2" aria-label={`${badges[item.key]} 則未讀`}>
+                      {(badges[item.key] ?? 0) > 99 ? "99+" : badges[item.key]}
+                    </span>
+                  )}
                 </a>
               </li>
             ))}
