@@ -29,18 +29,25 @@ const SCOPE_OPTIONS = ["感測端點", "系統部署", "通訊方式", "作業�
  * 同樣的標籤，兩顆按鈕才會有一致的圓角/漸層樣式。
  */
 export default function EnterpriseContactModal({ id, companyId }: { id: string; companyId: string }) {
-  const [checked, setChecked] = useState<Record<string, boolean>>({ 感測端點: true });
+  const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [contact, setContact] = useState<{ name: string; phone: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function requestContact() {
     if (loading) return;
+    // 要先勾選至少一項才能送出、才會顯示聯繫窗口（預設都不勾，issue #50）
+    const scopes = SCOPE_OPTIONS.filter((option) => checked[option]);
+    if (scopes.length === 0) {
+      setContact(null);
+      setError("請至少勾選一項想了解的智慧技術");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const response = await apiClient.post<{ contactName: string; contactPhone: string }>(`/api/Company/${companyId}/contact-request`, {
-        scopes: SCOPE_OPTIONS.filter((option) => checked[option]),
+        scopes,
       });
       setContact({ name: response.data.contactName, phone: response.data.contactPhone });
     } catch (err) {
@@ -112,7 +119,7 @@ export default function EnterpriseContactModal({ id, companyId }: { id: string; 
       )}
 
       <div className="co_m_botom" id={`${id}-contact-info`} style={contact ? undefined : { display: "none" }}>
-        <h4>連系窗口資訊</h4>
+        <h4>聯繫窗口資訊</h4>
         <ul className="nav">
           <li>
             <span className="label">
@@ -124,9 +131,13 @@ export default function EnterpriseContactModal({ id, companyId }: { id: string; 
             <span className="label">
               <i className="bi bi-telephone me-1"></i>電話：
             </span>
-            <a href={`tel:${(contact?.phone ?? "").split("#")[0].replace(/[^0-9+]/g, "")}`} title={`撥打電話至 ${contact?.phone ?? ""}`}>
-              {contact?.phone}
-            </a>
+            {contact?.phone ? (
+              <a href={`tel:${contact.phone.split("#")[0].replace(/[^0-9+]/g, "")}`} title={`撥打電話至 ${contact.phone}`}>
+                {contact.phone}
+              </a>
+            ) : (
+              <span>未提供，請洽平台承辦單位</span>
+            )}
           </li>
         </ul>
       </div>

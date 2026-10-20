@@ -11,6 +11,8 @@ import { DocumentType } from "@/types/api";
 import { ApplicantType, CompanyLevel, MemberRole, type CreateApplicationRequest } from "@/types/application";
 import CompanyRoleTierSelector, { type CompanyRoleTierSelection } from "@/components/member/CompanyRoleTierSelector";
 import DocumentUploadField from "@/components/member/DocumentUploadField";
+import PersonalDataConsentNotice from "@/components/member/PersonalDataConsentNotice";
+import Modal from "@/components/ui/Modal";
 
 const REQUIRED = (
   <span className="red me-1" aria-hidden="true">
@@ -320,7 +322,13 @@ export default function UpgradePanel() {
                 onChange={(e) => setConsentChecked(e.target.checked)}
               />
             </label>
-            <span>我已詳細閱讀並同意「個人資料同意書」</span>
+            <span>
+              我已詳細閱讀並同意「
+              <a href="#" data-bs-toggle="modal" data-bs-target="#upgradeConsentModal" className="blue text-decoration-underline" title="開啟個人資料同意書">
+                個人資料同意書
+              </a>
+              」
+            </span>
           </div>
 
           {error && (
@@ -334,6 +342,17 @@ export default function UpgradePanel() {
           </button>
         </>
       )}
+
+      {/* 個人資料同意書（內容與註冊流程的「個人資料同意書」相同）；Modal 會掛到 body，不受會員中心版面影響（issue #48） */}
+      <Modal id="upgradeConsentModal" title="個人資料同意書">
+        <div className="txt editor">
+          <h5 className="mb-3">蒐集個人資料告知事項：</h5>
+          <PersonalDataConsentNotice />
+          <h5 className="mt-4 mb-2">個人資料之同意提供：</h5>
+          <p className="mb-1">一、本人已充分知悉貴署上述告知事項。</p>
+          <p className="mb-0">二、本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</p>
+        </div>
+      </Modal>
     </div>
   );
 }

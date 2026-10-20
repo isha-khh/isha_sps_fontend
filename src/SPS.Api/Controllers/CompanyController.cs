@@ -145,9 +145,10 @@ public class CompanyController : ControllerBase
         // 優先用後台指定的聯絡窗口，沒有就用公司負責人
         var designated = company.DesignatedContacts?.FirstOrDefault();
         var name = designated?.Name ?? company.Charge;
-        var phone = designated != null
-            ? (string.IsNullOrWhiteSpace(designated.MobilePhone) ? designated.Phone : designated.MobilePhone)
-            : (string.IsNullOrWhiteSpace(company.ChargePhone) ? company.ChargeMobile : company.ChargePhone);
+        // 電話依序找：指定窗口的手機／電話 → 負責人的電話／手機 → 公司電話。有些企業的窗口與負責人都沒填電話，
+        // 原本就回空字串、畫面上電話那格是空的（issue #50），所以最後退回公司電話
+        string? FirstFilled(params string?[] values) => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+        var phone = FirstFilled(designated?.MobilePhone, designated?.Phone, company.ChargePhone, company.ChargeMobile, company.Phone);
         if (string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(phone))
         {
             return NotFound(new { error = "這家企業尚未提供聯絡窗口，請洽平台承辦單位" });
@@ -155,6 +156,11 @@ public class CompanyController : ControllerBase
 
         var scopes = (request?.Scopes ?? new List<string>())
             .Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).Where(s => s.Length <= 50).Take(20).ToList();
+        // 必須至少選一項想了解的智慧技術才給聯繫窗口（issue #50：送出前要先選）
+        if (scopes.Count == 0)
+        {
+            return BadRequest(new { error = "請至少勾選一項想了解的智慧技術" });
+        }
         _logger.LogInformation("Company contact requested: caller={Caller} company={CompanyId} scopes={Scopes}", who, id, string.Join(",", scopes));
 
         return Ok(new CompanyContactResponse { ContactName = name ?? string.Empty, ContactPhone = phone ?? string.Empty });
