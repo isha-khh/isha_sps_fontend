@@ -64,7 +64,9 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
 
   return (
     <>
-      <BodyClass className="support resources" />
+      {/* 設計稿 page/support/p01.html 的 body 是 `support p01`：`.support.p01 .content { width:100% }` 讓卡片列撐滿整個內容寬度（3 欄），
+          沒有 `p01` 的話內容區卡在預設 67%，卡片又窄又擠、標題被擠成兩行（issue #35） */}
+      <BodyClass className="support p01" />
       <InnerPageShell
         title="政府補助資源"
         titleAside={<PageSubNav links={SUPPORT_SUB_NAV} activeHref="/support/resources" />}
@@ -124,7 +126,8 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
                       </div>
                     </div>
                   )}
-                  <div className={resource.image ? "tit mt-4" : "tit"}>
+                  {/* 設計稿卡片的 `.tit` 一律有 `mt-4`；沒有封面圖時原本沒加，標題會緊貼卡片上緣（issue #35） */}
+                  <div className="tit mt-4">
                     <div className="tit_nsl">
                       <div className="h3_solid">
                         <h3>{resource.title}</h3>
