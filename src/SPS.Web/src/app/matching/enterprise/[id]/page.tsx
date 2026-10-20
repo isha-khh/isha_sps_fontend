@@ -5,6 +5,7 @@ import BodyClass from "@/components/BodyClass";
 import MoreLink from "@/components/ui/MoreLink";
 import EnterpriseContactModal from "@/components/matching/EnterpriseContactModal";
 import FavoriteButton from "@/components/matching/FavoriteButton";
+import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
 import { getCompanyTypeLabels } from "@/lib/matching-data";
 import { fetchCompanyDetail, fetchTagTaxonomy } from "@/lib/api.server";
 import { splitTagsByKind } from "@/lib/company-tags";
@@ -42,8 +43,17 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
   const tagSections = [
     { label: "應用情境", items: tags.scenario },
     { label: "應用範疇", items: tags.scope },
-    { label: "智慧技術", items: tags.tech },
   ].filter((section) => section.items.length > 0);
+  // 智慧技術照設計稿用「大類 tab → 子分類手風琴 → 項目」三層版面，只列這家公司勾選的項目（issue #33）
+  const wantedTechIds = new Set(company.tagIds.map(String));
+  const techGroups = taxonomy.techGroups
+    .map((group) => ({
+      ...group,
+      sections: group.sections
+        .map((section) => ({ ...section, options: section.options.filter((option) => wantedTechIds.has(option.value)) }))
+        .filter((section) => section.options.length > 0),
+    }))
+    .filter((group) => group.sections.length > 0);
   const typeLabels = getCompanyTypeLabels(company.type);
   const modalId = `enterprise-contact-${company.id}`;
   const phoneDial = company.phone ? company.phone.split("#")[0].replace(/[^0-9+]/g, "") : "";
@@ -159,7 +169,7 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
             </div>
           )}
 
-          {(company.subject || company.productImages.length > 0 || tagSections.length > 0) && (
+          {(company.subject || company.productImages.length > 0 || tagSections.length > 0 || techGroups.length > 0) && (
             <div className="item_box_two_1">
               <div className="dow-name">
                 <i className="bi bi-file-earmark-text"></i>
@@ -198,6 +208,16 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
                   </ul>
                 </div>
               ))}
+
+              {techGroups.length > 0 && (
+                <div>
+                  <h5 className="mb-3">
+                    <i className="bi bi-caret-right-fill me-1 blue"></i>
+                    智慧技術
+                  </h5>
+                  <TechAttributeSelector groups={techGroups} name="company-tech" variant="tags" />
+                </div>
+              )}
             </div>
           )}
         </div>

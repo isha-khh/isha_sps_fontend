@@ -6,7 +6,7 @@ import MatchingSearchBar from "@/components/matching/MatchingSearchBar";
 import EnterpriseCard from "@/components/matching/EnterpriseCard";
 import Pagination from "@/components/ui/Pagination";
 import { fetchCompaniesPage, fetchTagTaxonomy } from "@/lib/api.server";
-import { parseTagIds } from "@/lib/company-tags";
+import { parseTagIds, techGroupLabels } from "@/lib/company-tags";
 import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
@@ -65,7 +65,8 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
                 image: company.photo || withBasePath("/images/all/new_logo.jpg"),
                 title: company.name,
                 description: company.introduction ?? "",
-                keywords: company.tagNames,
+                // 卡片只顯示智慧技術的第一層大類（issue #34）；沒有標籤 id 的舊資料退回顯示全部標籤名稱
+                keywords: company.tagIds ? techGroupLabels(company.tagIds, taxonomy) : company.tagNames,
               }}
             />
           ))}

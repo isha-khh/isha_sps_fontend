@@ -301,6 +301,8 @@ export type CompanyList = {
     status: number;
     isVerified: boolean;
     photo?: string;
+    /** 後端列表本來就有回傳標籤 id，先前型別沒補；企業名錄卡片用它找出每個標籤屬於哪個智慧技術大類 */
+    tagIds?: number[];
     tagNames: string[];
     createdTime: string;
 }

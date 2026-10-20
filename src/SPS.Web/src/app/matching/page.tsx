@@ -52,7 +52,8 @@ export default async function MatchingPage({ searchParams }: PageProps<"/matchin
   ]);
   const totalPages = Math.max(1, Math.ceil(result.totalCount / NEED_PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const pagedNeeds = result.items.map(demandToNeed);
+  // 列表上的標籤只顯示「應用情境」，點進詳情才看得到全部標籤（issue #38）：版面不會被一長串標籤塞滿
+  const pagedNeeds = result.items.map(demandToNeed).map((need) => ({ ...need, tags: need.tags.filter((tag) => taxonomy.kindById[tag.id] === "scenario") }));
   const hasFilter = Boolean(query) || tagIds.length > 0;
 
   return (

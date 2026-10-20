@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { TechAttributeGroup } from "@/lib/matching-data";
+import { withBasePath } from "@/lib/api-client";
 
 /**
  * 積木元件：「智慧技術」三層分類選單（大類 tab → 子分類手風琴 →
@@ -110,7 +111,8 @@ export default function TechAttributeSelector({
                       <ul className="nav ul-key mt-2">
                         {section.options.map((option) => (
                           <li key={option.value}>
-                            <a href="#" title={option.label}>
+                            {/* 詳情頁：點項目看有同樣標籤的其他企業；項目的 value 是標籤 id */}
+                            <a href={withBasePath(`/matching/enterprise?tags=${option.value}`)} title={`查看同樣是「${option.label}」的企業`}>
                               {option.label}
                             </a>
                           </li>

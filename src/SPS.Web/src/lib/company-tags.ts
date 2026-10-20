@@ -95,6 +95,18 @@ export function splitTagsByKind(tagIds: number[], taxonomy: TagTaxonomy): Record
   return result;
 }
 
+/**
+ * 一組標籤裡「智慧技術」的第一層大類名稱（感測端點、系統部署、通訊方式、作業輔導、模擬決策…），依後台排序、不重複。
+ * 標籤可能是大類、子分類或項目任何一層，都歸到它所屬的大類；應用情境與應用範疇不算。企業名錄卡片只顯示這些，
+ * 避免一長串項目把版面塞滿（issue #34）。
+ */
+export function techGroupLabels(tagIds: number[], taxonomy: TagTaxonomy): string[] {
+  const wanted = new Set(tagIds.map(String));
+  return taxonomy.techGroups
+    .filter((group) => wanted.has(group.id) || group.sections.some((section) => wanted.has(section.id) || section.options.some((option) => wanted.has(option.value))))
+    .map((group) => group.label);
+}
+
 /** 網址 `?tags=1,2,3` 轉成 id 陣列（只收正整數、去重） */
 export function parseTagIds(raw: string | string[] | undefined): number[] {
   const text = Array.isArray(raw) ? raw.join(",") : raw ?? "";
