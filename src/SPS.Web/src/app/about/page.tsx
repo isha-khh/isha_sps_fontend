@@ -32,9 +32,8 @@ export default async function AboutPage() {
       <InnerPageShell title="關於我們" breadcrumb={[{ label: "關於我們" }]}>
         <div className="ab_list1">
           <div className="tit">
-            <div className="h3_tit mb-3" data-aos="fade-up">
-              {about.title}
-            </div>
+            {/* 設計稿的標題沒有 AOS 動畫，只有下面的介紹文字有淡入上移（issue #44 對照 demo 後拿掉標題的動畫） */}
+            <div className="h3_tit mb-3">{about.title}</div>
             {about.intro && <p data-aos="fade-up">{about.intro}</p>}
           </div>
 

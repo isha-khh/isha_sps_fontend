@@ -10,9 +10,10 @@ import { InquiryType, submitInquiry } from "@/lib/api/inquiries";
  *
  * 版面是 `.footer_right` 固定的一列（下拉＋信箱＋按鈕），沒有多餘空間放訊息：錯誤用瀏覽器原生的驗證提示泡泡
  * （`setCustomValidity` + `reportValidity`）顯示，成功則把按鈕暫時改成「已訂閱」。
- * 「產業代碼」下拉的選項目前沒有資料來源（設計稿沒有給代碼表），先維持只有提示選項；有選才會送。
+ * 「產業代碼」下拉的選項沿用後台「產業輔導 → 產業別」清單（由 `Footer` 傳進來，issue #43；設計稿沒有給代碼表）；
+ * 有選才會送，存成詢問單的「產業」欄位。
  */
-export default function NewsletterForm() {
+export default function NewsletterForm({ industries = [] }: { industries?: string[] }) {
   const [email, setEmail] = useState("");
   const [industry, setIndustry] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
@@ -52,6 +53,11 @@ export default function NewsletterForm() {
       <div className="form-group mb-md-0">
         <select className="form-select" aria-label="請選擇產業代碼" value={industry} onChange={(event) => setIndustry(event.target.value)}>
           <option value="">請選擇產業代碼</option>
+          {industries.map((name) => (
+            <option value={name} key={name}>
+              {name}
+            </option>
+          ))}
         </select>
       </div>
 

@@ -1,7 +1,7 @@
 import NewsletterForm from "@/components/layout/NewsletterForm";
 import Link from "next/link";
 import { withBasePath } from "@/lib/api-client";
-import { fetchFooterLinks, fetchSiteVisitorCount } from "@/lib/api.server";
+import { fetchFooterLinks, fetchSectionCategories, fetchSiteVisitorCount, SectionCategoryTypes } from "@/lib/api.server";
 
 /**
  * 外部網址只放行 http／https。後端已經驗證過一次，這裡再擋一次：就算資料庫裡被塞進
@@ -25,7 +25,8 @@ function safeExternalUrl(url: string): string | undefined {
  * 標章圖片固定，只有點擊後的連結可設定，沒設連結就只顯示圖片。
  */
 export default async function Footer() {
-  const [links, visitorCount] = await Promise.all([fetchFooterLinks(), fetchSiteVisitorCount()]);
+  // 訂閱電子報的「產業代碼」下拉沿用後台「產業輔導 → 產業別」清單（issue #43，設計稿沒有給代碼表）
+  const [links, visitorCount, industries] = await Promise.all([fetchFooterLinks(), fetchSiteVisitorCount(), fetchSectionCategories(SectionCategoryTypes.Tutoring)]);
 
   const address = links.contactAddress.trim();
   const mapUrl = safeExternalUrl(links.contactMapUrl);
@@ -67,7 +68,7 @@ export default async function Footer() {
             </div>
           </div>
 
-          <NewsletterForm />
+          <NewsletterForm industries={industries.map((industry) => industry.name)} />
         </div>
 
         <div className="footer_bg3" aria-hidden="true">

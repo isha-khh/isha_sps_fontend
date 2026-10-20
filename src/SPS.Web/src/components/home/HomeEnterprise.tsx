@@ -1,13 +1,12 @@
 import SectionTitle from "@/components/ui/SectionTitle";
 import MoreLink from "@/components/ui/MoreLink";
-import Badge from "@/components/ui/Badge";
-import { fetchCompanies } from "@/lib/api.server";
+import { fetchCompanies, fetchTagTaxonomy } from "@/lib/api.server";
+import { techGroupLabels, type TagTaxonomy } from "@/lib/company-tags";
 import type { CompanyList } from "@/lib/types";
 import { withBasePath } from "@/lib/api-client";
 
 interface EnterpriseListingData {
   href: string;
-  category: string;
   name: string;
   keywords: string[];
   description: string;
@@ -16,21 +15,18 @@ interface EnterpriseListingData {
 const LISTINGS: EnterpriseListingData[] = [
   {
     href: "/matching/enterprise/1",
-    category: "技術供應",
     name: "智安科技股份有限公司",
     keywords: ["AIoT", "工安監控", "電腦視覺"],
     description: "專注於工業AI視覺辨識技術，提供完整的智慧安全監控系統解決方案，服務逾50家石化廠。",
   },
   {
     href: "/matching/enterprise/2",
-    category: "系統整合",
     name: "智安科技股份有限公司",
     keywords: ["AIoT", "工安監控", "電腦視覺"],
     description: "專注於工業AI視覺辨識技術，提供完整的智慧安全監控系統解決方案，服務逾50家石化廠。",
   },
   {
     href: "/matching/enterprise/3",
-    category: "顧問服務",
     name: "智安科技股份有限公司",
     keywords: ["AIoT", "工安監控", "電腦視覺"],
     description: "專注於工業AI視覺辨識技術，提供完整的智慧安全監控系統解決方案，服務逾50家石化廠。",
@@ -40,15 +36,13 @@ const LISTINGS: EnterpriseListingData[] = [
 /** .nav.ul-key 只是點綴用的關鍵字連結，這裡沒有對應的「技術標籤頁」可以連，統一連回企業名錄。 */
 const ENTERPRISE_DIRECTORY_HREF = "/matching/enterprise";
 
-function toListingData(company: CompanyList): EnterpriseListingData {
+function toListingData(company: CompanyList, taxonomy: TagTaxonomy): EnterpriseListingData {
   return {
     href: `${ENTERPRISE_DIRECTORY_HREF}/${company.id}`,
-    // 真後端沒有像 News/SuccessCase 那樣的「分類」欄位，企業標籤
-    // （tagNames，見 CompanyController 的 /tags API）是唯一的分類線索，
-    // 取第一個當卡片左上角的徽章；完全沒有標籤時退回通用字樣。
-    category: company.tagNames[0] ?? "企業會員",
     name: company.name,
-    keywords: company.tagNames,
+    // 技術標籤跟企業名錄一樣，只顯示智慧技術的第一層大類（感測端點、系統部署…）；沒有標籤 id 的舊資料退回顯示全部標籤名稱。
+    // 卡片左上角原本有一顆紫色的第一個標籤徽章，已拿掉（issue #42）
+    keywords: company.tagIds ? techGroupLabels(company.tagIds, taxonomy) : company.tagNames,
     description: company.introduction ?? "",
   };
 }
@@ -83,9 +77,9 @@ function byTagsThenNewest(a: CompanyList, b: CompanyList): number {
  * 共用介面。
  */
 export default async function HomeEnterprise() {
-  const { items, backendAvailable } = await fetchCompanies();
+  const [{ items, backendAvailable }, taxonomy] = await Promise.all([fetchCompanies(), fetchTagTaxonomy()]);
   const visibleListings = backendAvailable
-    ? items.slice().sort(byTagsThenNewest).slice(0, 3).map(toListingData)
+    ? items.slice().sort(byTagsThenNewest).slice(0, 3).map((company) => toListingData(company, taxonomy))
     : LISTINGS;
 
   return (
@@ -96,10 +90,6 @@ export default async function HomeEnterprise() {
         <div className="d-flex" data-aos="fade-up">
           {visibleListings.map((listing) => (
             <div className="tit" key={listing.href}>
-              <div className="tag-wrap">
-                <Badge>{listing.category}</Badge>
-              </div>
-
               <h3>
                 <a href={withBasePath(listing.href)} title={listing.name}>
                   {listing.name}
