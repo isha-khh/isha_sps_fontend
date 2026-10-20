@@ -108,7 +108,7 @@ export default async function HomeIndustry() {
 
                 <a href={withBasePath(item.href)} className="pic" title="查看更多產業案例內容">
                   <div className="ratio ratio-4x3">
-                    <img className="img-fluid d-block" src={item.image} alt="" />
+                    <img className="img-fluid d-block" src={item.image} alt={item.title} />
                   </div>
                 </a>
               </div>

@@ -19,7 +19,7 @@ export default function EnterpriseCard({ data }: { data: EnterpriseCardData }) {
       <div className="item_box">
         <a href={withBasePath(data.href)} className="pic" title={data.title}>
           <div className="ratio ratio-4x3">
-            <img className="img-fluid d-block" src={data.image} alt="" />
+            <img className="img-fluid d-block" src={data.image} alt={data.title} />
           </div>
         </a>
 

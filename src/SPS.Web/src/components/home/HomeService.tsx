@@ -140,7 +140,7 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
           <div className="d-flex" key={slide.href}>
             <a href={withBasePath(slide.href)} className="pic" title={`查看更多${slide.title}內容`}>
               <div className="ratio ratio-4x3">
-                <img className="img-fluid d-block" src={slide.image} alt="" />
+                <img className="img-fluid d-block" src={slide.image} alt={`查看更多${slide.title}內容`} />
               </div>
             </a>
 

@@ -54,7 +54,7 @@ export default function PopularPosts({
                 <a href={withBasePath(item.href)} className="pic" title={item.title}>
                   <div className="ranking">{String(index + 1).padStart(2, "0")}</div>
                   <div className={`ratio ${imageRatio}`}>
-                    <img className="img-fluid d-block" src={item.image} alt="" />
+                    <img className="img-fluid d-block" src={item.image} alt={item.title} />
                   </div>
                 </a>
               )}

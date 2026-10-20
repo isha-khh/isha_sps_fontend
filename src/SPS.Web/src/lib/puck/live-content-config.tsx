@@ -96,7 +96,8 @@ function DocFrame({ title, icon, children }: { title: ReactNode; icon: ReactNode
     <section style={{ position: "relative", margin: "28px 0", padding: "30px 36px", border: `1px solid ${C.frame}`, borderRadius: 24 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${C.rule}`, paddingBottom: 10, marginBottom: 22, color: C.blue }}>
         {icon}
-        <h2 style={{ margin: 0, fontSize: 26, fontWeight: 700, ...headingGradient }}>{title}</h2>
+        {/* 標題是空的就不輸出 <h2>：空標題會讓螢幕閱讀器念出一個空的標題、無障礙檢測不過（HM1130100C） */}
+        {title ? <h2 style={{ margin: 0, fontSize: 26, fontWeight: 700, ...headingGradient }}>{title}</h2> : null}
       </div>
       {children}
     </section>
@@ -323,16 +324,19 @@ export const puckConfig: Config<Props> = {
 
         return (
           <header style={{ margin: "12px 0 16px", textAlign: alignment }}>
-            <HeadingTag
-              style={
-                big
-                  ? { margin: 0, display: "inline-flex", alignItems: "center", gap: 12, fontSize: 30, fontWeight: 700, lineHeight: 1.35, ...headingGradient }
-                  : { margin: 0, fontSize: 21, fontWeight: 700, lineHeight: 1.4, color: C.navy }
-              }
-            >
-              {big && <span aria-hidden="true" style={{ display: "inline-block", width: 6, height: 30, background: C.blue, borderRadius: 2, flex: "none" }} />}
-              {title}
-            </HeadingTag>
+            {/* 標題是空的就不輸出標題標籤（空標題無障礙檢測不過，HM1130100C） */}
+            {title && title.trim() !== "" ? (
+              <HeadingTag
+                style={
+                  big
+                    ? { margin: 0, display: "inline-flex", alignItems: "center", gap: 12, fontSize: 30, fontWeight: 700, lineHeight: 1.35, ...headingGradient }
+                    : { margin: 0, fontSize: 21, fontWeight: 700, lineHeight: 1.4, color: C.navy }
+                }
+              >
+                {big && <span aria-hidden="true" style={{ display: "inline-block", width: 6, height: 30, background: C.blue, borderRadius: 2, flex: "none" }} />}
+                {title}
+              </HeadingTag>
+            ) : null}
             {subtitle ? (
               <div style={{ marginTop: 8, fontSize: subSize, lineHeight: 1.8, color: C.text }}>
                 <RichTextContent html={subtitle} />
@@ -410,7 +414,8 @@ export const puckConfig: Config<Props> = {
         const hasText = typeof description === "string" ? description.trim() !== "" : Boolean(description);
         const linkable = safeUrl(imageUrl);
         const image = (
-          <img src={imageUrl} alt={alt} loading="lazy" style={{ display: "block", width: "100%", height: "auto", borderRadius: 20 }} />
+          // 圖片外面包了連結（點擊看原圖），替代文字不能是空的（無障礙檢測 HM1240401C）：後台沒填就用圖說，再沒有就用通用說明
+          <img src={imageUrl} alt={alt?.trim() || imageCaption?.trim() || "內容圖片"} loading="lazy" style={{ display: "block", width: "100%", height: "auto", borderRadius: 20 }} />
         );
 
         return (
@@ -466,7 +471,7 @@ export const puckConfig: Config<Props> = {
         const base: CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 46, padding: "0 30px", borderRadius: 999, fontWeight: 700, fontSize: 16, textDecoration: "none" };
         return (
           <section style={{ margin: "28px 0", padding: "30px 20px", textAlign: "center" }}>
-            <h2 style={{ margin: "0 0 8px", fontSize: 24, fontWeight: 700, color: C.navy }}>{heading}</h2>
+            {heading && heading.trim() !== "" ? <h2 style={{ margin: "0 0 8px", fontSize: 24, fontWeight: 700, color: C.navy }}>{heading}</h2> : null}
             <div style={{ margin: "0 0 20px", fontSize: 16, lineHeight: 1.8, color: C.text }}>
               <RichTextContent html={description} />
             </div>

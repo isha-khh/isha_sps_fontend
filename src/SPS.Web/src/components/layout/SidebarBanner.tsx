@@ -31,7 +31,8 @@ export default function SidebarBanner({ banners, heading }: { banners: BannerIte
           const title = item.title || item.name || "廣告";
           const picture = (
             <div className="ratio ratio-4x3 mb-4">
-              <img className="img-fluid d-block" src={item.uri as string} alt="" />
+              {/* 有連結時圖片是連結唯一的內容，替代文字不能是空的（無障礙檢測 HM1240401C）；沒連結的純展示圖才留空 */}
+              <img className="img-fluid d-block" src={item.uri as string} alt={item.linkUrl ? title : ""} />
             </div>
           );
           // 沒設連結就只顯示圖片，不包 `<a>`

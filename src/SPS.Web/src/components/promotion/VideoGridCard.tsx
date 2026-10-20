@@ -68,7 +68,7 @@ export default function VideoGridCard({ data, group }: { data: VideoGridCardData
       <div className="item_box">
         <a href={data.href} className="pic" title={watchTitle} target="_blank" rel="noopener noreferrer" {...fancyboxProps}>
           <div className="ratio ratio-16x9">
-            <img className="img-fluid d-block" src={data.thumbnail} alt="" />
+            <img className="img-fluid d-block" src={data.thumbnail} alt={watchTitle} />
           </div>
         </a>
 
