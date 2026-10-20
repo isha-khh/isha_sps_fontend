@@ -1,6 +1,7 @@
 import { DISABLED_INDUSTRY_AI_LINK, type IndustryAiLink } from "@/lib/industry-ai-link";
 import { cookies, headers } from "next/headers";
 import { ServeCategory,
+    XrPage,
     BannerItem,
     SearchResult,
     FaqItem,
@@ -600,6 +601,34 @@ export async function fetchContributePage(): Promise<ContributePage> {
         };
     } catch {
         return DEFAULT_CONTRIBUTE_PAGE;
+    }
+}
+
+/** 讀不到 XR 頁籤設定時的預設值：原本的兩個頁籤（動火作業用內建版面、有機電操作敬請期待），與後端預設相同 */
+const DEFAULT_XR_PAGE: XrPage = {
+    tabs: [
+        { id: "fire-work", label: "動火作業", useBuiltInLayout: true, introduction: "", links: [] },
+        { id: "organic-electric", label: "有機電操作", useBuiltInLayout: false, introduction: "", links: [] },
+    ],
+};
+
+/** 「XR」頁的頁籤（後台「人才培育 → XR 頁面」維護）。快取 60 秒；後端連不到或資料不完整就用預設值，頁面不會壞 */
+export async function fetchXrPage(): Promise<XrPage> {
+    try {
+        const data = await getBackendJson<Partial<XrPage>>("/api/page-settings/xr/public", 60);
+        const tabs = (data.tabs ?? []).filter((t) => t && typeof t.id === "string" && typeof t.label === "string" && t.label.trim() !== "");
+        if (tabs.length === 0) return DEFAULT_XR_PAGE;
+        return {
+            tabs: tabs.map((t) => ({
+                id: t.id,
+                label: t.label,
+                useBuiltInLayout: Boolean(t.useBuiltInLayout),
+                introduction: t.introduction ?? "",
+                links: (t.links ?? []).filter((l) => l && typeof l.url === "string" && /^https?:\/\//i.test(l.url)).map((l) => ({ label: l.label ?? "", url: l.url })),
+            })),
+        };
+    } catch {
+        return DEFAULT_XR_PAGE;
     }
 }
 

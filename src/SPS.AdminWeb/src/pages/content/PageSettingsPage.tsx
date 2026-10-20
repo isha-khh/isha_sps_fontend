@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { PageTitle } from '@/components/PageTitle';
 import { DownloadResourcesSection } from './DownloadResourcesSection';
 import { AboutPageSection } from './AboutPageSection';
+import { XrPageSection } from './XrPageSection';
 import { SupportInfoSection } from './SupportInfoSection';
 import { IndustryAiLinkSection } from './IndustryAiLinkSection';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
@@ -64,7 +65,7 @@ function pickedFile(file: FileListItem | FileUploadResponse): { id: string; name
  * - `contribute`（「我要投稿」）：投稿頁的主視覺圖片、投稿格式檔、聯絡資訊
  * - `about`（「關於我們」）：關於我們頁的文字內容
  */
-export const PageSettingsPage = ({ view = 'misc' }: { view?: 'misc' | 'contribute' | 'about' }) => {
+export const PageSettingsPage = ({ view = 'misc' }: { view?: 'misc' | 'contribute' | 'about' | 'xr' }) => {
   const notify = useNotify();
   const [form, setForm] = useState<ContributePageSettings>(EMPTY);
   // 目前選到的檔案資訊（檔名、大小）；剛從對話框選的檔案還沒儲存前，先用選到的檔名顯示
@@ -211,13 +212,15 @@ export const PageSettingsPage = ({ view = 'misc' }: { view?: 'misc' | 'contribut
     <div className="space-y-6">
       {notify.NotifyComponent}
       <PageTitle
-        title={view === 'contribute' ? '我要投稿' : view === 'about' ? '關於我們' : '頁面設定'}
+        title={view === 'contribute' ? '我要投稿' : view === 'about' ? '關於我們' : view === 'xr' ? 'XR 頁面' : '頁面設定'}
         items={
           view === 'contribute'
             ? [{ label: '推廣專區', path: '/content/contribute' }, { label: '我要投稿', active: true }]
             : view === 'about'
               ? [{ label: '關於我們', active: true }]
-              : [{ label: '內容管理', path: '/content/page-settings' }, { label: '頁面設定', active: true }]
+              : view === 'xr'
+                ? [{ label: '人才培育', path: '/talent-courses' }, { label: 'XR 頁面', active: true }]
+                : [{ label: '內容管理', path: '/content/page-settings' }, { label: '頁面設定', active: true }]
         }
       />
 
@@ -319,6 +322,8 @@ export const PageSettingsPage = ({ view = 'misc' }: { view?: 'misc' | 'contribut
       {view === 'misc' && <IndustryAiLinkSection />}
 
       {view === 'about' && <AboutPageSection />}
+
+      {view === 'xr' && <XrPageSection />}
 
       {view === 'misc' && <SupportInfoSection />}
 

@@ -89,6 +89,26 @@ export interface AboutPageSettings {
   visionHighlight: string;
 }
 
+/** 「XR」頁（前台 /talent/xr）的頁籤：名稱、介紹文字、模組下載連結 */
+export interface XrDownloadLink {
+  label: string;
+  url: string;
+}
+
+export interface XrTab {
+  /** 識別碼；新增頁籤時留空，由後端產生 */
+  id: string;
+  label: string;
+  /** 使用前台內建的動火作業介紹版面（只有識別碼 fire-work 的頁籤可以開） */
+  useBuiltInLayout: boolean;
+  introduction: string;
+  links: XrDownloadLink[];
+}
+
+export interface XrPageSettings {
+  tabs: XrTab[];
+}
+
 /** 補助專區頁首的資訊區塊 */
 export interface SupportInfoItem {
   label: string;
@@ -155,6 +175,17 @@ export const pageSettingsApi = {
    */
   async updateDownloads(items: DownloadResourceUpdate[]): Promise<void> {
     await apiClient.put('/api/page-settings/downloads', { items });
+  },
+
+  /** GET /api/page-settings/xr（沒設定過就是原本的兩個頁籤） */
+  async getXr(): Promise<XrPageSettings> {
+    const response = await apiClient.get<XrPageSettings>('/api/page-settings/xr');
+    return response.data;
+  },
+
+  /** PUT /api/page-settings/xr（名稱空白、連結網址不正確等後端回 400 `{ error }`） */
+  async updateXr(settings: XrPageSettings): Promise<void> {
+    await apiClient.put('/api/page-settings/xr', settings);
   },
 
   /** GET /api/page-settings/about */

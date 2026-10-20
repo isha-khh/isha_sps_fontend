@@ -220,6 +220,7 @@ function App() {
           <Route path="content/page-settings" element={<PageSettingsPage />} />
           <Route path="content/contribute" element={<PageSettingsPage view="contribute" />} />
           <Route path="content/about" element={<PageSettingsPage view="about" />} />
+          <Route path="content/xr" element={<PageSettingsPage view="xr" />} />
           <Route path="content/files" element={<FilesPage />} />
           <Route path="content/albums" element={<AlbumsPage />} />
           <Route path="content/videos" element={<VideosPage />} />

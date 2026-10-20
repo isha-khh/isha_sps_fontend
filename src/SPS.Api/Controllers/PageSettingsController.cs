@@ -21,6 +21,7 @@ public class PageSettingsController : ControllerBase
     private const string ContributeKey = "PageContribute";
     public const string DownloadsKey = "DownloadResources";
     private const string AboutKey = "PageAbout";
+    private const string XrKey = "PageXr";
     private const string SupportInfoKey = "PageSupportInfo";
     private const string IndustryAiKey = "PageIndustryAiLink";
 
@@ -157,6 +158,40 @@ public class PageSettingsController : ControllerBase
     [SwaggerOperation(Summary = "取得關於我們頁公開資料")]
     public async Task<IActionResult> GetAboutPublic(CancellationToken cancellationToken) =>
         Ok(await LoadSettingAsync<AboutPageSettingsDto>(AboutKey, cancellationToken));
+
+    // ==================== XR 頁籤（前台 /talent/xr）====================
+
+    /// <summary>取得 XR 頁的頁籤設定（後台編輯用）；沒設定過就是原本的兩個頁籤</summary>
+    [HttpGet("xr")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得 XR 頁頁籤設定（後台）")]
+    public async Task<IActionResult> GetXr(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<XrPageSettingsDto>(XrKey, cancellationToken));
+
+    /// <summary>更新 XR 頁的頁籤：名稱、介紹文字、模組下載連結（只接受 http／https），最多 8 個頁籤</summary>
+    [HttpPut("xr")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新 XR 頁頁籤設定（後台）")]
+    public async Task<IActionResult> UpdateXr([FromBody] XrPageSettingsDto settings, CancellationToken cancellationToken)
+    {
+        var (normalized, error) = XrPageValidator.Normalize(settings);
+        if (error != null) return BadRequest(new { error });
+        var result = await _settingService.UpdateSettingAsync(XrKey, normalized);
+        return result.IsSuccess ? Ok(new { message = "XR page settings updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>取得 XR 頁的頁籤設定（前台使用）；資料庫裡若有繞過驗證寫進去的髒資料，整份退回預設</summary>
+    [HttpGet("xr/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "取得 XR 頁頁籤公開資料")]
+    public async Task<IActionResult> GetXrPublic(CancellationToken cancellationToken)
+    {
+        var settings = await LoadSettingAsync<XrPageSettingsDto>(XrKey, cancellationToken);
+        var (normalized, error) = XrPageValidator.Normalize(settings);
+        return Ok(error == null ? normalized : new XrPageSettingsDto());
+    }
 
     /// <summary>取得補助專區頁首四個資訊區塊（後台編輯用）；沒設定過就是預設內容</summary>
     [HttpGet("support-info")]

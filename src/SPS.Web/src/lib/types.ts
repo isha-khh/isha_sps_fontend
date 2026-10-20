@@ -656,6 +656,20 @@ export interface DownloadLink {
  * 「內容管理 → 頁面設定 → 下載資源」維護（`GET /api/page-settings/downloads/public`）。
  * key 是 `DownloadResourceCatalog` 裡的識別碼；`links` 為空陣列＝目前沒有可下載的東西。
  */
+/** 「XR」頁的頁籤（後台「人才培育 → XR 頁面」維護） */
+export interface XrTab {
+    id: string;
+    label: string;
+    /** 使用內建的動火作業介紹版面（只有 id 是 `fire-work` 的頁籤） */
+    useBuiltInLayout: boolean;
+    introduction: string;
+    links: { label: string; url: string }[];
+}
+
+export interface XrPage {
+    tabs: XrTab[];
+}
+
 export type DownloadResources = Record<string, { title: string; links: DownloadLink[] }>;
 
 
