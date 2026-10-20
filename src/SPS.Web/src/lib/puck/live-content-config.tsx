@@ -36,6 +36,9 @@ const C = {
   danger: "#c0392b",
 };
 
+/** 字級一律輸出 rem（相對單位）：無障礙檢測 CS2140401C 不接受 px，且使用者放大瀏覽器字級時才會跟著變 */
+const rem = (px: number) => `${px / 16}rem`;
+
 const GRADIENT_BTN = "linear-gradient(90deg, #0099ff 0%, #0052cc 100%)";
 
 const headingGradient: CSSProperties = {
@@ -97,7 +100,7 @@ function DocFrame({ title, icon, children }: { title: ReactNode; icon: ReactNode
       <div style={{ display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${C.rule}`, paddingBottom: 10, marginBottom: 22, color: C.blue }}>
         {icon}
         {/* 標題是空的就不輸出 <h2>：空標題會讓螢幕閱讀器念出一個空的標題、無障礙檢測不過（HM1130100C） */}
-        {title ? <h2 style={{ margin: 0, fontSize: 26, fontWeight: 700, ...headingGradient }}>{title}</h2> : null}
+        {title ? <h2 style={{ margin: 0, fontSize: rem(26), fontWeight: 700, ...headingGradient }}>{title}</h2> : null}
       </div>
       {children}
     </section>
@@ -108,12 +111,12 @@ const rowStyle = (index: number): CSSProperties => ({
   display: "flex",
   alignItems: "center",
   gap: 10,
-  fontSize: 16,
+  fontSize: rem(16),
   ...(index > 0 ? { borderTop: `1px solid ${C.line}`, paddingTop: 16, marginTop: 16 } : {}),
 });
 
-const badgeStyle: CSSProperties = { fontSize: 11, fontWeight: 700, color: "#fff", background: C.blue, borderRadius: 4, padding: "2px 6px", whiteSpace: "nowrap" };
-const metaStyle: CSSProperties = { marginLeft: "auto", fontSize: 13, color: "#666", whiteSpace: "nowrap" };
+const badgeStyle: CSSProperties = { fontSize: rem(12), fontWeight: 700, color: "#fff", background: C.blue, borderRadius: 4, padding: "2px 6px", whiteSpace: "nowrap" };
+const metaStyle: CSSProperties = { marginLeft: "auto", fontSize: rem(13), color: "#666", whiteSpace: "nowrap" };
 
 /** 自訂欄位：富文字輸入框（多個區塊共用） */
 const richField = (label: string) => ({
@@ -320,7 +323,7 @@ export const puckConfig: Config<Props> = {
       render: ({ title, titleSize, subtitle, subtitleSize, alignment, headingLevel }) => {
         const HeadingTag = headingLevel as "h2" | "h3";
         const big = titleSize !== "text-3xl";
-        const subSize = { "text-2xl": 20, "text-xl": 18, "text-base": 16 }[subtitleSize] ?? 16;
+        const subSize = rem({ "text-2xl": 20, "text-xl": 18, "text-base": 16 }[subtitleSize] ?? 16);
 
         return (
           <header style={{ margin: "12px 0 16px", textAlign: alignment }}>
@@ -329,8 +332,8 @@ export const puckConfig: Config<Props> = {
               <HeadingTag
                 style={
                   big
-                    ? { margin: 0, display: "inline-flex", alignItems: "center", gap: 12, fontSize: 30, fontWeight: 700, lineHeight: 1.35, ...headingGradient }
-                    : { margin: 0, fontSize: 21, fontWeight: 700, lineHeight: 1.4, color: C.navy }
+                    ? { margin: 0, display: "inline-flex", alignItems: "center", gap: 12, fontSize: rem(30), fontWeight: 700, lineHeight: 1.35, ...headingGradient }
+                    : { margin: 0, fontSize: rem(21), fontWeight: 700, lineHeight: 1.4, color: C.navy }
                 }
               >
                 {big && <span aria-hidden="true" style={{ display: "inline-block", width: 6, height: 30, background: C.blue, borderRadius: 2, flex: "none" }} />}
@@ -369,7 +372,7 @@ export const puckConfig: Config<Props> = {
         fontSize: "normal",
       },
       render: ({ content, fontSize }) => {
-        const size = { normal: 16, large: 18, extraLarge: 20 }[fontSize] ?? 16;
+        const size = rem({ normal: 16, large: 18, extraLarge: 20 }[fontSize] ?? 16);
         return (
           <article style={{ margin: "10px 0 18px", fontSize: size, lineHeight: 1.9, color: C.text, letterSpacing: "1px" }}>
             <RichTextContent html={content} />
@@ -430,11 +433,11 @@ export const puckConfig: Config<Props> = {
                   image
                 )}
                 {imageCaption ? (
-                  <figcaption style={{ marginTop: 8, fontSize: 14, color: "#666", textAlign: "center" }}>{imageCaption}</figcaption>
+                  <figcaption style={{ marginTop: 8, fontSize: rem(14), color: "#666", textAlign: "center" }}>{imageCaption}</figcaption>
                 ) : null}
               </div>
               {hasText && (
-                <div style={{ flex: isTop ? "1 1 100%" : "1 1 320px", minWidth: 0, fontSize: 16, lineHeight: 1.9, color: C.text }}>
+                <div style={{ flex: isTop ? "1 1 100%" : "1 1 320px", minWidth: 0, fontSize: rem(16), lineHeight: 1.9, color: C.text }}>
                   <RichTextContent html={description} />
                 </div>
               )}
@@ -468,11 +471,11 @@ export const puckConfig: Config<Props> = {
       render: ({ heading, description, primaryButtonText, primaryButtonUrl, secondaryButtonText, secondaryButtonUrl }) => {
         const primary = safeUrl(primaryButtonUrl);
         const secondary = safeUrl(secondaryButtonUrl);
-        const base: CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 46, padding: "0 30px", borderRadius: 999, fontWeight: 700, fontSize: 16, textDecoration: "none" };
+        const base: CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 46, padding: "0 30px", borderRadius: 999, fontWeight: 700, fontSize: rem(16), textDecoration: "none" };
         return (
           <section style={{ margin: "28px 0", padding: "30px 20px", textAlign: "center" }}>
-            {heading && heading.trim() !== "" ? <h2 style={{ margin: "0 0 8px", fontSize: 24, fontWeight: 700, color: C.navy }}>{heading}</h2> : null}
-            <div style={{ margin: "0 0 20px", fontSize: 16, lineHeight: 1.8, color: C.text }}>
+            {heading && heading.trim() !== "" ? <h2 style={{ margin: "0 0 8px", fontSize: rem(24), fontWeight: 700, color: C.navy }}>{heading}</h2> : null}
+            <div style={{ margin: "0 0 20px", fontSize: rem(16), lineHeight: 1.8, color: C.text }}>
               <RichTextContent html={description} />
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
@@ -519,14 +522,14 @@ export const puckConfig: Config<Props> = {
           {items.map((item, index) => (
             <details key={item.id || index} style={index > 0 ? { borderTop: `1px solid ${C.border}` } : undefined}>
               <summary
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, minHeight: 44, padding: "14px 18px", cursor: "pointer", listStyle: "none", background: C.panel, color: C.navy, fontSize: 16, fontWeight: 700 }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, minHeight: 44, padding: "14px 18px", cursor: "pointer", listStyle: "none", background: C.panel, color: C.navy, fontSize: rem(16), fontWeight: 700 }}
               >
                 <span>{item.question}</span>
                 <span style={{ flex: "none", color: C.blue }} aria-hidden="true">
                   <Icon type="chevronDown" size={20} />
                 </span>
               </summary>
-              <div style={{ padding: "14px 18px", fontSize: 15, lineHeight: 1.8, color: C.text, background: "#fff" }}>
+              <div style={{ padding: "14px 18px", fontSize: rem(15), lineHeight: 1.8, color: C.text, background: "#fff" }}>
                 <RichTextContent html={item.answer} />
               </div>
             </details>
@@ -573,8 +576,8 @@ export const puckConfig: Config<Props> = {
       render: ({ caption, headers = [], rows = [] }) => (
         <section style={{ margin: "18px 0" }}>
           <div style={{ overflowX: "auto" }} role="region" aria-label={typeof caption === "string" ? caption : "資料表格"} tabIndex={0}>
-            <table style={{ width: "100%", minWidth: 480, borderCollapse: "collapse", fontSize: 15 }}>
-              <caption style={{ textAlign: "left", fontWeight: 700, color: C.navy, fontSize: 16, marginBottom: 10 }}>{caption}</caption>
+            <table style={{ width: "100%", minWidth: 480, borderCollapse: "collapse", fontSize: rem(15) }}>
+              {caption ? <caption style={{ textAlign: "left", fontWeight: 700, color: C.navy, fontSize: rem(16), marginBottom: 10 }}>{caption}</caption> : null}
               <thead>
                 <tr>
                   {headers.map((header, index) => (
@@ -619,11 +622,11 @@ export const puckConfig: Config<Props> = {
       render: ({ text, author, source }) => (
         <figure style={{ margin: "18px 0", width: "100%", boxSizing: "border-box" }}>
           <blockquote style={{ margin: 0, padding: "22px 26px", background: C.panel, borderRadius: 10 }}>
-            <div style={{ fontSize: 18, lineHeight: 1.8, color: C.navy, fontWeight: 500 }}>
+            <div style={{ fontSize: rem(18), lineHeight: 1.8, color: C.navy, fontWeight: 500 }}>
               <RichTextContent html={text} />
             </div>
             {(author || source) && (
-              <figcaption style={{ marginTop: 12, fontSize: 14, color: "#555" }}>
+              <figcaption style={{ marginTop: 12, fontSize: rem(14), color: "#555" }}>
                 {author}
                 {author && source ? "　·　" : null}
                 {source}
@@ -668,11 +671,11 @@ export const puckConfig: Config<Props> = {
         const card = (
           <>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: C.navy, marginBottom: 4 }}>{title}</div>
-              <div style={{ fontSize: 15, lineHeight: 1.7, color: C.text }}>
+              <div style={{ fontSize: rem(18), fontWeight: 700, color: C.navy, marginBottom: 4 }}>{title}</div>
+              <div style={{ fontSize: rem(15), lineHeight: 1.7, color: C.text }}>
                 <RichTextContent html={description} />
               </div>
-              {linkText ? <div style={{ marginTop: 6, fontSize: 14, fontWeight: 700, color: C.blue }}>{linkText}</div> : null}
+              {linkText ? <div style={{ marginTop: 6, fontSize: rem(14), fontWeight: 700, color: C.blue }}>{linkText}</div> : null}
             </div>
             <span style={{ flex: "none", color: C.blue }} aria-hidden="true">
               <Icon type={iconType} size={26} />
@@ -741,7 +744,7 @@ export const puckConfig: Config<Props> = {
             <span style={{ flex: "none", marginTop: 2, color: styles.border }} aria-hidden="true">
               <Icon type={styles.icon} size={22} />
             </span>
-            <div style={{ flex: 1, fontSize: 15, lineHeight: 1.7 }}>
+            <div style={{ flex: 1, fontSize: rem(15), lineHeight: 1.7 }}>
               {title ? <b style={{ display: "block", marginBottom: 2 }}>{title}</b> : null}
               <RichTextContent html={message} />
             </div>
@@ -787,7 +790,7 @@ export const puckConfig: Config<Props> = {
               {src && (
                 <iframe
                   src={src}
-                  title={title}
+                  title={title || "嵌入影片"}
                   style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -796,7 +799,7 @@ export const puckConfig: Config<Props> = {
               )}
             </div>
             {hasTranscript && (
-              <details style={{ marginTop: 14, fontSize: 14, color: C.text }}>
+              <details style={{ marginTop: 14, fontSize: rem(14), color: C.text }}>
                 <summary style={{ cursor: "pointer", minHeight: 44, display: "flex", alignItems: "center", color: C.blue, fontWeight: 700 }}>逐字稿（無障礙）</summary>
                 <div style={{ marginTop: 6, lineHeight: 1.8 }}>
                   <RichTextContent html={transcript} />
@@ -833,7 +836,7 @@ export const puckConfig: Config<Props> = {
       },
       render: ({ leftContent, rightContent, ratio }) => {
         const grow = { "50-50": [1, 1], "33-67": [1, 2], "67-33": [2, 1] }[ratio] ?? [1, 1];
-        const col = (grown: number): CSSProperties => ({ flex: `${grown} 1 260px`, minWidth: 0, fontSize: 16, lineHeight: 1.9, color: C.text });
+        const col = (grown: number): CSSProperties => ({ flex: `${grown} 1 260px`, minWidth: 0, fontSize: rem(16), lineHeight: 1.9, color: C.text });
         return (
           <section style={{ display: "flex", flexWrap: "wrap", gap: 28, margin: "18px 0" }}>
             <div style={col(grow[0])}>
@@ -945,7 +948,7 @@ export const puckConfig: Config<Props> = {
         const HeadingTag = headingLevel as "h2" | "h3" | "h4";
         return (
           <section style={{ margin: "18px 0" }}>
-            {heading ? <HeadingTag style={{ margin: "0 0 14px", fontSize: 21, fontWeight: 700, color: C.navy }}>{heading}</HeadingTag> : null}
+            {heading ? <HeadingTag style={{ margin: "0 0 14px", fontSize: rem(21), fontWeight: 700, color: C.navy }}>{heading}</HeadingTag> : null}
             <ul style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 18, listStyle: "none", margin: 0, padding: 0 }}>
               {items.map((item, index) => (
                 <li key={index} style={{ padding: 20, borderRadius: 12, background: C.panel }}>
@@ -955,8 +958,8 @@ export const puckConfig: Config<Props> = {
                   >
                     {renderReactIcon(item.icon, 22)}
                   </div>
-                  <h3 style={{ margin: "0 0 6px", fontSize: 17, fontWeight: 700, color: C.navy }}>{item.title}</h3>
-                  <div style={{ fontSize: 14, lineHeight: 1.7, color: C.text }}>
+                  {item.title ? <h3 style={{ margin: "0 0 6px", fontSize: rem(17), fontWeight: 700, color: C.navy }}>{item.title}</h3> : null}
+                  <div style={{ fontSize: rem(14), lineHeight: 1.7, color: C.text }}>
                     <RichTextContent html={item.description} />
                   </div>
                 </li>
@@ -1016,9 +1019,9 @@ export const puckConfig: Config<Props> = {
 
         return (
           <DocFrame title={heading || "附件下載"} icon={<FileTitleIcon />}>
-            {description ? <p style={{ margin: "0 0 16px", fontSize: 15, color: C.text }}>{description}</p> : null}
+            {description ? <p style={{ margin: "0 0 16px", fontSize: rem(15), color: C.text }}>{description}</p> : null}
             {!files || files.length === 0 ? (
-              <p style={{ margin: 0, fontSize: 15, color: "#666" }}>尚未新增檔案。</p>
+              <p style={{ margin: 0, fontSize: rem(15), color: "#666" }}>尚未新增檔案。</p>
             ) : (
               <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
                 {files.map((f, idx) => {
@@ -1079,7 +1082,7 @@ export const puckConfig: Config<Props> = {
       render: ({ heading, items = [] }) => (
         <DocFrame title={heading || "相關連結"} icon={<LinkTitleIcon />}>
           {items.length === 0 ? (
-            <p style={{ margin: 0, fontSize: 15, color: "#666" }}>尚未新增連結。</p>
+            <p style={{ margin: 0, fontSize: rem(15), color: "#666" }}>尚未新增連結。</p>
           ) : (
             <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
               {items.map((item, idx) => {
@@ -1140,9 +1143,9 @@ export const puckConfig: Config<Props> = {
         return (
           <DocFrame title={heading || "聯絡資訊"} icon={<ContactTitleIcon />}>
             {rows.length === 0 ? (
-              <p style={{ margin: 0, fontSize: 15, color: "#666" }}>尚未填寫聯絡資訊。</p>
+              <p style={{ margin: 0, fontSize: rem(15), color: "#666" }}>尚未填寫聯絡資訊。</p>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 16 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: rem(16) }}>
                 {rows.map((row) => (
                   <div key={row.label} style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
                     <span style={{ minWidth: 76, color: "#555" }}>{row.label}</span>

@@ -8,6 +8,13 @@ interface PuckRendererProps {
 }
 
 /**
+ * 富文字欄位裡偶爾會留下編輯者按了標題格式卻沒打字的空標題（`<h2></h2>`）：螢幕閱讀器會念出一個空的標題，
+ * 無障礙檢測 HM1130100C 也不過。在解析前直接從內容字串拿掉空的（只含空白、&nbsp;、<br>）標題標籤。
+ * 這是對 JSON 字串做取代，只會動到完整成對、沒有任何內容的 `<h1>`～`<h6>`。
+ */
+const EMPTY_HEADING = /<h([1-6])(?:\s[^>]*)?>(?:\s|\\[nrt]|&nbsp;|\u00a0|\\u00a0|<br\s*\/?>)*<\/h\1>/gi;
+
+/**
  * 這支是照抄 SPS.AdminWeb 那份能動的版本，但那邊是後台獨立頁面在用
  * （daisyUI 主題、自己控制整個版面的背景色），照抄過來的三個地方在
  * 這個專案裡都會出問題，已經拿掉：
@@ -39,7 +46,7 @@ export const PuckRenderer = ({ content }: PuckRendererProps) => {
   let isLegacyContent = false;
 
   try {
-    const parsed = JSON.parse(content);
+    const parsed = JSON.parse(content.replace(EMPTY_HEADING, ''));
 
     // Validate data structure
     if (parsed.content && Array.isArray(parsed.content)) {
