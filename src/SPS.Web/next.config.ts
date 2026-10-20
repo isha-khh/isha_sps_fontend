@@ -45,10 +45,20 @@ const nextConfig: NextConfig = {
     //  - SAMEORIGIN：只有自己的網站可以用 iframe 嵌入頁面（防點擊劫持）；
     //  - Referrer-Policy：跨站連出去時只帶來源網域，不帶完整路徑與查詢字串。
     // CSP（含 nonce）與 Reporting-Endpoints 不在這裡設：每個請求要產生不同的 nonce，由 `src/proxy.ts` 負責。
+    //
+    // 2026-10-20 弱點掃描報告（Cymetrics）補上三個：
+    //  - Permissions-Policy（VAS03）：關掉網站用不到的瀏覽器功能（相機、麥克風、定位、付款、USB、動作感測器）；沒有關全螢幕，影片需要；
+    //  - Cross-Origin-Opener-Policy: same-origin（VAS02）：頁面不跟其他來源的視窗共用瀏覽環境（站內沒有靠 window.opener 溝通的彈窗）；
+    //  - Cross-Origin-Resource-Policy: same-site（VAS02）：只有同一個網站（isafe.org.tw 底下）可以載入這些資源。
+    //  刻意【不設】Cross-Origin-Embedder-Policy：`require-corp` 會擋掉沒有 CORP 標頭的跨來源內容（YouTube 影片、Google 字型、地圖），
+    //  網站的影音專區與地圖都會壞；掃描報告把它列為低風險，接受這項殘餘風險。
     const securityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "SAMEORIGIN" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()" },
+      { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+      { key: "Cross-Origin-Resource-Policy", value: "same-site" },
     ];
     return [
       { source: "/:path*", headers: securityHeaders },

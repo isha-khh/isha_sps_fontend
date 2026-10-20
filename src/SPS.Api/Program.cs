@@ -294,6 +294,23 @@ app.MapGet("api/antiforgery/token", (IAntiforgery antiforgery, HttpContext conte
 // Forwarded Headers 必須在所有中間件之前，讓後續中間件能正確識別 HTTPS
 app.UseForwardedHeaders();
 
+// 基本安全標頭（2026-10-20 弱點掃描報告 VAS03／VAS04）：API 的每個回應都帶 nosniff（尤其是 /api/FileManagement/{id}/download 這類
+// 使用者上傳檔案的下載，避免瀏覽器自己猜內容型別）、Referrer-Policy 與 Permissions-Policy。不依賴前面的 nginx 有沒有加——
+// 主機 nginx 是共用的，不一定有 include 安全標頭設定檔。用 OnStarting 在回應送出前才補，已經有同名標頭（例如下載端點自己設的）就不覆蓋。
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        var headers = context.Response.Headers;
+        if (!headers.ContainsKey("X-Content-Type-Options")) headers["X-Content-Type-Options"] = "nosniff";
+        if (!headers.ContainsKey("Referrer-Policy")) headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+        if (!headers.ContainsKey("Permissions-Policy"))
+            headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()";
+        return Task.CompletedTask;
+    });
+    await next();
+});
+
 // 全局異常處理中間件
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
