@@ -19,24 +19,40 @@ export const metadata: Metadata = {
 };
 
 const TALENT_PAGE_SIZE = 10;
+// 年份／類型篩選要在前台做，一次抓的課程數上限（課程數量不多）
+const ALL_COURSES_LIMIT = 100;
 
 // 對應設計稿 page/_uc/side2_banner.html——「熱門課程」下面還有一個共用的廣告欄位。
 /**
  * 人才培訓課程列表，對應設計稿 page/talent/index.html。2026-10-13 起資料來自後台「人才培育 → 課程內容」
- * （跟公告共用 News 資料表，見 `lib/talent-data.ts`），關鍵字搜尋與分頁交給後端；「熱門課程」側欄取瀏覽數最高的 5 筆。
+ * （跟公告共用 News 資料表，見 `lib/talent-data.ts`），關鍵字搜尋交給後端；「熱門課程」側欄取瀏覽數最高的 5 筆。
+ *
+ * 搜尋列的「年份」「類型」兩個下拉原本是空的（設計稿的佔位，客戶回報「知識加值選單沒功能」）。現在：
+ * - 年份＝課程開課起日的年份（後台「課程資訊 → 開課起日」；沒填就用公告上架日期的年份），選項列出所有課程出現過的年份；
+ * - 類型＝課程的「關鍵字標籤」（後台課程編輯的標籤），選項列出所有課程用到的標籤。
+ * 課程數量不多，所以一次抓全部（上限 100 筆）在前台篩選與分頁，選項才不會被目前頁面或搜尋結果限縮。
  */
 export default async function TalentIndexPage({ searchParams }: PageProps<"/talent">) {
-  const { query, page } = readListQuery(await searchParams);
-  const [sidebarBanners, topBanners, result, popularSource] = await Promise.all([
+  const params = await searchParams;
+  const { query, page } = readListQuery(params);
+  const year = typeof params.year === "string" && /^\d{4}$/.test(params.year) ? params.year : "";
+  const type = typeof params.type === "string" ? params.type.trim() : "";
+  const [sidebarBanners, topBanners, result, allSource] = await Promise.all([
     fetchBanners("sidebar-talent"),
     fetchBanners("talent-top"),
-    fetchSectionItems(NewsSections.Talent, { search: query || undefined, page, pageSize: TALENT_PAGE_SIZE }),
-    fetchSectionItems(NewsSections.Talent, { pageSize: 20 }),
+    fetchSectionItems(NewsSections.Talent, { search: query || undefined, page: 1, pageSize: ALL_COURSES_LIMIT }),
+    fetchSectionItems(NewsSections.Talent, { pageSize: ALL_COURSES_LIMIT }),
   ]);
-  const courses = result.items.map(toTalentCourse);
-  const popularCourses = sortByViewCount(popularSource.items).slice(0, 5).map(toTalentCourse);
-  const totalPages = Math.max(1, Math.ceil(result.totalCount / TALENT_PAGE_SIZE));
+  // 課程的年份：開課起日（YYYY-MM-DD）的年份，沒填就用上架日期
+  const yearOf = (item: (typeof allSource.items)[number]) => (item.meta?.dateStart ?? item.startDate ?? item.createdTime ?? "").slice(0, 4);
+  const years = Array.from(new Set(allSource.items.map(yearOf).filter((y) => /^\d{4}$/.test(y)))).sort((a, b) => Number(b) - Number(a));
+  const types = Array.from(new Set(allSource.items.flatMap((item) => item.tags ?? []))).sort((a, b) => a.localeCompare(b, "zh-Hant"));
+  const filtered = result.items.filter((item) => (!year || yearOf(item) === year) && (!type || (item.tags ?? []).includes(type)));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / TALENT_PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
+  const courses = filtered.slice((currentPage - 1) * TALENT_PAGE_SIZE, currentPage * TALENT_PAGE_SIZE).map(toTalentCourse);
+  const popularCourses = sortByViewCount(allSource.items).slice(0, 5).map(toTalentCourse);
+  const hasFilter = Boolean(query || year || type);
   return (
     <>
       <BodyClass className="talent" />
@@ -63,14 +79,23 @@ export default async function TalentIndexPage({ searchParams }: PageProps<"/tale
         }
       >
         <div className="search mb-4">
-          <SearchBar years={[]} typeOptions={[]} keywordPlaceholder="請輸入關鍵字" defaultKeyword={query} />
+          <SearchBar
+            years={years}
+            yearLabel="全部年份"
+            defaultYear={year}
+            typeOptions={types}
+            typeLabel="全部類型"
+            defaultType={type}
+            keywordPlaceholder="請輸入關鍵字"
+            defaultKeyword={query}
+          />
         </div>
 
         {!result.backendAvailable && <p>目前無法載入課程資料，請稍後再試。</p>}
-        {result.backendAvailable && courses.length === 0 && <p>{query ? "沒有符合的課程。" : "目前沒有課程資料。"}</p>}
+        {result.backendAvailable && courses.length === 0 && <p>{hasFilter ? "沒有符合的課程。" : "目前沒有課程資料。"}</p>}
         {courses.length > 0 && <CourseTable courses={courses} startIndex={(currentPage - 1) * TALENT_PAGE_SIZE} />}
 
-        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(target) => buildListHref("/talent", { q: query, page: target })} />
+        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={(target) => buildListHref("/talent", { year, type, q: query, page: target })} />
       </InnerPageShell>
     </>
   );
