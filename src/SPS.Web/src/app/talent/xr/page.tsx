@@ -288,7 +288,7 @@ export default async function TalentXrPage() {
       <InnerPageShell
         title="XR"
         titleAside={<PageSubNav links={TALENT_SUB_NAV} activeHref="/talent/xr" />}
-        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "人才培育", href: "/talent" }, { label: "XR" }]}
+        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "人才培育", href: "/talent" }, { label: "XR", href: "/talent/xr" }]}
         decorations={
           <>
             <div className="s_round_6" aria-hidden="true">

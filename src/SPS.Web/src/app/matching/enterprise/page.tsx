@@ -47,7 +47,7 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
       <InnerPageShell
         title="企業名錄"
         titleAside={<MatchingSubNav activeHref="/matching/enterprise" />}
-        breadcrumb={[{ label: "我要媒合", href: "/matching/enterprise" }, { label: "企業名錄" }]}
+        breadcrumb={[{ label: "我要媒合", href: "/matching/enterprise" }, { label: "企業名錄", href: "/matching/enterprise" }]}
         topBar={
           <div className="searchma_tching mb-5">
             <MatchingSearchBar defaultKeyword={query} taxonomy={taxonomy} selectedTagIds={tagIds} />

@@ -71,7 +71,7 @@ export default async function SupportPage({ searchParams }: PageProps<"/support"
       <InnerPageShell
         title="本計畫補助"
         titleAside={<PageSubNav links={SUPPORT_SUB_NAV} activeHref="/support" />}
-        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "補助資源", href: "/support" }, { label: "本計畫補助" }]}
+        breadcrumb={[{ label: "服務專區", href: "/serve" }, { label: "補助資源", href: "/support" }, { label: "本計畫補助", href: "/support" }]}
         banner={topBanners.some((b) => b.uri) ? <NewsBanner id="support-banner" banners={topBanners} /> : undefined}
         aside={
           <>
