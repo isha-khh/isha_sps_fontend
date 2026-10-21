@@ -17,4 +17,7 @@ public enum InquiryType : short
 
     /// <summary>頁尾「訂閱電子報」</summary>
     Newsletter = 5,
+
+    /// <summary>企業名錄詳情「取得聯繫窗口」：登入的企業會員索取某家企業的聯繫窗口（系統自動記錄，不是前台表單送出的）</summary>
+    ContactRequest = 6,
 }

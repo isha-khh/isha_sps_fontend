@@ -27,6 +27,7 @@ public class CompanyController : ControllerBase
     private readonly CompanyShowcaseHelper _showcase;
     private readonly IMemoryCache _cache;
     private readonly ISystemSettingService _settingService;
+    private readonly IInquiryService _inquiryService;
 
     private const int ContactRequestsPerHour = 30;
 
@@ -35,13 +36,15 @@ public class CompanyController : ControllerBase
         ILogger<CompanyController> logger,
         CompanyShowcaseHelper showcase,
         IMemoryCache cache,
-        ISystemSettingService settingService)
+        ISystemSettingService settingService,
+        IInquiryService inquiryService)
     {
         _companyService = companyService;
         _logger = logger;
         _showcase = showcase;
         _cache = cache;
         _settingService = settingService;
+        _inquiryService = inquiryService;
     }
 
     /// <summary>
@@ -177,6 +180,12 @@ public class CompanyController : ControllerBase
             return BadRequest(new { error = "請至少勾選一項想了解的智慧技術" });
         }
         _logger.LogInformation("Company contact requested: caller={Caller} company={CompanyId} scopes={Scopes}", who, id, string.Join(",", scopes));
+
+        // 同時記錄到後台「詢問單」（誰向哪家企業索取了聯繫窗口、勾選了什麼）；後台使用者（非會員）自己查看不記錄
+        if (!isAdmin && Guid.TryParse(User.FindFirst("MemberId")?.Value, out var callerMemberId))
+        {
+            await _inquiryService.RecordCompanyContactAsync(callerMemberId, id, company.Name, scopes, HttpContext.Connection.RemoteIpAddress?.ToString(), cancellationToken);
+        }
 
         return Ok(new CompanyContactResponse { ContactName = name ?? string.Empty, ContactPhone = phone ?? string.Empty });
     }

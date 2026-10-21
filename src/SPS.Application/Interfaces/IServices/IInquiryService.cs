@@ -6,6 +6,12 @@ namespace SPS.Application.Interfaces.IServices;
 
 public interface IInquiryService
 {
+    /// <summary>
+    /// 企業名錄「取得聯繫窗口」成功之後記錄一張詢問單（誰、向哪家企業、勾選了哪些想了解的智慧技術），後台「詢問單」可以看到。
+    /// 送出者的姓名、信箱、電話、公司、職稱取自會員資料；記錄失敗不影響取得聯繫窗口（只寫日誌）。
+    /// </summary>
+    Task RecordCompanyContactAsync(Guid memberId, Guid companyId, string companyName, IReadOnlyList<string> scopes, string? clientIp, CancellationToken ct = default);
+
     /// <summary>前台送出。<paramref name="memberId"/> 是登入會員（匿名為 null）；<paramref name="isEnterpriseMember"/> 用來檢查提案只開放企業會員</summary>
     Task<Result<bool>> CreateAsync(CreateInquiryRequest request, Guid? memberId, bool isEnterpriseMember, string? clientIp, CancellationToken ct = default);
 

@@ -5,6 +5,7 @@ export const InquiryType = {
   DownloadRequest: 3,
   SupportRequest: 4,
   Newsletter: 5,
+  ContactRequest: 6,
 } as const;
 export type InquiryType = (typeof InquiryType)[keyof typeof InquiryType];
 
@@ -14,6 +15,7 @@ export const InquiryTypeLabels: Record<number, string> = {
   3: '下載申請',
   4: '索取補助資料',
   5: '訂閱電子報',
+  6: '取得聯繫窗口',
 };
 
 /** 處理狀態（對應後端 InquiryStatus） */

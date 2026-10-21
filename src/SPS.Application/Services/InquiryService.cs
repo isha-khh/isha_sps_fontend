@@ -52,6 +52,8 @@ public class InquiryService : IInquiryService
         [InquiryType.DownloadRequest] = new(Who.Anyone, "下載申請", true, true, true, true, true, true, false),
         [InquiryType.SupportRequest] = new(Who.Anyone, "索取補助資料", true, true, true, true, false, false, true),
         [InquiryType.Newsletter] = new(Who.Anyone, "訂閱電子報", false, true, false, false, false, false, false),
+        // 系統在「取得聯繫窗口」成功時自動記錄（RecordCompanyContactAsync），不接受前台直接送出（見 CreateAsync）
+        [InquiryType.ContactRequest] = new(Who.EnterpriseMember, "取得聯繫窗口", false, false, false, false, false, false, false),
     };
 
     private static string TypeNameOf(InquiryType type) => Rules.TryGetValue(type, out var rule) ? rule.TypeName : type.ToString();
@@ -64,6 +66,7 @@ public class InquiryService : IInquiryService
         if (!Rules.TryGetValue(request.Type, out var rule)) return Result<bool>.Failure("不支援的表單種類");
         // 媒合對接改版：提案改為「回應需求」（審核後直接寄給刊登者與追蹤者），訂閱解方改為「追蹤需求」，不再收這兩種詢問單
         if (request.Type is InquiryType.ProposeSolution or InquiryType.SubscribeSolution) return Result<bool>.Failure("此表單已停用，請改用需求頁的「回應」或「追蹤」");
+        if (request.Type == InquiryType.ContactRequest) return Result<bool>.Failure("不支援的表單種類");
 
         if (rule.Who != Who.Anyone && memberId == null) return Result<bool>.Failure("請先登入會員");
         if (rule.Who == Who.EnterpriseMember && !isEnterpriseMember) return Result<bool>.Failure("僅企業會員可以使用這個功能");
@@ -149,6 +152,49 @@ public class InquiryService : IInquiryService
         }
 
         return Result<bool>.Success(true);
+    }
+
+    public async Task RecordCompanyContactAsync(Guid memberId, Guid companyId, string companyName, IReadOnlyList<string> scopes, string? clientIp, CancellationToken ct = default)
+    {
+        try
+        {
+            var member = await _unitOfWork.Members.GetByIdAsync(memberId, ct);
+            if (member == null) return;
+
+            // 公司：企業會員掛在 Company 上，個人會員用自己填的公司名稱
+            var memberCompany = member.CompanyName;
+            if (string.IsNullOrWhiteSpace(memberCompany) && member.CompanyId.HasValue)
+                memberCompany = (await _unitOfWork.Companies.GetByIdAsync(member.CompanyId.Value, ct))?.Name;
+
+            var inquiry = new Inquiry
+            {
+                Id = Guid.NewGuid(),
+                Type = InquiryType.ContactRequest,
+                Status = InquiryStatus.New,
+                MemberId = memberId,
+                Name = Clean(member.Nickname),
+                Email = Clean(member.Email),
+                Phone = Clean(string.IsNullOrWhiteSpace(member.MobilePhone) ? member.Phone : member.MobilePhone),
+                CompanyName = Clean(memberCompany),
+                JobTitle = Clean(member.MemberJobTitle) ?? Clean(member.Position),
+                Message = scopes.Count > 0 ? $"想了解的智慧技術：{string.Join("、", scopes)}" : null,
+                TargetType = "Company",
+                TargetKey = companyId.ToString(),
+                TargetTitle = Clean(companyName),
+                Extra = scopes.Count > 0 ? JsonSerializer.Serialize(new { scopes }) : null,
+                ClientIp = clientIp,
+                CreatedTime = DateTime.UtcNow,
+                UpdatedTime = DateTime.UtcNow,
+            };
+            await _unitOfWork.Inquiries.AddAsync(inquiry, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
+            _logger.LogInformation("Contact-request inquiry created: {Id} member={MemberId} company={CompanyId}", inquiry.Id, memberId, companyId);
+        }
+        catch (Exception ex)
+        {
+            // 記錄失敗不能擋住使用者取得聯繫窗口
+            _logger.LogError(ex, "Failed to record contact-request inquiry for member {MemberId} company {CompanyId}", memberId, companyId);
+        }
     }
 
     public async Task<Result<PagedResult<InquiryResponse>>> GetPagedAsync(InquiryQueryParameters parameters, CancellationToken ct = default)
