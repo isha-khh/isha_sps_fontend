@@ -10,6 +10,7 @@ import Pagination from "@/components/ui/Pagination";
 import NewsListCard from "@/components/news/NewsListCard";
 import { fetchBanners, fetchNews, fetchPublishedNewsCategories } from "@/lib/api.server";
 import { withBasePath } from "@/lib/api-client";
+import type { NewsItem } from "@/lib/types";
 import {
   NEWS_ARTICLES,
   deriveNewsCategories,
@@ -88,7 +89,9 @@ const NEWS_PAGE_SIZE = 5;
  */
 export default async function NewsIndexPage({ searchParams }: PageProps<"/news">) {
   const sidebarBanners = await fetchBanners("sidebar-news");
-  const { category: rawCategory, q: rawQuery, page: rawPage, tag: rawTag } = await searchParams;
+  const { category: rawCategory, q: rawQuery, page: rawPage, tag: rawTag, year: rawYear } = await searchParams;
+  // `?year=` 是公告日期的年份（issue #60）
+  const year = typeof rawYear === "string" && /^\d{4}$/.test(rawYear) ? rawYear : "";
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
   // `?tag=<標籤 id>` 對到後端 NewsQueryParameters.TagId，點公告上的標籤會帶進來
   const requestedTagId = typeof rawTag === "string" ? Number(rawTag) : NaN;
@@ -101,8 +104,15 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
   // 只有後端真的連不到/噴錯才退回假資料——搜尋剛好 0 筆是正常結果，
   // 不能也退回假資料（見上面的說明跟 fetchNews 的註解）
   const items = backendAvailable ? backendItems : NEWS_ARTICLES;
+  // 分類頁籤與年份選項要看「全部公告」，不能被目前的搜尋字串／標籤限縮（issue #61：搜尋後頁籤只剩一個）；
+  // 沒有搜尋條件時 `items` 本來就是全部公告，直接重用，不用多打一次 API。熱門文章也用這一份。
+  const allResult = query || tagId ? await fetchNews() : { items: backendItems, backendAvailable };
+  const allSource = allResult.backendAvailable ? allResult.items : NEWS_ARTICLES;
   // 後台「公告類別」停用的分類不顯示頁籤（issue #57）
-  const categories = filterPublishedNewsCategories(deriveNewsCategories(items), await fetchPublishedNewsCategories());
+  const categories = filterPublishedNewsCategories(deriveNewsCategories(allSource), await fetchPublishedNewsCategories());
+  // 年份選項：所有公告出現過的公告日期年份，新到舊（issue #60）
+  const yearOf = (item: NewsItem) => (item.startDate ?? "").slice(0, 4);
+  const years = Array.from(new Set(allSource.map(yearOf).filter((y) => /^\d{4}$/.test(y)))).sort((a, b) => Number(b) - Number(a));
 
   // `?category=` 兩種寫法都接：分類 id（頁籤、分頁連結用）與分類名稱（導覽列「公告事項」下拉選單與網站導覽用，
   // 例如 `?category=活動資訊`）——原本只認 id，導覽列的連結點了沒有跳到那個分類（issue #29）
@@ -110,7 +120,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
   const activeCategory =
     categories.find((c) => c.id === requestedId) ?? (typeof rawCategory === "string" && rawCategory ? categories.find((c) => c.name === rawCategory) : undefined);
   const activeHref = activeCategory ? `/news?category=${activeCategory.id}` : "/news";
-  const articles = activeCategory ? items.filter((item) => item.categoryId === activeCategory.id) : items;
+  const articles = items.filter((item) => (!activeCategory || item.categoryId === activeCategory.id) && (!year || yearOf(item) === year));
   // 標籤名稱從結果裡的 tagItems 找；篩選結果剛好 0 筆時找不到名稱，退回通用說法
   const activeTagName = tagId
     ? items.flatMap((item) => item.tagItems ?? []).find((t) => t.id === tagId)?.name ?? "此標籤"
@@ -131,17 +141,15 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
     const params = new URLSearchParams();
     if (activeCategory) params.set("category", String(activeCategory.id));
     if (query) params.set("q", query);
+    if (year) params.set("year", year);
     if (tagId) params.set("tag", String(tagId));
     if (page > 1) params.set("page", String(page));
     const qs = params.toString();
     return qs ? `/news?${qs}` : "/news";
   };
 
-  // 熱門文章要看全站排名，不能被目前的搜尋字串限縮——有搜尋字串時
-  // 才需要額外抓一次不帶搜尋條件的清單；沒有搜尋字串時 `items` 本來
-  // 就是全站清單，直接重用，不用多打一次 API。
-  const popularSourceResult = query || tagId ? await fetchNews() : { items: backendItems, backendAvailable };
-  const popularSource = popularSourceResult.backendAvailable ? popularSourceResult.items : NEWS_ARTICLES;
+  // 熱門文章要看全站排名，用上面不受搜尋條件限縮的 `allSource`
+  const popularSource = allSource;
   const popularPosts = sortNewsByViewCount(popularSource)
     .slice(0, 5)
     .map((item) => ({
@@ -173,7 +181,8 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
       >
         <div className="search mb-md-5 mb-4">
           <SearchBar
-            years={[]}
+            years={years}
+            defaultYear={year}
             defaultKeyword={query}
             hiddenFields={{
               ...(activeCategory ? { category: String(activeCategory.id) } : {}),
@@ -198,7 +207,9 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
                 ? `找不到符合「${query}」的公告。`
                 : activeTagName
                   ? `目前沒有標籤為「${activeTagName}」的公告。`
-                  : "目前沒有符合這個分類的消息。"}
+                  : year
+                    ? `${year} 年目前沒有符合的消息。`
+                    : "目前沒有符合這個分類的消息。"}
             </p>
           )}
 
