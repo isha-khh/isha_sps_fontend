@@ -58,6 +58,8 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
       ? { items: [], totalCount: 0, backendAvailable: true }
       : await fetchServeItems({ search: query || undefined, categoryId: activeSub?.id ?? activeCategory?.id, page, pageSize: SERVE_PAGE_SIZE });
   const items = result.items.map(toServeCardItem);
+  // 「產業AI」沒有啟用外部連結、底下也還沒有任何項目＝功能還沒準備好，顯示「維護中」，不要露出空的搜尋框與「沒有符合的項目」（issue #54）
+  const maintenance = category === INDUSTRY_AI_CATEGORY && !industryAiLink.enabled && result.backendAvailable && items.length === 0 && !query && !subName;
   const totalPages = Math.max(1, Math.ceil(result.totalCount / SERVE_PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
 
@@ -97,29 +99,37 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
         }
         aside={<SidebarBanner banners={sidebarBanners} />}
       >
-        <div className="search2 mb-md-5 mb-4">
-          <SearchBar keywordPlaceholder="請輸入關鍵字" defaultKeyword={query} hiddenFields={category ? { category, ...(activeSub ? { sub: activeSub.name } : {}) } : undefined} />
-        </div>
-        <div className="row">
-          {!result.backendAvailable && <p>目前無法載入服務專區的資料，請稍後再試。</p>}
-          {result.backendAvailable && items.length === 0 && <p>{query ? "沒有符合的項目。" : category ? "目前沒有符合這個分類的項目。" : "目前沒有資料。"}</p>}
-          {items.map((item) => (
-            <ServeItemCard
-              key={item.id}
-              data={{
-                href: `/serve/${item.id}`,
-                image: item.image,
-                category: item.category,
-                date: item.date,
-                title: item.title,
-                description: item.description,
-                keywords: item.keywords,
-                hasAttachments: item.hasAttachments,
-              }}
-            />
-          ))}
-        </div>
-        <Pagination currentPage={currentPage} totalPages={totalPages} getHref={getPageHref} />
+        {maintenance ? (
+          <p className="py-5 text-center" role="status">
+            產業 AI 功能維護中，敬請期待。
+          </p>
+        ) : (
+          <>
+            <div className="search2 mb-md-5 mb-4">
+              <SearchBar keywordPlaceholder="請輸入關鍵字" defaultKeyword={query} hiddenFields={category ? { category, ...(activeSub ? { sub: activeSub.name } : {}) } : undefined} />
+            </div>
+            <div className="row">
+              {!result.backendAvailable && <p>目前無法載入服務專區的資料，請稍後再試。</p>}
+              {result.backendAvailable && items.length === 0 && <p>{query ? "沒有符合的項目。" : category ? "目前沒有符合這個分類的項目。" : "目前沒有資料。"}</p>}
+              {items.map((item) => (
+                <ServeItemCard
+                  key={item.id}
+                  data={{
+                    href: `/serve/${item.id}`,
+                    image: item.image,
+                    category: item.category,
+                    date: item.date,
+                    title: item.title,
+                    description: item.description,
+                    keywords: item.keywords,
+                    hasAttachments: item.hasAttachments,
+                  }}
+                />
+              ))}
+            </div>
+            <Pagination currentPage={currentPage} totalPages={totalPages} getHref={getPageHref} />
+          </>
+        )}
       </InnerPageShell>
     </>
   );

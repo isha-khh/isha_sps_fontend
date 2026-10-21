@@ -228,10 +228,14 @@
   transition: background-color 0.2s, color 0.2s, transform 0.2s;
 }
 
-.tier-reset-btn:hover {
+.tier-reset-btn:hover,
+.favorite-btn[aria-pressed="true"] {
   background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
   color: #fff;
   border-color: transparent;
+}
+
+.tier-reset-btn:hover {
   transform: translateY(-3px);
 }
 

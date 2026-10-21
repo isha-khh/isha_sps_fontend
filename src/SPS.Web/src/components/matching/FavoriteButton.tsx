@@ -9,6 +9,7 @@ import { getApiErrorMessage } from "@/lib/error-utils";
  * 積木元件：「加入最愛」按鈕，放在企業名錄詳情與媒合需求詳情頁，收藏的項目顯示在會員中心「我的最愛」。
  * 掛載時呼叫 `GET /api/member/favorites/ids` 判斷目前狀態——這支端點沒登入也能呼叫（回 `loggedIn: false`），
  * 所以匿名瀏覽不會被導去登入頁；沒登入時按下按鈕才導去登入頁。
+ * 按鈕裡不放愛心圖示（卡片左側已經有一顆，issue #53）；已加入最愛的狀態靠藍色漸層底顯示（`globals.css` 的 `[aria-pressed="true"]`）。
  */
 export default function FavoriteButton({ kind, id, className }: { kind: "company" | "demand"; id: string | number; className?: string }) {
   const router = useRouter();
@@ -61,8 +62,7 @@ export default function FavoriteButton({ kind, id, className }: { kind: "company
 
   return (
     <span className={className}>
-      <button type="button" className="tier-reset-btn" onClick={() => void toggle()} disabled={busy} aria-pressed={favorited} title={favorited ? "從我的最愛移除" : "加入我的最愛"}>
-        <i className={`bi ${favorited ? "bi-heart-fill" : "bi-heart"} me-1`} aria-hidden="true"></i>
+      <button type="button" className="tier-reset-btn favorite-btn" onClick={() => void toggle()} disabled={busy} aria-pressed={favorited} title={favorited ? "從我的最愛移除" : "加入我的最愛"}>
         {favorited ? "已加入最愛" : "加入最愛"}
       </button>
       {error && (
