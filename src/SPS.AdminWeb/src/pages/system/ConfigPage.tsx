@@ -2,24 +2,16 @@ import { useState, useEffect } from 'react';
 import { PageTitle } from '@/components/PageTitle';
 import { TabSelector } from '@/components/common/TabSelector';
 import { settingsApi } from '@/lib/api/system-settings';
-import { siteCounterApi } from '@/lib/api/site-counter';
-import { siteStatisticsApi } from '@/lib/api/site-statistics';
-import { filesManagementApi } from '@/lib/api/files-management';
-import type { EmailSettings, GoogleAnalyticsSettings, FileStorageSettings, BounceMailSettings, BounceProcessingResult, ContentSettings, MembershipGuideSettings, EmbeddingSettings, EmbeddingTestResult } from '@/types/settings';
-import type { SiteCounter } from '@/types/site-counter';
-import type { SiteStatistics } from '@/types/site-statistics';
+import type { EmailSettings, GoogleAnalyticsSettings, FileStorageSettings, BounceMailSettings, BounceProcessingResult, ContentSettings, EmbeddingSettings, EmbeddingTestResult } from '@/types/settings';
 import { useNotify } from '@/hooks/useNotify';
 
-type SettingTab = 'email' | 'analytics' | 'fileStorage' | 'siteCounter' | 'siteStatistics' | 'content' | 'membershipGuide' | 'embedding';
+type SettingTab = 'email' | 'analytics' | 'fileStorage' | 'content' | 'embedding';
 
 const SETTING_TABS = [
   { value: 'email' as const, label: '電子郵件', icon: 'lucide--mail' },
   { value: 'analytics' as const, label: 'Google Analytics', icon: 'lucide--bar-chart' },
   { value: 'fileStorage' as const, label: '檔案儲存', icon: 'lucide--hard-drive' },
-  { value: 'siteCounter' as const, label: '網站計數器', icon: 'lucide--users' },
-  { value: 'siteStatistics' as const, label: '網站統計數據', icon: 'lucide--trophy' },
   { value: 'content' as const, label: '內容設定', icon: 'lucide--layout' },
-  { value: 'membershipGuide' as const, label: '會員申請須知', icon: 'lucide--file-text' },
   { value: 'embedding' as const, label: 'AI 語意搜尋', icon: 'lucide--sparkles' },
 ];
 
@@ -54,20 +46,6 @@ export const SystemConfigPage = () => {
     maxFileSizeInMB: 10,
   });
 
-  // Site Counter settings
-  const [siteCounter, setSiteCounter] = useState<SiteCounter>({
-    totalVisitors: 0,
-    totalPageViews: 0,
-  });
-
-  // Site Statistics settings
-  const [siteStatistics, setSiteStatistics] = useState<SiteStatistics>({
-    totalMembers: 0,
-    successfulMatches: 0,
-    subsidyApplications: 0,
-  });
-  const [realTotalMembers, setRealTotalMembers] = useState<number>(0);
-
   // Bounce Mail settings
   const [bounceMailSettings, setBounceMailSettings] = useState<BounceMailSettings>({
     enabled: false,
@@ -94,16 +72,6 @@ export const SystemConfigPage = () => {
     demandMatchThresholdPercent: 70,
   });
 
-  // Membership Guide settings
-  const [membershipGuideSettings, setMembershipGuideSettings] = useState<MembershipGuideSettings>({
-    guidePdfFileUrl: '',
-    guidePdfFileName: '',
-    guideDocxFileUrl: '',
-    guideDocxFileName: '',
-  });
-  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
-  const [isUploadingDocx, setIsUploadingDocx] = useState(false);
-
   // AI 語意搜尋設定
   const [embeddingSettings, setEmbeddingSettings] = useState<EmbeddingSettings>({
     isEnabled: false,
@@ -124,26 +92,19 @@ export const SystemConfigPage = () => {
   const fetchAllSettings = async () => {
     setIsLoading(true);
     try {
-      const [email, analytics, fileStorage, counter, statistics, bounceMail, content, membershipGuide, embedding] = await Promise.all([
+      const [email, analytics, fileStorage, bounceMail, content, embedding] = await Promise.all([
         settingsApi.getEmailSettings(),
         settingsApi.getGoogleAnalyticsSettings(),
         settingsApi.getFileStorageSettings(),
-        siteCounterApi.getAdminCounter(),
-        siteStatisticsApi.getAdminStatistics(),
         settingsApi.getBounceMailSettings().catch(() => bounceMailSettings),
         settingsApi.getContentSettings().catch(() => contentSettings),
-        settingsApi.getMembershipGuideSettings().catch(() => membershipGuideSettings),
         settingsApi.getEmbeddingSettings().catch(() => embeddingSettings),
       ]);
       setEmailSettings(email);
       setAnalyticsSettings(analytics);
       setFileStorageSettings(fileStorage);
-      setSiteCounter(counter);
-      setSiteStatistics(statistics);
-      setRealTotalMembers(statistics.totalMembers);
       setBounceMailSettings(bounceMail);
       setContentSettings(content);
-      setMembershipGuideSettings(membershipGuide);
       setEmbeddingSettings(embedding);
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -189,40 +150,6 @@ export const SystemConfigPage = () => {
     } catch (error) {
       console.error('Failed to save file storage settings:', error);
       await notify.error('儲存檔案儲存設定失敗');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSaveSiteCounter = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    try {
-      const updated = await siteCounterApi.setCounter(siteCounter);
-      setSiteCounter(updated);
-      await notify.success('網站計數器已儲存');
-    } catch (error) {
-      console.error('Failed to save site counter:', error);
-      await notify.error('儲存網站計數器失敗');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSaveSiteStatistics = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    try {
-      const updated = await siteStatisticsApi.setStatistics({
-        successfulMatches: siteStatistics.successfulMatches,
-        subsidyApplications: siteStatistics.subsidyApplications,
-      });
-      setSiteStatistics(updated);
-      setRealTotalMembers(updated.totalMembers);
-      await notify.success('網站統計數據已儲存');
-    } catch (error) {
-      console.error('Failed to save site statistics:', error);
-      await notify.error('儲存網站統計數據失敗');
     } finally {
       setIsSaving(false);
     }
@@ -284,64 +211,6 @@ export const SystemConfigPage = () => {
     } catch (error) {
       console.error('Failed to save content settings:', error);
       await notify.error('儲存內容設定失敗');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleUploadGuidePdf = async (file: File) => {
-    setIsUploadingPdf(true);
-    try {
-      const uploaded = await filesManagementApi.uploadFile({
-        file,
-        description: '會員申請須知 PDF',
-        isPublic: true,
-      });
-      setMembershipGuideSettings((prev) => ({
-        ...prev,
-        guidePdfFileUrl: uploaded.fileUrl,
-        guidePdfFileName: file.name.replace(/\.[^/.]+$/, ''),
-      }));
-      await notify.success('PDF 已上傳，請記得按下方「儲存設定」');
-    } catch (error) {
-      console.error('Failed to upload guide PDF:', error);
-      await notify.error('上傳 PDF 失敗');
-    } finally {
-      setIsUploadingPdf(false);
-    }
-  };
-
-  const handleUploadGuideDocx = async (file: File) => {
-    setIsUploadingDocx(true);
-    try {
-      const uploaded = await filesManagementApi.uploadFile({
-        file,
-        description: '可編輯申請須知附件',
-        isPublic: true,
-      });
-      setMembershipGuideSettings((prev) => ({
-        ...prev,
-        guideDocxFileUrl: uploaded.fileUrl,
-        guideDocxFileName: file.name.replace(/\.[^/.]+$/, ''),
-      }));
-      await notify.success('DOCX 已上傳，請記得按下方「儲存設定」');
-    } catch (error) {
-      console.error('Failed to upload guide DOCX:', error);
-      await notify.error('上傳 DOCX 失敗');
-    } finally {
-      setIsUploadingDocx(false);
-    }
-  };
-
-  const handleSaveMembershipGuide = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    try {
-      await settingsApi.updateMembershipGuideSettings(membershipGuideSettings);
-      await notify.success('會員申請須知設定已儲存');
-    } catch (error) {
-      console.error('Failed to save membership guide settings:', error);
-      await notify.error('儲存會員申請須知設定失敗');
     } finally {
       setIsSaving(false);
     }
@@ -1040,173 +909,7 @@ export const SystemConfigPage = () => {
         </form>
       )}
 
-      {/* Site Counter Settings */}
-      {activeTab === 'siteCounter' && (
-        <form onSubmit={handleSaveSiteCounter}>
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              <h3 className="card-title">網站計數器</h3>
-              <p className="text-sm text-base-content/60 mb-4">
-                管理網站訪客數與頁面瀏覽數統計
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">
-                      總訪客數 <span className="text-error">*</span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    className="input input-bordered"
-                    min="0"
-                    value={siteCounter.totalVisitors}
-                    onChange={(e) =>
-                      setSiteCounter({ ...siteCounter, totalVisitors: parseInt(e.target.value) || 0 })
-                    }
-                    required
-                  />
-                  <label className="label">
-                    <span className="label-text-alt">不重複訪客總數</span>
-                  </label>
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">
-                      總瀏覽數 <span className="text-error">*</span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    className="input input-bordered"
-                    min="0"
-                    value={siteCounter.totalPageViews}
-                    onChange={(e) =>
-                      setSiteCounter({ ...siteCounter, totalPageViews: parseInt(e.target.value) || 0 })
-                    }
-                    required
-                  />
-                  <label className="label">
-                    <span className="label-text-alt">頁面瀏覽總數</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="alert alert-info mt-4">
-                <span className="iconify lucide--info size-5" />
-                <div>
-                  <p className="font-medium">計數器說明</p>
-                  <ul className="text-sm list-disc list-inside mt-1">
-                    <li>訪客數：記錄不重複的網站訪客數量</li>
-                    <li>瀏覽數：記錄所有頁面的瀏覽次數總和</li>
-                    <li>前台透過 API 自動記錄訪問</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end mt-6">
-            <button type="submit" className="btn btn-success" disabled={isSaving}>
-              {isSaving ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                <>
-                  <span className="iconify lucide--save size-5" />
-                  儲存設定
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Site Statistics Settings */}
-      {activeTab === 'siteStatistics' && (
-        <form onSubmit={handleSaveSiteStatistics}>
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              <h3 className="card-title">網站統計數據</h3>
-              <p className="text-sm text-base-content/60 mb-4">
-                手動設定顯示於前台的統計數據
-              </p>
-              <div className="alert alert-info mb-4">
-                <span className="iconify lucide--users size-5" />
-                <div>
-                  <p className="font-medium">會員總數（系統自動計算）</p>
-                  <p className="text-sm mt-1">
-                    目前共 <strong>{realTotalMembers.toLocaleString()}</strong> 位會員，此數據由系統自動統計，無需手動設定。
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">
-                      媒合成功案例 <span className="text-error">*</span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    className="input input-bordered"
-                    min="0"
-                    value={siteStatistics.successfulMatches}
-                    onChange={(e) =>
-                      setSiteStatistics({ ...siteStatistics, successfulMatches: parseInt(e.target.value) || 0 })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">
-                      媒合補助申請案次 <span className="text-error">*</span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    className="input input-bordered"
-                    min="0"
-                    value={siteStatistics.subsidyApplications}
-                    onChange={(e) =>
-                      setSiteStatistics({ ...siteStatistics, subsidyApplications: parseInt(e.target.value) || 0 })
-                    }
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="alert alert-info mt-4">
-                <span className="iconify lucide--info size-5" />
-                <div>
-                  <p className="font-medium">統計數據說明</p>
-                  <p className="text-sm mt-1">
-                    這些數據將顯示在前台網站，供訪客參考。數據由管理員手動維護更新。
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end mt-6">
-            <button type="submit" className="btn btn-success" disabled={isSaving}>
-              {isSaving ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                <>
-                  <span className="iconify lucide--save size-5" />
-                  儲存設定
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Content Settings */}
+      {/* 內容設定 */}
       {activeTab === 'content' && (
         <form onSubmit={handleSaveContent}>
           <div className="card bg-base-100 shadow">
@@ -1355,151 +1058,6 @@ export const SystemConfigPage = () => {
                 <label className="label">
                   <span className="label-text-alt">預設 70。需求的標籤有多少比例也出現在供應業者的標籤裡，達到此比例才會預設通知。</span>
                 </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end mt-6">
-            <button type="submit" className="btn btn-success" disabled={isSaving}>
-              {isSaving ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                <>
-                  <span className="iconify lucide--save size-5" />
-                  儲存設定
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Membership Guide Settings */}
-      {activeTab === 'membershipGuide' && (
-        <form onSubmit={handleSaveMembershipGuide}>
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              <h3 className="card-title">
-                <span className="iconify lucide--file-text size-5" />
-                會員申請須知
-              </h3>
-              <p className="text-sm text-base-content/60 mb-4">
-                上傳前台會員申請流程第一步顯示的須知文件，供申請人下載閱讀
-              </p>
-
-              <div className="space-y-6">
-                {/* PDF 申請須知 */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">
-                      石化產業智慧化媒合與應用服務申請須知（PDF）
-                    </span>
-                  </label>
-
-                  {membershipGuideSettings.guidePdfFileUrl && (
-                    <div className="flex items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 mb-2">
-                      <span className="iconify lucide--file-text size-5 text-red-600 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {membershipGuideSettings.guidePdfFileName || '已上傳的 PDF'}
-                        </p>
-                        <p className="text-xs text-base-content/50 truncate">
-                          {membershipGuideSettings.guidePdfFileUrl}
-                        </p>
-                      </div>
-                      <a
-                        href={membershipGuideSettings.guidePdfFileUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-ghost btn-xs"
-                      >
-                        預覽
-                      </a>
-                    </div>
-                  )}
-
-                  <input
-                    type="file"
-                    accept="application/pdf"
-                    className="file-input file-input-bordered"
-                    disabled={isUploadingPdf}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void handleUploadGuidePdf(file);
-                      e.target.value = '';
-                    }}
-                  />
-                  {isUploadingPdf && (
-                    <label className="label">
-                      <span className="label-text-alt flex items-center gap-2">
-                        <span className="loading loading-spinner loading-xs" />
-                        上傳中…
-                      </span>
-                    </label>
-                  )}
-                </div>
-
-                <div className="divider my-2" />
-
-                {/* DOCX 申請須知附件 */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">可編輯申請須知附件（DOCX）</span>
-                  </label>
-
-                  {membershipGuideSettings.guideDocxFileUrl && (
-                    <div className="flex items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 mb-2">
-                      <span className="iconify lucide--file-text size-5 text-blue-600 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {membershipGuideSettings.guideDocxFileName || '已上傳的 DOCX'}
-                        </p>
-                        <p className="text-xs text-base-content/50 truncate">
-                          {membershipGuideSettings.guideDocxFileUrl}
-                        </p>
-                      </div>
-                      <a
-                        href={membershipGuideSettings.guideDocxFileUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-ghost btn-xs"
-                      >
-                        預覽
-                      </a>
-                    </div>
-                  )}
-
-                  <input
-                    type="file"
-                    accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    className="file-input file-input-bordered"
-                    disabled={isUploadingDocx}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void handleUploadGuideDocx(file);
-                      e.target.value = '';
-                    }}
-                  />
-                  {isUploadingDocx && (
-                    <label className="label">
-                      <span className="label-text-alt flex items-center gap-2">
-                        <span className="loading loading-spinner loading-xs" />
-                        上傳中…
-                      </span>
-                    </label>
-                  )}
-                </div>
-              </div>
-
-              <div className="alert alert-info mt-4">
-                <span className="iconify lucide--info size-5" />
-                <div>
-                  <p className="font-medium">說明</p>
-                  <p className="text-sm mt-1">
-                    上傳新檔案後，記得按下方「儲存設定」才會套用到前台會員申請頁面。
-                    對應前台位置：註冊申請流程第一步（Step1）。
-                  </p>
-                </div>
               </div>
             </div>
           </div>
