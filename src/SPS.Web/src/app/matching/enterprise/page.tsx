@@ -5,8 +5,9 @@ import MatchingSubNav from "@/components/matching/MatchingSubNav";
 import MatchingSearchBar from "@/components/matching/MatchingSearchBar";
 import EnterpriseCard from "@/components/matching/EnterpriseCard";
 import Pagination from "@/components/ui/Pagination";
-import { fetchCompaniesPage, fetchTagTaxonomy } from "@/lib/api.server";
+import { fetchBanners, fetchCompaniesPage, fetchTagTaxonomy } from "@/lib/api.server";
 import { parseTagIds, techGroupLabels } from "@/lib/company-tags";
+import EnterpriseBottomBanner from "@/components/matching/EnterpriseBottomBanner";
 import { withBasePath } from "@/lib/api-client";
 
 export const metadata: Metadata = {
@@ -22,6 +23,8 @@ const ENTERPRISE_PAGE_SIZE = 8;
  * 關鍵字搜尋（`?q=`）交給後端比對企業名稱／編號。搜尋列的應用情境／應用範疇／智慧技術三個勾選面板，
  * 企業目前沒有對應欄位，仍然只是畫面互動。
  *
+ * 列表下方的橫幅（設計稿 2026-10-14 從「我要媒合」首頁搬過來）原本寫死，2026-10-21 起改由後台「橫幅管理」的 `enterprise-bottom` 版位維護（issue #55）。
+ *
  * 沒有側欄分類（`side1`）、沒有右欄廣告（`side2`）——設計稿這兩塊都是 `d-none`，
  * 所以 `InnerPageShell` 沒給 `sidebar`／`aside`，讓 `.content` 自動撐滿。
  */
@@ -32,9 +35,10 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
   const requestedPage = typeof rawPage === "string" ? Number(rawPage) : 1;
   const page = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.floor(requestedPage) : 1;
 
-  const [taxonomy, result] = await Promise.all([
+  const [taxonomy, result, bottomBanners] = await Promise.all([
     fetchTagTaxonomy(),
     fetchCompaniesPage({ page, pageSize: ENTERPRISE_PAGE_SIZE, search: query, tagIds }),
+    fetchBanners("enterprise-bottom"),
   ]);
   const totalPages = Math.max(1, Math.ceil(result.totalCount / ENTERPRISE_PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -82,14 +86,8 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
           }}
         />
 
-        {/* 2026-10-14 設計稿：這張橫幅從「我要媒合」首頁搬到企業名錄頁 */}
-        <div className="publish_banner mt-md-5 mt-4 mb-4">
-          <a href="#" className="video-card" title="石化產業智慧轉型——從數據到決策（另開視窗）" target="_blank" rel="noopener noreferrer">
-            <div className="pic">
-              <img className="img-fluid d-block" src={withBasePath("/images/banner/b1.jpg")} alt="石化產業智慧轉型——從數據到決策" />
-            </div>
-          </a>
-        </div>
+        {/* 列表下方的橫幅：後台「橫幅管理 → 企業名錄底部橫幅」維護（issue #55），沒有上架中的 Banner 就不顯示 */}
+        <EnterpriseBottomBanner banners={bottomBanners} />
       </InnerPageShell>
     </>
   );
