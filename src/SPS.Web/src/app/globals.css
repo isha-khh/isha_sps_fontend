@@ -457,3 +457,20 @@
     bottom: -36px;
   }
 }
+
+/* 網站導覽的分組標題（沒有頁面、不是連結，issue #58）：跟 style.css 裡 `ul.unit_links > li > a` 的外觀一樣 */
+.sitemap_box .sitmp_fx .unit_col ul.unit_links > li > .unit_label {
+  position: relative;
+  display: block;
+  padding: 5px 0 5px 14px;
+}
+
+.sitemap_box .sitmp_fx .unit_col ul.unit_links > li > .unit_label::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0052cc;
+  font-size: 1rem;
+}

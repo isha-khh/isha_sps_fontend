@@ -43,10 +43,10 @@ const SITE_UNIT_GROUPS: SiteUnitGroup[] = [
   },
 ];
 
+// 這四個是分組標題（沒有自己的頁面），只有子項目是連結
 const SERVICE_LINKS = [
   {
     label: "技術工具",
-    href: "/serve",
     children: [
       { label: "產業AI", href: "/serve?category=%E7%94%A2%E6%A5%ADAI" },
       { label: "技術文件", href: "/serve?category=%E6%8A%80%E8%A1%93%E6%96%87%E4%BB%B6" },
@@ -54,7 +54,6 @@ const SERVICE_LINKS = [
   },
   {
     label: "人才培育",
-    href: "/talent",
     children: [
       { label: "知識加值", href: "/talent" },
       { label: "XR", href: "/talent/xr" },
@@ -62,12 +61,10 @@ const SERVICE_LINKS = [
   },
   {
     label: "產業輔導",
-    href: "/tutoring",
     children: [{ label: "輔導", href: "/tutoring" }],
   },
   {
     label: "補助資源",
-    href: "/support",
     children: [
       { label: "本計畫補助", href: "/support" },
       { label: "政府補助資源", href: "/support/resources" },
@@ -220,9 +217,8 @@ export default async function SitemapPage() {
                   <ul className="unit_links list-unstyled">
                     {SERVICE_LINKS.map((group) => (
                       <li key={group.label}>
-                        <a href={withBasePath(group.href)} title={`前往 ${group.label}`}>
-                          {group.label}
-                        </a>
+                        {/* 「技術工具」「人才培育」等只是分組標題、沒有對應頁面（主選單裡也是不能點的），不做成連結（issue #58） */}
+                        <span className="unit_label">{group.label}</span>
                         <ul className="list-unstyled">
                           {group.children.map((child) => (
                             <li key={child.label}>
