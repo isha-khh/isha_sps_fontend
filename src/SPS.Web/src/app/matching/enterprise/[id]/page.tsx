@@ -59,7 +59,7 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
   const phoneDial = company.phone ? company.phone.split("#")[0].replace(/[^0-9+]/g, "") : "";
 
   // 六格資訊：沒有資料的格子整格不顯示
-  const facts: { icon: string; label: string; content: React.ReactNode }[] = [];
+  const facts: { icon: string; label: string; content: React.ReactNode; cell?: React.ReactNode }[] = [];
   if (company.charge) facts.push({ icon: "bi-person-circle", label: "公司負責人", content: <span>{company.charge}</span> });
   if (company.establishmentDate) facts.push({ icon: "bi-calendar4-week", label: "成立日期", content: <span>{company.establishmentDate.slice(0, 10)}</span> });
   facts.push({ icon: "bi-person-vcard", label: "統一編號", content: <span>{company.unifiedSocialCreditCode}</span> });
@@ -85,10 +85,12 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
       </a>
     ),
   });
+  // 「我的最愛」整格由 FavoriteButton 自己畫：個人會員不能用，整格不顯示（不會留下只有標題的空框）
   facts.push({
     icon: "bi-heart",
     label: "我的最愛",
-    content: <FavoriteButton kind="company" id={company.id} />,
+    content: null,
+    cell: <FavoriteButton key="favorite" kind="company" id={company.id} fact={{ icon: "bi-heart", label: "我的最愛" }} />,
   });
   facts.push({
     icon: "bi-globe",
@@ -134,19 +136,23 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
           </div>
 
           <div className="item_box_six d-flex">
-            {facts.map((fact) => (
-              <div className="item_box_six_1" key={fact.label}>
-                <div className="pic">
-                  <i className={`bi ${fact.icon}`}></i>
-                </div>
-                <div className="tit">
-                  <div className="tit_dt">
-                    <label>{fact.label}</label>
-                    {fact.content}
+            {facts.map((fact) =>
+              fact.cell ? (
+                fact.cell
+              ) : (
+                <div className="item_box_six_1" key={fact.label}>
+                  <div className="pic">
+                    <i className={`bi ${fact.icon}`}></i>
+                  </div>
+                  <div className="tit">
+                    <div className="tit_dt">
+                      <label>{fact.label}</label>
+                      {fact.content}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </div>
 
