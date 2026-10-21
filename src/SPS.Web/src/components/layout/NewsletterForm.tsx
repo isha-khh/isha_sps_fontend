@@ -1,21 +1,22 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { InquiryType, submitInquiry } from "@/lib/api/inquiries";
+
+/** Newsleopard（電子報服務）的訂閱表單端點；送出後由 Newsleopard 寄驗證信，點信件連結才算完成訂閱 */
+const NEWSLEOPARD_SUBSCRIBE_URL = "https://api-backend.app.newsleopard.com/api/contacts/subscribe/4028985e972b1435019733375b860449/verify";
 
 /**
- * 頁尾「訂閱電子報」，原本是 `Footer`（伺服器元件）裡純展示的標記，2026-10-06 抽成 client 元件接上真後端：
- * 送出呼叫 `POST /api/Inquiry`（種類＝電子報，匿名也可以），存進後台「詢問單」收件匣，承辦單位依名單寄送。
- * 頁尾文案已說明「訂閱即表示同意蒐集電子郵件」，所以送出時視為已同意個資告知。
+ * 頁尾「訂閱電子報」，原本是 `Footer`（伺服器元件）裡純展示的標記，2026-10-06 抽成 client 元件。
+ * 2026-10-21 起訂閱直接送到 Newsleopard（電子報寄送服務，嵌入碼的 form POST 改成 fetch），不再存進後台「詢問單」；
+ * 「產業代碼」欄位已取消，只收電子郵件。Newsleopard 會寄驗證信給訂閱者，點信件連結才完成訂閱。
+ * 頁尾文案已說明「訂閱即表示同意蒐集電子郵件」。
  *
- * 版面是 `.footer_right` 固定的一列（下拉＋信箱＋按鈕），沒有多餘空間放訊息：錯誤用瀏覽器原生的驗證提示泡泡
- * （`setCustomValidity` + `reportValidity`）顯示，成功則把按鈕暫時改成「已訂閱」。
- * 「產業代碼」下拉的選項沿用後台「產業輔導 → 產業別」清單（由 `Footer` 傳進來，issue #43；設計稿沒有給代碼表）；
- * 有選才會送，存成詢問單的「產業」欄位。
+ * 版面是 `.footer_right` 固定的一列（信箱＋按鈕），沒有多餘空間放訊息：錯誤用瀏覽器原生的驗證提示泡泡
+ * （`setCustomValidity` + `reportValidity`）顯示，成功則把按鈕暫時改成「請收驗證信」。
+ * 要換電子報帳號／表單時改 `NEWSLEOPARD_SUBSCRIBE_URL`（CSP 的 `connect-src` 在 `src/proxy.ts`，換網域要一起改）。
  */
-export default function NewsletterForm({ industries = [] }: { industries?: string[] }) {
+export default function NewsletterForm() {
   const [email, setEmail] = useState("");
-  const [industry, setIndustry] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
   const emailRef = useRef<HTMLInputElement>(null);
 
@@ -33,35 +34,25 @@ export default function NewsletterForm({ industries = [] }: { industries?: strin
     if (!input?.checkValidity() || !email.trim()) return showError("請輸入有效的電子郵件信箱");
 
     setState("sending");
-    const message = await submitInquiry({
-      type: InquiryType.Newsletter,
-      email: email.trim(),
-      industry: industry || undefined,
-      consentAccepted: true,
-    });
-    if (message) {
+    try {
+      const response = await fetch(NEWSLEOPARD_SUBSCRIBE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `email=${encodeURIComponent(email.trim())}`,
+      });
+      if (!response.ok) throw new Error(String(response.status));
+    } catch {
       setState("idle");
-      return showError(message);
+      return showError("暫時無法接受訂閱，請稍候重新嘗試");
     }
     setEmail("");
     setState("done");
-    window.setTimeout(() => setState("idle"), 4000);
+    window.setTimeout(() => setState("idle"), 6000);
   }
 
   return (
     <div className="footer_right d-flex">
-      <div className="form-group mb-md-0">
-        <select className="form-select" aria-label="請選擇產業代碼" value={industry} onChange={(event) => setIndustry(event.target.value)}>
-          <option value="">請選擇產業代碼</option>
-          {industries.map((name) => (
-            <option value={name} key={name}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="input-group mt-2 mt-md-0">
+      <div className="input-group">
         <input
           ref={emailRef}
           type="email"
@@ -85,7 +76,7 @@ export default function NewsletterForm({ industries = [] }: { industries?: strin
         />
       </div>
       <button type="button" className="btn_a" title="送出訂閱電子報" disabled={state === "sending"} onClick={() => void submit()}>
-        {state === "sending" ? "送出中…" : state === "done" ? "已訂閱" : "立即訂閱"}
+        {state === "sending" ? "送出中…" : state === "done" ? "請收驗證信" : "立即訂閱"}
       </button>
     </div>
   );
