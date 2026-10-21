@@ -6,6 +6,7 @@ import MatchingSearchBar from "@/components/matching/MatchingSearchBar";
 import EnterpriseCard from "@/components/matching/EnterpriseCard";
 import Pagination from "@/components/ui/Pagination";
 import { fetchBanners, fetchCompaniesPage, fetchTagTaxonomy } from "@/lib/api.server";
+import { getContentSettingsSSR } from "@/lib/api/public-settings";
 import { parseTagIds, techGroupLabels } from "@/lib/company-tags";
 import EnterpriseBottomBanner from "@/components/matching/EnterpriseBottomBanner";
 import { withBasePath } from "@/lib/api-client";
@@ -35,11 +36,18 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
   const requestedPage = typeof rawPage === "string" ? Number(rawPage) : 1;
   const page = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.floor(requestedPage) : 1;
 
-  const [taxonomy, result, bottomBanners] = await Promise.all([
+  const [taxonomy, result, bottomBanners, contentSettings] = await Promise.all([
     fetchTagTaxonomy(),
     fetchCompaniesPage({ page, pageSize: ENTERPRISE_PAGE_SIZE, search: query, tagIds }),
     fetchBanners("enterprise-bottom"),
+    // 後台「系統配置 → 內容設定」：企業列表要不要顯示標籤、簡介與簡介最多幾個字
+    getContentSettingsSSR(),
   ]);
+  const introduction = (text?: string | null) => {
+    if (!contentSettings.showBusinessListIntroduction || !text) return "";
+    const max = contentSettings.businessListIntroductionMaxLength;
+    return max > 0 && text.length > max ? `${text.slice(0, max)}…` : text;
+  };
   const totalPages = Math.max(1, Math.ceil(result.totalCount / ENTERPRISE_PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const pagedListings = result.items;
@@ -68,9 +76,9 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
                 href: `/matching/enterprise/${company.id}`,
                 image: company.photo || withBasePath("/images/all/new_logo.jpg"),
                 title: company.name,
-                description: company.introduction ?? "",
+                description: introduction(company.introduction),
                 // 卡片只顯示智慧技術的第一層大類（issue #34）；沒有標籤 id 的舊資料退回顯示全部標籤名稱
-                keywords: company.tagIds ? techGroupLabels(company.tagIds, taxonomy) : company.tagNames,
+                keywords: !contentSettings.showBusinessListTags ? [] : company.tagIds ? techGroupLabels(company.tagIds, taxonomy) : company.tagNames,
               }}
             />
           ))}

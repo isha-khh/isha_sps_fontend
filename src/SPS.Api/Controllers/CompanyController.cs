@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using SPS.Application.DTOs.Company;
+using SPS.Application.DTOs.SystemSettings;
 using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.File;
 using SPS.Application.Interfaces.IServices;
@@ -25,6 +26,7 @@ public class CompanyController : ControllerBase
     private readonly ILogger<CompanyController> _logger;
     private readonly CompanyShowcaseHelper _showcase;
     private readonly IMemoryCache _cache;
+    private readonly ISystemSettingService _settingService;
 
     private const int ContactRequestsPerHour = 30;
 
@@ -32,12 +34,14 @@ public class CompanyController : ControllerBase
         ICompanyService companyService,
         ILogger<CompanyController> logger,
         CompanyShowcaseHelper showcase,
-        IMemoryCache cache)
+        IMemoryCache cache,
+        ISystemSettingService settingService)
     {
         _companyService = companyService;
         _logger = logger;
         _showcase = showcase;
         _cache = cache;
+        _settingService = settingService;
     }
 
     /// <summary>
@@ -87,6 +91,17 @@ public class CompanyController : ControllerBase
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting company by ID: {CompanyId}", id);
+
+        // 後台「系統配置 → 內容設定」關掉「訪客可查看企業名錄詳情」時，沒登入的訪客一律回 401（前台顯示登入提示）；
+        // 登入的會員與後台使用者不受影響。設定讀不到或沒設定過，預設訪客可以看
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            var contentSettings = await _settingService.GetSettingAsync<ContentSettingsDto>("Content");
+            if (contentSettings.IsSuccess && contentSettings.Data is { GuestCanViewBusinessDetail: false })
+            {
+                return Unauthorized(new { error = "請先登入會員，才能查看企業詳細資料" });
+            }
+        }
 
         var result = await _companyService.GetByIdAsync(id, cancellationToken);
 

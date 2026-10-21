@@ -397,7 +397,18 @@ export async function fetchDemandsPage(options: {
  * 這裡回 null（呼叫端轉成 404 頁）。負責人、窗口等內部欄位後端對匿名呼叫已清掉。
  */
 export async function fetchCompanyDetail(id: string): Promise<PublicCompanyDetail | null> {
+    return (await fetchCompanyDetailResult(id)).company;
+}
+
+/**
+ * 同 `fetchCompanyDetail`，另外分辨「需要登入」：後台「系統配置 → 內容設定」關掉「訪客可查看企業名錄詳情」時，
+ * 後端對沒登入的訪客回 401，`loginRequired` 就是 `true`（呼叫端顯示登入提示頁）。
+ * Server Component 打後端時瀏覽器的 cookie 不會自動帶，所以要把會員的 `accessToken` 手動轉傳（跟 `fetchDemandDetail` 一樣）。
+ */
+export async function fetchCompanyDetailResult(id: string): Promise<{ company: PublicCompanyDetail | null; loginRequired: boolean }> {
     try {
+        const token = (await cookies()).get("accessToken");
+        const cookieHeader = token ? { Cookie: `${token.name}=${token.value}` } : undefined;
         const response = await apiClient.get<{
             id: string; number: string; name: string; unifiedSocialCreditCode: string; phone?: string | null;
             type: number; employees?: number | null; subject?: string | null; introduction?: string | null;
@@ -407,19 +418,24 @@ export async function fetchCompanyDetail(id: string): Promise<PublicCompanyDetai
             cooperationNote?: string | null;
             productImages?: { url: string }[];
             awardImages?: { url: string }[];
-        }>(`/api/Company/${id}`);
+        }>(`/api/Company/${id}`, {
+            headers: cookieHeader,
+            // 401＝需要登入。讓 axios 把它當成一般回應，才不會觸發共用 apiClient 的「401 就刷新 token／導去登入頁」攔截器（那是給瀏覽器端用的）
+            validateStatus: (status) => (status >= 200 && status < 300) || status === 401,
+        });
+        if (response.status === 401) return { company: null, loginRequired: true };
         const c = response.data;
         let tagIds: number[] = [];
         let tagNames: string[] = [];
         try {
-            const tags = await apiClient.get<{ tagIds?: number[]; tagNames?: string[] }>(`/api/Company/${id}/tags`);
+            const tags = await apiClient.get<{ tagIds?: number[]; tagNames?: string[] }>(`/api/Company/${id}/tags`, { headers: cookieHeader });
             tagIds = tags.data.tagIds ?? [];
             tagNames = tags.data.tagNames ?? [];
         } catch {
             // 標籤載不到不影響詳情頁
         }
         const address = [c.address?.region, c.address?.city, c.address?.district, c.address?.line].filter(Boolean).join("");
-        return {
+        const company: PublicCompanyDetail = {
             id: c.id, number: c.number, name: c.name, unifiedSocialCreditCode: c.unifiedSocialCreditCode, phone: c.phone,
             type: c.type, employees: c.employees, subject: c.subject, introduction: c.introduction, orgUrl: c.orgUrl,
             establishmentDate: c.establishmentDate, charge: c.charge, chargePhone: c.chargePhone,
@@ -431,8 +447,9 @@ export async function fetchCompanyDetail(id: string): Promise<PublicCompanyDetai
             tagIds,
             tagNames,
         };
+        return { company, loginRequired: false };
     } catch {
-        return null;
+        return { company: null, loginRequired: false };
     }
 }
 

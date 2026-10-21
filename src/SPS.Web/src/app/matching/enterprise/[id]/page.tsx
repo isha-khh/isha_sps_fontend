@@ -7,15 +7,15 @@ import EnterpriseContactModal from "@/components/matching/EnterpriseContactModal
 import FavoriteButton from "@/components/matching/FavoriteButton";
 import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
 import { getCompanyTypeLabels } from "@/lib/matching-data";
-import { fetchCompanyDetail, fetchTagTaxonomy } from "@/lib/api.server";
+import { fetchCompanyDetailResult, fetchTagTaxonomy } from "@/lib/api.server";
 import { splitTagsByKind } from "@/lib/company-tags";
 import Link from "next/link";
 import { withBasePath } from "@/lib/api-client";
 
 export async function generateMetadata({ params }: PageProps<"/matching/enterprise/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const company = await fetchCompanyDetail(id);
-  return { title: company?.name ?? "找不到頁面" };
+  const { company, loginRequired } = await fetchCompanyDetailResult(id);
+  return { title: company?.name ?? (loginRequired ? "企業名錄" : "找不到頁面") };
 }
 
 /**
@@ -32,7 +32,25 @@ export async function generateMetadata({ params }: PageProps<"/matching/enterpri
  */
 export default async function MatchingEnterpriseDetailPage({ params }: PageProps<"/matching/enterprise/[id]">) {
   const { id } = await params;
-  const company = await fetchCompanyDetail(id);
+  const { company, loginRequired } = await fetchCompanyDetailResult(id);
+
+  // 後台「系統配置 → 內容設定」關掉「訪客可查看企業名錄詳情」，訪客看到登入提示（後端對沒登入的訪客回 401）
+  if (loginRequired) {
+    return (
+      <>
+        <BodyClass className="matching enterprise show" />
+        <InnerPageShell breadcrumb={[{ label: "我要媒合", href: "/matching/enterprise" }, { label: "企業名錄", href: "/matching/enterprise" }, { label: "企業詳細資料" }]}>
+          <div className="text-center py-5">
+            <p className="mb-4">企業詳細資料需要登入會員才能查看。</p>
+            <Link href="/member/login" className="more_x d-inline-flex" title="前往登入">
+              <span>前往登入</span>
+            </Link>
+          </div>
+          <MoreLink href="/matching/enterprise" label="返回" title="返回" />
+        </InnerPageShell>
+      </>
+    );
+  }
 
   if (!company) {
     notFound();
