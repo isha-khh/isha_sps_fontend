@@ -2,8 +2,8 @@ import SectionTitle from "@/components/ui/SectionTitle";
 import Tabs from "@/components/ui/Tabs";
 import MoreLink from "@/components/ui/MoreLink";
 import NewsItemCard, { type NewsItemCardData } from "@/components/news/NewsItemCard";
-import { fetchNews } from "@/lib/api.server";
-import { NEWS_ARTICLES, deriveNewsCategories } from "@/lib/news-data";
+import { fetchNews, fetchPublishedNewsCategories, type PublishedNewsCategory } from "@/lib/api.server";
+import { NEWS_ARTICLES, deriveNewsCategories, filterPublishedNewsCategories } from "@/lib/news-data";
 import type { NewsItem } from "@/lib/types";
 import { withBasePath } from "@/lib/api-client";
 
@@ -60,11 +60,12 @@ function NewsPanel({ items, moreHref, moreLabel }: { items: NewsItemCardData[]; 
  * ——後端連不到而退回假資料時，畫面就會看起來像「分類沒套用後端」，
  * 其實是兩份假資料/分類名稱各自維護、忘了同步的問題，不是真的沒接。
  */
-function buildNewsTabs(items: NewsItem[]) {
+function buildNewsTabs(items: NewsItem[], published: PublishedNewsCategory[] | null) {
   const byDateDesc = items
     .slice()
     .sort((a, b) => (a.startDate ?? a.createdTime) < (b.startDate ?? b.createdTime) ? 1 : -1);
-  const categories = deriveNewsCategories(items);
+  // 後台「公告類別」停用的分類不顯示頁籤（issue #57）
+  const categories = filterPublishedNewsCategories(deriveNewsCategories(items), published);
 
   return [
     {
@@ -105,9 +106,9 @@ function buildNewsTabs(items: NewsItem[]) {
  * 還是照樣導去 `/news`），不套用假資料掩蓋。
  */
 export default async function HomeNews() {
-  const { items: backendItems, backendAvailable } = await fetchNews();
+  const [{ items: backendItems, backendAvailable }, published] = await Promise.all([fetchNews(), fetchPublishedNewsCategories()]);
   const items = backendAvailable ? backendItems : NEWS_ARTICLES;
-  const tabs = buildNewsTabs(items);
+  const tabs = buildNewsTabs(items, backendAvailable ? published : null);
 
   return (
     <div className="home_news">

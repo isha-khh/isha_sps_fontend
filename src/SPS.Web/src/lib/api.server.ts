@@ -669,6 +669,25 @@ export type NewsSectionId = (typeof NewsSections)[keyof typeof NewsSections];
 /** 後端 `CategoryType`：服務專區 9、產業輔導的產業別 10、補助資源分類 11 */
 export const SectionCategoryTypes = { Serve: 9, Tutoring: 10, SupportResource: 11, SupportResourceIndustry: 12 } as const;
 
+/** 後台「公告類別」中「啟用」的公告分類（依後台排序）。`ordinal` 給前台頁籤排序用 */
+export type PublishedNewsCategory = { id: number; name: string; ordinal: number; parentId?: number | null };
+
+/**
+ * 公告分類（`CategoryType.News` = 1）裡後台設為「啟用」的，依排序。快取 60 秒（主選單每個頁面都要用）。
+ * 回傳 `null`＝後端連不到：呼叫端要退回原本的行為（不依啟用狀態過濾），不要因為後端一時連不到就讓分類全部消失。
+ */
+export async function fetchPublishedNewsCategories(): Promise<PublishedNewsCategory[] | null> {
+    try {
+        const data = await getBackendJson<{ id: number; name?: string | null; published: boolean; ordinal: number; parentId?: number | null }[]>("/api/Category/type/1", 60);
+        return (data ?? [])
+            .filter((c) => c.published && c.name)
+            .map((c) => ({ id: c.id, name: c.name as string, ordinal: c.ordinal, ...(c.parentId ? { parentId: c.parentId } : {}) }))
+            .sort((a, b) => a.ordinal - b.ordinal || a.id - b.id);
+    } catch {
+        return null;
+    }
+}
+
 /** 某個專區用的分類（後台維護），依排序回傳已發布的 */
 export async function fetchSectionCategories(categoryType: number): Promise<ServeCategory[]> {
     try {

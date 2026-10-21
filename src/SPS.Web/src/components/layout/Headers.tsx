@@ -8,7 +8,7 @@ import { authApi } from "@/lib/api/auth";
 import { INBOX_CHANGED_EVENT, memberNotificationsApi } from "@/lib/api/member-notifications";
 import { useAuthStore } from "@/store/auth-store";
 import HeaderSearch from "@/components/layout/HeaderSearch";
-import { useIndustryAiLink } from "@/components/SiteLinksProvider";
+import { useIndustryAiLink, useNewsNavCategories } from "@/components/SiteLinksProvider";
 import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
 
 /**
@@ -146,6 +146,8 @@ function MemberNavItem() {
 function NavLinks() {
   // 「產業AI」可在後台「頁面設定」改成外部連結（關閉時維持站內頁面）
   const industryAiTarget = resolveServeCategoryLink("產業AI", useIndustryAiLink());
+  // 「公告事項」下拉列的是後台「公告類別」中啟用的分類（issue #57）
+  const newsCategories = useNewsNavCategories();
   return (
     <>
       <li className="nav-item">
@@ -166,21 +168,13 @@ function NavLinks() {
           <span className="title-main">公告事項</span>
         </Link>
         <ul className="dropdown-menu">
-          <li className="hover_r_sider dropdown-submenu">
-            <Link className="dropdown-item dropdown-toggle" href="/news?category=活動資訊" title="活動資訊">
-              活動資訊
-            </Link>
-          </li>
-          <li className="hover_r_sider">
-            <Link className="dropdown-item" href="/news?category=產業新知" title="產業新知">
-              產業新知
-            </Link>
-          </li>
-          <li className="hover_r_sider">
-            <Link className="dropdown-item" href="/news?category=外部消息" title="外部消息">
-              外部消息
-            </Link>
-          </li>
+          {newsCategories.map((category) => (
+            <li className="hover_r_sider" key={category.id}>
+              <Link className="dropdown-item" href={`/news?category=${encodeURIComponent(category.name)}`} title={category.name}>
+                {category.name}
+              </Link>
+            </li>
+          ))}
         </ul>
       </li>
 

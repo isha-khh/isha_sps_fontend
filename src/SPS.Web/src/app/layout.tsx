@@ -5,7 +5,7 @@ import BootstrapModalRouteCleanup from "@/components/BootstrapModalRouteCleanup"
 import SiteVisitTracker from "@/components/SiteVisitTracker";
 import PopupAnnouncements from "@/components/PopupAnnouncements";
 import { SiteLinksProvider } from "@/components/SiteLinksProvider";
-import { fetchIndustryAiLink } from "@/lib/api.server";
+import { fetchIndustryAiLink, fetchPublishedNewsCategories } from "@/lib/api.server";
 import { notoSansTC } from "@/lib/fonts";
 import "./globals.css";
 import { withBasePath } from "@/lib/api-client";
@@ -104,7 +104,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // 靜態預先產生的頁面沒有請求標頭、沒有 nonce，所以整站要動態渲染。
   await connection();
   // 後台「頁面設定」的「產業AI」外部連結開關（取不到就是關閉）
-  const industryAi = await fetchIndustryAiLink();
+  const [industryAi, newsCategories] = await Promise.all([fetchIndustryAiLink(), fetchPublishedNewsCategories()]);
   return (
     <html lang="zh-tw" data-scroll-behavior="smooth" className={notoSansTC.variable}>
       <body>
@@ -115,7 +115,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SiteVisitTracker />
         <PopupAnnouncements />
 
-        <SiteLinksProvider industryAi={industryAi}>{children}</SiteLinksProvider>
+        <SiteLinksProvider industryAi={industryAi} newsCategories={newsCategories?.filter((c) => !c.parentId).map(({ id, name }) => ({ id, name })) ?? null}>{children}</SiteLinksProvider>
 
         {/* 舊站第三方套件，依照原本的載入順序保留，元件轉換完成後再逐步移除 */}
         <Script src={withBasePath("/js/jquery-3.7.1.min.js")} strategy="beforeInteractive" />

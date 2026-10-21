@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import InnerPageShell from "@/components/layout/InnerPageShell";
 import BodyClass from "@/components/BodyClass";
 import { withBasePath } from "@/lib/api-client";
-import { fetchIndustryAiLink } from "@/lib/api.server";
+import { fetchIndustryAiLink, fetchPublishedNewsCategories } from "@/lib/api.server";
 import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
 
 export const metadata: Metadata = {
@@ -34,6 +34,7 @@ const SITE_UNIT_GROUPS: SiteUnitGroup[] = [
   {
     icon: "bi-megaphone",
     title: "公告事項",
+    // 後台「公告類別」中啟用的分類（issue #57）；下面 `SitemapPage` 會換成實際清單，這裡是後端連不到時的預設
     links: [
       { label: "活動資訊", href: "/news?category=活動資訊" },
       { label: "產業新知", href: "/news?category=產業新知" },
@@ -48,7 +49,7 @@ const SERVICE_LINKS = [
     href: "/serve",
     children: [
       { label: "產業AI", href: "/serve?category=%E7%94%A2%E6%A5%ADAI" },
-      { label: "技術文件", href: "/serve" },
+      { label: "技術文件", href: "/serve?category=%E6%8A%80%E8%A1%93%E6%96%87%E4%BB%B6" },
     ],
   },
   {
@@ -76,7 +77,15 @@ const SERVICE_LINKS = [
 
 export default async function SitemapPage() {
   // 後台「頁面設定」開啟「產業AI」外部連結時，這裡的「產業AI」連到外部網址
-  const industryAi = resolveServeCategoryLink("產業AI", await fetchIndustryAiLink());
+  const [industryAiLink, newsCategories] = await Promise.all([fetchIndustryAiLink(), fetchPublishedNewsCategories()]);
+  const industryAi = resolveServeCategoryLink("產業AI", industryAiLink);
+  const siteUnitGroups = newsCategories
+    ? SITE_UNIT_GROUPS.map((group) =>
+        group.title === "公告事項"
+          ? { ...group, links: newsCategories.filter((c) => !c.parentId).map((c) => ({ label: c.name, href: `/news?category=${encodeURIComponent(c.name)}` })) }
+          : group,
+      )
+    : SITE_UNIT_GROUPS;
   return (
     <>
       <BodyClass className="sitemap" />
@@ -178,7 +187,7 @@ export default async function SitemapPage() {
           </h3>
           <div className="sitemap_card">
             <div className="sitmp_fx d-flex">
-              {SITE_UNIT_GROUPS.map((group) => (
+              {siteUnitGroups.map((group) => (
                 <div className="unit_col" key={group.title}>
                   <div className="unit_group">
                     <div className="group_header d-flex align-items-center">

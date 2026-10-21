@@ -40,6 +40,16 @@ export function deriveNewsCategories(items: NewsItem[]): NewsCategory[] {
 }
 
 /**
+ * 只留下後台「公告類別」設為啟用的分類，並照後台排序（issue #57：後台停用的分類前台頁籤不該還在）。
+ * `published` 是 `null`（後端連不到）就原樣回傳，不過濾。只隱藏分類頁籤，停用分類底下的文章仍照常顯示在「全部」列表。
+ */
+export function filterPublishedNewsCategories(categories: NewsCategory[], published: { id: number; ordinal: number }[] | null): NewsCategory[] {
+  if (!published) return categories;
+  const ordinal = new Map(published.map((c) => [c.id, c.ordinal]));
+  return categories.filter((c) => ordinal.has(c.id)).sort((a, b) => (ordinal.get(a.id) ?? 0) - (ordinal.get(b.id) ?? 0) || a.id - b.id);
+}
+
+/**
  * 公告假資料——後端無法連線或尚無資料時的退回內容。
  *
  * 形狀直接對到真後端的 `NewsItem`／`NewsDetail`（見 lib/types.ts）：

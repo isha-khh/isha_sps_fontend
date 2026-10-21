@@ -8,11 +8,12 @@ import SidebarBanner from "@/components/layout/SidebarBanner";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import NewsListCard from "@/components/news/NewsListCard";
-import { fetchBanners, fetchNews } from "@/lib/api.server";
+import { fetchBanners, fetchNews, fetchPublishedNewsCategories } from "@/lib/api.server";
 import { withBasePath } from "@/lib/api-client";
 import {
   NEWS_ARTICLES,
   deriveNewsCategories,
+  filterPublishedNewsCategories,
   getNewsActivityStatus,
   formatNewsDate,
   sortNewsByViewCount,
@@ -100,7 +101,8 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
   // 只有後端真的連不到/噴錯才退回假資料——搜尋剛好 0 筆是正常結果，
   // 不能也退回假資料（見上面的說明跟 fetchNews 的註解）
   const items = backendAvailable ? backendItems : NEWS_ARTICLES;
-  const categories = deriveNewsCategories(items);
+  // 後台「公告類別」停用的分類不顯示頁籤（issue #57）
+  const categories = filterPublishedNewsCategories(deriveNewsCategories(items), await fetchPublishedNewsCategories());
 
   // `?category=` 兩種寫法都接：分類 id（頁籤、分頁連結用）與分類名稱（導覽列「公告事項」下拉選單與網站導覽用，
   // 例如 `?category=活動資訊`）——原本只認 id，導覽列的連結點了沒有跳到那個分類（issue #29）
