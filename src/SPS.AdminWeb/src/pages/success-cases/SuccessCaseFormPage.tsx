@@ -3,6 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { PageTitle } from '@/components/PageTitle';
 import { successCasesApi } from '@/lib/api/success-cases';
 import { categoriesApi } from '@/lib/api/category';
+import { companiesApi } from '@/lib/api/companies';
+import { Status } from '@/types/company';
+import type { Company } from '@/types/company';
 import { PuckEditor } from '@/components/puck/PuckEditor';
 import { ImageUploadField } from '@/components/puck/ImageUploadField';
 import type { CreateSuccessCaseRequest } from '@/types/success-case';
@@ -30,7 +33,12 @@ export const SuccessCaseFormPage = () => {
     content: '',
     publishedDate: '',
     isPublished: false,
+    companyIds: [],
   });
+
+  // 關聯企業：平台上已審核通過且啟用的企業（前台案例頁的「公司簡介」區塊用）
+  const [companyOptions, setCompanyOptions] = useState<Company[]>([]);
+  const [companySearch, setCompanySearch] = useState('');
 
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
 
@@ -48,6 +56,11 @@ export const SuccessCaseFormPage = () => {
       }
     };
     fetchCategories();
+
+    companiesApi
+      .getCompanies(1, 200, { status: Status.Active, isVerified: true })
+      .then((result) => setCompanyOptions(result.items ?? []))
+      .catch((error) => console.error('Failed to fetch companies:', error));
   }, []);
 
   useEffect(() => {
@@ -69,6 +82,7 @@ export const SuccessCaseFormPage = () => {
         content: data.content,
         publishedDate: data.publishedDate || '',
         isPublished: data.isPublished,
+        companyIds: data.companyIds ?? [],
       });
       // 初始化 ref
       puckContentRef.current = data.content || '';
@@ -193,6 +207,62 @@ export const SuccessCaseFormPage = () => {
                       onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                       required
                     />
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">關聯企業</span>
+                      <span className="label-text-alt text-base-content/60">前台案例頁「公司簡介」顯示，可多選；沒選就不顯示</span>
+                    </label>
+                    {(formData.companyIds ?? []).length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {(formData.companyIds ?? []).map((companyId) => {
+                          const company = companyOptions.find((c) => c.id === companyId);
+                          return (
+                            <span key={companyId} className="badge badge-primary gap-1">
+                              {company?.name ?? '（已不在名單中的企業）'}
+                              <button
+                                type="button"
+                                aria-label={`移除 ${company?.name ?? '企業'}`}
+                                onClick={() => setFormData({ ...formData, companyIds: (formData.companyIds ?? []).filter((x) => x !== companyId) })}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <input
+                      type="search"
+                      placeholder="搜尋企業名稱…"
+                      className="input input-bordered input-sm mb-2"
+                      value={companySearch}
+                      onChange={(e) => setCompanySearch(e.target.value)}
+                    />
+                    <div className="max-h-44 overflow-y-auto rounded-lg border border-base-300 p-2">
+                      {companyOptions
+                        .filter((c) => !companySearch.trim() || c.name.toLowerCase().includes(companySearch.trim().toLowerCase()))
+                        .map((company) => (
+                          <label key={company.id} className="flex cursor-pointer items-center gap-2 py-1">
+                            <input
+                              type="checkbox"
+                              className="checkbox checkbox-sm"
+                              checked={(formData.companyIds ?? []).includes(company.id)}
+                              onChange={() =>
+                                setFormData({
+                                  ...formData,
+                                  companyIds: (formData.companyIds ?? []).includes(company.id)
+                                    ? (formData.companyIds ?? []).filter((x) => x !== company.id)
+                                    : [...(formData.companyIds ?? []), company.id],
+                                })
+                              }
+                            />
+                            <span className="text-sm">{company.name}</span>
+                          </label>
+                        ))}
+                      {companyOptions.length === 0 && <p className="text-sm text-base-content/60">沒有可選的企業（需已審核通過且啟用）</p>}
+                    </div>
                   </div>
 
                   <div className="form-control">

@@ -16,6 +16,7 @@ public class SuccessCaseDto
     public DateTime? PublishedDate { get; set; }
     public bool IsPublished { get; set; }
     public int ViewCount { get; set; }
+    public List<Guid> CompanyIds { get; set; } = new();
     public DateTime CreatedTime { get; set; }
     public DateTime UpdatedTime { get; set; }
 }

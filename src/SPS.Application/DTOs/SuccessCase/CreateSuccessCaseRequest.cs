@@ -61,4 +61,10 @@ public class CreateSuccessCaseRequest
     /// 是否已發布
     /// </summary>
     public bool IsPublished { get; set; }
+
+    /// <summary>
+    /// 關聯企業（平台上企業的 Id，依顯示順序）
+    /// </summary>
+    public List<Guid>? CompanyIds { get; set; }
+
 }

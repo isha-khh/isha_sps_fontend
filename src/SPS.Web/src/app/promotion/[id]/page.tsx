@@ -10,7 +10,9 @@ import PopularPosts from "@/components/layout/PopularPosts";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import NewsViewTracker from "@/components/news/NewsViewTracker";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
-import { fetchPromotionCases, fetchPromotionCaseDetail, fetchBanners } from "@/lib/api.server";
+import CaseCompanyIntro from "@/components/promotion/CaseCompanyIntro";
+import { fetchPromotionCases, fetchPromotionCaseDetail, fetchBanners, fetchCompanyDetail } from "@/lib/api.server";
+import type { PublicCompanyDetail } from "@/lib/types";
 import { formatIsoDate, sortByViewCount } from "@/lib/content-list-utils";
 import { INDUSTRY_CASES, PROMOTION_FALLBACK_IMAGE, getIndustryCase } from "@/lib/promotion-data";
 import { withBasePath } from "@/lib/api-client";
@@ -63,6 +65,9 @@ export default async function PromotionShowPage({ params }: PageProps<"/promotio
   if (!item) {
     notFound();
   }
+
+  // 後台案例編輯頁「關聯企業」選的平台企業（公司簡介區塊）；不是已審核啟用的企業查不到，就略過（issue #66）
+  const companies = (await Promise.all((item.companyIds ?? []).map((companyId) => fetchCompanyDetail(companyId)))).filter((c): c is PublicCompanyDetail => c !== null);
 
   const { items: backendItems, backendAvailable } = await fetchPromotionCases();
   const popularSource = backendAvailable ? backendItems : INDUSTRY_CASES;
@@ -132,6 +137,8 @@ export default async function PromotionShowPage({ params }: PageProps<"/promotio
           <ZoomableImage src={item.coverImageUrl || PROMOTION_FALLBACK_IMAGE} alt={item.title} caption={item.title} />
 
           <PuckRenderer content={item.content} />
+
+          <CaseCompanyIntro companies={companies} />
 
           <MoreLink href="/promotion" label="返回" title="返回" />
         </div>

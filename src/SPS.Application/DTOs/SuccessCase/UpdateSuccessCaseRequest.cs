@@ -59,4 +59,10 @@ public class UpdateSuccessCaseRequest
     /// 是否已發布
     /// </summary>
     public bool? IsPublished { get; set; }
+
+    /// <summary>
+    /// 關聯企業；沒帶（null）= 不動，帶空陣列 = 清空
+    /// </summary>
+    public List<Guid>? CompanyIds { get; set; }
+
 }

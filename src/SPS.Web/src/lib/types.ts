@@ -72,6 +72,8 @@ export type PromotionCase = {
     publishedDate: string | null;
     isPublished: boolean;
     viewCount: number;
+    /** 關聯企業（平台上的企業 Id，依顯示順序）：案例詳情頁的「公司簡介」區塊用 */
+    companyIds?: string[];
     createdTime: string;
 };
 

@@ -59,6 +59,12 @@ public class SuccessCase : BaseEntity<int>
     public int ViewCount { get; set; }
 
     /// <summary>
+    /// 關聯企業：平台上的企業（<c>Company.Id</c>，依顯示順序）。前台產業案例詳情頁的「公司簡介」區塊用這些企業的
+    /// 標誌、名稱、簡介、網址；只顯示已審核且啟用的企業。沒有選就不顯示公司簡介（issue #66）
+    /// </summary>
+    public List<Guid> CompanyIds { get; set; } = new();
+
+    /// <summary>
     /// 數據模式
     /// </summary>
     public DataMode DataMode { get; set; }
