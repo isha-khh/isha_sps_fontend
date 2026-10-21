@@ -50,7 +50,11 @@ export default async function FaqPage({ searchParams }: PageProps<"/faq">) {
     const index = categoryOrder.indexOf(id);
     return index === -1 ? Number.MAX_SAFE_INTEGER : index;
   };
-  const categories = deriveFaqCategories(items).sort((a, b) => rankOf(a.id) - rankOf(b.id));
+  // 側欄分類要看「全部題目」，不能被目前的搜尋結果限縮（issue #68：搜尋沒結果側欄整個消失、有結果只剩有命中的分類）；
+  // 沒搜尋時 `backendItems` 本來就是全部，不用多打一次 API
+  const allBackendItems = query ? (await fetchFaq()).items : backendItems;
+  const allItems = allBackendItems.length > 0 ? allBackendItems : FAQ_ITEMS;
+  const categories = deriveFaqCategories(allItems).sort((a, b) => rankOf(a.id) - rankOf(b.id));
 
   const requestedId = rawCategory ? Number(rawCategory) : NaN;
   const explicitCategory = categories.find((c) => c.id === requestedId);
