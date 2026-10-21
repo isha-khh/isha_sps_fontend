@@ -49,6 +49,12 @@ const headingGradient: CSSProperties = {
   color: "transparent",
 };
 
+/**
+ * 欄位有沒有內容。行內編輯欄位（`inlineText`／`inlineRich`）在後台編輯器裡是「可編輯的節點」、不是字串，
+ * 沒有 `trim` 等字串方法——直接 `title.trim()` 會讓編輯器在拖曳區塊時當掉（issue #64、#66）；只有字串才去掉空白判斷。
+ */
+const isFilled = (value: unknown): boolean => (typeof value === "string" ? value.trim() !== "" : Boolean(value));
+
 /** 只放行 http／https 與站內路徑，避免內容裡塞進 javascript: 之類的網址 */
 function safeUrl(url: unknown): string | undefined {
   if (typeof url !== "string") return undefined;
@@ -328,7 +334,7 @@ export const puckConfig: Config<Props> = {
         return (
           <header style={{ margin: "12px 0 16px", textAlign: alignment }}>
             {/* 標題是空的就不輸出標題標籤（空標題無障礙檢測不過，HM1130100C） */}
-            {title && title.trim() !== "" ? (
+            {isFilled(title) ? (
               <HeadingTag
                 style={
                   big
@@ -418,7 +424,7 @@ export const puckConfig: Config<Props> = {
         const linkable = safeUrl(imageUrl);
         const image = (
           // 圖片外面包了連結（點擊看原圖），替代文字不能是空的（無障礙檢測 HM1240401C）：後台沒填就用圖說，再沒有就用通用說明
-          <img src={imageUrl} alt={alt?.trim() || imageCaption?.trim() || "內容圖片"} loading="lazy" style={{ display: "block", width: "100%", height: "auto", borderRadius: 20 }} />
+          <img src={imageUrl} alt={(typeof alt === "string" && alt.trim()) || (typeof imageCaption === "string" && imageCaption.trim()) || "內容圖片"} loading="lazy" style={{ display: "block", width: "100%", height: "auto", borderRadius: 20 }} />
         );
 
         return (
@@ -474,7 +480,7 @@ export const puckConfig: Config<Props> = {
         const base: CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 46, padding: "0 30px", borderRadius: 999, fontWeight: 700, fontSize: rem(16), textDecoration: "none" };
         return (
           <section style={{ margin: "28px 0", padding: "30px 20px", textAlign: "center" }}>
-            {heading && heading.trim() !== "" ? <h2 style={{ margin: "0 0 8px", fontSize: rem(24), fontWeight: 700, color: C.navy }}>{heading}</h2> : null}
+            {isFilled(heading) ? <h2 style={{ margin: "0 0 8px", fontSize: rem(24), fontWeight: 700, color: C.navy }}>{heading}</h2> : null}
             <div style={{ margin: "0 0 20px", fontSize: rem(16), lineHeight: 1.8, color: C.text }}>
               <RichTextContent html={description} />
             </div>

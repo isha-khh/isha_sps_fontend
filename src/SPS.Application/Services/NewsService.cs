@@ -318,8 +318,9 @@ public class NewsService : INewsService
         if (newCategoryIds != null)
         {
             news.CategoryIds = newCategoryIds;
+            // 只改外鍵 CategoryId，不要再碰導覽屬性：先前這裡寫了 `news.Category = null`，EF 會把它當成「移除關聯」而把
+            // CategoryId 一起清成 null——後台每次編輯公告，主分類就變成「未分類」（issue #62）。外鍵變了 EF 會自己更新導覽屬性。
             news.CategoryId = newCategoryIds.Count > 0 ? newCategoryIds[0] : null;
-            news.Category = null; // 主分類換了，別讓舊的導覽屬性蓋掉
         }
         if (newIndustryIds != null) news.IndustryIds = newIndustryIds;
         if (request.Type.HasValue) news.Type = request.Type.Value;

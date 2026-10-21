@@ -74,7 +74,9 @@ function toGridCardData(video: VideoItem) {
  */
 export default async function PromotionVideoPage({ searchParams }: PageProps<"/promotion/video">) {
   const sidebarBanners = await fetchBanners("sidebar-promotion");
-  const { category: rawCategory, page: rawPage, q: rawQuery } = await searchParams;
+  const { category: rawCategory, page: rawPage, q: rawQuery, year: rawYear } = await searchParams;
+  // `?year=` 是影片上架日期（卡片上顯示的日期）的年份（issue #65）
+  const year = typeof rawYear === "string" && /^\d{4}$/.test(rawYear) ? rawYear : "";
   const category = typeof rawCategory === "string" ? rawCategory : undefined;
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
   const activeHref = category ? `/promotion/video?category=${category}` : "/promotion/video";
@@ -82,11 +84,16 @@ export default async function PromotionVideoPage({ searchParams }: PageProps<"/p
   const { items: backendItems, backendAvailable } = await fetchVideos({ search: query || undefined });
   // 搜尋時只有後端真的連不到才退回假資料；後端有回應但 0 筆是正常的搜尋結果（理由同 /news）
   const items = backendAvailable ? backendItems : PROMOTION_VIDEOS;
-  const categories = deriveVideoCategories(items);
+  // 分類與年份選項要看「全部影片」，不能被目前的搜尋字串限縮（跟公告事項 issue #60、#61 同一個原因）；沒搜尋時 `items` 就是全部
+  const allResult = query ? await fetchVideos() : { items: backendItems, backendAvailable };
+  const allItems = allResult.backendAvailable ? allResult.items : PROMOTION_VIDEOS;
+  const categories = deriveVideoCategories(allItems);
+  const yearOf = (video: VideoItem) => (video.createdTime ?? "").slice(0, 4);
+  const years = Array.from(new Set(allItems.map(yearOf).filter((y) => /^\d{4}$/.test(y)))).sort((a, b) => Number(b) - Number(a));
 
   const sorted = sortVideosByOrdinal(items);
   const featured = sorted[0];
-  const remaining = category ? sorted.slice(1).filter((v) => v.albumTitle === category) : sorted.slice(1);
+  const remaining = sorted.slice(1).filter((v) => (!category || v.albumTitle === category) && (!year || yearOf(v) === year));
 
   const totalPages = Math.max(1, Math.ceil(remaining.length / VIDEO_PAGE_SIZE));
   const requestedPage = typeof rawPage === "string" ? Number(rawPage) : 1;
@@ -96,6 +103,7 @@ export default async function PromotionVideoPage({ searchParams }: PageProps<"/p
     const params = new URLSearchParams();
     if (category) params.set("category", category);
     if (query) params.set("q", query);
+    if (year) params.set("year", year);
     if (page > 1) params.set("page", String(page));
     const qs = params.toString();
     return qs ? `/promotion/video?${qs}` : "/promotion/video";
@@ -150,11 +158,11 @@ export default async function PromotionVideoPage({ searchParams }: PageProps<"/p
         }
       >
         <div className="search mb-md-5 mb-4">
-          <SearchBar years={[]} defaultKeyword={query} hiddenFields={category ? { category } : undefined} />
+          <SearchBar years={years} defaultYear={year} defaultKeyword={query} hiddenFields={category ? { category } : undefined} />
         </div>
 
         <div className="row">
-          {pagedVideos.length === 0 && <p>{query ? `找不到符合「${query}」的影片。` : "目前沒有符合這個分類的影片。"}</p>}
+          {pagedVideos.length === 0 && <p>{query ? `找不到符合「${query}」的影片。` : year ? `${year} 年目前沒有符合的影片。` : "目前沒有符合這個分類的影片。"}</p>}
 
           {pagedVideos.map((video) => (
             <VideoGridCard key={video.id} data={toGridCardData(video)} group={VIDEO_FANCYBOX_GROUP} />

@@ -76,6 +76,8 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
                 <div className="tit_three_left">
                   <div className="tag-wrap">{course.city && <span className="badge-tag mb-0">{course.city}</span>}</div>
                   <div className="part-line"></div>
+                  {/* 課程公告上架日期；其他詳情頁（公告、產業輔導）標題下都有日期，這裡原本漏了（issue #63） */}
+                  {course.postedDate && <div className="date">{course.postedDate}</div>}
                 </div>
 
                 <ShareBox />
