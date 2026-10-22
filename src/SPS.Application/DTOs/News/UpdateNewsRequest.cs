@@ -31,6 +31,9 @@ public class UpdateNewsRequest
     public short? Section { get; set; }
     public List<int>? TagIds { get; set; }
 
+    /// <summary>課程類型 ID 列表；沒帶（null）= 不動課程類型，帶空陣列 = 清空</summary>
+    public List<int>? CourseTypeIds { get; set; }
+
     /// <summary>換封面圖：檔案管理中的圖片檔案 Id；沒帶（null）= 不更新</summary>
     public Guid? CoverFileId { get; set; }
 

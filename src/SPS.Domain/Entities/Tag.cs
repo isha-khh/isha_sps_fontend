@@ -9,7 +9,7 @@ namespace SPS.Domain.Entities;
 public class Tag : BaseEntity<int>
 {
     /// <summary>
-    /// 標簽類型（新聞、產品、需求、企業）
+    /// 標簽類型（新聞、產品、需求、企業、課程類型）
     /// </summary>
     public TagType Type { get; set; }
 

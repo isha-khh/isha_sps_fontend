@@ -27,14 +27,14 @@ public interface INewsRepository : IRepository<News, int>
     Task<News?> GetByIdWithIncludesAsync(int id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 獲取新聞的標簽列表
+    /// 獲取新聞的標簽列表（預設只取「公告關鍵字標籤」；帶 <paramref name="tagType"/> 可改取課程類型等其他類型）
     /// </summary>
-    Task<List<NewsTagItem>> GetNewsTagsAsync(int newsId, CancellationToken cancellationToken = default);
+    Task<List<NewsTagItem>> GetNewsTagsAsync(int newsId, CancellationToken cancellationToken = default, SPS.Domain.Enums.TagType tagType = SPS.Domain.Enums.TagType.News);
 
     /// <summary>
     /// 批次獲取多筆新聞的標簽列表（分頁列表用，避免逐筆查詢的 N+1 問題）
     /// </summary>
     /// <returns>以新聞 Id 為鍵、標籤（id+名稱）列表為值的字典；沒有標簽的新聞不會出現在字典裡</returns>
     Task<Dictionary<int, List<NewsTagItem>>> GetNewsTagsBatchAsync(
-        List<int> newsIds, CancellationToken cancellationToken = default);
+        List<int> newsIds, CancellationToken cancellationToken = default, SPS.Domain.Enums.TagType tagType = SPS.Domain.Enums.TagType.News);
 }
