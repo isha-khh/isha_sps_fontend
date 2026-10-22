@@ -37,7 +37,7 @@ services:
         max-file: "5"
 
   api:
-    image: ghcr.io/isha-khh/isha-sps-api:${SPS_VERSION:-1.0.0-beta.13}
+    image: ghcr.io/isha-khh/isha-sps-api:${SPS_VERSION:-1.0.0-beta.14}
     container_name: sps-beta-api
     depends_on:
       redis:
@@ -88,7 +88,7 @@ services:
     logging: *logging
 
   web:
-    image: ghcr.io/isha-khh/isha-sps-web:${SPS_VERSION:-1.0.0-beta.13}
+    image: ghcr.io/isha-khh/isha-sps-web:${SPS_VERSION:-1.0.0-beta.14}
     container_name: sps-beta-web
     depends_on:
       api:
@@ -114,7 +114,7 @@ services:
     logging: *logging
 
   admin:
-    image: ghcr.io/isha-khh/isha-sps-admin:${SPS_VERSION:-1.0.0-beta.13}
+    image: ghcr.io/isha-khh/isha-sps-admin:${SPS_VERSION:-1.0.0-beta.14}
     container_name: sps-beta-admin
     depends_on:
       api:
