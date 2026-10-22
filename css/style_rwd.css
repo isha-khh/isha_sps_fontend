@@ -1758,7 +1758,7 @@
         height: 100%;
        padding-top:30px;
     }
-    .header .bsnav-mobile .navbar {
+    .header .bsnav-mobile.in .navbar {
         background: linear-gradient(279deg, rgba(4, 109, 220, 1) 0%, rgba(3, 152, 185, 1) 100%);
         width: 80%;
     }
