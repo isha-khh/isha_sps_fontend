@@ -10,20 +10,20 @@
     <PackageReference Include="Google.Apis.AnalyticsData.v1beta" Version="1.68.0.3608" />
     <PackageReference Include="Google.Cloud.Kms.V1" Version="3.27.0" />
     <PackageReference Include="MailKit" Version="4.16.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.13" />
     <!-- 強制升級 MessagePack 以修補 High 漏洞 GHSA-hv8m-jj95-wg3x（SignalR 傳遞相依預設帶入 2.5.187） -->
     <PackageReference Include="MessagePack" Version="2.5.303" />
-    <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.13" />
 
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.13">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.1" />
     <PackageReference Include="Fido2" Version="4.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.13" />
     <PackageReference Include="Pgvector" Version="0.3.2" />
     <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.12.4" />
