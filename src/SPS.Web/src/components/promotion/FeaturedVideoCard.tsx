@@ -1,3 +1,4 @@
+import VideoPlayLink from "@/components/promotion/VideoPlayLink";
 import { getFancyboxVideoProps } from "@/lib/content-list-utils";
 
 export interface FeaturedVideoData {
@@ -54,7 +55,7 @@ export default function FeaturedVideoCard({ data, group }: { data: FeaturedVideo
         </a>
 
         <div className="tit">
-          <a href={data.href} title={watchTitle} target="_blank" rel="noopener noreferrer">
+          <VideoPlayLink playOnSite={hasSource} href={data.href} title={watchTitle} target="_blank" rel="noopener noreferrer">
             <div className="tit_three d-flex mb-2">
               <div className="tag-wrap">
                 <span className="badge-tag mb-0">精選影音</span>
@@ -63,7 +64,7 @@ export default function FeaturedVideoCard({ data, group }: { data: FeaturedVideo
             </div>
             <h3>{data.title}</h3>
             {data.description && <p>{data.description}</p>}
-          </a>
+          </VideoPlayLink>
 
           <div className="vdo_Watch d-flex">
             {data.keywords && data.keywords.length > 0 && (
@@ -78,10 +79,10 @@ export default function FeaturedVideoCard({ data, group }: { data: FeaturedVideo
               </ul>
             )}
 
-            <a href={data.href} title={watchTitle} className="more_x" target="_blank" rel="noopener noreferrer">
+            <VideoPlayLink playOnSite={hasSource} href={data.href} title={watchTitle} className="more_x" target="_blank" rel="noopener noreferrer">
               <span>立即觀看</span>
               <i className="bi bi-arrow-right" aria-hidden="true"></i>
-            </a>
+            </VideoPlayLink>
           </div>
         </div>
       </div>
