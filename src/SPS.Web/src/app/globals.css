@@ -270,6 +270,18 @@
   }
 }
 
+/*
+ * iPad 直式（769–991px）右側欄：style.css 的 `.content` 67% + `.side2` 28% 在這個寬度只剩約 207px，
+ * 「熱門課程」的標籤、日期、「剩餘 N 名」被擠成直排（issue #75）。手機（≤768px）本來就是上下堆疊，
+ * 這裡把有右側欄的頁面在 769–991px 也改成堆疊；沒有右側欄的頁面（例如常見問題的「左側分類＋內容」）維持原樣。
+ */
+@media (min-width: 769px) and (max-width: 991px) {
+  .main .content:has(~ .side2),
+  .main .side2 {
+    width: 100%;
+  }
+}
+
 @media (min-width: 768px) {
   .category-tab-strip {
     margin-bottom: 1.25rem;
