@@ -256,6 +256,48 @@
   }
 }
 
+/*
+ * iPad 直式（769–991px）頁首：桌機版選單在這個寬度會換行（logo 一排、選單一排），「訂閱電子報」被擠到第三排，
+ * 但固定頁首的高度與內容的上方留白只算到兩排，按鈕就蓋到麵包屑（issue #74，實測頁首 165px、麵包屑從 110px 開始）。
+ * 手機（≤768px）style_rwd.css 已經把按鈕絕對定位在右上角，這裡把同樣的做法延伸到 769–991px，頁首維持兩排。
+ */
+@media (min-width: 769px) and (max-width: 991px) {
+  .header .small-btn-box a.btn-light {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    margin-left: 0;
+  }
+}
+
+/*
+ * iPad 直式（769–991px）右側欄：style.css 的 `.content` 67% + `.side2` 28% 在這個寬度只剩約 207px，
+ * 「熱門課程」的標籤、日期、「剩餘 N 名」被擠成直排（issue #75）。手機（≤768px）本來就是上下堆疊，
+ * 這裡把有右側欄的頁面在 769–991px 也改成堆疊；沒有右側欄的頁面（例如常見問題的「左側分類＋內容」）維持原樣。
+ */
+@media (min-width: 769px) and (max-width: 991px) {
+  .main .content:has(~ .side2),
+  .main .side2 {
+    width: 100%;
+  }
+}
+
+/*
+ * 本計畫補助（/support）四張卡片：style_rwd.css 在 1800px 以下把 `.support_er` 固定 `height: 485px`，
+ * 但內容（補助類別、補助金額的說明文字）在窄螢幕換行後比 485px 高，底部文字被切掉（issue #75，iPad 直式實測內容 493–551px）。
+ * 改成最低 485px（手機 455px）、可隨內容撐高；同一排的卡片仍等高（flex stretch）。因為 style_rwd.css 是後載入、權重相同，這裡必須用 `!important` 才蓋得過。
+ */
+.support .support_box .d-flex .support_er {
+  height: auto !important; /* style_rwd.css 的固定高度選擇器權重相同、載入順序在後，不加 !important 會被蓋回去 */
+  min-height: 485px;
+}
+
+@media (max-width: 767px) {
+  .support .support_box .d-flex .support_er {
+    min-height: 455px; /* 手機版原本固定的高度 */
+  }
+}
+
 @media (min-width: 768px) {
   .category-tab-strip {
     margin-bottom: 1.25rem;
