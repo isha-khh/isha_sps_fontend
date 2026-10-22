@@ -44,6 +44,9 @@ public class NewsResponse
     /// 標籤（id + 名稱）：前台點標籤篩選、後台編輯表單預選用
     /// </summary>
     public List<NewsTagItem> TagItems { get; set; } = new();
+
+    /// <summary>課程類型（id + 名稱；人才培育課程的「類型」篩選用）</summary>
+    public List<NewsTagItem> CourseTypes { get; set; } = new();
     public DateTime CreatedTime { get; set; }
     public DateTime? UpdatedTime { get; set; }
 
@@ -100,6 +103,9 @@ public class NewsListItemResponse
     /// 標籤（id + 名稱）：前台卡片上的標籤要能點了篩選
     /// </summary>
     public List<NewsTagItem> TagItems { get; set; } = new();
+
+    /// <summary>課程類型（id + 名稱；人才培育課程的「類型」篩選用）</summary>
+    public List<NewsTagItem> CourseTypes { get; set; } = new();
 
     /// <summary>
     /// 封面圖網址（來自 News.Picture.DefaultImageUri），沒有設定圖片時為 null

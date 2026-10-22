@@ -89,12 +89,14 @@ public class TagRepository : Repository<Tag, int>, ITagRepository
         SPS.Domain.Enums.EntityType entityType,
         string entityId,
         IEnumerable<int> tagIds,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        SPS.Domain.Enums.TagType? onlyType = null)
     {
         var set = _context.Set<EntityTag>();
-        var existing = await set
-            .Where(et => et.EntityType == entityType && et.EntityId == entityId)
-            .ToListAsync(cancellationToken);
+        var existingQuery = set.Where(et => et.EntityType == entityType && et.EntityId == entityId);
+        if (onlyType.HasValue)
+            existingQuery = existingQuery.Where(et => et.Tag.Type == onlyType.Value);
+        var existing = await existingQuery.ToListAsync(cancellationToken);
 
         var desired = tagIds.Distinct().ToHashSet();
         var existingIds = existing.Select(et => et.TagId).ToHashSet();

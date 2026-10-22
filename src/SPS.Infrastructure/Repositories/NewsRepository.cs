@@ -174,24 +174,24 @@ public class NewsRepository : Repository<News, int>, INewsRepository
         };
     }
 
-    public async Task<List<NewsTagItem>> GetNewsTagsAsync(int newsId, CancellationToken cancellationToken = default)
+    public async Task<List<NewsTagItem>> GetNewsTagsAsync(int newsId, CancellationToken cancellationToken = default, TagType tagType = TagType.News)
     {
         return await _context.Set<EntityTag>()
-            .Where(et => et.EntityType == EntityType.News && et.EntityId == newsId.ToString())
+            .Where(et => et.EntityType == EntityType.News && et.EntityId == newsId.ToString() && et.Tag.Type == tagType)
             .OrderBy(et => et.Tag.Ordinal).ThenBy(et => et.Tag.Id)
             .Select(et => new NewsTagItem { Id = et.Tag.Id, Name = et.Tag.Name })
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Dictionary<int, List<NewsTagItem>>> GetNewsTagsBatchAsync(
-        List<int> newsIds, CancellationToken cancellationToken = default)
+        List<int> newsIds, CancellationToken cancellationToken = default, TagType tagType = TagType.News)
     {
         // 列表頁一次要顯示一整頁的標簽，逐筆呼叫 GetNewsTagsAsync 會是
         // N+1 查詢——一頁 20~100 筆就是 20~100 次額外查詢。這裡一次把
         // 整頁的 EntityId 都丟進 IN 子句查完，再依 EntityId 分組回傳。
         var idStrings = newsIds.Select(id => id.ToString()).ToList();
         var rows = await _context.Set<EntityTag>()
-            .Where(et => et.EntityType == EntityType.News && idStrings.Contains(et.EntityId))
+            .Where(et => et.EntityType == EntityType.News && idStrings.Contains(et.EntityId) && et.Tag.Type == tagType)
             .OrderBy(et => et.Tag.Ordinal).ThenBy(et => et.Tag.Id)
             .Select(et => new { et.EntityId, TagId = et.Tag.Id, TagName = et.Tag.Name })
             .ToListAsync(cancellationToken);

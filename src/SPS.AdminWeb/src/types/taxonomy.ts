@@ -7,6 +7,8 @@
  */
 export const TagType = {
   News: 1,
+  /** 課程類型（人才培育課程的「類型」篩選，跟公告關鍵字標籤是獨立的兩組） */
+  CourseType: 5,
 } as const;
 export type TagType = number;
 

@@ -34,6 +34,9 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  // 課程類型（config.hasCourseTypes，人才培育）：到「課程類型」頁維護，前台知識加值的類型下拉用
+  const [availableCourseTypes, setAvailableCourseTypes] = useState<Tag[]>([]);
+  const [selectedCourseTypeIds, setSelectedCourseTypeIds] = useState<number[]>([]);
   // 多選分類（config.multiCategory 的專區，例如產業輔導的產業別）；其他專區仍用 formData.categoryId 單選
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   // 適用產業（config.industryCategoryType 的專區，例如政府補助資源）：另一組可多選的分類
@@ -95,6 +98,15 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
   }, []);
 
   useEffect(() => {
+    if (!config.hasCourseTypes) return;
+    tagsApi
+      .getPaged({ type: TagType.CourseType, page: 1, pageSize: 100 })
+      .then((result) => setAvailableCourseTypes(result.items))
+      .catch((error) => console.error('Failed to fetch course types:', error));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (!isEditMode) return;
 
     const fetchNews = async () => {
@@ -118,6 +130,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
         setMeta(data.meta ?? {});
         setCoverUrl(data.imageUrl || undefined);
         setSelectedTagIds((data.tagItems ?? []).map((t) => t.id));
+        setSelectedCourseTypeIds((data.courseTypes ?? []).map((t) => t.id));
         setSelectedIndustryIds(data.industryIds ?? []);
         setSelectedCategoryIds(data.categoryIds && data.categoryIds.length > 0 ? data.categoryIds : data.categoryId ? [data.categoryId] : []);
         // 初始化 ref
@@ -182,6 +195,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           type: formData.type,
           section,
           tagIds: selectedTagIds,
+          ...(config.hasCourseTypes ? { courseTypeIds: selectedCourseTypeIds } : {}),
           ...(config.hasAttachments ? { attachmentFileIds: attachmentIds } : {}),
           ...(config.metaFields ? { meta } : {}),
           ...(coverFileId ? { coverFileId } : {}),
@@ -205,6 +219,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           type: formData.type,
           section,
           tagIds: selectedTagIds,
+          ...(config.hasCourseTypes ? { courseTypeIds: selectedCourseTypeIds } : {}),
           ...(config.hasAttachments ? { attachmentFileIds: attachmentIds } : {}),
           ...(config.metaFields ? { meta } : {}),
           ...(coverFileId ? { coverFileId } : {}),
@@ -541,6 +556,42 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                             <span className="text-sm">{industry.name}</span>
                           </label>
                         ))}
+                      </div>
+                    )}
+                  </div>
+                  )}
+
+                  {/* 課程類型（多選）：前台知識加值搜尋列的「類型」下拉 */}
+                  {config.hasCourseTypes && (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">課程類型</span>
+                      <a href="/talent-courses/types" target="_blank" rel="noreferrer" className="label-text-alt link link-primary">
+                        管理課程類型
+                      </a>
+                    </label>
+                    {availableCourseTypes.length === 0 ? (
+                      <p className="text-sm text-base-content/50">尚未建立任何課程類型，請先到「課程類型」新增</p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {availableCourseTypes.map((courseType) => {
+                          const selected = selectedCourseTypeIds.includes(courseType.id);
+                          return (
+                            <button
+                              key={courseType.id}
+                              type="button"
+                              aria-pressed={selected}
+                              className={`badge badge-lg cursor-pointer ${selected ? 'badge-primary' : 'badge-outline'}`}
+                              onClick={() =>
+                                setSelectedCourseTypeIds((prev) =>
+                                  selected ? prev.filter((id) => id !== courseType.id) : [...prev, courseType.id]
+                                )
+                              }
+                            >
+                              {courseType.name}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

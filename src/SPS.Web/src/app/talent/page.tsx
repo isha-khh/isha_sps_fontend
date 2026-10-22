@@ -29,7 +29,7 @@ const ALL_COURSES_LIMIT = 100;
  *
  * 搜尋列的「年份」「類型」兩個下拉原本是空的（設計稿的佔位，客戶回報「知識加值選單沒功能」）。現在：
  * - 年份＝課程開課起日的年份（後台「課程資訊 → 開課起日」；沒填就用公告上架日期的年份），選項列出所有課程出現過的年份；
- * - 類型＝課程的「關鍵字標籤」（後台課程編輯的標籤），選項列出所有課程用到的標籤。
+ * - 類型＝課程的「課程類型」（後台「人才培育 → 課程類型」維護、課程編輯時勾選，後端 TagType.CourseType，跟公告共用的關鍵字標籤是獨立的兩組），選項列出所有課程用到的類型。
  * 課程數量不多，所以一次抓全部（上限 100 筆）在前台篩選與分頁，選項才不會被目前頁面或搜尋結果限縮。
  */
 export default async function TalentIndexPage({ searchParams }: PageProps<"/talent">) {
@@ -46,8 +46,8 @@ export default async function TalentIndexPage({ searchParams }: PageProps<"/tale
   // 課程的年份：開課起日（YYYY-MM-DD）的年份，沒填就用上架日期
   const yearOf = (item: (typeof allSource.items)[number]) => (item.meta?.dateStart ?? item.startDate ?? item.createdTime ?? "").slice(0, 4);
   const years = Array.from(new Set(allSource.items.map(yearOf).filter((y) => /^\d{4}$/.test(y)))).sort((a, b) => Number(b) - Number(a));
-  const types = Array.from(new Set(allSource.items.flatMap((item) => item.tags ?? []))).sort((a, b) => a.localeCompare(b, "zh-Hant"));
-  const filtered = result.items.filter((item) => (!year || yearOf(item) === year) && (!type || (item.tags ?? []).includes(type)));
+  const types = Array.from(new Set(allSource.items.flatMap((item) => (item.courseTypes ?? []).map((t) => t.name)))).sort((a, b) => a.localeCompare(b, "zh-Hant"));
+  const filtered = result.items.filter((item) => (!year || yearOf(item) === year) && (!type || (item.courseTypes ?? []).some((t) => t.name === type)));
   const totalPages = Math.max(1, Math.ceil(filtered.length / TALENT_PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const courses = filtered.slice((currentPage - 1) * TALENT_PAGE_SIZE, currentPage * TALENT_PAGE_SIZE).map(toTalentCourse);

@@ -64,6 +64,9 @@ public class CreateNewsRequest
     /// </summary>
     public List<int>? TagIds { get; set; }
 
+    /// <summary>課程類型 ID 列表（人才培育課程用；必須是「課程類型」標籤）</summary>
+    public List<int>? CourseTypeIds { get; set; }
+
     /// <summary>封面圖：檔案管理中的圖片檔案 Id（Controller 會檢查必須是可用的圖片）</summary>
     public Guid? CoverFileId { get; set; }
 

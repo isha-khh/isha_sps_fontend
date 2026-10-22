@@ -19,8 +19,10 @@ public interface ITagRepository : IRepository<Tag, int>
     Task<List<int>> GetExistingTagIdsAsync(IEnumerable<int> tagIds, SPS.Domain.Enums.TagType type, CancellationToken cancellationToken = default);
     /// <summary>
     /// 以指定的標籤集合覆寫某實體的標籤綁定（不在集合內的解除、不存在的新增），由呼叫端負責 SaveChanges。
+    /// <paramref name="onlyType"/> 有帶時只處理該類型標籤的綁定、不動其他類型（公告的關鍵字標籤與課程類型各自覆寫，互不影響）；
+    /// 沒帶 = 處理該實體的全部綁定（刪除實體時清孤兒用）。
     /// </summary>
-    Task ReplaceEntityTagsAsync(SPS.Domain.Enums.EntityType entityType, string entityId, IEnumerable<int> tagIds, CancellationToken cancellationToken = default);
+    Task ReplaceEntityTagsAsync(SPS.Domain.Enums.EntityType entityType, string entityId, IEnumerable<int> tagIds, CancellationToken cancellationToken = default, SPS.Domain.Enums.TagType? onlyType = null);
     Task<Dictionary<string, List<int>>> GetTagIdsByEntityIdsAsync(SPS.Domain.Enums.EntityType entityType, IEnumerable<string> entityIds, CancellationToken cancellationToken = default);
     Task<Dictionary<int, string>> GetTagNamesByIdsAsync(IEnumerable<int> tagIds, CancellationToken cancellationToken = default);
 }

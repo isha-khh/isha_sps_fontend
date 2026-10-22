@@ -214,6 +214,9 @@ export type NewsItem = {
     // 對到真後端 NewsListItemResponse.TagItems（id + 名稱）：標籤要能點了篩選公告
     // （`/news?tag=<id>`，對到 NewsQueryParameters.TagId），只有名稱的 `tags` 做不到
     tagItems?: NewsTagItem[];
+    // 對到真後端 NewsListItemResponse.CourseTypes：人才培育課程的「類型」（後台「課程類型」頁維護），
+    // 知識加值（/talent）搜尋列的類型下拉與篩選用；跟公告共用的關鍵字標籤（tagItems）是獨立的兩組
+    courseTypes?: NewsTagItem[];
     // 對到真後端 NewsListItemResponse.ImageUrl（News.Picture.DefaultImageUri），
     // 2026-09-08 已請後端補上，沒設定圖片時仍可能是 undefined/null，
     // 沒圖就不顯示圖片區塊（2026-10-08 起不再用假圖佔位）

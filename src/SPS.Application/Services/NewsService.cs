@@ -29,6 +29,8 @@ public class NewsService : INewsService
         // 一次批次查完這一頁所有新聞的標簽，避免逐筆呼叫造成 N+1 查詢
         var tagsByNewsId = await _unitOfWork.News.GetNewsTagsBatchAsync(
             pagedResult.Items.Select(n => n.Id).ToList(), cancellationToken);
+        var courseTypesByNewsId = await _unitOfWork.News.GetNewsTagsBatchAsync(
+            pagedResult.Items.Select(n => n.Id).ToList(), cancellationToken, TagType.CourseType);
 
         var categoryNames = await GetCategoryNamesAsync(pagedResult.Items.SelectMany(n => AllCategoryIds(n).Concat(n.IndustryIds)), cancellationToken);
 
@@ -56,6 +58,7 @@ public class NewsService : INewsService
                 CreatedTime = n.CreatedTime,
                 Tags = tagsByNewsId.GetValueOrDefault(n.Id, new List<NewsTagItem>()).Select(t => t.Name).ToList(),
                 TagItems = tagsByNewsId.GetValueOrDefault(n.Id, new List<NewsTagItem>()),
+                CourseTypes = courseTypesByNewsId.GetValueOrDefault(n.Id, new List<NewsTagItem>()),
                 ImageUrl = n.Picture?.DefaultImageUri
             }).ToList(),
             TotalCount = pagedResult.TotalCount,
@@ -73,6 +76,7 @@ public class NewsService : INewsService
 
         // 查詢標簽
         var tags = await _unitOfWork.News.GetNewsTagsAsync(id, cancellationToken);
+        var courseTypes = await _unitOfWork.News.GetNewsTagsAsync(id, cancellationToken, TagType.CourseType);
         var detailCategoryIds = AllCategoryIds(news).ToList();
         var detailCategoryNames = await GetCategoryNamesAsync(detailCategoryIds.Concat(news.IndustryIds), cancellationToken);
 
@@ -100,6 +104,7 @@ public class NewsService : INewsService
             Meta = news.Meta ?? new Dictionary<string, string>(),
             Tags = tags.Select(t => t.Name).ToList(),
             TagItems = tags,
+            CourseTypes = courseTypes,
             CreatedTime = news.CreatedTime,
             UpdatedTime = news.UpdatedTime,
             ImageUrl = news.Picture?.DefaultImageUri
@@ -129,6 +134,10 @@ public class NewsService : INewsService
             var (tagIds, tagError) = await ResolveNewsTagIdsAsync(request.TagIds, cancellationToken);
             if (tagError != null)
                 return Result<NewsResponse>.Failure(tagError);
+
+            var (courseTypeIds, courseTypeError) = await ResolveTagIdsAsync(request.CourseTypeIds, TagType.CourseType, "課程類型", cancellationToken);
+            if (courseTypeError != null)
+                return Result<NewsResponse>.Failure(courseTypeError);
 
             // 創建多語言文本
             var title = await _unitOfWork.MultilingualTexts.CreateTextAsync(request.Title, cancellationToken);
@@ -169,15 +178,18 @@ public class NewsService : INewsService
             await _unitOfWork.News.AddAsync(news, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            if (tagIds.Count > 0)
+            if (tagIds.Count > 0 || courseTypeIds.Count > 0)
             {
-                await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), tagIds, cancellationToken);
+                // 關鍵字標籤與課程類型各自覆寫（onlyType），互不影響
+                await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), tagIds, cancellationToken, TagType.News);
+                await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), courseTypeIds, cancellationToken, TagType.CourseType);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
 
             // 提交事務
             await transaction.CommitAsync(cancellationToken);
             var createdTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
+            var createdCourseTypes = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken, TagType.CourseType);
 
             return Result<NewsResponse>.Success(new NewsResponse
             {
@@ -200,6 +212,7 @@ public class NewsService : INewsService
                 Meta = news.Meta,
                 Tags = createdTags.Select(t => t.Name).ToList(),
                 TagItems = createdTags,
+                CourseTypes = createdCourseTypes,
                 CreatedTime = news.CreatedTime,
                 UpdatedTime = news.UpdatedTime,
                 ImageUrl = coverImage?.DefaultImageUri
@@ -247,6 +260,16 @@ public class NewsService : INewsService
             if (tagError != null)
                 return Result<NewsResponse>.Failure(tagError);
             newTagIds = resolved;
+        }
+
+        // CourseTypeIds 沒帶（null）= 不動課程類型；帶空陣列 = 清空
+        List<int>? newCourseTypeIds = null;
+        if (request.CourseTypeIds != null)
+        {
+            var (resolvedTypes, courseTypeError) = await ResolveTagIdsAsync(request.CourseTypeIds, TagType.CourseType, "課程類型", cancellationToken);
+            if (courseTypeError != null)
+                return Result<NewsResponse>.Failure(courseTypeError);
+            newCourseTypeIds = resolvedTypes;
         }
 
         // 更新 Title (MultilingualText)
@@ -344,10 +367,15 @@ public class NewsService : INewsService
         await _unitOfWork.News.UpdateAsync(news, cancellationToken);
         if (newTagIds != null)
         {
-            await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), newTagIds, cancellationToken);
+            await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), newTagIds, cancellationToken, TagType.News);
+        }
+        if (newCourseTypeIds != null)
+        {
+            await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), newCourseTypeIds, cancellationToken, TagType.CourseType);
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         var updatedTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
+        var updatedCourseTypes = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken, TagType.CourseType);
         var updatedCategoryNames = await GetCategoryNamesAsync(AllCategoryIds(news).Concat(news.IndustryIds), cancellationToken);
 
         return Result<NewsResponse>.Success(new NewsResponse
@@ -374,6 +402,7 @@ public class NewsService : INewsService
             Meta = news.Meta ?? new Dictionary<string, string>(),
             Tags = updatedTags.Select(t => t.Name).ToList(),
             TagItems = updatedTags,
+            CourseTypes = updatedCourseTypes,
             CreatedTime = news.CreatedTime,
             UpdatedTime = news.UpdatedTime,
             ImageUrl = news.Picture?.DefaultImageUri
@@ -425,17 +454,24 @@ public class NewsService : INewsService
     /// <summary>
     /// 驗證公告要綁的標籤：去重後必須全部是「公告類型」且實際存在的標籤。
     /// </summary>
-    private async Task<(List<int> Ids, string? Error)> ResolveNewsTagIdsAsync(
+    private Task<(List<int> Ids, string? Error)> ResolveNewsTagIdsAsync(
         IEnumerable<int>? tagIds, CancellationToken cancellationToken)
+        => ResolveTagIdsAsync(tagIds, TagType.News, "公告標籤", cancellationToken);
+
+    /// <summary>
+    /// 驗證要綁的標籤：去重後必須全部是指定類型且實際存在的標籤（公告關鍵字標籤、課程類型共用）。
+    /// </summary>
+    private async Task<(List<int> Ids, string? Error)> ResolveTagIdsAsync(
+        IEnumerable<int>? tagIds, TagType type, string label, CancellationToken cancellationToken)
     {
         var requested = (tagIds ?? Enumerable.Empty<int>()).Distinct().ToList();
         if (requested.Count == 0)
             return (requested, null);
 
-        var existing = await _unitOfWork.Tags.GetExistingTagIdsAsync(requested, TagType.News, cancellationToken);
+        var existing = await _unitOfWork.Tags.GetExistingTagIdsAsync(requested, type, cancellationToken);
         var missing = requested.Except(existing).ToList();
         return missing.Count > 0
-            ? (requested, $"標籤 ID {string.Join(", ", missing)} 不存在或不是公告標籤")
+            ? (requested, $"標籤 ID {string.Join(", ", missing)} 不存在或不是{label}")
             : (requested, null);
     }
 
