@@ -1,2 +1,8 @@
 allowBuilds:
   unrs-resolver: true
+# 2026-10-22 安全性更新：間接相依（axios→follow-redirects、next→postcss→source-map-js、next→sharp）的已知弱點，
+# 強制使用修補版以上；上游（axios／next）更新後若已帶入修補版，可移除對應項目。
+overrides:
+  follow-redirects: ">=1.16.1"
+  source-map-js: ">=1.2.2"
+  sharp: ">=0.35.5"
