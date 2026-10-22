@@ -25,6 +25,5 @@ export default function VideoPlayLink({
     event.preventDefault();
     pic.click();
   };
-  // eslint-disable-next-line jsx-a11y/anchor-has-content -- 內容由 props.children 傳入
   return <a {...props} onClick={handleClick} />;
 }
