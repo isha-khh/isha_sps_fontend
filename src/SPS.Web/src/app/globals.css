@@ -282,6 +282,16 @@
   }
 }
 
+/*
+ * 本計畫補助（/support）四張卡片：style_rwd.css 在 1800px 以下把 `.support_er` 固定 `height: 485px`，
+ * 但內容（補助類別、補助金額的說明文字）在窄螢幕換行後比 485px 高，底部文字被切掉（issue #75，iPad 直式實測內容 493–551px）。
+ * 改成最低 485px、可隨內容撐高；同一排的卡片仍等高（flex stretch）。
+ */
+.support .support_box .d-flex .support_er {
+  height: auto;
+  min-height: 485px;
+}
+
 @media (min-width: 768px) {
   .category-tab-strip {
     margin-bottom: 1.25rem;
