@@ -10,15 +10,15 @@ import { useAuthStore } from "@/store/auth-store";
 import HeaderSearch from "@/components/layout/HeaderSearch";
 import { useIndustryAiLink, useNewsNavCategories } from "@/components/SiteLinksProvider";
 import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
+import { setupHeaderNav } from "@/components/layout/header-nav";
 
 /**
  * 過渡期元件：內容照抄舊站的 page/_uc/nav.html，
  * 樣式繼續吃 public/css 底下照搬過來的舊站 CSS + bsnav 套件。
  *
  * 互動行為（手機選單開關 / focus trap / 下拉選單無障礙屬性 / 訂閱電子報捲動）
- * 原本是寫在 nav.html 內嵌的 <script>，這裡原封不動搬進 useEffect，
- * 只是把 document 上的事件都掛上 `.headerNav` namespace，
- * 這樣 React StrictMode 在開發模式下重複執行 effect 時不會重複綁定。
+ * 原本是寫在 nav.html 內嵌的 <script>（後來搬進這裡的 useEffect、用 jQuery 綁事件），
+ * 現在是原生 JS 版的 `setupHeaderNav()`（header-nav.ts），不再依賴 jQuery 與 bsnav.min.js。
  *
  * 手機版選單面板（.bsnav-mobile）裡的項目**不是**用 jQuery 在 mount 時
  * 把桌機版 `<ul>` clone 一份塞進去——原本 bsnav.min.js 的 `mobileMenu()`
@@ -328,194 +328,8 @@ function NavLinks() {
 }
 
 export default function Headers() {
-  useEffect(() => {
-    const $ = window.jQuery;
-    if (!$) return;
-
-    const NS = ".headerNav";
-    const focusableSelectors =
-      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-    function closeMobileNav() {
-      const $mobileNav = $(".bsnav-mobile");
-      const $toggler = $(".navbar-toggler");
-
-      if ($mobileNav.hasClass("in")) {
-        $mobileNav.removeClass("in");
-        $toggler.removeClass("active").attr("aria-expanded", "false");
-        $(".bsnavclose").removeClass("active");
-        $("body, html").removeClass("bsnav-mobile-open");
-
-        if ($toggler.is(":visible")) {
-          $toggler.focus();
-        }
-      }
-    }
-
-    /**
-     * 開啟手機版選單——這件事原本是交給 bsnav.min.js 的 `mobileMenu()`
-     * 做（`.navbar-toggler` 點擊時 `toggleClass('in')`），但那支是掛在
-     * `$(window).on('load', ...)`——Next.js 這裡 script 標籤真正執行
-     * 時，瀏覽器的 `load` 事件早就已經觸發過了，這個監聽器根本沒機會
-     * 被叫到，點漢堡按鈕因此永遠沒反應。跟關閉行為（`closeMobileNav`）
-     * 同樣的道理，改成自己在這個 `useEffect` 裡接管。
-     *
-     * 選單內容本身不在這裡處理——`.bsnav-mobile` 面板裡的項目是 JSX
-     * 直接渲染兩份（`NavLinks`，見上面的元件說明），不是這裡用 jQuery
-     * 動態塞進去的，這樣才不會跟 React 自己管理的 DOM 打架。
-     *
-     * 這裡刻意直接綁在 `.navbar-toggler` 這個元素本身上
-     * （`$(".navbar-toggler").on(...)`），不是用 `$(document).on('click',
-     * '.navbar-toggler', ...)` 這種委派寫法——實測抓出 `coreScript.js`
-     * （舊站帶來的共用腳本，這個元件沒有直接匯入，是透過 layout.tsx
-     * 全站載入的）也直接綁了一個 click handler 在同一顆按鈕上，那個
-     * handler 最後 `return false`（jQuery 裡等同同時呼叫
-     * `preventDefault()` 跟 `stopPropagation()`），事件因此在到達
-     * `document` 之前就被攔截掉，委派寫法完全收不到這個 click，選單
-     * 因此永遠打不開。直接綁在按鈕本身上，跟 `coreScript.js`／
-     * bsnav.min.js 那兩個既有的 handler 一樣「同一個元素上的多個
-     * handler」，`stopPropagation()` 不會擋掉同一個元素上其他 handler
-     * 執行，才能確保這裡一定會被叫到。
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    $(".navbar-toggler").on(`click${NS}`, (e: any) => {
-      e.preventDefault();
-
-      const $mobileNav = $(".bsnav-mobile");
-      if ($mobileNav.hasClass("in")) {
-        closeMobileNav();
-        return;
-      }
-
-      const $toggler = $(".navbar-toggler");
-      $mobileNav.addClass("in");
-      $toggler.addClass("active").attr("aria-expanded", "true");
-      $(".bsnavclose").addClass("active");
-      $("body, html").addClass("bsnav-mobile-open");
-      $(".bsnavclose").trigger("focus");
-    });
-
-    // 點擊關閉按鈕或遮罩關閉
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    $(document).on(`click${NS}`, ".bsnavclose, .bsnav-mobile-overlay", (e: any) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeMobileNav();
-    });
-
-    // 鍵盤無障礙控制（ESC 關閉 + Tab 焦點鎖定在側邊欄內）
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    $(document).on(`keydown${NS}`, (e: any) => {
-      const $mobileNav = $(".bsnav-mobile");
-      if (!$mobileNav.hasClass("in")) return;
-
-      if (e.key === "Escape" || e.keyCode === 27) {
-        e.preventDefault();
-        closeMobileNav();
-        return;
-      }
-
-      if (e.key === "Tab" || e.keyCode === 9) {
-        const $focusableElements = $mobileNav.find(focusableSelectors).filter(":visible");
-        if ($focusableElements.length === 0) return;
-
-        const $firstElement = $focusableElements.first();
-        const $lastElement = $focusableElements.last();
-
-        if (e.shiftKey) {
-          if ($(document.activeElement).is($firstElement)) {
-            e.preventDefault();
-            $lastElement.focus();
-          }
-        } else if ($(document.activeElement).is($lastElement)) {
-          e.preventDefault();
-          $firstElement.focus();
-        }
-      }
-    });
-
-    // 視窗拉大時重設
-    $(window).on(`resize${NS}`, () => {
-      if ($(window).width() >= 768) {
-        closeMobileNav();
-      }
-    });
-
-    // 訂閱電子報：捲動到 footer 的訂閱表單
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    $(document).on(`click${NS}`, ".btn-scroll-newsletter", (e: any) => {
-      e.preventDefault();
-      const $target = $(".footer-top");
-      if ($target.length) {
-        $("html, body").animate({ scrollTop: $target.offset().top }, 600);
-      }
-    });
-
-    /**
-     * 手機版下拉選單（點擊展開/收合子選單）——這裡也跟開啟手機版選單
-     * 那個 handler 一樣，故意直接綁在每個 `.dropdown-toggle` 元素本身
-     * 上，不是委派到 document：這些連結都是 Next.js 的 `<Link>`，
-     * React 自己在更上層（root container）也掛了 click 監聽器處理
-     * client-side 導頁，而且會比委派到 `document` 的 jQuery handler
-     * 更早收到這個事件（React 的監聽點在 bubble 路徑上比 `document`
-     * 更靠近元素本身）。如果用委派寫法，這裡的 `e.preventDefault()`
-     * 執行時 React 早就已經根據「當下還沒被 preventDefault」判斷要
-     * 導頁了——實測點「公告事項」這種有子選單的項目，手風琴是有展開
-     * 沒錯，但畫面同時也真的跳轉到 /news 去了。直接綁在元素本身上，
-     * 在事件真正開始往上冒泡（也就是 React 的監聽器收到之前）就先
-     * 執行完 `preventDefault()`，才能真的攔下 Next.js 的導頁。
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    $(".navbar-nav .dropdown-toggle").on(`click${NS}`, function (this: HTMLElement, e: any) {
-      if (window.innerWidth >= 992) return;
-
-      const $this = $(this);
-      const $dropdownMenu = $this.siblings(".dropdown-menu");
-      if ($dropdownMenu.length === 0) return;
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      const $parentLi = $this.parent("li");
-      $parentLi.siblings().find(".dropdown-menu").slideUp(200).removeClass("show");
-      $parentLi.siblings().find(".dropdown-toggle").removeClass("show").attr("aria-expanded", "false");
-
-      if ($dropdownMenu.is(":visible")) {
-        $dropdownMenu.slideUp(200).removeClass("show");
-        $this.removeClass("show").attr("aria-expanded", "false");
-      } else {
-        $dropdownMenu.slideDown(200).addClass("show");
-        $this.addClass("show").attr("aria-expanded", "true");
-      }
-    });
-
-    // 桌機版下拉選單 hover / focus 的無障礙屬性同步
-    $(document).on(`focusin${NS} mouseenter${NS}`, ".navbar-expand-md .nav-item.dropdown", function (this: HTMLElement) {
-      $(this).find(".dropdown-toggle").attr("aria-expanded", "true");
-    });
-
-    $(document).on(`mouseleave${NS}`, ".navbar-expand-md .nav-item.dropdown", function (this: HTMLElement) {
-      $(this).find(".dropdown-toggle").attr("aria-expanded", "false");
-    });
-
-    $(document).on(`focusout${NS}`, ".navbar-expand-md .nav-item.dropdown", function (this: HTMLElement) {
-      // 用箭頭函式，`this` 沿用外層的 HTMLElement，不用另外指定一個變數保存
-      setTimeout(() => {
-        if (!this.contains(document.activeElement)) {
-          $(this).find(".dropdown-toggle").attr("aria-expanded", "false");
-        }
-      }, 10);
-    });
-
-    return () => {
-      $(document).off(NS);
-      $(window).off(NS);
-      // 這兩個 handler 是直接綁在元素本身上，不是委派到 document，
-      // 要另外解綁（見上面各自綁定處的說明）
-      $(".navbar-toggler").off(NS);
-      $(".navbar-nav .dropdown-toggle").off(NS);
-    };
-  }, []);
+  // 手機選單開關／ESC／焦點鎖定、手機版子選單手風琴、aria 同步、訂閱電子報捲動，見 header-nav.ts
+  useEffect(() => setupHeaderNav(), []);
 
   return (
     <header className="header">

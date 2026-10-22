@@ -133,16 +133,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <Script src={withBasePath("/js/CSSPlugin.min.js")} strategy="beforeInteractive" />
 
         {/*
-          這兩支排在 afterInteractive（hydrate 完成後才執行），跟其他套件不同：
-          bsnav.min.js 裡有一段 `$(document).ready(...)`，一載入就會馬上重排
-          導覽列的 DOM（搬移選單、加 class）；coreScript.js 則是在 ready
-          裡呼叫 AOS.init()，會替所有 [data-aos] 元素加上 class 跟屬性。
-          這兩個「載入當下就馬上改 DOM」的動作如果跟其他套件一樣排
-          beforeInteractive（hydrate 前執行），改出來的 DOM 會跟 React 在
-          server 端算出來的 HTML 對不上，變成 hydration mismatch（實測過，
-          拿掉其中任一支、或改回 beforeInteractive 都會重現）。
+          coreScript.js 排在 afterInteractive（hydrate 完成後才執行），跟其他套件不同：它會呼叫 AOS.init()，
+          替所有 [data-aos] 元素加上 class 跟屬性。如果跟其他套件一樣排 beforeInteractive（hydrate 前執行），
+          改出來的 DOM 會跟 React 在 server 端算出來的 HTML 對不上，變成 hydration mismatch（實測過）。
+          （bsnav.min.js 也曾有同樣問題，手機選單改成 header-nav.ts 之後已不再載入，只保留它的 CSS。）
         */}
-        <Script src={withBasePath("/js/bsnav-master/dist/bsnav.min.js")} strategy="afterInteractive" />
         <Script src={withBasePath("/js/coreScript.js")} strategy="afterInteractive" />
       </body>
     </html>
