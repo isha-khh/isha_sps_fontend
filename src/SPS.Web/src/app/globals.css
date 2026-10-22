@@ -107,6 +107,18 @@
   border-bottom: 3px solid #0d6efd;
 }
 
+/*
+ * 手機版：頁籤下面那個三欄 `.row.gy-4` 自己有 -24px 的上邊距，平常靠子欄位的 margin-top（也是 24px）補回來；
+ * 但 style_rwd.css 在手機（max-width: 767px）把 `.main .content` 的 margin-top 改成 5px，補不回來，
+ * 搜尋列（年份下拉）就整個往上頂、蓋到頁籤（實測重疊約 3px，應該有 16px 間距）。
+ * 手機版把這個 row 的負邊距歸零，頁籤自己的 margin-bottom 才會生效。
+ */
+@media (max-width: 767px) {
+  .category-tab-strip + .row {
+    margin-top: 0;
+  }
+}
+
 @media (min-width: 768px) {
   .category-tab-strip {
     margin-bottom: 1.25rem;
