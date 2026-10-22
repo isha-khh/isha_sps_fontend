@@ -256,6 +256,20 @@
   }
 }
 
+/*
+ * iPad 直式（769–991px）頁首：桌機版選單在這個寬度會換行（logo 一排、選單一排），「訂閱電子報」被擠到第三排，
+ * 但固定頁首的高度與內容的上方留白只算到兩排，按鈕就蓋到麵包屑（issue #74，實測頁首 165px、麵包屑從 110px 開始）。
+ * 手機（≤768px）style_rwd.css 已經把按鈕絕對定位在右上角，這裡把同樣的做法延伸到 769–991px，頁首維持兩排。
+ */
+@media (min-width: 769px) and (max-width: 991px) {
+  .header .small-btn-box a.btn-light {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    margin-left: 0;
+  }
+}
+
 @media (min-width: 768px) {
   .category-tab-strip {
     margin-bottom: 1.25rem;
