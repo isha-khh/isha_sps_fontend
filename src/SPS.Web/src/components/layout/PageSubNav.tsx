@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 export interface PageSubNavLink {
   label: string;
@@ -31,9 +31,9 @@ export default function PageSubNav({ links, activeHref }: { links: PageSubNavLin
           <Fragment key={link.href}>
             {index > 0 && <li className="s_meu_sid"></li>}
             <li>
-              <a href={withBasePath(link.href)} title={link.label} className={link.href === activeHref ? "active" : undefined}>
+              <Link href={link.href} title={link.label} className={link.href === activeHref ? "active" : undefined}>
                 {link.label}
-              </a>
+              </Link>
             </li>
           </Fragment>
         ))}
