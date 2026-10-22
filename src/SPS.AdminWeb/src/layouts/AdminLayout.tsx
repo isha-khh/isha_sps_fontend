@@ -84,6 +84,7 @@ const allMenuItems: MenuItemWithPermission[] = [
         permissions: [Permission.ManageNews, Permission.ManageLicenses, Permission.ManageSiteContent],
         children: [
           { id: 'talent-course-list', label: '課程內容', url: '/talent-courses', permissions: [Permission.ManageNews] },
+          { id: 'talent-course-types', label: '課程類型', url: '/talent-courses/types', permissions: [Permission.ManageNews] },
           { id: 'xr-page', label: 'XR 頁面', url: '/content/xr', permissions: [Permission.ManageSiteContent] },
           { id: 'xr-licenses', label: 'XR 授權', url: '/licenses', permissions: [Permission.ManageLicenses] },
           { id: 'xr-license-keys', label: 'XR 簽章金鑰', url: '/licenses/keys', permissions: [Permission.ManageLicenses] },

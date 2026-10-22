@@ -27,7 +27,55 @@ interface TagFormData {
  * 標籤名稱在後端同一分類內要唯一；仍被公告使用的標籤後端會拒絕刪除，
  * 這裡直接顯示後端回的原因。
  */
-export const AnnouncementTagsPage = () => {
+export const AnnouncementTagsPage = () => (
+  <TagManagementPage
+    config={{
+      type: TagType.News,
+      title: '公告標籤',
+      parentLabel: '公告事項',
+      parentPath: '/announcements',
+      breadcrumbLabel: '標籤管理',
+      emptyText: '尚未建立任何公告標籤',
+      usageHeader: '使用中公告數',
+      usageBlockedTitle: '仍有公告使用中，無法刪除',
+      placeholder: '例如：智慧工安',
+    }}
+  />
+);
+
+/**
+ * 課程類型管理（人才培育）。「類型」是知識加值（/talent）搜尋列的類型下拉，跟公告共用的關鍵字標籤是獨立的兩組
+ * （後端 TagType.CourseType），管理員在這裡維護類型清單，再到課程表單替每堂課勾選。操作方式與公告標籤相同。
+ */
+export const CourseTypesPage = () => (
+  <TagManagementPage
+    config={{
+      type: TagType.CourseType,
+      title: '課程類型',
+      parentLabel: '人才培育',
+      parentPath: '/talent-courses',
+      breadcrumbLabel: '課程類型',
+      emptyText: '尚未建立任何課程類型',
+      usageHeader: '使用中課程數',
+      usageBlockedTitle: '仍有課程使用中，無法刪除',
+      placeholder: '例如：AI 基礎',
+    }}
+  />
+);
+
+interface TagManagementConfig {
+  type: number;
+  title: string;
+  parentLabel: string;
+  parentPath: string;
+  breadcrumbLabel: string;
+  emptyText: string;
+  usageHeader: string;
+  usageBlockedTitle: string;
+  placeholder: string;
+}
+
+const TagManagementPage = ({ config }: { config: TagManagementConfig }) => {
   const notify = useNotify();
   const { confirmDialog, ConfirmComponent } = useConfirm();
   const [tags, setTags] = useState<Tag[]>([]);
@@ -45,7 +93,7 @@ export const AnnouncementTagsPage = () => {
     setIsLoading(true);
     try {
       const result = await tagsApi.getPaged({
-        type: TagType.News,
+        type: config.type,
         name: appliedKeyword || undefined,
         page,
         pageSize: PAGE_SIZE,
@@ -90,7 +138,7 @@ export const AnnouncementTagsPage = () => {
       if (editing) {
         await tagsApi.updateTag(editing.id, { name, ordinal: formData.ordinal });
       } else {
-        await tagsApi.createTag({ type: TagType.News, name, ordinal: formData.ordinal });
+        await tagsApi.createTag({ type: config.type, name, ordinal: formData.ordinal });
       }
       closeModal();
       await fetchTags();
@@ -124,10 +172,10 @@ export const AnnouncementTagsPage = () => {
     <>
       <div className="space-y-6">
         <PageTitle
-          title="公告標籤"
+          title={config.title}
           items={[
-            { label: '公告事項', path: '/announcements' },
-            { label: '標籤管理', active: true },
+            { label: config.parentLabel, path: config.parentPath },
+            { label: config.breadcrumbLabel, active: true },
           ]}
         />
 
@@ -175,7 +223,7 @@ export const AnnouncementTagsPage = () => {
                   <thead>
                     <tr>
                       <th>標籤名稱</th>
-                      <th>使用中公告數</th>
+                      <th>{config.usageHeader}</th>
                       <th>排序</th>
                       <th>建立時間</th>
                       <th>操作</th>
@@ -248,7 +296,7 @@ export const AnnouncementTagsPage = () => {
                     <input
                       type="text"
                       className="input input-bordered"
-                      placeholder="例如：智慧工安"
+                      placeholder={config.placeholder}
                       maxLength={100}
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}

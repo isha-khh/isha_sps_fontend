@@ -46,6 +46,8 @@ export interface NewsSectionConfig {
   hasAttachments: boolean;
   /** 標籤（前台卡片上的關鍵字）；補助公告沒有 */
   hasTags: boolean;
+  /** 有「課程類型」多選（只有人才培育；類型在「課程類型」頁維護，對應前台知識加值的類型篩選） */
+  hasCourseTypes?: boolean;
   /** 專區專屬欄位 */
   metaFields?: MetaField[];
   /** 專區專屬欄位卡片的標題 */
@@ -107,6 +109,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
     hasSeverityType: false,
     hasAttachments: false,
     hasTags: true,
+    hasCourseTypes: true,
     metaTitle: '課程資訊',
     metaFields: [
       { key: 'organizer', label: '開課單位', placeholder: '例如：財團法人工業技術研究院南分院', hint: '列表表格的「開課單位」' },

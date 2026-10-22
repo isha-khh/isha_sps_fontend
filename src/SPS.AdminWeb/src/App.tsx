@@ -69,7 +69,7 @@ import { ChatPage } from '@/pages/chat/ChatPage';
 
 // Announcements
 import { AnnouncementCategoriesPage } from '@/pages/announcements/CategoriesPage';
-import { AnnouncementTagsPage } from '@/pages/announcements/TagsPage';
+import { AnnouncementTagsPage, CourseTypesPage } from '@/pages/announcements/TagsPage';
 
 // Knowledge
 import { RegulationCategoriesPage } from '@/pages/knowledge/RegulationCategoriesPage';
@@ -238,6 +238,7 @@ function App() {
           <Route path="support-notices/:id" element={<NewsDetailPage key="NewsDetailPage-2" section={2} />} />
           <Route path="support-notices/:id/edit" element={<NewsFormPage key="NewsFormPage-2" section={2} />} />
           <Route path="talent-courses" element={<NewsListPage key="NewsListPage-3" section={3} />} />
+          <Route path="talent-courses/types" element={<CourseTypesPage />} />
           <Route path="talent-courses/:id" element={<NewsDetailPage key="NewsDetailPage-3" section={3} />} />
           <Route path="talent-courses/:id/edit" element={<NewsFormPage key="NewsFormPage-3" section={3} />} />
           <Route path="tutoring-items/categories" element={<AnnouncementCategoriesPage key="AnnouncementCategoriesPage-4" section={4} />} />
