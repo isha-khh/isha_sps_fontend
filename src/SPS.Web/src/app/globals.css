@@ -236,6 +236,15 @@
   }
 }
 
+/*
+ * 我要投稿（/promotion/contribute）下方兩顆大按鈕：設計稿 style.css 的 `.contribute_box { gap: 0 20px }` 只有欄間距，
+ * 手機版 style_rwd.css 把按鈕改成整列（flex-wrap），上下兩顆就貼在一起（實測間距 0px）。補列間距；
+ * 沒換行的桌機版只有一列，不受影響。
+ */
+.contribute_box.d-flex {
+  row-gap: 1rem;
+}
+
 @media (min-width: 768px) {
   .category-tab-strip {
     margin-bottom: 1.25rem;
