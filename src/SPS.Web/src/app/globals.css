@@ -245,6 +245,17 @@
   row-gap: 1rem;
 }
 
+/*
+ * 手機版頁首「訂閱電子報」按鈕 hover 往下跳：style_rwd.css 在 767px 以下用 `top: 50%` + `transform: translateY(-50%)`
+ * 把按鈕垂直置中，但 style.css 的 `:hover` 規則寫 `transform: scale(1.05)`，會整個蓋掉 translateY，
+ * 按鈕少了 -50% 的位移就往下掉約半個按鈕高（實測 top 12px → 29px）。手機版 hover 把兩個 transform 合在一起。
+ */
+@media (max-width: 767px) {
+  .header .small-btn-box a.btn-light:hover {
+    transform: translateY(-50%) scale(1.05);
+  }
+}
+
 @media (min-width: 768px) {
   .category-tab-strip {
     margin-bottom: 1.25rem;
