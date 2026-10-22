@@ -1,5 +1,5 @@
-import { withBasePath } from "@/lib/api-client";
 import type { TutoringItem } from "@/lib/tutoring-data";
+import Link from "next/link";
 
 /**
  * 積木元件：產業輔導列表卡片，對應設計稿 page/tutoring/index.html 的
@@ -8,17 +8,17 @@ import type { TutoringItem } from "@/lib/tutoring-data";
  * 資料形狀不一樣所以獨立元件。後台沒填的欄位整列不顯示。
  */
 export default function TutoringItemCard({ item }: { item: TutoringItem }) {
-  const href = withBasePath(`/tutoring/${item.id}`);
+  const href = `/tutoring/${item.id}`;
 
   return (
     <div className="item">
       <div className="d-flex">
         {item.image && (
-          <a href={href} className="pic" title={item.title}>
+          <Link href={href} className="pic" title={item.title}>
             <div className="ratio ratio-4x3">
               <img className="img-fluid d-block" src={item.image} alt={item.title} />
             </div>
-          </a>
+          </Link>
         )}
 
         <div className="tit">
@@ -36,9 +36,9 @@ export default function TutoringItemCard({ item }: { item: TutoringItem }) {
 
               <div className="h3_solid">
                 <h3>
-                  <a href={href} title={item.title}>
+                  <Link href={href} title={item.title}>
                     {item.title}
-                  </a>
+                  </Link>
                 </h3>
               </div>
               <p>{item.description}</p>
@@ -74,10 +74,10 @@ export default function TutoringItemCard({ item }: { item: TutoringItem }) {
                 )}
               </ul>
 
-              <a href={href} title={`了解詳情：${item.title}`} className="more_x more_x_gu">
+              <Link href={href} title={`了解詳情：${item.title}`} className="more_x more_x_gu">
                 <span>了解詳情</span>
                 <i className="bi bi-arrow-right" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>

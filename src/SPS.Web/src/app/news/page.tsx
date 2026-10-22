@@ -9,7 +9,6 @@ import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import NewsListCard from "@/components/news/NewsListCard";
 import { fetchBanners, fetchNews, fetchPublishedNewsCategories } from "@/lib/api.server";
-import { withBasePath } from "@/lib/api-client";
 import type { NewsItem } from "@/lib/types";
 import {
   NEWS_ARTICLES,
@@ -19,6 +18,7 @@ import {
   formatNewsDate,
   sortNewsByViewCount,
 } from "@/lib/news-data";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "最新消息",
@@ -194,9 +194,9 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
         {activeTagName && (
           <p className="mb-4">
             標籤：<strong>{activeTagName}</strong>
-            <a href={withBasePath(activeHref)} className="ms-3 blue text-decoration-underline" title="清除標籤篩選">
+            <Link href={activeHref} className="ms-3 blue text-decoration-underline" title="清除標籤篩選">
               清除
-            </a>
+            </Link>
           </p>
         )}
 

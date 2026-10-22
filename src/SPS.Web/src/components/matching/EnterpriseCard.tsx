@@ -1,4 +1,4 @@
-import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 export interface EnterpriseCardData {
   href: string;
@@ -17,21 +17,21 @@ export default function EnterpriseCard({ data }: { data: EnterpriseCardData }) {
   return (
     <div className="col-lg-3 col-md-4 col-12 item mb-md-4 mb-4">
       <div className="item_box">
-        <a href={withBasePath(data.href)} className="pic" title={data.title}>
+        <Link href={data.href} className="pic" title={data.title}>
           <div className="ratio ratio-4x3">
             <img className="img-fluid d-block" src={data.image} alt={data.title} />
           </div>
-        </a>
+        </Link>
 
         <div className="tit mt-4">
-          <a href={withBasePath(data.href)} title={data.title}>
+          <Link href={data.href} title={data.title}>
             <div className="tit_nsl">
               <div className="h3_solid">
                 <h3>{data.title}</h3>
               </div>
               <p>{data.description}</p>
             </div>
-          </a>
+          </Link>
 
           {data.keywords.length > 0 && (
             <ul className="nav ul-key">
@@ -45,9 +45,9 @@ export default function EnterpriseCard({ data }: { data: EnterpriseCardData }) {
             </ul>
           )}
 
-          <a href={withBasePath(data.href)} title="詳細資料" className="det_more">
+          <Link href={data.href} title="詳細資料" className="det_more">
             詳細資料
-          </a>
+          </Link>
         </div>
       </div>
     </div>

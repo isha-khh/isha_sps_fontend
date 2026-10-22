@@ -1,5 +1,5 @@
-import { withBasePath } from "@/lib/api-client";
 import type { TalentCourse } from "@/lib/talent-data";
+import Link from "next/link";
 
 /**
  * 積木元件：人才培訓右側欄「熱門課程」，對應設計稿
@@ -18,12 +18,12 @@ export default function PopularCourses({ courses }: { courses: TalentCourse[] })
         <h4 className="mb-3">熱門課程</h4>
 
         {courses.map((course) => {
-          const href = withBasePath(`/talent/${course.id}`);
+          const href = `/talent/${course.id}`;
           return (
             <div className="item" key={course.id}>
               <div className="d-flex">
                 <div className="tit">
-                  <a href={href} title={course.title}>
+                  <Link href={href} title={course.title}>
                     <div className="tit_nsl">
                       <div className="tit_three d-flex mb-2">
                         <div className="tag-wrap">{course.city && <span className="badge-tag mb-0">{course.city}</span>}</div>
@@ -31,15 +31,15 @@ export default function PopularCourses({ courses }: { courses: TalentCourse[] })
                       </div>
                       <h3>{course.title}</h3>
                     </div>
-                  </a>
+                  </Link>
                 </div>
 
                 {course.remainingSeats !== undefined && (
-                  <a href={href} className="pic" title={course.title}>
+                  <Link href={href} className="pic" title={course.title}>
                     <div className="tit_quota">
                       剩餘<span className="blue">{course.remainingSeats}名</span>
                     </div>
-                  </a>
+                  </Link>
                 )}
               </div>
             </div>

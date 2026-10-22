@@ -4,6 +4,7 @@ import { fetchCompanies, fetchTagTaxonomy } from "@/lib/api.server";
 import { techGroupLabels, type TagTaxonomy } from "@/lib/company-tags";
 import type { CompanyList } from "@/lib/types";
 import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 interface EnterpriseListingData {
   href: string;
@@ -91,9 +92,9 @@ export default async function HomeEnterprise() {
           {visibleListings.map((listing) => (
             <div className="tit" key={listing.href}>
               <h3>
-                <a href={withBasePath(listing.href)} title={listing.name}>
+                <Link href={listing.href} title={listing.name}>
                   {listing.name}
-                </a>
+                </Link>
               </h3>
 
               <ul className="nav ul-key">
@@ -108,9 +109,9 @@ export default async function HomeEnterprise() {
 
               <p>{listing.description}</p>
 
-              <a href={withBasePath(listing.href)} className="news-arrow" title={listing.name}>
+              <Link href={listing.href} className="news-arrow" title={listing.name}>
                 <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt={`查看${listing.name}`} />
-              </a>
+              </Link>
             </div>
           ))}
         </div>

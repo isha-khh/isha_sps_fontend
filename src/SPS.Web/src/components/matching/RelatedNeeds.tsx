@@ -1,7 +1,7 @@
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
-import { withBasePath } from "@/lib/api-client";
 import type { MatchingNeed } from "@/lib/matching-need-data";
+import Link from "next/link";
 
 /**
  * 積木元件：需求詳情頁「相關需求」輪播，對應設計稿
@@ -37,7 +37,7 @@ export default function RelatedNeeds({ id, needs }: { id: string; needs: Matchin
             ],
           }}
           slides={needs.map((need) => (
-            <a href={withBasePath(`/matching/${need.id}`)} title={need.title} className="tit" key={need.id}>
+            <Link href={`/matching/${need.id}`} title={need.title} className="tit" key={need.id}>
               <div className="tit_nsl">
                 <div className="tit_three d-flex">
                   <div className="tag-wrap">
@@ -68,7 +68,7 @@ export default function RelatedNeeds({ id, needs }: { id: string; needs: Matchin
                   </li>
                 </ul>
               </div>
-            </a>
+            </Link>
           ))}
         />
       </div>

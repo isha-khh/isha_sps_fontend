@@ -1,5 +1,5 @@
-import { withBasePath } from "@/lib/api-client";
 import type { TalentCourse } from "@/lib/talent-data";
+import Link from "next/link";
 
 /**
  * 積木元件：人才培訓列表用的課程表格，對應設計稿
@@ -71,14 +71,14 @@ export default function CourseTable({ courses, startIndex = 0 }: { courses: Tale
                   )}
                 </td>
                 <td data-label="課程網址" className="td-link">
-                  <a
-                    href={withBasePath(`/talent/${course.id}`)}
+                  <Link
+                    href={`/talent/${course.id}`}
                     className="btn-course-link"
                     rel="noopener noreferrer"
                     title={`前往 ${course.title} 課程`}
                   >
                     前往課程
-                  </a>
+                  </Link>
                 </td>
               </tr>
             ))}

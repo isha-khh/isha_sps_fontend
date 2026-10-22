@@ -1,4 +1,4 @@
-import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 export interface IndustryCaseCardData {
   href: string;
@@ -24,14 +24,14 @@ export default function IndustryCaseCard({ data }: { data: IndustryCaseCardData 
   return (
     <div className="col-lg-4 col-md-6 col-12 item mb-md-4 mb-4">
       <div className="item_box">
-        <a href={withBasePath(data.href)} className="pic" title={data.title}>
+        <Link href={data.href} className="pic" title={data.title}>
           <div className="ratio ratio-4x3">
             <img className="img-fluid d-block" src={data.image} alt={data.title} />
           </div>
-        </a>
+        </Link>
 
         <div className="tit mt-4">
-          <a href={withBasePath(data.href)} title={data.title}>
+          <Link href={data.href} title={data.title}>
             <div className="tit_nsl">
               <div className="h3_solid">
                 <h3>{data.title}</h3>
@@ -48,7 +48,7 @@ export default function IndustryCaseCard({ data }: { data: IndustryCaseCardData 
                 </li>
               </ul>
             </div>
-          </a>
+          </Link>
 
           {data.keywords && data.keywords.length > 0 && (
             <ul className="nav ul-key">

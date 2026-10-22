@@ -14,6 +14,7 @@ import { fetchNews, fetchNewsDetail, fetchBanners } from "@/lib/api.server";
 import { NEWS_ARTICLES, getNewsArticle, formatNewsDate, sortNewsByViewCount } from "@/lib/news-data";
 import { withBasePath } from "@/lib/api-client";
 import NewsViewTracker from "@/components/news/NewsViewTracker";
+import Link from "next/link";
 
 /**
  * 查一篇公告，後端沒有（或連不到）才退回假資料用 id 查找。
@@ -135,13 +136,13 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
                   const tagItem = article.tagItems?.[index];
                   return (
                     <li key={keyword}>
-                      <a
-                        href={tagItem ? withBasePath(`/news?tag=${tagItem.id}`) : "#"}
+                      <Link
+                        href={tagItem ? `/news?tag=${tagItem.id}` : "#"}
                         title={`查看標籤「${keyword}」的公告`}
                         tabIndex={0}
                       >
                         {keyword}
-                      </a>
+                      </Link>
                     </li>
                   );
                 })}

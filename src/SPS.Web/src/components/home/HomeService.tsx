@@ -6,6 +6,7 @@ import CarouselControls from "@/components/ui/CarouselControls";
 import { withBasePath } from "@/lib/api-client";
 import { fetchIndustryAiLink, fetchSectionItems, NewsSections, type NewsSectionId } from "@/lib/api.server";
 import { resolveServeCategoryLink, type IndustryAiLink } from "@/lib/industry-ai-link";
+import Link from "next/link";
 
 interface ServiceSlideData {
   href: string;
@@ -138,11 +139,11 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
         }}
         slides={category.slides.map((slide) => (
           <div className="d-flex" key={slide.href}>
-            <a href={withBasePath(slide.href)} className="pic" title={`查看更多${slide.title}內容`}>
+            <Link href={slide.href} className="pic" title={`查看更多${slide.title}內容`}>
               <div className="ratio ratio-4x3">
                 <img className="img-fluid d-block" src={slide.image} alt={`查看更多${slide.title}內容`} />
               </div>
-            </a>
+            </Link>
 
             <div className="tit">
               <div className="tit_1">

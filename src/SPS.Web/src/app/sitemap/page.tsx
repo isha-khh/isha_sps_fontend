@@ -4,6 +4,7 @@ import BodyClass from "@/components/BodyClass";
 import { withBasePath } from "@/lib/api-client";
 import { fetchIndustryAiLink, fetchPublishedNewsCategories } from "@/lib/api.server";
 import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "網站導覽",
@@ -196,9 +197,9 @@ export default async function SitemapPage() {
                     <ul className="unit_links list-unstyled">
                       {group.links.map((link) => (
                         <li key={link.label}>
-                          <a href={withBasePath(link.href)} title={`前往 ${link.label}`}>
+                          <Link href={link.href} title={`前往 ${link.label}`}>
                             {link.label}
-                          </a>
+                          </Link>
                         </li>
                       ))}
                     </ul>
@@ -231,9 +232,9 @@ export default async function SitemapPage() {
                                   {child.label}
                                 </a>
                               ) : (
-                                <a href={withBasePath(child.href)} title={`前往 ${child.label}`}>
+                                <Link href={child.href} title={`前往 ${child.label}`}>
                                   {child.label}
-                                </a>
+                                </Link>
                               )}
                             </li>
                           ))}
@@ -254,19 +255,19 @@ export default async function SitemapPage() {
                   </div>
                   <ul className="unit_links list-unstyled">
                     <li>
-                      <a href={withBasePath("/promotion")} title="前往 產業案例">
+                      <Link href="/promotion" title="前往 產業案例">
                         產業案例
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href={withBasePath("/promotion/video")} title="前往 影音專區">
+                      <Link href="/promotion/video" title="前往 影音專區">
                         影音專區
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href={withBasePath("/promotion/contribute")} title="前往 我要投稿">
+                      <Link href="/promotion/contribute" title="前往 我要投稿">
                         我要投稿
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -282,14 +283,14 @@ export default async function SitemapPage() {
                   </div>
                   <ul className="unit_links list-unstyled">
                     <li>
-                      <a href={withBasePath("/matching/enterprise")} title="前往 企業名錄">
+                      <Link href="/matching/enterprise" title="前往 企業名錄">
                         企業名錄
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href={withBasePath("/matching")} title="前往 媒合對接">
+                      <Link href="/matching" title="前往 媒合對接">
                         媒合對接
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -305,9 +306,9 @@ export default async function SitemapPage() {
                   </div>
                   <ul className="unit_links list-unstyled">
                     <li>
-                      <a href={withBasePath("/faq")} title="前往 常見問題">
+                      <Link href="/faq" title="前往 常見問題">
                         常見問題
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -323,14 +324,14 @@ export default async function SitemapPage() {
                   </div>
                   <ul className="unit_links list-unstyled">
                     <li>
-                      <a href={withBasePath("/member/login")} title="前往 我要登入">
+                      <Link href="/member/login" title="前往 我要登入">
                         我要登入
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href={withBasePath("/member/register")} title="前往 註冊會員">
+                      <Link href="/member/register" title="前往 註冊會員">
                         註冊會員
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
