@@ -113,9 +113,9 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
               <ul className="nav ul-key">
                 {need.tags.map((tag) => (
                   <li key={tag.id}>
-                    <a href={withBasePath(`/matching?tags=${tag.id}`)} title={`查看同樣是「${tag.name}」的需求`} tabIndex={0}>
+                    <Link href={`/matching?tags=${tag.id}`} title={`查看同樣是「${tag.name}」的需求`} tabIndex={0}>
                       {tag.name}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

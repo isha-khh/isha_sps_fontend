@@ -1,4 +1,4 @@
-import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 export interface CategoryTabItem {
   label: string;
@@ -33,9 +33,9 @@ export default function CategoryTabList({
     <ul className="nav wid-cont">
       {items.map((item) => (
         <li key={item.label}>
-          <a href={withBasePath(item.href)} title={item.label} className={item.href === activeHref ? "active" : undefined}>
+          <Link href={item.href} title={item.label} className={item.href === activeHref ? "active" : undefined}>
             {item.label}
-          </a>
+          </Link>
         </li>
       ))}
     </ul>

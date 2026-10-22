@@ -1,5 +1,6 @@
 import Badge from "@/components/ui/Badge";
 import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 export interface NewsItemCardData {
   href: string;
@@ -19,7 +20,7 @@ export interface NewsItemCardData {
  */
 export default function NewsItemCard({ data }: { data: NewsItemCardData }) {
   return (
-    <a href={withBasePath(data.href)} className="news-item" title={`前往閱讀：${data.title}`}>
+    <Link href={data.href} className="news-item" title={`前往閱讀：${data.title}`}>
       <div className="news-date">
         <span className="day">{data.day}</span>
         <span className="year-month">{data.yearMonth}</span>
@@ -36,6 +37,6 @@ export default function NewsItemCard({ data }: { data: NewsItemCardData }) {
       <div className="news-arrow" aria-hidden="true">
         <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt="" />
       </div>
-    </a>
+    </Link>
   );
 }

@@ -7,6 +7,7 @@ import { sortByViewCount } from "@/lib/content-list-utils";
 import type { PromotionCase } from "@/lib/types";
 import { PROMOTION_FALLBACK_IMAGE } from "@/lib/promotion-data";
 import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 interface IndustryCaseData {
   href: string;
@@ -91,13 +92,13 @@ export default async function HomeIndustry() {
               <div className="d-flex" key={`${item.href}-${index}`}>
                 <div className="tit">
                   <div className="tit_1">
-                    <a href={withBasePath(item.href)} title="查看更多產業案例">
+                    <Link href={item.href} title="查看更多產業案例">
                       <div className="d-flex">
                         <h3>{item.title}</h3>
                         <div className="i_number">{String(index + 1).padStart(2, "0")}</div>
                       </div>
                       <p>{item.description}</p>
-                    </a>
+                    </Link>
                   </div>
 
                   <div className="mo_pa_box">
@@ -106,11 +107,11 @@ export default async function HomeIndustry() {
                   </div>
                 </div>
 
-                <a href={withBasePath(item.href)} className="pic" title="查看更多產業案例內容">
+                <Link href={item.href} className="pic" title="查看更多產業案例內容">
                   <div className="ratio ratio-4x3">
                     <img className="img-fluid d-block" src={item.image} alt={item.title} />
                   </div>
-                </a>
+                </Link>
               </div>
             ))}
           />

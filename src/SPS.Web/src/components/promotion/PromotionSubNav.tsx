@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 const LINKS = [
   { label: "產業案例", href: "/promotion" },
@@ -20,9 +20,9 @@ export default function PromotionSubNav({ activeHref }: { activeHref: string }) 
           <Fragment key={link.href}>
             {index > 0 && <li className="s_meu_sid"></li>}
             <li>
-              <a href={withBasePath(link.href)} title={link.label} className={link.href === activeHref ? "active" : undefined}>
+              <Link href={link.href} title={link.label} className={link.href === activeHref ? "active" : undefined}>
                 {link.label}
-              </a>
+              </Link>
             </li>
           </Fragment>
         ))}

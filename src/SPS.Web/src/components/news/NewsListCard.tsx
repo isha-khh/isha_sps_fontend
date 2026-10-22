@@ -1,5 +1,6 @@
 import Badge from "@/components/ui/Badge";
 import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 export interface NewsListCardMeta {
   icon: "calendar" | "geo";
@@ -37,15 +38,15 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
     <div className={data.image ? "item" : "item no-pic"}>
       <div className="d-flex">
         {data.image && (
-          <a href={withBasePath(data.href)} className="pic" title={data.title}>
+          <Link href={data.href} className="pic" title={data.title}>
             <div className="ratio ratio-4x3">
               <img className="img-fluid d-block" src={data.image} alt={data.title} />
             </div>
-          </a>
+          </Link>
         )}
 
         <div className="tit">
-          <a href={withBasePath(data.href)} title={data.title}>
+          <Link href={data.href} title={data.title}>
             <div className="tit_nsl">
               <div className="tit_three d-flex mb-2">
                 <div className="tag-wrap">
@@ -81,15 +82,15 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
             <div className="news-arrow" aria-hidden="true">
               <img className="img-fluid d-block" src={withBasePath("/images/home/arrow_black.svg")} alt="" />
             </div>
-          </a>
+          </Link>
 
           {data.keywords && data.keywords.length > 0 && (
             <ul className="nav ul-key">
               {data.keywords.map((keyword) => (
                 <li key={keyword.label}>
-                  <a href={keyword.href ? withBasePath(keyword.href) : "#"} title={`查看標籤「${keyword.label}」的公告`} tabIndex={0}>
+                  <Link href={keyword.href ? keyword.href : "#"} title={`查看標籤「${keyword.label}」的公告`} tabIndex={0}>
                     {keyword.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

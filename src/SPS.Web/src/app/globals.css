@@ -75,12 +75,14 @@
 .category-tab-strip ul {
   display: flex;
   width: max-content;
+  min-width: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .category-tab-strip li {
+  flex: 1 0 auto;
   text-align: center;
 }
 
@@ -117,6 +119,130 @@
   .category-tab-strip + .row {
     margin-top: 0;
   }
+}
+
+/*
+ * 手機版：知識加值（/talent）課程表格改成直向卡片。7 欄的表格在手機只能縮字加橫向捲動，
+ * 「聯絡人」「課程網址」會被切掉。`CourseTable` 每個 `td` 已有 `data-label`，這裡用它顯示欄名。
+ * 設計稿的 style.css／style_rwd.css 沒有這段，所以寫在這裡（不透過 @layer，才蓋得過設計稿的欄寬）。
+ */
+@media (max-width: 767px) {
+  .course-table-container {
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .course-table-container .course-table,
+  .course-table-container .course-table tbody,
+  .course-table-container .course-table tr,
+  .course-table-container .course-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .course-table-container .course-table thead {
+    display: none;
+  }
+
+  .course-table-container .course-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+  }
+
+  .course-table-container .course-table td {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+    text-align: right;
+    white-space: normal;
+  }
+
+  .course-table-container .course-table td::before {
+    content: attr(data-label);
+    flex: 0 0 5em;
+    font-weight: 700;
+    color: #0d6efd;
+    text-align: left;
+  }
+
+  /* 序號不用欄名，當卡片左上角的小標；課程名稱當標題整列顯示 */
+  .course-table-container .course-table td.td-seq {
+    justify-content: flex-start;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .course-table-container .course-table td.td-seq::before {
+    flex: 0 0 auto;
+  }
+
+  .course-table-container .course-table td.td-name {
+    display: block;
+    padding-top: 0.75rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .course-table-container .course-table td.td-name::before {
+    display: none;
+  }
+
+  .course-table-container .course-table td.td-date {
+    white-space: normal;
+  }
+
+  /* 聯絡人有「姓名」「電話」兩個子元素，用 grid 讓它們疊在右欄、欄名佔左欄 */
+  .course-table-container .course-table td.td-contact {
+    display: grid;
+    grid-template-columns: 5em 1fr;
+    column-gap: 0.75rem;
+  }
+
+  .course-table-container .course-table td.td-contact::before {
+    grid-row: 1 / span 2;
+  }
+
+  .course-table-container .course-table td.td-contact > * {
+    grid-column: 2;
+  }
+
+  .course-table-container .course-table td.td-link {
+    display: block;
+    border-bottom: 0;
+    text-align: center;
+  }
+
+  .course-table-container .course-table td.td-link::before {
+    display: none;
+  }
+
+  .course-table-container .course-table .btn-course-link {
+    display: block;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+  }
+}
+
+/*
+ * 我要投稿（/promotion/contribute）下方兩顆大按鈕：設計稿 style.css 的 `.contribute_box { gap: 0 20px }` 只有欄間距，
+ * 手機版 style_rwd.css 把按鈕改成整列（flex-wrap），上下兩顆就貼在一起（實測間距 0px）。補列間距；
+ * 沒換行的桌機版只有一列，不受影響。
+ */
+.contribute_box.d-flex {
+  row-gap: 1rem;
 }
 
 @media (min-width: 768px) {

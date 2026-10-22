@@ -1,3 +1,4 @@
+import VideoPlayLink from "@/components/promotion/VideoPlayLink";
 import { getFancyboxVideoProps } from "@/lib/content-list-utils";
 
 export interface VideoGridCardData {
@@ -73,12 +74,12 @@ export default function VideoGridCard({ data, group }: { data: VideoGridCardData
         </a>
 
         <div className="tit mt-4">
-          <a href={data.href} title={watchTitle} target="_blank" rel="noopener noreferrer">
+          <VideoPlayLink playOnSite={hasSource} href={data.href} title={watchTitle} target="_blank" rel="noopener noreferrer">
             <div className="tit_nsl">
               <div className="date">{data.date}</div>
               <h3>{data.title}</h3>
             </div>
-          </a>
+          </VideoPlayLink>
 
           {data.keywords && data.keywords.length > 0 && (
             <ul className="nav ul-key">

@@ -1,6 +1,6 @@
-import { withBasePath } from "@/lib/api-client";
 import type { MatchingNeed } from "@/lib/matching-need-data";
 import FollowButton from "@/components/matching/FollowButton";
+import Link from "next/link";
 
 /**
  * 積木元件：「媒合對接」列表頁單一需求項目，對應設計稿
@@ -25,9 +25,9 @@ export default function NeedListItem({ need }: { need: MatchingNeed }) {
 
           <div className="h3_solid">
             <h3>
-              <a href={withBasePath(`/matching/${need.id}`)} title={need.title}>
+              <Link href={`/matching/${need.id}`} title={need.title}>
                 {need.title}
-              </a>
+              </Link>
             </h3>
           </div>
 
@@ -68,10 +68,10 @@ export default function NeedListItem({ need }: { need: MatchingNeed }) {
 
             <ul className="nav d-md-block d-flex sup_ul_s">
               <li className="mb-3">
-                <a href={withBasePath(`/matching/${need.id}`)} title="查看需求" className="more_x">
+                <Link href={`/matching/${need.id}`} title="查看需求" className="more_x">
                   <span>查看需求</span>
                   <i className="bi bi-arrow-right" aria-hidden="true" />
-                </a>
+                </Link>
               </li>
               <li>
                 <FollowButton demandId={Number(need.id)} variant="list" />
@@ -84,9 +84,9 @@ export default function NeedListItem({ need }: { need: MatchingNeed }) {
           <ul className="nav ul-key">
             {need.tags.map((tag) => (
               <li key={tag.id}>
-                <a href={withBasePath(`/matching?tags=${tag.id}`)} title={`查看同樣是「${tag.name}」的需求`} tabIndex={0}>
+                <Link href={`/matching?tags=${tag.id}`} title={`查看同樣是「${tag.name}」的需求`} tabIndex={0}>
                   {tag.name}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

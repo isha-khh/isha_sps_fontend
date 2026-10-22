@@ -1,5 +1,5 @@
 import Badge from "@/components/ui/Badge";
-import { withBasePath } from "@/lib/api-client";
+import Link from "next/link";
 
 export interface ServeItemCardData {
   href: string;
@@ -33,15 +33,15 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
     <div className="col-lg-4 col-md-6 col-12 item mb-md-4 mb-4">
       <div className="item_box">
         {data.image && (
-          <a href={withBasePath(data.href)} className="pic" title={data.title}>
+          <Link href={data.href} className="pic" title={data.title}>
             <div className="ratio ratio-4x3">
               <img className="img-fluid d-block" src={data.image} alt={data.title} />
             </div>
-          </a>
+          </Link>
         )}
 
         <div className={data.image ? "tit mt-4" : "tit"}>
-          <a href={withBasePath(data.href)} title={data.title}>
+          <Link href={data.href} title={data.title}>
             <div className="tit_nsl">
               <div className="tit_three d-flex mb-2">
                 <div className="tag-wrap">
@@ -65,7 +65,7 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
                 </ul>
               )}
             </div>
-          </a>
+          </Link>
 
           {data.keywords && data.keywords.length > 0 && (
             <ul className="nav ul-key">

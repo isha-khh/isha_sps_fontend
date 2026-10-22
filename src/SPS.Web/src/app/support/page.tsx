@@ -10,6 +10,7 @@ import { buildListHref, readListQuery } from "@/lib/list-query";
 import { withBasePath } from "@/lib/api-client";
 import { fetchBanners, fetchDownloadResources, fetchSectionItems, fetchSupportInfoBlocks, NewsSections } from "@/lib/api.server";
 import DownloadDialog from "@/components/ui/DownloadDialog";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "本計畫補助",
@@ -178,7 +179,7 @@ export default async function SupportPage({ searchParams }: PageProps<"/support"
             {!notices.backendAvailable && <p>目前無法載入補助公告，請稍後再試。</p>}
             {notices.backendAvailable && announcements.length === 0 && <p>目前沒有補助公告。</p>}
             {announcements.map((item) => (
-              <a href={withBasePath(`/support/${item.id}`)} className="news-item" title={`前往閱讀：${item.title}`} key={item.id}>
+              <Link href={`/support/${item.id}`} className="news-item" title={`前往閱讀：${item.title}`} key={item.id}>
                 <div className="news-content">
                   <span className="date blue mb-1 d-block">{item.date}</span>
                   <h4>{item.title}</h4>
@@ -186,7 +187,7 @@ export default async function SupportPage({ searchParams }: PageProps<"/support"
                 <div className="news-arrow" aria-hidden="true">
                   <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt="" />
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
           {noticeTotalPages > 1 && <Pagination currentPage={noticePage} totalPages={noticeTotalPages} getHref={(target) => buildListHref("/support", { page: target })} />}
