@@ -14,7 +14,7 @@ import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
  * 獲獎事蹟圖片與合作案例說明。資料與公司資料同一份（`/api/member/company`），標籤另走 `/api/member/company/tags`。
  *
  * 需求端（只有需求、沒有供給）沒有這些欄位，顯示說明文字；供需雙方的公司兩邊都有。
- * 儲存需要「編輯公司資料」權限（經理才有）；儲存後立即生效。
+ * 儲存需要「編輯公司資料」權限（擁有者才有）；儲存後立即生效。
  */
 export default function ProductPanel() {
   const { taxonomy } = useTagTaxonomy();
@@ -69,7 +69,7 @@ export default function ProductPanel() {
       setMessage("已儲存，前台企業詳情已更新");
     } catch (err) {
       const status = (err as { response?: { status?: number } }).response?.status;
-      setError(status === 403 ? "您的帳號沒有編輯公司資料的權限（只有經理可以編輯）。" : getApiErrorMessage(err, "儲存失敗，請稍後再試"));
+      setError(status === 403 ? "您的帳號沒有編輯公司資料的權限（只有擁有者可以編輯）。" : getApiErrorMessage(err, "儲存失敗，請稍後再試"));
     } finally {
       setSaving(false);
     }

@@ -54,7 +54,13 @@ public class MemberService : IMemberService
         if (request.Extension != null) member.Extension = request.Extension;
         if (request.MobilePhone != null) member.MobilePhone = request.MobilePhone;
         if (request.Status.HasValue) member.Status = request.Status.Value;
-        if (request.MemberPosition.HasValue) member.MemberPosition = request.MemberPosition.Value;
+        if (request.MemberPosition.HasValue && request.MemberPosition.Value != member.MemberPosition)
+        {
+            member.MemberPosition = request.MemberPosition.Value;
+            // 身分改了，權限要跟著重算（擁有者＝可編輯公司資料、一般成員＝只能查看）
+            var calculated = MemberPermissionCalculator.Calculate(member.Role, member.MemberPosition);
+            if (calculated != MemberPermission.None) member.Permissions = calculated;
+        }
         if (request.Remark != null) member.Remark = request.Remark;
         if (request.MemberJobTitle != null) member.MemberJobTitle = request.MemberJobTitle;
         if (request.Position != null) member.Position = request.Position;

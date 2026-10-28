@@ -45,8 +45,8 @@ const SupplierTierLabels: Record<number, string> = {
 };
 
 const MemberPositionLabels: Record<number, string> = {
-  1: '經理',
-  2: '員工',
+  1: '擁有者',
+  2: '一般成員',
 };
 
 const StatusLabels: Record<number, string> = {

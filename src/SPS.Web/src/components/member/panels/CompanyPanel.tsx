@@ -74,7 +74,7 @@ function buildChanges(form: CompanyForm, original: CompanyForm): MemberUpdateCom
  * （不是從網址帶公司 id，所以改不到別家公司）。
  *
  * 公司名稱、統一編號、審核狀態只能唯讀——這些是審核通過時確認的身分資料，要改得洽平台承辦單位（後台）。
- * 編輯需要「編輯公司資料」權限（經理才有），沒有權限時儲存會被後端擋下並顯示訊息。
+ * 編輯需要「編輯公司資料」權限（擁有者才有），沒有權限時儲存會被後端擋下並顯示訊息。
  * 儲存後立即生效，前台企業名錄的企業詳情馬上會顯示新內容。
  */
 export default function CompanyPanel() {
@@ -147,7 +147,7 @@ export default function CompanyPanel() {
       setMessage("已儲存，前台企業詳情已更新");
     } catch (err) {
       const status = (err as { response?: { status?: number } }).response?.status;
-      setError(status === 403 ? "您的帳號沒有編輯公司資料的權限（只有經理可以編輯）。" : getApiErrorMessage(err, "儲存失敗，請稍後再試"));
+      setError(status === 403 ? "您的帳號沒有編輯公司資料的權限（只有擁有者可以編輯）。" : getApiErrorMessage(err, "儲存失敗，請稍後再試"));
     } finally {
       setSaving(false);
     }

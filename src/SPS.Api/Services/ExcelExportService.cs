@@ -208,8 +208,8 @@ public class ExcelExportService : IExcelExportService
             };
             ws.Cell(row, 10).Value = m.MemberPosition switch
             {
-                MemberPosition.Manager => "經理",
-                MemberPosition.Employee => "員工",
+                MemberPosition.Manager => "擁有者",
+                MemberPosition.Employee => "一般成員",
                 _ => string.Empty
             };
             ws.Cell(row, 11).Value = m.Status switch

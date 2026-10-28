@@ -554,6 +554,11 @@ public class ApplicationReviewService : IApplicationReviewService
             _logger.LogInformation("Processing {MemberCount} members for application {ApplicationNumber}",
                 applicationMembers.Count, application.ApplicationNumber);
 
+            // 公司還沒有任何指定聯絡窗口時，申請的第一位成員（註冊人）預設為聯絡窗口，避免「取得聯繫窗口」查不到人（issue #81）
+            var needsDesignatedContact = company != null
+                && !await _unitOfWork.Members.GetQueryable()
+                    .AnyAsync(m => m.CompanyId == company.Id && m.IsDesignatedContact, cancellationToken);
+
             if (application.ExistingMemberId.HasValue)
             {
                 // 升級申請：更新既有會員，不新建帳號（姓名/Email 沿用既有
@@ -567,7 +572,7 @@ public class ApplicationReviewService : IApplicationReviewService
                 }
 
                 var primaryAppMember = applicationMembers.First();
-                var permissions = CalculatePermissions(application.MemberRole, primaryAppMember.MemberPosition);
+                var permissions = MemberPermissionCalculator.Calculate(application.MemberRole, primaryAppMember.MemberPosition);
 
                 existingMember.CompanyId = company?.Id;
                 existingMember.Role = application.MemberRole;
@@ -575,6 +580,7 @@ public class ApplicationReviewService : IApplicationReviewService
                 existingMember.Permissions = permissions;
                 existingMember.ApplicationId = application.Id;
                 existingMember.IsApproved = true;
+                if (needsDesignatedContact) existingMember.IsDesignatedContact = true;
                 // 產業別所有申請類型都必填（含升級），所屬公司名稱只有
                 // 個人會員才寫回 Member（企業會員的公司名稱已經由真正的
                 // Company 記錄承接，不重複存一份）
@@ -611,7 +617,7 @@ public class ApplicationReviewService : IApplicationReviewService
                 // 的資料完整性漏洞，這次升級流程提高觸發機率一併修掉）
                 foreach (var appMember in applicationMembers)
                 {
-                    var permissions = CalculatePermissions(application.MemberRole, appMember.MemberPosition);
+                    var permissions = MemberPermissionCalculator.Calculate(application.MemberRole, appMember.MemberPosition);
                     var existingByEmail = await _unitOfWork.Members
                         .GetByEmailAsync(appMember.Email, cancellationToken);
 
@@ -623,6 +629,7 @@ public class ApplicationReviewService : IApplicationReviewService
                         existingByEmail.Permissions = permissions;
                         existingByEmail.ApplicationId = application.Id;
                         existingByEmail.IsApproved = true;
+                        if (needsDesignatedContact && appMember == applicationMembers.First()) existingByEmail.IsDesignatedContact = true;
                         if (!string.IsNullOrEmpty(application.Industry))
                         {
                             existingByEmail.Industry = application.Industry;
@@ -662,6 +669,7 @@ public class ApplicationReviewService : IApplicationReviewService
                         Permissions = permissions,
                         ApplicationId = application.Id,
                         IsApproved = true,
+                        IsDesignatedContact = needsDesignatedContact && appMember == applicationMembers.First(),
                         Status = Domain.Enums.Status.Active,
                         FirstChanged = false,
                         PasswordChanged = false,
@@ -689,20 +697,6 @@ public class ApplicationReviewService : IApplicationReviewService
             _logger.LogError(ex, "Error creating members and company for application {ApplicationId}", application.Id);
             return Result<bool>.Failure($"創建會員失敗: {ex.Message}");
         }
-    }
-
-    private static MemberPermission CalculatePermissions(
-        MemberRole role,
-        MemberPosition position)
-    {
-        return (role, position) switch
-        {
-            (MemberRole.Supplier, MemberPosition.Manager) => MemberPermission.SupplierManager,
-            (MemberRole.Supplier, MemberPosition.Employee) => MemberPermission.SupplierEmployee,
-            (MemberRole.Buyer, MemberPosition.Manager) => MemberPermission.BuyerManager,
-            (MemberRole.Buyer, MemberPosition.Employee) => MemberPermission.BuyerEmployee,
-            _ => MemberPermission.None
-        };
     }
 
     private async Task<string> GenerateMemberNumberAsync(CancellationToken cancellationToken)

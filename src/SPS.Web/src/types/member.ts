@@ -20,8 +20,8 @@ export const MemberRole = {
 export type MemberRole = typeof MemberRole[keyof typeof MemberRole];
 
 export const MemberPosition = {
-  Manager: 1,   // 經理
-  Employee: 2   // 員工
+  Manager: 1,   // 擁有者（可編輯企業資料）
+  Employee: 2   // 一般成員（可媒合、可查看公司資料）
 } as const;
 
 export type MemberPosition = typeof MemberPosition[keyof typeof MemberPosition];

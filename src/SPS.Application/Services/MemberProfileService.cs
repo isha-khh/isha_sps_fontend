@@ -450,6 +450,10 @@ public class MemberProfileService : IMemberProfileService
         if (emailExists)
             return Result<MemberListItemResponse>.Failure("該 Email 已被使用");
 
+        // 依成員身分與公司角色套用權限（擁有者可編輯公司資料；一般成員只能查看），和審核通過時一致
+        var memberPermissions = MemberPermissionCalculator.Calculate(manager.Role, request.MemberPosition);
+        if (memberPermissions == MemberPermission.None) memberPermissions = MemberPermission.ViewCompany;
+
         var member = new Domain.Entities.Member
         {
             Id = Guid.NewGuid(),
@@ -469,7 +473,7 @@ public class MemberProfileService : IMemberProfileService
             DataMode = DataMode.Normal,
             IsApproved = true,
             IsDesignatedContact = request.IsDesignatedContact,
-            Permissions = MemberPermission.ViewCompany,
+            Permissions = memberPermissions,
             CreatedTime = DateTime.UtcNow,
             UpdatedTime = DateTime.UtcNow
         };

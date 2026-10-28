@@ -68,9 +68,9 @@ public enum MemberPermission : long
     SupplierManager = ViewCompany | EditCompany | ViewProduct | CreateProduct | EditProduct | DeleteProduct,
 
     /// <summary>
-    /// 供給端員工：產品維護權限
+    /// 供給端一般成員：可查看公司資料＋產品維護權限（不能編輯公司資料）
     /// </summary>
-    SupplierEmployee = ViewProduct | CreateProduct | EditProduct | DeleteProduct,
+    SupplierEmployee = ViewCompany | ViewProduct | CreateProduct | EditProduct | DeleteProduct,
 
     /// <summary>
     /// 需求端經理：所有權限（公司資料 + 需求管理）
@@ -78,7 +78,7 @@ public enum MemberPermission : long
     BuyerManager = ViewCompany | EditCompany | ViewDemand | CreateDemand | EditDemand | DeleteDemand,
 
     /// <summary>
-    /// 需求端員工：需求維護權限
+    /// 需求端一般成員：可查看公司資料＋需求維護權限（不能編輯公司資料）
     /// </summary>
-    BuyerEmployee = ViewDemand | CreateDemand | EditDemand | DeleteDemand
+    BuyerEmployee = ViewCompany | ViewDemand | CreateDemand | EditDemand | DeleteDemand
 }

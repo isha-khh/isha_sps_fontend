@@ -14,7 +14,7 @@ interface MemberTableProps {
 }
 
 const memberPositionLabel = (memberPosition: MemberPosition) =>
-  memberPosition === MemberPosition.Manager ? '經理' : '員工';
+  memberPosition === MemberPosition.Manager ? '擁有者' : '一般成員';
 
 export const MemberTable = ({ members, isLoading, onUpdateStatus, onUpdateMemberPosition, selectable, selectedIds, onSelectionChange }: MemberTableProps) => {
   const allSelected = members.length > 0 && members.every((m) => selectedIds?.has(m.id));
@@ -177,13 +177,13 @@ export const MemberTable = ({ members, isLoading, onUpdateStatus, onUpdateMember
     ...(onUpdateMemberPosition
       ? [
           {
-            label: '調整為經理',
+            label: '調整為擁有者',
             icon: 'lucide--arrow-left-right',
             onClick: (member: Member) => onUpdateMemberPosition(member.id, MemberPosition.Manager),
             show: (member: Member) => member.memberPosition !== MemberPosition.Manager,
           },
           {
-            label: '調整為員工',
+            label: '調整為一般成員',
             icon: 'lucide--arrow-left-right',
             onClick: (member: Member) => onUpdateMemberPosition(member.id, MemberPosition.Employee),
             show: (member: Member) => member.memberPosition !== MemberPosition.Employee,

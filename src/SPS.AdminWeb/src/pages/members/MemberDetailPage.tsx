@@ -12,8 +12,8 @@ const MemberRoleLabels: Record<MemberRole, string> = {
 };
 
 const MemberPositionLabels: Record<MemberPosition, string> = {
-  1: '經理',
-  2: '員工',
+  1: '擁有者',
+  2: '一般成員',
 };
 
 const StatusOptions: { value: MemberStatus; label: string }[] = [

@@ -42,8 +42,8 @@ const EMPTY_FORM: MemberForm = {
 
 /**
  * 積木元件：會員中心「成員管理」面板（企業會員專屬）。接 `/api/member/company/members` 一組端點：
- * 公司經理（有「編輯公司資料」權限）可以新增、修改、停用／啟用、刪除同公司的成員、重設成員密碼、指定聯絡窗口；
- * 沒有權限的成員（員工）後端回 403，這裡顯示說明而不是錯誤。**指定聯絡窗口的人，就是企業名錄「取得聯繫窗口」
+ * 公司擁有者（有「編輯公司資料」權限）可以新增、修改、停用／啟用、刪除同公司的成員、重設成員密碼、指定聯絡窗口；
+ * 沒有權限的成員（一般成員）後端回 403，這裡顯示說明而不是錯誤。**指定聯絡窗口的人，就是企業名錄「取得聯繫窗口」
  * 給出去的聯絡人與電話**，所以這裡改的資料會直接對外。
  *
  * 後端會擋：只能管同公司、不能刪除或停用自己、狀態只能啟用／停用、新密碼至少 8 個字元。
@@ -186,7 +186,7 @@ export default function MembersPanel() {
     return (
       <p className="text-muted">
         <i className="bi bi-info-circle-fill me-1" aria-hidden="true"></i>
-        只有公司經理可以管理成員。需要新增或停用成員，請洽貴公司的經理。
+        只有公司擁有者可以管理成員。需要新增或停用成員，請洽貴公司的擁有者。
       </p>
     );
   }
@@ -228,10 +228,10 @@ export default function MembersPanel() {
           {editing === "new" && (
             <>
               <div className="menb_inp_tit form-group">
-                <label className="mb-2">成員身分</label>
+                <label className="mb-2">帳號權限</label>
                 <select className="form-select" value={form.memberPosition} onChange={(e) => setForm((prev) => ({ ...prev, memberPosition: Number(e.target.value) }))}>
-                  <option value={POSITION_EMPLOYEE}>員工</option>
-                  <option value={POSITION_MANAGER}>經理</option>
+                  <option value={POSITION_EMPLOYEE}>一般成員（可媒合、可查看公司資料）</option>
+                  <option value={POSITION_MANAGER}>擁有者（可編輯企業資料、管理成員）</option>
                 </select>
               </div>
               <div className="menb_inp_tit form-group">
@@ -276,7 +276,7 @@ export default function MembersPanel() {
                   <div>
                     <strong>{member.name}</strong>
                     {isMe && <span className="badge bg-secondary ms-2">本人</span>}
-                    {member.memberPosition === POSITION_MANAGER && <span className="badge bg-primary ms-2">經理</span>}
+                    {member.memberPosition === POSITION_MANAGER && <span className="badge bg-primary ms-2">擁有者</span>}
                     {member.isDesignatedContact && <span className="badge bg-success ms-2">指定聯絡窗口</span>}
                     {!active && <span className="badge bg-warning text-dark ms-2">已停用</span>}
                     <div className="small text-muted">{member.email}</div>
