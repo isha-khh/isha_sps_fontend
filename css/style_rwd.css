@@ -217,6 +217,17 @@
 
 
 @media (max-width: 991px) {
+    .support .support_box .d-flex .support_er {
+        height: 545px;
+    }
+    .navbar-expand-md .navbar-collapse {
+        justify-content: center!important;
+    }
+    .small-btn-box a.btn-light {
+        position: absolute;
+        top :20px;
+        right: 10px;
+    }
     .support_box .d-flex .support_er {
         padding: 15px;
     }
@@ -692,6 +703,12 @@
 
 
 @media (max-width: 767px) {
+
+
+    .small-btn-box a.btn-light:hover {
+        top: 50%;
+        transform: translateY(-50%);
+    }
     .xr_h.xr_h_s    span {
         padding: 0 30px;
     }
@@ -1706,6 +1723,7 @@
     }
     .navbar-nav .nav-item .dropdown-menu.show {
         padding: 10px 20px !important;
+        margin-top: 15px;
     }
     .navbar-nav .dropdown-menu.show li ul li {
         border-bottom: none;
