@@ -77,9 +77,19 @@ export type PromotionCase = {
     createdTime: string;
 };
 
+/** 案例詳情頁「公司簡介」區塊的企業公開資料（後端 `SuccessCaseCompanyIntroDto`，只含已審核啟用的關聯企業） */
+export type PromotionCaseCompany = {
+    id: string;
+    name: string;
+    introduction?: string | null;
+    orgUrl?: string | null;
+    photoUrl?: string | null;
+};
+
 export type PromotionCaseDetail = PromotionCase & {
     // 直接存 puck Data，跟 News.Content／Question.Answer 同一套格式
     content: string;
+    companies?: PromotionCaseCompany[];
 };
 
 /**

@@ -94,6 +94,7 @@ public class SuccessCaseService : ISuccessCaseService
                 return Result<SuccessCaseDto>.Failure("成功案例不存在");
 
             var dto = await MapToDtoAsync(successCase);
+            dto.Companies = await LoadCompanyIntrosAsync(successCase.CompanyIds);
             return Result<SuccessCaseDto>.Success(dto);
         }
         catch (Exception ex)
@@ -300,6 +301,32 @@ public class SuccessCaseService : ISuccessCaseService
             _logger.LogError(ex, "Error getting success case statistics");
             return Result<SuccessCaseStatisticsDto>.Failure($"獲取成功案例統計失敗: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// 依關聯企業 Id（保留後台選擇的順序）取出公開簡介；未通過審核或未啟用的企業略過
+    /// </summary>
+    private async Task<List<SuccessCaseCompanyIntroDto>> LoadCompanyIntrosAsync(List<Guid> companyIds)
+    {
+        if (companyIds.Count == 0) return new List<SuccessCaseCompanyIntroDto>();
+
+        var companies = await _unitOfWork.Companies.GetQueryable()
+            .Include(c => c.Photo)
+            .Where(c => companyIds.Contains(c.Id) && c.IsVerified && c.Status == Status.Active)
+            .ToListAsync();
+
+        return companyIds
+            .Select(companyId => companies.FirstOrDefault(c => c.Id == companyId))
+            .Where(c => c != null)
+            .Select(c => new SuccessCaseCompanyIntroDto
+            {
+                Id = c!.Id,
+                Name = c.Name,
+                Introduction = c.Introduction,
+                OrgUrl = c.OrgUrl,
+                PhotoUrl = c.Photo?.Uri
+            })
+            .ToList();
     }
 
     private async Task<SuccessCaseDto> MapToDtoAsync(SuccessCase successCase)

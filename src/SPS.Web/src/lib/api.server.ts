@@ -300,7 +300,11 @@ export async function fetchPromotionCases(options?: { search?: string }): Promis
 export async function fetchPromotionCaseDetail(id: string): Promise<PromotionCaseDetail | null> {
     try {
         const response = await apiClient.get<PromotionCaseDetail>(`/api/SuccessCase/${id}`);
-        return { ...response.data, coverImageUrl: resolveBackendAssetUrl(response.data.coverImageUrl) };
+        return {
+            ...response.data,
+            coverImageUrl: resolveBackendAssetUrl(response.data.coverImageUrl),
+            companies: (response.data.companies ?? []).map((company) => ({ ...company, photoUrl: resolveBackendAssetUrl(company.photoUrl) })),
+        };
     } catch {
         return null;
     }
