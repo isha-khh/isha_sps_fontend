@@ -193,6 +193,14 @@ public class ContentIndexingService : IContentIndexingService
         return embedResult.IsSuccess;
     }
 
+    public async Task<int> ResetFailedRetryCountsAsync(CancellationToken ct = default)
+    {
+        var db = _unitOfWork.GetDbContext();
+        return await db.Set<ContentEmbedding>()
+            .Where(e => e.Status == EmbeddingStatus.Failed && e.RetryCount > 0)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(e => e.RetryCount, 0), ct);
+    }
+
     public async Task<IReadOnlyList<ReindexTarget>> ListReindexTargetsAsync(CancellationToken ct = default)
     {
         var db = _unitOfWork.GetDbContext();

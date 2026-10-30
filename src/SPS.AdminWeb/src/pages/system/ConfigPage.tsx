@@ -1507,7 +1507,7 @@ export const SystemConfigPage = () => {
                   <div className="alert alert-error">
                     <span className="iconify lucide--circle-x size-5" />
                     <div className="text-sm">
-                      <p>有 {indexStatus.counts.failedExhausted} 筆已達重試上限（5 次），排程不會再自動重試。請確認連線設定後執行「全部重新索引」。</p>
+                      <p>有 {indexStatus.counts.failedExhausted} 筆已達重試上限（5 次），排程不會再自動重試。請確認連線設定，儲存設定後會重新嘗試（也可以直接執行「全部重新索引」）。</p>
                       {indexStatus.counts.lastError && (
                         <p className="mt-1 break-all text-base-content/70">最近一次錯誤：{indexStatus.counts.lastError}</p>
                       )}

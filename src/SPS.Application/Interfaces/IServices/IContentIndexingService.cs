@@ -30,6 +30,12 @@ public interface IContentIndexingService
     Task<int> ReconcileBatchAsync(int batchSize, CancellationToken ct = default);
 
     /// <summary>
+    /// 把所有「失敗」項目的重試次數歸零，讓排程重新嘗試（設定修好後用，避免錯誤設定期間把重試次數燒光）。
+    /// 回傳受影響筆數。
+    /// </summary>
+    Task<int> ResetFailedRetryCountsAsync(CancellationToken ct = default);
+
+    /// <summary>
     /// 全量重新索引的對象清單：所有 Demand + 供給端（Supplier/Both）Company。
     /// </summary>
     Task<IReadOnlyList<ReindexTarget>> ListReindexTargetsAsync(CancellationToken ct = default);

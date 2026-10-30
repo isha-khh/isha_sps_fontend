@@ -1147,6 +1147,10 @@ public class SystemSettingController : ControllerBase
         var result = await _settingService.UpdateSettingAsync("Embedding", settings, ct);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
 
+        // 設定可能剛修好（金鑰、模型名稱…）：把失敗項目的重試次數歸零，讓排程重新嘗試，
+        // 不然設定錯誤期間已經把重試次數燒到上限的項目不會再被自動補上
+        await _contentIndexingService.ResetFailedRetryCountsAsync(ct);
+
         // 讓背景服務立刻套用新的排程間隔；剛啟用時也會馬上開始補索引，不必等下一個間隔
         _embeddingIndexJob.RequestScan();
         return Ok(new { message = "AI 語意搜尋設定已更新" });
