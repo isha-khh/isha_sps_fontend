@@ -39,6 +39,15 @@ const C = {
 /** 字級一律輸出 rem（相對單位）：無障礙檢測 CS2140401C 不接受 px，且使用者放大瀏覽器字級時才會跟著變 */
 const rem = (px: number) => `${px / 16}rem`;
 
+/**
+ * 「圖片區塊」新增時的範例圖：用內嵌的 SVG（data URI），不再連到外部的 placehold.co。
+ * 預設值會連同內容存進資料庫、前台直接輸出成 <img src>，連外部網站的話，前台一旦開跨來源嵌入政策（COEP require-corp）
+ * 沒換圖的內容就會破圖，也多一個對外連線；內嵌圖不需要網路、前台與後台編輯器都能顯示（CSP img-src 本來就允許 data:）。
+ */
+const SAMPLE_IMAGE = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="#dfe8ef"/><text x="400" y="310" font-size="40" text-anchor="middle" fill="#6b7c8c" font-family="sans-serif">範例圖片</text></svg>',
+)}`;
+
 const GRADIENT_BTN = "linear-gradient(90deg, #0099ff 0%, #0052cc 100%)";
 
 const headingGradient: CSSProperties = {
@@ -412,7 +421,7 @@ export const puckConfig: Config<Props> = {
         },
       },
       defaultProps: {
-        imageUrl: "https://placehold.co/800x600/dfe8ef/6b7c8c?text=範例圖片",
+        imageUrl: SAMPLE_IMAGE,
         alt: "這是一張範例圖片",
         imageCaption: "圖片說明",
         description: "",
