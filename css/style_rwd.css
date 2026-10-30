@@ -144,7 +144,7 @@
         max-width: 60%;
     }
     .matching_sear .input-group {
-        width: 60%;
+        width: 40%;
     }
    
 
@@ -217,6 +217,7 @@
 
 
 @media (max-width: 991px) {
+  
     .support .support_box .d-flex .support_er {
         height: 545px;
     }
@@ -703,6 +704,34 @@
 
 
 @media (max-width: 767px) {
+    .column_course .tag-wrap .badge-tag {
+        font-size: 0.75rem;
+    
+    }
+    .talent  .side2 .column_box > .item {
+        padding: 3% 0;
+    }
+    .talent   .tit_quota span {
+        font-size: 1rem;
+    }
+    .talent .column_box .item .pic {
+        width: 80px;
+        padding: 0;
+        margin-left: 5px;
+    }
+    .talent   .column_box > .item .d-flex {
+        flex-wrap: unset;
+    }
+.talent   .column_box .item .tit {
+    margin-top: 0;
+}
+.talent  .content  .search {
+    margin-top: 18px;
+}
+.talent  .course_box  .course-table {
+    min-width: 800px;
+ 
+}
 
 
     .small-btn-box a.btn-light:hover {
