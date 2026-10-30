@@ -50,8 +50,11 @@ const nextConfig: NextConfig = {
     //  - Permissions-Policy（VAS03）：關掉網站用不到的瀏覽器功能（相機、麥克風、定位、付款、USB、動作感測器）；沒有關全螢幕，影片需要；
     //  - Cross-Origin-Opener-Policy: same-origin（VAS02）：頁面不跟其他來源的視窗共用瀏覽環境（站內沒有靠 window.opener 溝通的彈窗）；
     //  - Cross-Origin-Resource-Policy: same-site（VAS02）：只有同一個網站（isafe.org.tw 底下）可以載入這些資源。
-    //  刻意【不設】Cross-Origin-Embedder-Policy：`require-corp` 會擋掉沒有 CORP 標頭的跨來源內容（YouTube 影片、Google 字型、地圖），
-    //  網站的影音專區與地圖都會壞；掃描報告把它列為低風險，接受這項殘餘風險。
+    //  2026-10-30 複測又被列 COEP，重新評估後補上 Cross-Origin-Embedder-Policy: require-corp（VAS02）：先前以為會擋掉 YouTube／Google 字型，
+    //  實際查標頭，YouTube 嵌入、ytimg 縮圖、Google 字型都帶 `Cross-Origin-Resource-Policy: cross-origin`（YouTube 自己還宣告支援 COEP），
+    //  CSP 又已把可載入的第三方來源限死在這份名單，所以影響很小。已知會被擋的：沒有 CORP 的外部圖片（例如舊內容裡的 placehold.co 範例圖，
+    //  新增的圖片區塊已改用內嵌圖）、可能沒有 CORP 的 Google 地圖嵌入（前台沒有固定的地圖嵌入，只有編輯者貼進內容才會有）。
+    //  若上線後有第三方內容被擋（主控台 ERR_BLOCKED_BY_RESPONSE），先把下面 COEP 那一行拿掉即可還原。
     const securityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -59,6 +62,7 @@ const nextConfig: NextConfig = {
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()" },
       { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
       { key: "Cross-Origin-Resource-Policy", value: "same-site" },
+      { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
     ];
     return [
       { source: "/:path*", headers: securityHeaders },
