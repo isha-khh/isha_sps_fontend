@@ -177,6 +177,8 @@ public static class DependencyInjection
         services.AddHostedService<MailCampaignProcessingBackgroundService>();
 
         // AI 向量媒合索引排程掃描
+        services.AddSingleton<EmbeddingIndexJob>();
+        services.AddSingleton<IEmbeddingIndexJob>(sp => sp.GetRequiredService<EmbeddingIndexJob>());
         services.AddHostedService<IndexReconciliationBackgroundService>();
 
         return services;

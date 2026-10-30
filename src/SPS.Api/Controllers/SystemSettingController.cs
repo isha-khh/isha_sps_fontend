@@ -25,6 +25,8 @@ public class SystemSettingController : ControllerBase
     private readonly Infrastructure.Services.NginxReloadService _nginxReloadService;
     private readonly IProTrackService _proTrackService;
     private readonly IEmbeddingService _embeddingService;
+    private readonly IEmbeddingIndexJob _embeddingIndexJob;
+    private readonly IContentIndexingService _contentIndexingService;
 
     public SystemSettingController(
         ISystemSettingService settingService,
@@ -33,7 +35,9 @@ public class SystemSettingController : ControllerBase
         IFido2Provider fido2Provider,
         Infrastructure.Services.NginxReloadService nginxReloadService,
         IProTrackService proTrackService,
-        IEmbeddingService embeddingService)
+        IEmbeddingService embeddingService,
+        IEmbeddingIndexJob embeddingIndexJob,
+        IContentIndexingService contentIndexingService)
     {
         _settingService = settingService;
         _emailService = emailService;
@@ -42,6 +46,8 @@ public class SystemSettingController : ControllerBase
         _nginxReloadService = nginxReloadService;
         _proTrackService = proTrackService;
         _embeddingService = embeddingService;
+        _embeddingIndexJob = embeddingIndexJob;
+        _contentIndexingService = contentIndexingService;
     }
 
     /// <summary>
@@ -1139,7 +1145,57 @@ public class SystemSettingController : ControllerBase
     public async Task<IActionResult> UpdateEmbeddingSettings([FromBody] EmbeddingSettingsDto settings, CancellationToken ct)
     {
         var result = await _settingService.UpdateSettingAsync("Embedding", settings, ct);
-        return result.IsSuccess ? Ok(new { message = "AI 語意搜尋設定已更新" }) : BadRequest(new { error = result.Error });
+        if (!result.IsSuccess) return BadRequest(new { error = result.Error });
+
+        // 讓背景服務立刻套用新的排程間隔；剛啟用時也會馬上開始補索引，不必等下一個間隔
+        _embeddingIndexJob.RequestScan();
+        return Ok(new { message = "AI 語意搜尋設定已更新" });
+    }
+
+    [HttpGet("embedding/index-status")]
+    [RequirePermission(UserPermission.ManageSettings)]
+    [SwaggerOperation(Summary = "取得 AI 語意搜尋索引進度（筆數統計 + 背景工作狀態）")]
+    public async Task<IActionResult> GetEmbeddingIndexStatus(CancellationToken ct)
+    {
+        var settingResult = await _settingService.GetSettingAsync<EmbeddingSettingsDto>("Embedding", ct);
+        var settings = settingResult.IsSuccess && settingResult.Data != null ? settingResult.Data : new EmbeddingSettingsDto();
+        var activeModel = string.IsNullOrWhiteSpace(settings.Model) ? null : settings.Model;
+
+        return Ok(new EmbeddingIndexStatusDto
+        {
+            IsEnabled = settings.IsEnabled,
+            ActiveModel = activeModel,
+            Counts = await _contentIndexingService.GetIndexCountsAsync(activeModel, ct),
+            Job = _embeddingIndexJob.GetSnapshot(),
+        });
+    }
+
+    [HttpPost("embedding/reindex")]
+    [RequirePermission(UserPermission.ManageSettings)]
+    [SwaggerOperation(Summary = "全量重新索引（對所有需求與供給端企業強制重新產生向量，背景執行）")]
+    public async Task<IActionResult> ReindexEmbeddings(CancellationToken ct)
+    {
+        var settingResult = await _settingService.GetSettingAsync<EmbeddingSettingsDto>("Embedding", ct);
+        if (!settingResult.IsSuccess || settingResult.Data is not { IsEnabled: true })
+            return BadRequest(new { error = "請先啟用並儲存 AI 語意搜尋設定" });
+
+        if (!_embeddingIndexJob.RequestFullReindex())
+            return Conflict(new { error = "已有全量重新索引在進行中" });
+
+        return Accepted(new { message = "已開始全量重新索引" });
+    }
+
+    [HttpPost("embedding/index-scan")]
+    [RequirePermission(UserPermission.ManageSettings)]
+    [SwaggerOperation(Summary = "立即執行一輪索引掃描（補缺漏、重試失敗，不等排程間隔）")]
+    public async Task<IActionResult> ScanEmbeddingIndex(CancellationToken ct)
+    {
+        var settingResult = await _settingService.GetSettingAsync<EmbeddingSettingsDto>("Embedding", ct);
+        if (!settingResult.IsSuccess || settingResult.Data is not { IsEnabled: true })
+            return BadRequest(new { error = "請先啟用並儲存 AI 語意搜尋設定" });
+
+        _embeddingIndexJob.RequestScan();
+        return Accepted(new { message = "已要求立即掃描" });
     }
 
     [HttpPost("embedding/test")]

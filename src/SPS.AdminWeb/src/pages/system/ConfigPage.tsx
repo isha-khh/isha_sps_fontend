@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PageTitle } from '@/components/PageTitle';
 import { TabSelector } from '@/components/common/TabSelector';
 import { settingsApi } from '@/lib/api/system-settings';
-import type { EmailSettings, GoogleAnalyticsSettings, FileStorageSettings, BounceMailSettings, BounceProcessingResult, ContentSettings, EmbeddingSettings, EmbeddingTestResult } from '@/types/settings';
+import type { EmailSettings, GoogleAnalyticsSettings, FileStorageSettings, BounceMailSettings, BounceProcessingResult, ContentSettings, EmbeddingSettings, EmbeddingTestResult, EmbeddingIndexStatus } from '@/types/settings';
 import { useNotify } from '@/hooks/useNotify';
 
 type SettingTab = 'email' | 'analytics' | 'fileStorage' | 'content' | 'embedding';
@@ -79,15 +79,50 @@ export const SystemConfigPage = () => {
     apiKey: '',
     model: '',
     queryInstructionPrefix: '',
+    reconcileIntervalMinutes: 5,
+    reconcileBatchSize: 50,
   });
   const [showEmbeddingKey, setShowEmbeddingKey] = useState(false);
   const [embeddingTestState, setEmbeddingTestState] = useState<
     { status: 'idle' } | { status: 'testing' } | { status: 'done'; result: EmbeddingTestResult }
   >({ status: 'idle' });
 
+  // AI 語意搜尋索引進度
+  const [indexStatus, setIndexStatus] = useState<EmbeddingIndexStatus | null>(null);
+  const [indexStatusError, setIndexStatusError] = useState(false);
+  const [isIndexActionPending, setIsIndexActionPending] = useState(false);
+  // 由本頁啟動全部重新索引後，等它跑完再通知
+  const awaitingReindexDoneRef = useRef(false);
+
   useEffect(() => {
     void fetchAllSettings();
   }, []);
+
+  // 切到 AI 語意搜尋分頁時載入索引進度；背景工作進行中每 3 秒更新，否則每 15 秒
+  const indexBusy = indexStatus ? indexStatus.job.phase !== 'idle' || indexStatus.job.reindexQueued : false;
+  useEffect(() => {
+    if (activeTab !== 'embedding') return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const load = async () => {
+      try {
+        const status = await settingsApi.getEmbeddingIndexStatus();
+        if (cancelled) return;
+        setIndexStatus(status);
+        setIndexStatusError(false);
+      } catch {
+        if (!cancelled) setIndexStatusError(true);
+      }
+      if (!cancelled) timer = setTimeout(load, indexBusy ? 3000 : 15000);
+    };
+    void load();
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [activeTab, indexBusy]);
 
   const fetchAllSettings = async () => {
     setIsLoading(true);
@@ -239,6 +274,71 @@ export const SystemConfigPage = () => {
       setIsSaving(false);
     }
   };
+
+  // 全部重新索引跑完時通知（只在這個頁面開著、且是由本頁啟動時）
+  useEffect(() => {
+    if (!indexStatus || !awaitingReindexDoneRef.current) return;
+    const job = indexStatus.job;
+    if (job.phase !== 'idle' || job.reindexQueued || !job.reindexFinishedAt) return;
+
+    awaitingReindexDoneRef.current = false;
+    if (job.reindexFailed > 0) {
+      notify.warning(
+        `全部重新索引已完成：共處理 ${job.reindexProcessed} / ${job.reindexTotal} 筆，其中 ${job.reindexFailed} 筆失敗。請查看下方錯誤訊息。`,
+        '重新索引完成（有失敗）'
+      );
+    } else {
+      notify.success(`全部重新索引已完成：共處理 ${job.reindexProcessed} / ${job.reindexTotal} 筆。`, '重新索引完成');
+    }
+  }, [indexStatus]);
+
+  const refreshIndexStatus = async () => {
+    try {
+      setIndexStatus(await settingsApi.getEmbeddingIndexStatus());
+      setIndexStatusError(false);
+    } catch {
+      setIndexStatusError(true);
+    }
+  };
+
+  const handleReindexAll = async () => {
+    const ok = await notify.confirm(
+      '將對所有需求與供給端企業重新產生向量，期間會呼叫外部 AI 服務（可能產生費用），筆數多時需要一段時間。' +
+        '重新索引期間舊向量仍可使用，會陸續被新向量取代。確定要開始嗎？',
+      '全部重新索引'
+    );
+    if (!ok) return;
+    setIsIndexActionPending(true);
+    try {
+      await settingsApi.reindexEmbeddings();
+      awaitingReindexDoneRef.current = true;
+      await refreshIndexStatus();
+    } catch (error) {
+      console.error('Failed to start reindex:', error);
+      const message = (error as { response?: { data?: { error?: string } } }).response?.data?.error;
+      await notify.error(message ?? '無法開始重新索引');
+    } finally {
+      setIsIndexActionPending(false);
+    }
+  };
+
+  const handleScanNow = async () => {
+    setIsIndexActionPending(true);
+    try {
+      await settingsApi.scanEmbeddingIndex();
+      // 背景服務被喚醒後才會更新狀態，稍等再抓一次
+      setTimeout(() => void refreshIndexStatus(), 1500);
+    } catch (error) {
+      console.error('Failed to trigger index scan:', error);
+      const message = (error as { response?: { data?: { error?: string } } }).response?.data?.error;
+      await notify.error(message ?? '無法執行索引掃描');
+    } finally {
+      setIsIndexActionPending(false);
+    }
+  };
+
+  const formatIndexTime = (value?: string | null) =>
+    value ? new Date(value).toLocaleString('zh-TW', { hour12: false }) : '—';
 
   if (isLoading) {
     return (
@@ -1251,6 +1351,64 @@ export const SystemConfigPage = () => {
             </div>
           </div>
 
+          <div className="card bg-base-100 shadow mt-6">
+            <div className="card-body">
+              <h3 className="card-title">
+                <span className="iconify lucide--calendar-clock size-5" />
+                索引排程
+              </h3>
+              <p className="text-sm text-base-content/60 mb-4">
+                需求或企業資料異動時會即時更新索引；排程則定期掃描，補上漏掉的項目、重試失敗的項目，剛啟用時也靠它建立初次索引。
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">掃描間隔（分鐘）</span>
+                  </label>
+                  <input
+                    type="number"
+                    className="input input-bordered"
+                    min={1}
+                    max={1440}
+                    value={embeddingSettings.reconcileIntervalMinutes}
+                    onChange={(e) =>
+                      setEmbeddingSettings({
+                        ...embeddingSettings,
+                        reconcileIntervalMinutes: Math.min(1440, Math.max(1, parseInt(e.target.value) || 5)),
+                      })
+                    }
+                  />
+                  <label className="label">
+                    <span className="label-text-alt">1–1440，預設 5。間隔越短，補漏與重試越快</span>
+                  </label>
+                </div>
+
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">每輪最多處理筆數</span>
+                  </label>
+                  <input
+                    type="number"
+                    className="input input-bordered"
+                    min={1}
+                    max={500}
+                    value={embeddingSettings.reconcileBatchSize}
+                    onChange={(e) =>
+                      setEmbeddingSettings({
+                        ...embeddingSettings,
+                        reconcileBatchSize: Math.min(500, Math.max(1, parseInt(e.target.value) || 50)),
+                      })
+                    }
+                  />
+                  <label className="label">
+                    <span className="label-text-alt">1–500，預設 50。每筆都會呼叫一次 embedding API；全部重新索引也以此為批次大小</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-end mt-6">
             <button type="submit" className="btn btn-success" disabled={isSaving}>
               {isSaving ? (
@@ -1264,6 +1422,174 @@ export const SystemConfigPage = () => {
             </button>
           </div>
         </form>
+      )}
+
+      {/* AI 語意搜尋索引進度 */}
+      {activeTab === 'embedding' && (
+        <div className="card bg-base-100 shadow mt-6">
+          <div className="card-body">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="card-title">
+                <span className="iconify lucide--database-zap size-5" />
+                索引進度
+              </h3>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => void refreshIndexStatus()}>
+                <span className="iconify lucide--refresh-cw size-4" />
+                重新整理
+              </button>
+            </div>
+
+            {indexStatusError && !indexStatus && (
+              <div className="alert alert-error">
+                <span className="iconify lucide--circle-x size-5" />
+                <span className="text-sm">無法取得索引進度</span>
+              </div>
+            )}
+
+            {!indexStatus && !indexStatusError && (
+              <div className="flex justify-center py-6">
+                <span className="loading loading-spinner" />
+              </div>
+            )}
+
+            {indexStatus && (
+              <div className="space-y-4">
+                {!indexStatus.isEnabled && (
+                  <div className="alert alert-warning">
+                    <span className="iconify lucide--triangle-alert size-5" />
+                    <span className="text-sm">AI 語意搜尋尚未啟用（或設定尚未儲存），背景不會建立索引。</span>
+                  </div>
+                )}
+
+                {(
+                  [
+                    ['需求', indexStatus.counts.demand],
+                    ['供給端企業', indexStatus.counts.company],
+                  ] as const
+                ).map(([label, c]) => (
+                  <div key={label}>
+                    <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                      <span className="font-medium">{label}</span>
+                      <span className="text-base-content/70">
+                        已索引 {c.indexed} / {c.total}
+                        {c.pending > 0 && <span className="ml-2">待處理 {c.pending}</span>}
+                        {c.failed > 0 && <span className="ml-2 text-error">失敗 {c.failed}</span>}
+                      </span>
+                    </div>
+                    <progress
+                      className={`progress w-full ${c.failed > 0 ? 'progress-warning' : 'progress-success'}`}
+                      value={c.total === 0 ? 0 : c.indexed}
+                      max={c.total === 0 ? 1 : c.total}
+                    />
+                  </div>
+                ))}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm text-base-content/70">
+                  <div>目前模型：{indexStatus.activeModel ?? '—'}</div>
+                  <div>最近索引寫入：{formatIndexTime(indexStatus.counts.lastIndexedAt)}</div>
+                  <div>最近一次掃描：{formatIndexTime(indexStatus.job.lastScanAt)}
+                    {indexStatus.job.lastScanAt && `（處理 ${indexStatus.job.lastScanProcessed} 筆）`}
+                  </div>
+                  <div>下次掃描：{indexStatus.isEnabled ? formatIndexTime(indexStatus.job.nextScanAt) : '—'}</div>
+                </div>
+
+                {indexStatus.counts.otherModelCount > 0 && (
+                  <div className="alert alert-warning">
+                    <span className="iconify lucide--triangle-alert size-5" />
+                    <span className="text-sm">
+                      有 {indexStatus.counts.otherModelCount} 筆向量是用其他模型建立的，不同模型的向量無法互相比對，
+                      請執行「全部重新索引」。
+                    </span>
+                  </div>
+                )}
+
+                {indexStatus.counts.failedExhausted > 0 && (
+                  <div className="alert alert-error">
+                    <span className="iconify lucide--circle-x size-5" />
+                    <div className="text-sm">
+                      <p>有 {indexStatus.counts.failedExhausted} 筆已達重試上限（5 次），排程不會再自動重試。請確認連線設定後執行「全部重新索引」。</p>
+                      {indexStatus.counts.lastError && (
+                        <p className="mt-1 break-all text-base-content/70">最近一次錯誤：{indexStatus.counts.lastError}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {indexStatus.job.reindexQueued && indexStatus.job.phase !== 'reindexing' && (
+                  <div className="alert alert-info">
+                    <span className="loading loading-spinner loading-sm" />
+                    <span className="text-sm">已排入全部重新索引，等待背景服務開始…</span>
+                  </div>
+                )}
+
+                {indexStatus.job.phase === 'reindexing' && (
+                  <div>
+                    <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                      <span className="font-medium">全部重新索引進行中</span>
+                      <span className="text-base-content/70">
+                        {indexStatus.job.reindexProcessed} / {indexStatus.job.reindexTotal}
+                        {indexStatus.job.reindexFailed > 0 && (
+                          <span className="ml-2 text-error">失敗 {indexStatus.job.reindexFailed}</span>
+                        )}
+                      </span>
+                    </div>
+                    <progress
+                      className="progress progress-primary w-full"
+                      value={indexStatus.job.reindexProcessed}
+                      max={Math.max(1, indexStatus.job.reindexTotal)}
+                    />
+                  </div>
+                )}
+
+                {indexStatus.job.phase === 'scanning' && (
+                  <div className="alert alert-info">
+                    <span className="loading loading-spinner loading-sm" />
+                    <span className="text-sm">正在掃描並補上缺漏的索引…</span>
+                  </div>
+                )}
+
+                {indexStatus.job.phase === 'idle' && indexStatus.job.reindexFinishedAt && (
+                  <p className="text-sm text-base-content/70">
+                    上次全部重新索引：{formatIndexTime(indexStatus.job.reindexFinishedAt)}，共處理{' '}
+                    {indexStatus.job.reindexProcessed} / {indexStatus.job.reindexTotal} 筆
+                    {indexStatus.job.reindexFailed > 0 && `，其中失敗 ${indexStatus.job.reindexFailed} 筆`}
+                  </p>
+                )}
+
+                {indexStatus.job.lastError && (
+                  <div className="alert alert-error">
+                    <span className="iconify lucide--circle-x size-5" />
+                    <span className="text-sm break-all">背景索引發生錯誤：{indexStatus.job.lastError}</span>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={handleScanNow}
+                    disabled={!indexStatus.isEnabled || indexBusy || isIndexActionPending}
+                  >
+                    <span className="iconify lucide--scan-search size-4" />
+                    立即掃描補漏
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleReindexAll}
+                    disabled={!indexStatus.isEnabled || indexBusy || isIndexActionPending}
+                  >
+                    <span className="iconify lucide--refresh-ccw size-4" />
+                    全部重新索引
+                  </button>
+                </div>
+                <p className="text-xs text-base-content/60 text-right">
+                  修改上方設定後請先按「儲存設定」，背景才會套用新的排程與模型。
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

@@ -19,6 +19,7 @@ import type {
   MembershipGuideSettings,
   EmbeddingSettings,
   EmbeddingTestResult,
+  EmbeddingIndexStatus,
 } from '@/types/settings';
 
 export const settingsApi = {
@@ -269,5 +270,18 @@ export const settingsApi = {
   async testEmbeddingConnection(settings: EmbeddingSettings): Promise<EmbeddingTestResult> {
     const response = await apiClient.post('/api/settings/embedding/test', settings);
     return response.data;
+  },
+
+  async getEmbeddingIndexStatus(): Promise<EmbeddingIndexStatus> {
+    const response = await apiClient.get('/api/settings/embedding/index-status');
+    return response.data;
+  },
+
+  async reindexEmbeddings(): Promise<void> {
+    await apiClient.post('/api/settings/embedding/reindex');
+  },
+
+  async scanEmbeddingIndex(): Promise<void> {
+    await apiClient.post('/api/settings/embedding/index-scan');
   },
 };

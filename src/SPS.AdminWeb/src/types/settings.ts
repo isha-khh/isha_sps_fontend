@@ -207,6 +207,10 @@ export interface EmbeddingSettings {
   model: string;
   /** 查詢端 instruction prefix（進階，可留空用預設） */
   queryInstructionPrefix?: string | null;
+  /** 索引排程掃描間隔（分鐘，1–1440） */
+  reconcileIntervalMinutes: number;
+  /** 每輪掃描最多處理筆數（1–500） */
+  reconcileBatchSize: number;
 }
 
 export interface EmbeddingTestResult {
@@ -214,4 +218,43 @@ export interface EmbeddingTestResult {
   message?: string;
   dimension?: number;
   latencyMs?: number;
+}
+
+export interface EmbeddingSourceCounts {
+  total: number;
+  indexed: number;
+  failed: number;
+  pending: number;
+}
+
+export interface EmbeddingIndexCounts {
+  demand: EmbeddingSourceCounts;
+  company: EmbeddingSourceCounts;
+  /** 失敗且已達重試上限、排程不會再自動重試的筆數 */
+  failedExhausted: number;
+  /** 用不同於目前設定模型建立的向量筆數 */
+  otherModelCount: number;
+  lastIndexedAt?: string | null;
+  lastError?: string | null;
+}
+
+export interface EmbeddingIndexJob {
+  phase: 'idle' | 'scanning' | 'reindexing';
+  reindexQueued: boolean;
+  reindexTotal: number;
+  reindexProcessed: number;
+  reindexFailed: number;
+  reindexStartedAt?: string | null;
+  reindexFinishedAt?: string | null;
+  lastScanAt?: string | null;
+  lastScanProcessed: number;
+  nextScanAt?: string | null;
+  lastError?: string | null;
+}
+
+export interface EmbeddingIndexStatus {
+  isEnabled: boolean;
+  activeModel?: string | null;
+  counts: EmbeddingIndexCounts;
+  job: EmbeddingIndexJob;
 }

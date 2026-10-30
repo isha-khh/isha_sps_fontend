@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SPS.Application.DTOs.SystemSettings;
 using SPS.Application.Interfaces;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Entities;
@@ -30,12 +31,12 @@ public class ContentIndexingService : IContentIndexingService
         _logger = logger;
     }
 
-    public async Task IndexDemandAsync(int demandId, CancellationToken ct = default)
+    public async Task<bool> IndexDemandAsync(int demandId, CancellationToken ct = default, bool force = false)
     {
         var db = _unitOfWork.GetDbContext();
 
         var demand = await db.Set<Demand>().AsNoTracking().FirstOrDefaultAsync(d => d.Id == demandId, ct);
-        if (demand == null) return;
+        if (demand == null) return false;
 
         var tagNames = await GetTagNamesAsync(db, demandTagsForDemandId: demandId, companyTagsForCompanyId: null, ct);
         var text = BuildSourceText(demand.Name, demand.Description, tagNames);
@@ -45,21 +46,21 @@ public class ContentIndexingService : IContentIndexingService
         // 對這個方向有效；CSLS 偏誤修正（§5.4）的基準集合也是用同一種向量算的，兩邊要一致。
         // 若日後要做「以 Company 找 Demand」的反向搜尋，屆時 Demand 需要另外存一份不含
         // instruction 的「文件端」向量，是獨立的待辦（見 §7）。
-        await UpsertAsync(EmbeddingSourceType.Demand, demandId.ToString(), text, useQueryStyle: true, ct);
+        return await UpsertAsync(EmbeddingSourceType.Demand, demandId.ToString(), text, useQueryStyle: true, force, ct);
     }
 
-    public async Task IndexCompanyAsync(Guid companyId, CancellationToken ct = default)
+    public async Task<bool> IndexCompanyAsync(Guid companyId, CancellationToken ct = default, bool force = false)
     {
         var db = _unitOfWork.GetDbContext();
 
         var company = await db.Set<Company>().AsNoTracking().FirstOrDefaultAsync(c => c.Id == companyId, ct);
-        if (company == null) return;
+        if (company == null) return false;
 
         var tagNames = await GetTagNamesAsync(db, demandTagsForDemandId: null, companyTagsForCompanyId: companyId, ct);
         var text = BuildSourceText(company.Subject, company.Introduction, tagNames);
 
         // Company 存的是「文件端」向量（不含 instruction），是被檢索的一方，符合不對稱檢索慣例
-        await UpsertAsync(EmbeddingSourceType.Company, companyId.ToString(), text, useQueryStyle: false, ct);
+        return await UpsertAsync(EmbeddingSourceType.Company, companyId.ToString(), text, useQueryStyle: false, force, ct);
     }
 
     public async Task<int> ReconcileBatchAsync(int batchSize, CancellationToken ct = default)
@@ -147,7 +148,7 @@ public class ContentIndexingService : IContentIndexingService
         return processed;
     }
 
-    private async Task UpsertAsync(EmbeddingSourceType sourceType, string sourceId, string text, bool useQueryStyle, CancellationToken ct)
+    private async Task<bool> UpsertAsync(EmbeddingSourceType sourceType, string sourceId, string text, bool useQueryStyle, bool force, CancellationToken ct)
     {
         var db = _unitOfWork.GetDbContext();
         var hash = ComputeHash(text);
@@ -155,8 +156,8 @@ public class ContentIndexingService : IContentIndexingService
         var existing = await db.Set<ContentEmbedding>()
             .FirstOrDefaultAsync(e => e.SourceType == sourceType && e.SourceId == sourceId, ct);
 
-        if (existing != null && existing.SourceTextHash == hash && existing.Status == EmbeddingStatus.Indexed)
-            return; // 內容沒變動且已成功索引過，跳過
+        if (!force && existing != null && existing.SourceTextHash == hash && existing.Status == EmbeddingStatus.Indexed)
+            return true; // 內容沒變動且已成功索引過，跳過
 
         var embedResult = useQueryStyle
             ? await _embeddingService.EmbedQueryAsync(text, ct)
@@ -189,6 +190,81 @@ public class ContentIndexingService : IContentIndexingService
         }
 
         await db.SaveChangesAsync(ct);
+        return embedResult.IsSuccess;
+    }
+
+    public async Task<IReadOnlyList<ReindexTarget>> ListReindexTargetsAsync(CancellationToken ct = default)
+    {
+        var db = _unitOfWork.GetDbContext();
+
+        var demandIds = await db.Set<Demand>().AsNoTracking().OrderBy(d => d.Id).Select(d => d.Id).ToListAsync(ct);
+        var companyIds = await db.Set<Company>().AsNoTracking()
+            .Where(c => c.Type == CompanyType.Supplier || c.Type == CompanyType.Both)
+            .OrderBy(c => c.Id)
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+
+        var targets = new List<ReindexTarget>(demandIds.Count + companyIds.Count);
+        targets.AddRange(demandIds.Select(id => new ReindexTarget(EmbeddingSourceType.Demand, id.ToString())));
+        targets.AddRange(companyIds.Select(id => new ReindexTarget(EmbeddingSourceType.Company, id.ToString())));
+        return targets;
+    }
+
+    public async Task<EmbeddingIndexCountsDto> GetIndexCountsAsync(string? activeModel, CancellationToken ct = default)
+    {
+        var db = _unitOfWork.GetDbContext();
+        var embeddings = db.Set<ContentEmbedding>().AsNoTracking();
+
+        var demandTotal = await db.Set<Demand>().CountAsync(ct);
+        var demandIndexed = await db.Set<Demand>().CountAsync(d => embeddings.Any(e =>
+            e.SourceType == EmbeddingSourceType.Demand && e.SourceId == d.Id.ToString() && e.Status == EmbeddingStatus.Indexed), ct);
+        var demandFailed = await db.Set<Demand>().CountAsync(d => embeddings.Any(e =>
+            e.SourceType == EmbeddingSourceType.Demand && e.SourceId == d.Id.ToString() && e.Status == EmbeddingStatus.Failed), ct);
+
+        var suppliers = db.Set<Company>().AsNoTracking().Where(c => c.Type == CompanyType.Supplier || c.Type == CompanyType.Both);
+        var companyTotal = await suppliers.CountAsync(ct);
+        var companyIndexed = await suppliers.CountAsync(c => embeddings.Any(e =>
+            e.SourceType == EmbeddingSourceType.Company && e.SourceId == c.Id.ToString() && e.Status == EmbeddingStatus.Indexed), ct);
+        var companyFailed = await suppliers.CountAsync(c => embeddings.Any(e =>
+            e.SourceType == EmbeddingSourceType.Company && e.SourceId == c.Id.ToString() && e.Status == EmbeddingStatus.Failed), ct);
+
+        var failedExhausted = await embeddings.CountAsync(e => e.Status == EmbeddingStatus.Failed && e.RetryCount >= MaxRetryCount, ct);
+
+        var otherModel = string.IsNullOrWhiteSpace(activeModel)
+            ? 0
+            : await embeddings.CountAsync(e => e.Status == EmbeddingStatus.Indexed && e.Model != activeModel, ct);
+
+        var lastIndexedAt = await embeddings
+            .Where(e => e.Status == EmbeddingStatus.Indexed)
+            .MaxAsync(e => (DateTime?)e.UpdatedTime, ct);
+
+        var lastError = await embeddings
+            .Where(e => e.Status == EmbeddingStatus.Failed && e.LastError != null)
+            .OrderByDescending(e => e.UpdatedTime)
+            .Select(e => e.LastError)
+            .FirstOrDefaultAsync(ct);
+
+        return new EmbeddingIndexCountsDto
+        {
+            Demand = new EmbeddingSourceCountsDto
+            {
+                Total = demandTotal,
+                Indexed = demandIndexed,
+                Failed = demandFailed,
+                Pending = Math.Max(0, demandTotal - demandIndexed - demandFailed),
+            },
+            Company = new EmbeddingSourceCountsDto
+            {
+                Total = companyTotal,
+                Indexed = companyIndexed,
+                Failed = companyFailed,
+                Pending = Math.Max(0, companyTotal - companyIndexed - companyFailed),
+            },
+            FailedExhausted = failedExhausted,
+            OtherModelCount = otherModel,
+            LastIndexedAt = lastIndexedAt,
+            LastError = lastError,
+        };
     }
 
     private static async Task<List<string>> GetTagNamesAsync(

@@ -30,6 +30,18 @@ public class EmbeddingSettingsDto
     /// 查詢端（Demand）的 instruction prefix，用於不對稱檢索。留空則後端使用預設值。
     /// </summary>
     public string? QueryInstructionPrefix { get; set; }
+
+    /// <summary>
+    /// 索引排程掃描間隔（分鐘）。背景服務每隔這段時間補索引缺漏／重試失敗的項目。
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Range(1, 1440)]
+    public int ReconcileIntervalMinutes { get; set; } = 5;
+
+    /// <summary>
+    /// 每輪掃描最多處理的筆數（Demand 與 Company 合計）。
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Range(1, 500)]
+    public int ReconcileBatchSize { get; set; } = 50;
 }
 
 /// <summary>

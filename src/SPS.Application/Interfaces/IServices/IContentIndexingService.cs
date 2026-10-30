@@ -1,3 +1,4 @@
+using SPS.Application.DTOs.SystemSettings;
 using SPS.Domain.Entities;
 
 namespace SPS.Application.Interfaces.IServices;
@@ -11,14 +12,15 @@ public interface IContentIndexingService
 {
     /// <summary>
     /// 索引單一 Demand（事件觸發路徑用）。內容 hash 沒變則跳過，不重複呼叫 embedding API。
-    /// 失敗時只記 log，不拋例外中斷呼叫端流程。
+    /// 失敗時只記 log，不拋例外中斷呼叫端流程。force=true 時不比對 hash，一律重新呼叫 embedding API（全量重新索引用）。
+    /// 回傳 true 表示該筆目前處於已索引狀態（含內容沒變而跳過），false 表示索引失敗或來源不存在。
     /// </summary>
-    Task IndexDemandAsync(int demandId, CancellationToken ct = default);
+    Task<bool> IndexDemandAsync(int demandId, CancellationToken ct = default, bool force = false);
 
     /// <summary>
     /// 索引單一 Company（事件觸發路徑用）。同上。
     /// </summary>
-    Task IndexCompanyAsync(Guid companyId, CancellationToken ct = default);
+    Task<bool> IndexCompanyAsync(Guid companyId, CancellationToken ct = default, bool force = false);
 
     /// <summary>
     /// 排程掃描路徑：找出需要（重新）索引的 Demand/Company，各處理最多 batchSize 筆。
@@ -26,4 +28,14 @@ public interface IContentIndexingService
     /// 回傳實際處理筆數。
     /// </summary>
     Task<int> ReconcileBatchAsync(int batchSize, CancellationToken ct = default);
+
+    /// <summary>
+    /// 全量重新索引的對象清單：所有 Demand + 供給端（Supplier/Both）Company。
+    /// </summary>
+    Task<IReadOnlyList<ReindexTarget>> ListReindexTargetsAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// 索引進度統計（設定頁顯示用）。activeModel 為目前設定的模型名稱，用來統計「用舊模型建的向量」筆數。
+    /// </summary>
+    Task<EmbeddingIndexCountsDto> GetIndexCountsAsync(string? activeModel, CancellationToken ct = default);
 }
