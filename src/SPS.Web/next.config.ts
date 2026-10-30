@@ -49,7 +49,9 @@ const nextConfig: NextConfig = {
     // 2026-10-20 弱點掃描報告（Cymetrics）補上三個：
     //  - Permissions-Policy（VAS03）：關掉網站用不到的瀏覽器功能（相機、麥克風、定位、付款、USB、動作感測器）；沒有關全螢幕，影片需要；
     //  - Cross-Origin-Opener-Policy: same-origin（VAS02）：頁面不跟其他來源的視窗共用瀏覽環境（站內沒有靠 window.opener 溝通的彈窗）；
-    //  - Cross-Origin-Resource-Policy: same-site（VAS02）：只有同一個網站（isafe.org.tw 底下）可以載入這些資源。
+    //  - Cross-Origin-Resource-Policy: same-origin（VAS02）：只有同一個來源（match.isafe.org.tw）的頁面可以載入這些資源。
+    //    2026-10-30 從 same-site 改成 same-origin（複測報告建議，same-site 被視為較寬鬆）。只影響 Next.js 自己回應的頁面與靜態檔（/sps/images、/sps/_next 等）；
+    //    /sps/api 是 nginx 轉給後端的，不經過這裡。後台是另一個網域，不會載入前台的資源；若之後有其他網域要載入前台的圖片，改回 same-site 或 cross-origin。
     //  2026-10-30 複測又被列 COEP，重新評估後補上 Cross-Origin-Embedder-Policy: require-corp（VAS02）：先前以為會擋掉 YouTube／Google 字型，
     //  實際查標頭，YouTube 嵌入、ytimg 縮圖、Google 字型都帶 `Cross-Origin-Resource-Policy: cross-origin`（YouTube 自己還宣告支援 COEP），
     //  CSP 又已把可載入的第三方來源限死在這份名單，所以影響很小。已知會被擋的：沒有 CORP 的外部圖片（例如舊內容裡的 placehold.co 範例圖，
@@ -61,7 +63,7 @@ const nextConfig: NextConfig = {
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()" },
       { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-      { key: "Cross-Origin-Resource-Policy", value: "same-site" },
+      { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
       { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
     ];
     return [
