@@ -8,6 +8,9 @@
 @media (min-width: 1680px) {
 }
 @media (max-width: 1800px) {
+    .matching_sear .matching_sear_mid {
+        width: 70%;
+    }
     .support .support_box .d-flex .support_er {
         height: 485px;
     }
@@ -115,7 +118,7 @@
         padding: 0 20px;
     }
         .header .navbar .collapse ul.navbar-nav > li > a {
-            padding: 10px 15px 10px;
+            padding: 10px 10px 10px;
         }
     .home .banner_home .item {
         left: 20px;
@@ -239,6 +242,18 @@
 
 
     @media (max-width: 991px) {
+        .matching_sear .btn-filter-toggle {
+            padding: 8px 4px;
+        }
+
+        .matching_sear .matching_sear_mid ul {
+            padding: 5px 10px;
+            gap: 0 10px;
+        }
+
+        .matching_sear .btn_a {
+            width: 110px;
+        }
 
         .support .support_box .d-flex .support_er {
             height: 545px;
@@ -786,19 +801,7 @@
             bottom: -110px;
         }
     }
-@media (max-width:800px) {
-    .matching_sear  .btn-filter-toggle {
-        padding: 8px 4px;
-    }
-    .matching_sear .matching_sear_mid ul {
-        padding: 5px 10px;
-        gap: 0 10px;
-    }
-    .matching_sear   .btn_a {
-        width: 110px;
-    }
 
-}
 
     @media (max-width: 767px) {
         .side2 .side2_new .column_box .item .tit .date {
