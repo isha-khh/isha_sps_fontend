@@ -786,12 +786,25 @@
             bottom: -110px;
         }
     }
+@media (max-width:800px) {
+    .matching_sear  .btn-filter-toggle {
+        padding: 8px 4px;
+    }
+    .matching_sear .matching_sear_mid ul {
+        padding: 5px 10px;
+        gap: 0 10px;
+    }
+    .matching_sear   .btn_a {
+        width: 110px;
+    }
 
+}
 
     @media (max-width: 767px) {
         .side2 .side2_new .column_box .item .tit .date {
             font-size: 0.75rem;
         }
+
         .column_course .tag-wrap .badge-tag {
             font-size: 0.75rem;
         }
