@@ -69,8 +69,8 @@ export const metadata: Metadata = {
   // Next 會自動套進這個 template 變成「頁面名稱 | 高雄技術處」。
   // 只有首頁（沒有自己 title 的路由）會顯示 default 這個值。
   title: {
-    default: "高雄技術處",
-    template: "%s | 高雄技術處",
+    default: "智慧工安媒合平台",
+    template: "%s | 智慧工安媒合平台",
   },
   description: "智慧工安技術產業資訊暨媒合平台",
   // 之前這裡漏了 `public/favicon.ico`（客戶實際的品牌 icon）會被
