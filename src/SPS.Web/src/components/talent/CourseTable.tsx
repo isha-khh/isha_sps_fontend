@@ -5,8 +5,8 @@ import Link from "next/link";
  * 積木元件：人才培訓列表用的課程表格，對應設計稿
  * page/talent/index.html 的 `.course-table`——跟其他列表頁的卡片
  * 版型不同，這裡客戶指定要用表格（序號/課程名稱/培訓單位/課程日期/
- * 縣市/聯絡人/課程網址），`data-label` 屬性搭配 CSS 是給手機版
- * RWD 直向卡片顯示用的（見 style.css `.course-table` 對應規則）。
+ * 縣市/聯絡人/課程網址）。1199px 以下由設計稿的 style_rwd.css 讓表格容器
+ * 橫向捲動（表格 min-width 800px），手機也一樣用捲動，不另外做卡片版。
  */
 export default function CourseTable({ courses, startIndex = 0 }: { courses: TalentCourse[]; startIndex?: number }) {
   return (
