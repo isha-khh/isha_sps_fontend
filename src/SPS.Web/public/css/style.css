@@ -1672,6 +1672,28 @@ a.det_more {
     border-radius: 5px;
     margin: 10px 0 20px;
 }
+/* 企業名錄卡片等高（EnterpriseCard）：同一列卡片拉成一樣高，標籤區固定保留兩行，「詳細資料」按鈕貼底 */
+.item.ente_card .item_box {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.item.ente_card .item_box .tit {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.item.ente_card .item_box .tit ul.ul-key {
+    /* 兩行標籤：每行 = 標籤高（行高 1.5 × 0.875rem + 上下 padding 10px）+ 下方間距 8px */
+    min-height: calc(2 * (1.3125rem + 18px));
+    align-content: flex-start;
+}
+.item.ente_card .item_box .tit .tit_nsl {
+    margin-bottom: 10px; /* 按鈕貼底後，內容與按鈕之間至少留的間距 */
+}
+.item.ente_card .item_box .tit a.det_more {
+    margin-top: auto;
+}
 .matching_sear {
     gap: 0 10px;
 }
