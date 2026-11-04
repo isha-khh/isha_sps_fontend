@@ -125,6 +125,7 @@ export default function MemberDetailsForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
+  const [extension, setExtension] = useState("");
   const [mobilePhone, setMobilePhone] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [industry, setIndustry] = useState("");
@@ -205,6 +206,7 @@ export default function MemberDetailsForm({
             position,
             email,
             phone,
+            extension: extension || undefined,
             mobilePhone: mobilePhone || undefined,
             password,
             confirmPassword,
@@ -323,14 +325,31 @@ export default function MemberDetailsForm({
 
         <div className="menb_inp_tit form-group">
           <label className="mb-2">{requiredMark}聯絡電話</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="請輸入聯絡電話"
-            value={disabled ? reviewValue(reviewMember?.phone) : phone}
-            onChange={(e) => setPhone(e.target.value)}
-            disabled={disabled}
-          />
+          <div className="d-flex gap-2">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="請輸入聯絡電話"
+              value={disabled ? reviewValue(reviewMember?.phone) : phone}
+              onChange={(e) => setPhone(e.target.value)}
+              disabled={disabled}
+            />
+            {/* 分機選填（後端 Extension 欄位，上限 20 字）；Step 4 檢視沒填就不顯示 */}
+            {(!disabled || reviewMember?.extension) && (
+              <input
+                type="text"
+                inputMode="numeric"
+                className="form-control"
+                style={{ maxWidth: "5.5rem" }}
+                placeholder="分機"
+                aria-label="聯絡電話分機"
+                maxLength={10}
+                value={disabled ? reviewValue(reviewMember?.extension) : extension}
+                onChange={(e) => setExtension(e.target.value.replace(/[^0-9]/g, ""))}
+                disabled={disabled}
+              />
+            )}
+          </div>
         </div>
 
         <div className="menb_inp_tit form-group">

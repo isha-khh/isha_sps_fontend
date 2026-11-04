@@ -65,6 +65,7 @@ export default function UpgradePanel() {
 
   const [roleTier, setRoleTier] = useState<CompanyRoleTierSelection | null>(null);
   const [phone, setPhone] = useState(member?.phone ?? "");
+  const [extension, setExtension] = useState(member?.extension ?? "");
   const [mobilePhone, setMobilePhone] = useState(member?.mobilePhone ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -156,6 +157,7 @@ export default function UpgradePanel() {
             position,
             email: member!.email,
             phone,
+            extension: extension || undefined,
             mobilePhone: mobilePhone || undefined,
             password,
             confirmPassword,
@@ -221,7 +223,20 @@ export default function UpgradePanel() {
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">{REQUIRED}聯絡電話</label>
-              <input type="text" className="form-control" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <div className="d-flex gap-2">
+                <input type="text" className="form-control" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="form-control"
+                  style={{ maxWidth: "5.5rem" }}
+                  placeholder="分機"
+                  aria-label="聯絡電話分機"
+                  maxLength={10}
+                  value={extension}
+                  onChange={(e) => setExtension(e.target.value.replace(/[^0-9]/g, ""))}
+                />
+              </div>
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">手機</label>
