@@ -133,7 +133,8 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
                       <div className="h3_solid">
                         <h3>{resource.title}</h3>
                       </div>
-                      <p>{resource.description}</p>
+                      {/* 沒填簡介就不產生這一段（樣式固定保留兩行高度，空的會在分隔線下留一大塊空白） */}
+                      {resource.description && <p>{resource.description}</p>}
                       <ul className="nav d-block mb-3">
                         {resource.industries.length > 0 && (
                           <li className="mb-2">
