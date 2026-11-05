@@ -1718,8 +1718,10 @@ a.det_more {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-/* 滑鼠移上卡片（或鍵盤聚焦）時，被「…」截斷的標題、簡介、條列資訊自動展開成全文。
-   只對有 hover 的裝置（桌機）生效；觸控裝置維持截斷。卡片會往下變高，同一列的卡片跟著等高。 */
+/* 被「…」截斷的標題、簡介、條列資訊（企業名錄、政府補助資源卡片）的展開方式：
+   - 有滑鼠的裝置（桌機）：滑鼠移上卡片或鍵盤聚焦時展開成全文，移開恢復截斷；
+   - 觸控裝置（手機、平板，沒有 hover）：沒辦法 hover，直接一律顯示全文，不截斷。
+   展開後卡片會往下變高，同一列的卡片跟著等高。 */
 @media (hover: hover) {
     .item.equal_card:hover .item_box .tit h3,
     .item.equal_card:focus-within .item_box .tit h3,
@@ -1731,6 +1733,21 @@ a.det_more {
         line-clamp: unset;
         display: block;
         overflow: visible;
+    }
+}
+@media (hover: none) {
+    .item.equal_card .item_box .tit h3,
+    .item.equal_card .item_box .tit .tit_nsl > p,
+    .item.support_card .item_box .tit ul.nav.d-block li > span {
+        -webkit-line-clamp: unset;
+        line-clamp: unset;
+        display: block;
+        overflow: visible;
+    }
+    /* 不再截斷，就不需要替標題、簡介預留固定的兩行高度 */
+    .item.support_card .item_box .tit h3,
+    .item.support_card .item_box .tit .tit_nsl > p {
+        min-height: 0;
     }
 }
 .matching_sear {
