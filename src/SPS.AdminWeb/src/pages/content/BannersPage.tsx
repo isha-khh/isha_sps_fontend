@@ -248,10 +248,10 @@ export const BannersPage = () => {
     <>
     <div className="space-y-6 min-h-screen">
       <PageTitle
-        title="橫幅管理"
+        title="廣告管理"
         items={[
           { label: '內容管理', path: '/content/banners' },
-          { label: '橫幅管理', active: true },
+          { label: '廣告管理', active: true },
         ]}
       />
 

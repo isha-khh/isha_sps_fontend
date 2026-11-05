@@ -113,7 +113,7 @@ public enum UserPermission : long
     ManageRegulations = 1L << 36,
 
     /// <summary>
-    /// 橫幅管理（首頁主視覺、各頁側欄廣告、頂部輪播）
+    /// 廣告管理（首頁主視覺、各頁側欄廣告、頂部輪播）
     /// </summary>
     ManageBanners = 1L << 37,
 

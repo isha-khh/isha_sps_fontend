@@ -191,7 +191,7 @@ const allMenuItems: MenuItemWithPermission[] = [
     icon: 'lucide--file-edit',
     permissions: [Permission.ManageBanners, Permission.ManageSiteContent, Permission.ManageMedia, Permission.ManageFiles],
     children: [
-      { id: 'banners', label: '橫幅管理', url: '/content/banners', permissions: [Permission.ManageBanners] },
+      { id: 'banners', label: '廣告管理', url: '/content/banners', permissions: [Permission.ManageBanners] },
       { id: 'popup-announcements', label: '彈窗公告', url: '/content/popup-announcements', permissions: [Permission.ManageSiteContent] },
       { id: 'page-settings', label: '頁面設定', url: '/content/page-settings', permissions: [Permission.ManageSiteContent] },
       { id: 'footer-links', label: '頁尾連結', url: '/content/footer-links', permissions: [Permission.ManageSiteContent] },
