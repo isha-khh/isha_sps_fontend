@@ -1718,6 +1718,21 @@ a.det_more {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+/* 滑鼠移上卡片（或鍵盤聚焦）時，被「…」截斷的標題、簡介、條列資訊自動展開成全文。
+   只對有 hover 的裝置（桌機）生效；觸控裝置維持截斷。卡片會往下變高，同一列的卡片跟著等高。 */
+@media (hover: hover) {
+    .item.equal_card:hover .item_box .tit h3,
+    .item.equal_card:focus-within .item_box .tit h3,
+    .item.equal_card:hover .item_box .tit .tit_nsl > p,
+    .item.equal_card:focus-within .item_box .tit .tit_nsl > p,
+    .item.support_card:hover .item_box .tit ul.nav.d-block li > span,
+    .item.support_card:focus-within .item_box .tit ul.nav.d-block li > span {
+        -webkit-line-clamp: unset;
+        line-clamp: unset;
+        display: block;
+        overflow: visible;
+    }
+}
 .matching_sear {
     gap: 0 10px;
 }
