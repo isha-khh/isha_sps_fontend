@@ -241,19 +241,14 @@ function NavLinks() {
             </ul>
           </li>
           <li className="hover_r_sider dropdown-submenu">
+            {/* 產業輔導底下只有一項，不再多一層，直接點選（跟推廣專區的「產業案例」一樣是葉節點） */}
             <Link className="dropdown-item" href="/tutoring" title="產業輔導">
               產業輔導
             </Link>
-            <ul className="dropdown-menu">
-              <li>
-                <Link className="dropdown-item" href="/tutoring" title="輔導">
-                  輔導
-                </Link>
-              </li>
-            </ul>
           </li>
           <li className="hover_r_sider dropdown-submenu">
-            <Link className="dropdown-item" href="/support" title="補助資源">
+            {/* 跟「技術工具」「人才培育」一樣是分組標籤，本身不能點，要點下一階的「本計畫補助」「政府補助資源」 */}
+            <Link className="dropdown-item dropdown-toggle disabled" href="/support" title="補助資源">
               補助資源
             </Link>
             <ul className="dropdown-menu">
