@@ -44,8 +44,10 @@ const SITE_UNIT_GROUPS: SiteUnitGroup[] = [
   },
 ];
 
-// 這四個是分組標題（沒有自己的頁面），只有子項目是連結
-const SERVICE_LINKS = [
+// 「技術工具」「人才培育」「補助資源」是分組標題（沒有自己的頁面），只有子項目是連結；
+// 「產業輔導」底下只有一個頁面，跟主選單一樣不再多一層，直接是連結（有 `href`）
+type ServiceLink = { label: string; href: string } | { label: string; children: { label: string; href: string }[] };
+const SERVICE_LINKS: ServiceLink[] = [
   {
     label: "技術工具",
     children: [
@@ -62,7 +64,7 @@ const SERVICE_LINKS = [
   },
   {
     label: "產業輔導",
-    children: [{ label: "輔導", href: "/tutoring" }],
+    href: "/tutoring",
   },
   {
     label: "補助資源",
@@ -218,27 +220,35 @@ export default async function SitemapPage() {
                   <ul className="unit_links list-unstyled">
                     {SERVICE_LINKS.map((group) => (
                       <li key={group.label}>
-                        {/* 「技術工具」「人才培育」等只是分組標題、沒有對應頁面（主選單裡也是不能點的），不做成連結（issue #58） */}
-                        <span className="unit_label">{group.label}</span>
-                        <ul className="list-unstyled">
-                          {group.children.map((child) => (
-                            <li key={child.label}>
-                              {child.label === "產業AI" && industryAi.external ? (
-                                <a
-                                  href={industryAi.href}
-                                  title={`前往 ${child.label}`}
-                                  {...(industryAi.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                                >
-                                  {child.label}
-                                </a>
-                              ) : (
-                                <Link href={child.href} title={`前往 ${child.label}`}>
-                                  {child.label}
-                                </Link>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
+                        {"href" in group ? (
+                          <Link href={group.href} title={`前往 ${group.label}`}>
+                            {group.label}
+                          </Link>
+                        ) : (
+                          <>
+                            {/* 「技術工具」「人才培育」等只是分組標題、沒有對應頁面（主選單裡也是不能點的），不做成連結（issue #58） */}
+                            <span className="unit_label">{group.label}</span>
+                            <ul className="list-unstyled">
+                              {group.children.map((child) => (
+                                <li key={child.label}>
+                                  {child.label === "產業AI" && industryAi.external ? (
+                                    <a
+                                      href={industryAi.href}
+                                      title={`前往 ${child.label}`}
+                                      {...(industryAi.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                                    >
+                                      {child.label}
+                                    </a>
+                                  ) : (
+                                    <Link href={child.href} title={`前往 ${child.label}`}>
+                                      {child.label}
+                                    </Link>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
                       </li>
                     ))}
                   </ul>
