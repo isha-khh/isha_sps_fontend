@@ -1,4 +1,5 @@
-import type { NewsDetail, NewsItem } from "@/lib/types";
+import type { BadgeStyle, NewsDetail, NewsItem } from "@/lib/types";
+import { tagBadgesOf } from "@/lib/badge-style";
 import { formatIsoDate } from "@/lib/content-list-utils";
 
 /**
@@ -27,6 +28,8 @@ export interface TalentCourse {
   hostOrganizer: string;
   executor: string;
   keywords: string[];
+  /** 與 keywords 一一對應的標籤徽章顏色（後台「標籤管理」設定） */
+  keywordBadges?: (BadgeStyle | null | undefined)[];
   /** 對應「熱門課程」側欄的「剩餘 X 名」；後台沒填就是 undefined，側欄不顯示名額 */
   remainingSeats?: number;
   /** 課程公告上架日期，跟 dateStart/dateEnd（課程實際上課日期區間）是兩回事，對應「熱門課程」側欄顯示的日期 */
@@ -72,6 +75,7 @@ export function toTalentCourse(item: NewsItem | NewsDetail): TalentCourse {
     hostOrganizer: meta.hostOrganizer ?? "",
     executor: meta.executor ?? "",
     keywords: item.tags ?? [],
+    keywordBadges: tagBadgesOf(item),
     remainingSeats: parseSeats(meta.remainingSeats),
     postedDate: formatIsoDate(item.startDate ?? item.createdTime),
     registerUrl: safeUrl(meta.registerUrl),

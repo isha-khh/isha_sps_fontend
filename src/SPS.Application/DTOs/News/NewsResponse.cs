@@ -1,3 +1,5 @@
+using SPS.Application.DTOs.Common;
+
 namespace SPS.Application.DTOs.News;
 
 /// <summary>
@@ -16,9 +18,15 @@ public class NewsResponse
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
 
+    /// <summary>主分類（<see cref="CategoryId"/>）的徽章顏色（後台「分類管理」設定）；沒設定為 null，前台套預設紫色樣式</summary>
+    public BadgeStyleDto? CategoryBadge { get; set; }
+
     /// <summary>所有分類 Id 與名稱（依選擇順序，與 <see cref="CategoryId"/>／<see cref="CategoryName"/> 的第一個一致）</summary>
     public List<int> CategoryIds { get; set; } = new();
     public List<string> CategoryNames { get; set; } = new();
+
+    /// <summary>與 <see cref="CategoryNames"/> 一一對應的徽章顏色（沒設定的位置是 null）；多個產業別（產業輔導）各自套色用</summary>
+    public List<BadgeStyleDto?> CategoryBadges { get; set; } = new();
 
     /// <summary>適用產業（政府補助資源）的 Id 與名稱</summary>
     public List<int> IndustryIds { get; set; } = new();
@@ -77,9 +85,15 @@ public class NewsListItemResponse
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
 
+    /// <summary>主分類（<see cref="CategoryId"/>）的徽章顏色（後台「分類管理」設定）；沒設定為 null，前台套預設紫色樣式</summary>
+    public BadgeStyleDto? CategoryBadge { get; set; }
+
     /// <summary>所有分類 Id 與名稱（依選擇順序，與 <see cref="CategoryId"/>／<see cref="CategoryName"/> 的第一個一致）</summary>
     public List<int> CategoryIds { get; set; } = new();
     public List<string> CategoryNames { get; set; } = new();
+
+    /// <summary>與 <see cref="CategoryNames"/> 一一對應的徽章顏色（沒設定的位置是 null）；多個產業別（產業輔導）各自套色用</summary>
+    public List<BadgeStyleDto?> CategoryBadges { get; set; } = new();
 
     /// <summary>適用產業（政府補助資源）的 Id 與名稱</summary>
     public List<int> IndustryIds { get; set; } = new();

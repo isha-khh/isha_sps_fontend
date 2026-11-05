@@ -1,3 +1,5 @@
+using SPS.Application.DTOs.Common;
+
 namespace SPS.Application.DTOs.News;
 
 /// <summary>
@@ -9,4 +11,7 @@ public class NewsTagItem
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>標籤的徽章顏色（後台「標籤管理」設定）；三個顏色都沒設定時為 null，前台套預設藍色樣式</summary>
+    public BadgeStyleDto? Badge { get; set; }
 }

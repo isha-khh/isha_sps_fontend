@@ -220,6 +220,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
                 href: `/news/${article.id}`,
                 image: article.imageUrl || undefined,
                 category: article.categoryName || "未分類",
+                categoryBadge: article.categoryBadge,
                 date: formatNewsDate(article.startDate),
                 status: getNewsActivityStatus(article.startDate, article.endDate),
                 title: article.title,
@@ -228,7 +229,7 @@ export default async function NewsIndexPage({ searchParams }: PageProps<"/news">
                   ...(article.meta?.eventTime ? [{ icon: "calendar" as const, text: article.meta.eventTime }] : []),
                   ...(article.meta?.location ? [{ icon: "geo" as const, text: article.meta.location }] : []),
                 ],
-                keywords: article.tagItems?.map((t) => ({ label: t.name, href: `/news?tag=${t.id}` })) ?? article.tags?.map((label) => ({ label })),
+                keywords: article.tagItems?.map((t) => ({ label: t.name, href: `/news?tag=${t.id}`, badge: t.badge })) ?? article.tags?.map((label) => ({ label })),
               }}
             />
           ))}

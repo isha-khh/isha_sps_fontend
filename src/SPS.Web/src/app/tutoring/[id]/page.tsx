@@ -13,6 +13,7 @@ import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import { toTutoringItem } from "@/lib/tutoring-data";
 import { fetchBanners, fetchSectionDetail, fetchSectionItems, NewsSections } from "@/lib/api.server";
 import { sortByViewCount } from "@/lib/content-list-utils";
+import { badgeInlineStyle } from "@/lib/badge-style";
 
 export async function generateMetadata({ params }: PageProps<"/tutoring/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -67,8 +68,8 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
                   {/* 設計稿的 `.tit_three_left .tag-wrap span` 是 display:block，多個產業別會一個一行；用 flex 讓它們排在同一行、太長自動換行 */}
                   <div className="tag-wrap" style={{ display: "flex", flexWrap: "wrap", columnGap: "0.75rem" }}>
                     {item.industries.length > 0 && <span>產業別：</span>}
-                    {item.industries.map((name) => (
-                      <Badge key={name}>{name}</Badge>
+                    {item.industries.map((name, index) => (
+                      <Badge key={name} style={item.industryBadges?.[index]}>{name}</Badge>
                     ))}
                   </div>
                   <div className="part-line"></div>
@@ -81,9 +82,9 @@ export default async function TutoringShowPage({ params }: PageProps<"/tutoring/
 
             {item.keywords.length > 0 && (
               <ul className="nav ul-key">
-                {item.keywords.map((keyword) => (
+                {item.keywords.map((keyword, index) => (
                   <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                    <a href="#" title={`前往${keyword}`} tabIndex={0} style={badgeInlineStyle(item.keywordBadges?.[index])}>
                       {keyword}
                     </a>
                   </li>

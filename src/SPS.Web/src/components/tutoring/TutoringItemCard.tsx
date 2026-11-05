@@ -1,5 +1,6 @@
 import type { TutoringItem } from "@/lib/tutoring-data";
 import Link from "next/link";
+import { badgeInlineStyle } from "@/lib/badge-style";
 
 /**
  * 積木元件：產業輔導列表卡片，對應設計稿 page/tutoring/index.html 的
@@ -25,9 +26,9 @@ export default function TutoringItemCard({ item }: { item: TutoringItem }) {
           <div>
             <div className="tit_nsl">
               <ul className="nav ul-key">
-                {item.keywords.map((keyword) => (
+                {item.keywords.map((keyword, index) => (
                   <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                    <a href="#" title={`前往${keyword}`} tabIndex={0} style={badgeInlineStyle(item.keywordBadges?.[index])}>
                       {keyword}
                     </a>
                   </li>

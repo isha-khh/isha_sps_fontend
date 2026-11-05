@@ -11,6 +11,7 @@ import { PuckRenderer } from "@/components/puck/PuckRenderer";
 import { toTalentCourse, type TalentCourse } from "@/lib/talent-data";
 import { fetchBanners, fetchSectionDetail, fetchSectionItems, NewsSections } from "@/lib/api.server";
 import { sortByViewCount } from "@/lib/content-list-utils";
+import { badgeInlineStyle } from "@/lib/badge-style";
 
 export async function generateMetadata({ params }: PageProps<"/talent/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -86,9 +87,9 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
 
             {course.keywords.length > 0 && (
               <ul className="nav ul-key">
-                {course.keywords.map((keyword) => (
+                {course.keywords.map((keyword, index) => (
                   <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                    <a href="#" title={`前往${keyword}`} tabIndex={0} style={badgeInlineStyle(course.keywordBadges?.[index])}>
                       {keyword}
                     </a>
                   </li>

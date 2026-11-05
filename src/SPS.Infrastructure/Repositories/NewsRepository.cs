@@ -176,11 +176,15 @@ public class NewsRepository : Repository<News, int>, INewsRepository
 
     public async Task<List<NewsTagItem>> GetNewsTagsAsync(int newsId, CancellationToken cancellationToken = default, TagType tagType = TagType.News)
     {
-        return await _context.Set<EntityTag>()
+        var rows = await _context.Set<EntityTag>()
             .Where(et => et.EntityType == EntityType.News && et.EntityId == newsId.ToString() && et.Tag.Type == tagType)
             .OrderBy(et => et.Tag.Ordinal).ThenBy(et => et.Tag.Id)
-            .Select(et => new NewsTagItem { Id = et.Tag.Id, Name = et.Tag.Name })
+            .Select(et => new { et.Tag.Id, et.Tag.Name, et.Tag.BadgeColor, et.Tag.BadgeTextColor, et.Tag.BadgeBorderColor })
             .ToListAsync(cancellationToken);
+
+        return rows
+            .Select(r => new NewsTagItem { Id = r.Id, Name = r.Name, Badge = BadgeStyleDto.From(r.BadgeColor, r.BadgeTextColor, r.BadgeBorderColor) })
+            .ToList();
     }
 
     public async Task<Dictionary<int, List<NewsTagItem>>> GetNewsTagsBatchAsync(
@@ -193,11 +197,11 @@ public class NewsRepository : Repository<News, int>, INewsRepository
         var rows = await _context.Set<EntityTag>()
             .Where(et => et.EntityType == EntityType.News && idStrings.Contains(et.EntityId) && et.Tag.Type == tagType)
             .OrderBy(et => et.Tag.Ordinal).ThenBy(et => et.Tag.Id)
-            .Select(et => new { et.EntityId, TagId = et.Tag.Id, TagName = et.Tag.Name })
+            .Select(et => new { et.EntityId, TagId = et.Tag.Id, TagName = et.Tag.Name, et.Tag.BadgeColor, et.Tag.BadgeTextColor, et.Tag.BadgeBorderColor })
             .ToListAsync(cancellationToken);
 
         return rows
             .GroupBy(r => int.Parse(r.EntityId))
-            .ToDictionary(g => g.Key, g => g.Select(r => new NewsTagItem { Id = r.TagId, Name = r.TagName }).ToList());
+            .ToDictionary(g => g.Key, g => g.Select(r => new NewsTagItem { Id = r.TagId, Name = r.TagName, Badge = BadgeStyleDto.From(r.BadgeColor, r.BadgeTextColor, r.BadgeBorderColor) }).ToList());
     }
 }

@@ -1,4 +1,6 @@
 import Badge from "@/components/ui/Badge";
+import { badgeInlineStyle } from "@/lib/badge-style";
+import type { BadgeStyle } from "@/lib/types";
 import Link from "next/link";
 
 export interface ServeItemCardData {
@@ -6,10 +8,13 @@ export interface ServeItemCardData {
   /** 沒有封面圖就不顯示圖片區塊 */
   image?: string;
   category: string;
+  categoryBadge?: BadgeStyle | null;
   date: string;
   title: string;
   description: string;
   keywords?: string[];
+  /** 與 keywords 一一對應的標籤徽章顏色 */
+  keywordBadges?: (BadgeStyle | null | undefined)[];
   /** 有附件才顯示「下載文件」 */
   hasAttachments?: boolean;
 }
@@ -45,7 +50,7 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
             <div className="tit_nsl">
               <div className="tit_three d-flex mb-2">
                 <div className="tag-wrap">
-                  <Badge>{data.category}</Badge>
+                  <Badge style={data.categoryBadge}>{data.category}</Badge>
                 </div>
                 <div className="date">{data.date}</div>
               </div>
@@ -69,9 +74,9 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
 
           {data.keywords && data.keywords.length > 0 && (
             <ul className="nav ul-key">
-              {data.keywords.map((keyword) => (
+              {data.keywords.map((keyword, index) => (
                 <li key={keyword}>
-                  <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                  <a href="#" title={`前往${keyword}`} tabIndex={0} style={badgeInlineStyle(data.keywordBadges?.[index])}>
                     {keyword}
                   </a>
                 </li>

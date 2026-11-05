@@ -26,6 +26,7 @@ function toNewsItemCardData(item: NewsItem): NewsItemCardData {
     href: `/news/${item.id}`,
     ...toDayAndYearMonth(item),
     category: item.categoryName || "未分類",
+    categoryBadge: item.categoryBadge,
     title: item.title,
     description: item.introduction,
   };

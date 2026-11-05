@@ -1,4 +1,5 @@
-import type { NewsItem } from "@/lib/types";
+import type { BadgeStyle, NewsItem } from "@/lib/types";
+import { tagBadgesOf } from "@/lib/badge-style";
 import { formatIsoDate } from "@/lib/content-list-utils";
 
 /**
@@ -13,12 +14,16 @@ import { formatIsoDate } from "@/lib/content-list-utils";
 export interface ServeCardItem {
   id: number;
   category: string;
+  /** 分類徽章顏色（後台「分類管理」設定），沒設定用預設紫色 */
+  categoryBadge?: BadgeStyle | null;
   date: string;
   title: string;
   description: string;
   /** 沒有封面圖就是 undefined，卡片不顯示圖片區塊（不再用 logo 當假圖） */
   image?: string;
   keywords: string[];
+  /** 與 keywords 一一對應的標籤徽章顏色（後台「標籤管理」設定） */
+  keywordBadges?: (BadgeStyle | null | undefined)[];
   /** 有沒有附件（卡片顯示「下載文件」）；附件本身要填完下載表單才看得到 */
   hasAttachments: boolean;
 }
@@ -27,11 +32,13 @@ export function toServeCardItem(item: NewsItem): ServeCardItem {
   return {
     id: item.id,
     category: item.categoryName,
+    categoryBadge: item.categoryBadge,
     date: formatIsoDate(item.startDate ?? item.createdTime),
     title: item.title,
     description: item.introduction,
     image: item.imageUrl || undefined,
     keywords: item.tags ?? [],
+    keywordBadges: tagBadgesOf(item),
     hasAttachments: (item.attachmentCount ?? 0) > 0,
   };
 }

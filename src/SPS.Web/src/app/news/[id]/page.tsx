@@ -13,6 +13,7 @@ import SidebarBanner from "@/components/layout/SidebarBanner";
 import { fetchNews, fetchNewsDetail, fetchBanners } from "@/lib/api.server";
 import { NEWS_ARTICLES, getNewsArticle, formatNewsDate, sortNewsByViewCount } from "@/lib/news-data";
 import { withBasePath } from "@/lib/api-client";
+import { badgeInlineStyle } from "@/lib/badge-style";
 import NewsViewTracker from "@/components/news/NewsViewTracker";
 import Link from "next/link";
 
@@ -120,7 +121,7 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">
                   <div className="tag-wrap">
-                    <Badge>{article.categoryName || "未分類"}</Badge>
+                    <Badge style={article.categoryBadge}>{article.categoryName || "未分類"}</Badge>
                   </div>
                   <div className="part-line"></div>
                   <div className="date">{formatNewsDate(article.startDate)}</div>
@@ -140,6 +141,7 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
                         href={tagItem ? `/news?tag=${tagItem.id}` : "#"}
                         title={`查看標籤「${keyword}」的公告`}
                         tabIndex={0}
+                        style={badgeInlineStyle(tagItem?.badge)}
                       >
                         {keyword}
                       </Link>

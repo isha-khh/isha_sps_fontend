@@ -13,6 +13,7 @@ import NewsViewTracker from "@/components/news/NewsViewTracker";
 import { withBasePath } from "@/lib/api-client";
 import { fetchBanners, fetchServeDetail } from "@/lib/api.server";
 import { formatIsoDate } from "@/lib/content-list-utils";
+import { badgeInlineStyle } from "@/lib/badge-style";
 
 export async function generateMetadata({ params }: PageProps<"/serve/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -65,7 +66,7 @@ export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">
                   <div className="tag-wrap">
-                    <Badge>{item.categoryName}</Badge>
+                    <Badge style={item.categoryBadge}>{item.categoryName}</Badge>
                   </div>
                   <div className="part-line"></div>
                   <div className="date">{formatIsoDate(item.startDate ?? item.createdTime)}</div>
@@ -77,9 +78,9 @@ export default async function ServeShowPage({ params }: PageProps<"/serve/[id]">
 
             {item.tags && item.tags.length > 0 && (
               <ul className="nav ul-key">
-                {item.tags.map((keyword) => (
+                {item.tags.map((keyword, index) => (
                   <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                    <a href="#" title={`前往${keyword}`} tabIndex={0} style={badgeInlineStyle(item.tagItems?.[index]?.badge)}>
                       {keyword}
                     </a>
                   </li>

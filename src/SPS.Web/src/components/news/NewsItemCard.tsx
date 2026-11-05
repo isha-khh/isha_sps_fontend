@@ -1,4 +1,5 @@
 import Badge from "@/components/ui/Badge";
+import type { BadgeStyle } from "@/lib/types";
 import { withBasePath } from "@/lib/api-client";
 import Link from "next/link";
 
@@ -7,6 +8,8 @@ export interface NewsItemCardData {
   day: string;
   yearMonth: string;
   category: string;
+  /** 分類徽章顏色（後台「分類管理」設定），沒設定用預設紫色 */
+  categoryBadge?: BadgeStyle | null;
   title: string;
   description: string;
 }
@@ -28,7 +31,7 @@ export default function NewsItemCard({ data }: { data: NewsItemCardData }) {
 
       <div className="news-content">
         <div className="tag-wrap">
-          <Badge>{data.category}</Badge>
+          <Badge style={data.categoryBadge}>{data.category}</Badge>
         </div>
         <h3 className="title">{data.title}</h3>
         <p className="desc">{data.description}</p>

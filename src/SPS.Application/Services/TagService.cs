@@ -42,6 +42,9 @@ public class TagService : ITagService
                 CategoryId = tag.CategoryId,
                 CategoryName = tag.Category?.Name,
                 UsageCount = usageCount,
+                BadgeColor = tag.BadgeColor,
+                BadgeTextColor = tag.BadgeTextColor,
+                BadgeBorderColor = tag.BadgeBorderColor,
                 CreatedTime = tag.CreatedTime,
                 UpdatedTime = tag.UpdatedTime
             });
@@ -67,6 +70,9 @@ public class TagService : ITagService
             CategoryId = tag.CategoryId,
             CategoryName = tag.Category?.Name,
             UsageCount = usageCount,
+            BadgeColor = tag.BadgeColor,
+            BadgeTextColor = tag.BadgeTextColor,
+            BadgeBorderColor = tag.BadgeBorderColor,
             CreatedTime = tag.CreatedTime,
             UpdatedTime = tag.UpdatedTime
         });
@@ -86,6 +92,9 @@ public class TagService : ITagService
                 Name = request.Name,
                 Ordinal = request.Ordinal,
                 CategoryId = request.CategoryId,
+                BadgeColor = BadgeColorAttribute.Apply(request.BadgeColor, null),
+                BadgeTextColor = BadgeColorAttribute.Apply(request.BadgeTextColor, null),
+                BadgeBorderColor = BadgeColorAttribute.Apply(request.BadgeBorderColor, null),
                 CreatedTime = DateTime.UtcNow,
                 UpdatedTime = DateTime.UtcNow
             };
@@ -104,6 +113,9 @@ public class TagService : ITagService
                 CategoryId = tag.CategoryId,
                 CategoryName = createdTag?.Category?.Name,
                 UsageCount = 0,
+                BadgeColor = tag.BadgeColor,
+                BadgeTextColor = tag.BadgeTextColor,
+                BadgeBorderColor = tag.BadgeBorderColor,
                 CreatedTime = tag.CreatedTime,
                 UpdatedTime = tag.UpdatedTime
             });
@@ -134,6 +146,9 @@ public class TagService : ITagService
         if (request.Type.HasValue) tag.Type = request.Type.Value;
         if (request.Ordinal.HasValue) tag.Ordinal = request.Ordinal.Value;
         if (request.CategoryId.HasValue) tag.CategoryId = request.CategoryId;
+        tag.BadgeColor = BadgeColorAttribute.Apply(request.BadgeColor, tag.BadgeColor);
+        tag.BadgeTextColor = BadgeColorAttribute.Apply(request.BadgeTextColor, tag.BadgeTextColor);
+        tag.BadgeBorderColor = BadgeColorAttribute.Apply(request.BadgeBorderColor, tag.BadgeBorderColor);
         tag.UpdatedTime = DateTime.UtcNow;
 
         await _unitOfWork.Tags.UpdateAsync(tag, cancellationToken);
@@ -151,6 +166,9 @@ public class TagService : ITagService
             CategoryId = tag.CategoryId,
             CategoryName = updatedTag?.Category?.Name,
             UsageCount = usageCount,
+            BadgeColor = tag.BadgeColor,
+            BadgeTextColor = tag.BadgeTextColor,
+            BadgeBorderColor = tag.BadgeBorderColor,
             CreatedTime = tag.CreatedTime,
             UpdatedTime = tag.UpdatedTime
         });

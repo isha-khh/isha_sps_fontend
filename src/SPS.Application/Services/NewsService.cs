@@ -33,6 +33,7 @@ public class NewsService : INewsService
             pagedResult.Items.Select(n => n.Id).ToList(), cancellationToken, TagType.CourseType);
 
         var categoryNames = await GetCategoryNamesAsync(pagedResult.Items.SelectMany(n => AllCategoryIds(n).Concat(n.IndustryIds)), cancellationToken);
+        var categoryBadges = await GetCategoryBadgesAsync(pagedResult.Items.SelectMany(n => AllCategoryIds(n)), cancellationToken);
 
         var response = new PagedResult<NewsListItemResponse>
         {
@@ -46,8 +47,10 @@ public class NewsService : INewsService
                 Published = n.Published,
                 CategoryId = n.CategoryId,
                 CategoryName = n.Category?.Name,
+                CategoryBadge = BadgeStyleDto.From(n.Category?.BadgeColor, n.Category?.BadgeTextColor, n.Category?.BadgeBorderColor),
                 CategoryIds = AllCategoryIds(n).ToList(),
                 CategoryNames = AllCategoryIds(n).Where(categoryNames.ContainsKey).Select(cid => categoryNames[cid]).ToList(),
+                CategoryBadges = AllCategoryIds(n).Where(categoryNames.ContainsKey).Select(cid => categoryBadges.GetValueOrDefault(cid)).ToList(),
                 IndustryIds = n.IndustryIds.ToList(),
                 IndustryNames = n.IndustryIds.Where(categoryNames.ContainsKey).Select(cid => categoryNames[cid]).ToList(),
                 ViewCount = n.ViewCount,
@@ -79,6 +82,7 @@ public class NewsService : INewsService
         var courseTypes = await _unitOfWork.News.GetNewsTagsAsync(id, cancellationToken, TagType.CourseType);
         var detailCategoryIds = AllCategoryIds(news).ToList();
         var detailCategoryNames = await GetCategoryNamesAsync(detailCategoryIds.Concat(news.IndustryIds), cancellationToken);
+        var detailCategoryBadges = await GetCategoryBadgesAsync(detailCategoryIds, cancellationToken);
 
         return Result<NewsResponse>.Success(new NewsResponse
         {
@@ -92,8 +96,10 @@ public class NewsService : INewsService
             Ordinal = news.Ordinal,
             CategoryId = news.CategoryId,
             CategoryName = news.Category?.Name,
+            CategoryBadge = BadgeStyleDto.From(news.Category?.BadgeColor, news.Category?.BadgeTextColor, news.Category?.BadgeBorderColor),
             CategoryIds = detailCategoryIds,
             CategoryNames = detailCategoryIds.Where(detailCategoryNames.ContainsKey).Select(cid => detailCategoryNames[cid]).ToList(),
+            CategoryBadges = detailCategoryIds.Where(detailCategoryNames.ContainsKey).Select(cid => detailCategoryBadges.GetValueOrDefault(cid)).ToList(),
             IndustryIds = news.IndustryIds.ToList(),
             IndustryNames = news.IndustryIds.Where(detailCategoryNames.ContainsKey).Select(cid => detailCategoryNames[cid]).ToList(),
             Type = news.Type,
@@ -439,6 +445,18 @@ public class NewsService : INewsService
         return await _unitOfWork.GetDbContext().Set<Category>()
             .Where(c => wanted.Contains(c.Id))
             .ToDictionaryAsync(c => c.Id, c => c.Name ?? string.Empty, cancellationToken);
+    }
+
+    /// <summary>分類的徽章顏色（只回有設定顏色的分類；沒設定的查不到，呼叫端取 null）</summary>
+    private async Task<Dictionary<int, BadgeStyleDto?>> GetCategoryBadgesAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
+    {
+        var wanted = ids.Distinct().ToList();
+        if (wanted.Count == 0) return new Dictionary<int, BadgeStyleDto?>();
+        var rows = await _unitOfWork.GetDbContext().Set<Category>()
+            .Where(c => wanted.Contains(c.Id) && (c.BadgeColor != null || c.BadgeTextColor != null || c.BadgeBorderColor != null))
+            .Select(c => new { c.Id, c.BadgeColor, c.BadgeTextColor, c.BadgeBorderColor })
+            .ToListAsync(cancellationToken);
+        return rows.ToDictionary(r => r.Id, r => BadgeStyleDto.From(r.BadgeColor, r.BadgeTextColor, r.BadgeBorderColor));
     }
 
     /// <summary>封面圖：為檔案管理的檔案建立一筆新的圖片紀錄（每次都新建，不改既有的，避免動到別處共用的圖片）</summary>

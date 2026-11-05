@@ -118,10 +118,12 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
                     href: `/serve/${item.id}`,
                     image: item.image,
                     category: item.category,
+                    categoryBadge: item.categoryBadge,
                     date: item.date,
                     title: item.title,
                     description: item.description,
                     keywords: item.keywords,
+                    keywordBadges: item.keywordBadges,
                     hasAttachments: item.hasAttachments,
                   }}
                 />

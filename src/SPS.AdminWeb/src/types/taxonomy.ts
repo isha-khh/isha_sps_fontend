@@ -12,7 +12,7 @@ export const TagType = {
 } as const;
 export type TagType = number;
 
-/** 對應後端 TagResponse（原本這裡的 description/color 後端根本沒有，舊型別從沒被頁面用過） */
+/** 對應後端 TagResponse（徽章顏色 badge* 是 2026-11 新增的，後台標籤管理設定、前台卡片套用） */
 export interface Tag {
   id: number;
   type: TagType;
@@ -22,6 +22,10 @@ export interface Tag {
   categoryName?: string | null;
   /** 目前有幾個項目綁了這個標籤；大於 0 時後端不允許刪除 */
   usageCount: number;
+  /** 前台徽章顏色（#RRGGBB），沒設定為空：後台「分類管理／標籤管理」維護 */
+  badgeColor?: string | null;
+  badgeTextColor?: string | null;
+  badgeBorderColor?: string | null;
   createdTime: string;
   updatedTime?: string;
 }
@@ -31,11 +35,19 @@ export interface CreateTagRequest {
   name: string;
   ordinal?: number;
   categoryId?: number | null;
+  /** 徽章顏色 #RRGGBB；更新時空字串＝清除（恢復前台預設樣式），不傳＝不變 */
+  badgeColor?: string;
+  badgeTextColor?: string;
+  badgeBorderColor?: string;
 }
 
 export interface UpdateTagRequest {
   name?: string;
   ordinal?: number;
+  /** 徽章顏色 #RRGGBB；更新時空字串＝清除（恢復前台預設樣式），不傳＝不變 */
+  badgeColor?: string;
+  badgeTextColor?: string;
+  badgeBorderColor?: string;
 }
 
 // ========== 業務屬性類別 (Business Categories) ==========

@@ -63,6 +63,15 @@ public class Category : BaseEntity<int>
     /// </summary>
     public string? Remark { get; set; }
 
+    /// <summary>徽章底色（<c>#RRGGBB</c>）；沒設定就套前台預設樣式</summary>
+    public string? BadgeColor { get; set; }
+
+    /// <summary>徽章文字顏色（<c>#RRGGBB</c>）；沒設定就用前台預設（白色）</summary>
+    public string? BadgeTextColor { get; set; }
+
+    /// <summary>徽章外框顏色（<c>#RRGGBB</c>）；沒設定就不加外框</summary>
+    public string? BadgeBorderColor { get; set; }
+
     // Navigation properties
     public Category? Parent { get; set; }
     public Picture? Picture { get; set; }

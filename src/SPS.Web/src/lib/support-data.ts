@@ -1,4 +1,5 @@
-import type { NewsItem } from "@/lib/types";
+import type { BadgeStyle, NewsItem } from "@/lib/types";
+import { tagBadgesOf } from "@/lib/badge-style";
 import { formatIsoDate } from "@/lib/content-list-utils";
 
 /**
@@ -97,6 +98,8 @@ export interface SupportResource {
   organizer: string;
   period: string;
   keywords: string[];
+  /** 與 keywords 一一對應的標籤徽章顏色（後台「標籤管理」設定） */
+  keywordBadges?: (BadgeStyle | null | undefined)[];
   /** 後台「補助資源分類」名稱 */
   category: string;
   /** 後台「補助資源產業別」名稱（可多個） */
@@ -119,6 +122,7 @@ export function toSupportResource(item: NewsItem): SupportResource {
     organizer: meta.organizer ?? "",
     period: meta.period ?? "",
     keywords: item.tags ?? [],
+    keywordBadges: tagBadgesOf(item),
     category: item.categoryName ?? "",
     industries: item.industryNames ?? [],
   };

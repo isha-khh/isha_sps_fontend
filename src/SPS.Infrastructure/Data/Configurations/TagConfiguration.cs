@@ -30,6 +30,11 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
             .HasForeignKey(t => t.CategoryId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // 前台徽章顏色（#RRGGBB）
+        builder.Property(t => t.BadgeColor).HasMaxLength(7);
+        builder.Property(t => t.BadgeTextColor).HasMaxLength(7);
+        builder.Property(t => t.BadgeBorderColor).HasMaxLength(7);
+
         // 索引
         builder.HasIndex(t => t.Type);
         builder.HasIndex(t => t.CategoryId);

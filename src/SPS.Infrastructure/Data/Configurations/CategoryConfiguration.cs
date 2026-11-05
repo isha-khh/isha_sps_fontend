@@ -57,6 +57,11 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .HasForeignKey(c => c.MultilingualPictureId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // 前台徽章顏色（#RRGGBB）
+        builder.Property(c => c.BadgeColor).HasMaxLength(7);
+        builder.Property(c => c.BadgeTextColor).HasMaxLength(7);
+        builder.Property(c => c.BadgeBorderColor).HasMaxLength(7);
+
         // 索引
         builder.HasIndex(c => c.Type);
         builder.HasIndex(c => c.ParentId);

@@ -10,6 +10,7 @@ import { toSupportResource } from "@/lib/support-data";
 import { withBasePath } from "@/lib/api-client";
 import { fetchSectionCategories, fetchSectionItems, NewsSections, SectionCategoryTypes } from "@/lib/api.server";
 import { buildListHref, readListQuery } from "@/lib/list-query";
+import { badgeInlineStyle } from "@/lib/badge-style";
 
 export const metadata: Metadata = {
   title: "政府補助資源",
@@ -183,9 +184,9 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
                     </div>
 
                     <ul className="nav ul-key">
-                      {resource.keywords.map((keyword) => (
+                      {resource.keywords.map((keyword, index) => (
                         <li key={keyword}>
-                          <a href="#" title={keyword} tabIndex={0}>
+                          <a href="#" title={keyword} tabIndex={0} style={badgeInlineStyle(resource.keywordBadges?.[index])}>
                             {keyword}
                           </a>
                         </li>

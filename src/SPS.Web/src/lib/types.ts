@@ -187,9 +187,21 @@ export type BannerItem = {
     ordinal: number;
 };
 
+/**
+ * 徽章顏色（#RRGGBB，都是選填）：後台「分類管理／標籤管理」設定，對到後端 `BadgeStyleDto`。
+ * 沒設定的欄位前台套預設樣式（分類紫色、標籤藍色；見 `lib/badge-style.ts`）。
+ */
+export type BadgeStyle = {
+    badgeColor?: string | null;
+    badgeTextColor?: string | null;
+    badgeBorderColor?: string | null;
+};
+
 export type NewsTagItem = {
     id: number;
     name: string;
+    /** 標籤的徽章顏色；後台沒設定就是 null／沒有這個欄位 */
+    badge?: BadgeStyle | null;
 };
 
 export type NewsItem = {
@@ -213,8 +225,12 @@ export type NewsItem = {
     published: boolean;
     categoryId: number;
     categoryName: string;
+    /** 主分類的徽章顏色（後台「分類管理」設定）；沒設定就是 null／沒有這個欄位，前台用預設紫色 */
+    categoryBadge?: BadgeStyle | null;
     /** 所有分類名稱（產業輔導的產業別可多選；第一個就是 categoryName） */
     categoryNames?: string[];
+    /** 與 categoryNames 一一對應的徽章顏色（沒設定的位置是 null） */
+    categoryBadges?: (BadgeStyle | null)[];
     /** 適用產業（政府補助資源，可多選） */
     industryNames?: string[];
     createdTime: string;
@@ -263,8 +279,12 @@ export type NewsDetail = {
     published: boolean;
     categoryId: number;
     categoryName: string;
+    /** 主分類的徽章顏色（後台「分類管理」設定）；沒設定就是 null／沒有這個欄位，前台用預設紫色 */
+    categoryBadge?: BadgeStyle | null;
     /** 所有分類名稱（產業輔導的產業別可多選；第一個就是 categoryName） */
     categoryNames?: string[];
+    /** 與 categoryNames 一一對應的徽章顏色（沒設定的位置是 null） */
+    categoryBadges?: (BadgeStyle | null)[];
     /** 適用產業（政府補助資源，可多選） */
     industryNames?: string[];
     createdTime: string;

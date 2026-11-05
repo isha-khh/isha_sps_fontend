@@ -4,6 +4,8 @@ import MoreLink from "@/components/ui/MoreLink";
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
 import { withBasePath } from "@/lib/api-client";
+import { badgeInlineStyle, tagBadgesOf } from "@/lib/badge-style";
+import type { BadgeStyle } from "@/lib/types";
 import { fetchIndustryAiLink, fetchSectionItems, NewsSections, type NewsSectionId } from "@/lib/api.server";
 import { resolveServeCategoryLink, type IndustryAiLink } from "@/lib/industry-ai-link";
 import Link from "next/link";
@@ -12,6 +14,8 @@ interface ServiceSlideData {
   href: string;
   /** 關鍵字連結：沒給就連到這張投影片所屬專區的列表頁 */
   keywordHrefs?: string[];
+  /** 與 keywords 一一對應的徽章顏色（後台「分類／標籤管理」設定），沒設定用預設藍色 */
+  keywordBadges?: (BadgeStyle | null | undefined)[];
   /** 哪些關鍵字連到外部網址（後台「產業AI」外部連結開啟時），這些連結要另開新視窗 */
   externalKeywords?: Array<{ newTab: boolean } | null>;
   image: string;
@@ -58,6 +62,7 @@ async function loadSlides(section: NewsSectionId, detailBase: string, categoryPa
       image: item.imageUrl || SERVICE_FALLBACK_IMAGE,
       title: item.title,
       keywords,
+      keywordBadges: categoryPath ? (category ? [item.categoryBadge] : []) : tagBadgesOf(item).slice(0, 3),
       keywordHrefs: categoryPath ? keywords.map((name) => `${categoryPath}?category=${encodeURIComponent(name)}`) : undefined,
       description: intro.length > DESCRIPTION_MAX_LENGTH ? `${intro.slice(0, DESCRIPTION_MAX_LENGTH)}…` : intro,
     };
@@ -155,6 +160,7 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
                         <a
                           href={withBasePath(slide.keywordHrefs?.[index] ?? slide.href)}
                           title={`前往${keyword}`}
+                          style={badgeInlineStyle(slide.keywordBadges?.[index])}
                           {...(slide.externalKeywords?.[index]?.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                         >
                           {keyword}
