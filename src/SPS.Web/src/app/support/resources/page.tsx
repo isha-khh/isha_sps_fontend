@@ -118,7 +118,7 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
           {filteredResources.map((resource) => {
             const modalId = `support-request-${resource.id}`;
             return (
-              <div className="col-lg-4 col-md-6 col-12 item mb-md-4 mb-4" key={resource.id}>
+              <div className="col-lg-4 col-md-6 col-12 item equal_card support_card mb-md-4 mb-4" key={resource.id}>
                 <div className="item_box">
                   {resource.image && (
                     <div className="pic">
@@ -183,15 +183,17 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
                       </ul>
                     </div>
 
-                    <ul className="nav ul-key">
-                      {resource.keywords.map((keyword, index) => (
-                        <li key={keyword}>
-                          <a href="#" title={keyword} tabIndex={0} style={badgeInlineStyle(resource.keywordBadges?.[index])}>
-                            {keyword}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                    {resource.keywords.length > 0 && (
+                      <ul className="nav ul-key">
+                        {resource.keywords.map((keyword, index) => (
+                          <li key={keyword}>
+                            <a href="#" title={keyword} tabIndex={0} style={badgeInlineStyle(resource.keywordBadges?.[index])}>
+                              {keyword}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
 
                     <a
                       href="#"

@@ -1672,27 +1672,51 @@ a.det_more {
     border-radius: 5px;
     margin: 10px 0 20px;
 }
-/* 企業名錄卡片等高（EnterpriseCard）：同一列卡片拉成一樣高，標籤區固定保留兩行，「詳細資料」按鈕貼底 */
-.item.ente_card .item_box {
+/* 卡片等高（企業名錄 EnterpriseCard、政府補助資源）：同一列卡片拉成一樣高，標籤區固定保留兩行，按鈕貼底 */
+.item.equal_card .item_box {
     height: 100%;
     display: flex;
     flex-direction: column;
 }
-.item.ente_card .item_box .tit {
+.item.equal_card .item_box .tit {
     flex: 1;
     display: flex;
     flex-direction: column;
 }
-.item.ente_card .item_box .tit ul.ul-key {
+.item.equal_card .item_box .tit ul.ul-key {
     /* 兩行標籤：每行 = 標籤高（行高 1.5 × 0.875rem + 上下 padding 10px）+ 下方間距 8px */
     min-height: calc(2 * (1.3125rem + 18px));
     align-content: flex-start;
 }
-.item.ente_card .item_box .tit .tit_nsl {
+.item.equal_card .item_box .tit .tit_nsl {
     margin-bottom: 10px; /* 按鈕貼底後，內容與按鈕之間至少留的間距 */
 }
-.item.ente_card .item_box .tit a.det_more {
+.item.equal_card .item_box .tit a.det_more {
     margin-top: auto;
+}
+/* 政府補助資源（support_card）：標題、簡介固定保留兩行，下方條列資訊每項最多兩行，各欄有沒有填、字多字少都不會讓卡片錯位（issue #85） */
+.item.support_card .item_box .tit h3 {
+    min-height: calc(2 * 1lh);
+}
+.item.support_card .item_box .tit .tit_nsl > p {
+    min-height: calc(2 * 1lh);
+}
+.item.support_card .item_box .tit ul.nav.d-block li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+.item.support_card .item_box .tit ul.nav.d-block li > i {
+    flex: none;
+    margin: 0 !important;
+}
+.item.support_card .item_box .tit ul.nav.d-block li > span {
+    flex: 1;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 .matching_sear {
     gap: 0 10px;
