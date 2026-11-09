@@ -601,3 +601,9 @@
   color: #0052cc;
   pointer-events: none;
 }
+
+/* 知識加值「熱門課程」側欄（PopularCourses）：右邊的「剩餘 X 名」欄已經拿掉，標題不用再替它預留寬度。
+   通用的 `.column_box .item .tit` 是 70%（手機斷點 75%、80%），這裡還原成滿寬；多一層 class 讓優先權蓋過設計稿的樣式。 */
+.column_box.column_course .item .tit {
+  width: 100%;
+}
