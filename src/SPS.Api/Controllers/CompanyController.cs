@@ -69,6 +69,14 @@ public class CompanyController : ControllerBase
             parameters.Status = Status.Active;
         }
 
+        // 前台企業名錄列表：套用後台「頁面設定」的排序（沒指定 sortBy 才有作用，只有傳 useDirectorySort 的呼叫端會用到）
+        if (parameters.UseDirectorySort && string.IsNullOrWhiteSpace(parameters.SortBy))
+        {
+            var sort = await _settingService.GetSettingAsync<EnterpriseDirectorySortSettingsDto>(PageSettingsController.EnterpriseSortKey, cancellationToken);
+            var settings = sort.IsSuccess && sort.Data != null ? sort.Data : new EnterpriseDirectorySortSettingsDto();
+            parameters.DirectorySortRules = EnterpriseDirectorySortValidator.Normalize(settings).Settings.Rules.Where(r => r.Enabled).ToList();
+        }
+
         var result = await _companyService.GetPagedAsync(parameters, cancellationToken);
 
         if (!result.IsSuccess)

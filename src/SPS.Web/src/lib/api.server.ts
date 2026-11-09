@@ -365,10 +365,12 @@ export async function fetchCompaniesPage(options: {
     pageSize: number;
     search?: string;
     tagIds?: number[];
+    /** 套用後台「頁面設定 → 企業名錄排序」；只有企業名錄列表需要，其他呼叫端維持原排序 */
+    useDirectorySort?: boolean;
 }): Promise<{ items: CompanyList[]; totalCount: number; backendAvailable: boolean }> {
     try {
         const response = await apiClient.get<PagedResult<CompanyList>>("/api/Company", {
-            params: { page: options.page, pageSize: options.pageSize, search: options.search || undefined, tagIds: options.tagIds },
+            params: { page: options.page, pageSize: options.pageSize, search: options.search || undefined, tagIds: options.tagIds, useDirectorySort: options.useDirectorySort || undefined },
             paramsSerializer: { indexes: null },
         });
         const items = (response.data.items ?? []).map((c) => ({ ...c, photo: resolveBackendAssetUrl(c.photo) }));

@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using SPS.Application.DTOs.SystemSettings;
 using SPS.Domain.Enums;
 
 namespace SPS.Application.DTOs.Company;
@@ -56,4 +58,14 @@ public class CompanyQueryParameters
     /// 是否降序排列
     /// </summary>
     public bool Descending { get; set; } = true;
+
+    /// <summary>
+    /// 套用後台「頁面設定」的企業名錄排序（前台企業名錄列表傳 true）。沒指定 <see cref="SortBy"/> 時才有作用；
+    /// 後台公司管理、首頁等其他呼叫端不傳，排序不受影響。
+    /// </summary>
+    public bool UseDirectorySort { get; set; }
+
+    /// <summary>已啟用的名錄排序規則，由 API 讀設定後填入，不接受使用者從網址傳入</summary>
+    [BindNever]
+    public List<EnterpriseSortRuleDto>? DirectorySortRules { get; set; }
 }
