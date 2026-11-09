@@ -607,3 +607,86 @@
 .column_box.column_course .item .tit {
   width: 100%;
 }
+
+/* 第一次造訪的 Cookie 告知橫幅（CookieNotice）：固定在畫面底部，低於彈窗（1055）、高於一般內容 */
+.cookie-notice {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1040;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  /* 右邊多留一點：站台右下角有浮動按鈕（搜尋／回到頁首），不要壓住「我知道了」 */
+  padding: 0.75rem 5rem calc(0.75rem + env(safe-area-inset-bottom, 0px)) 1.25rem;
+  background: #0b4fb3;
+  color: #fff;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.18);
+}
+@media (max-width: 575px) {
+  /* 手機：按鈕會換到下一行靠左，不會壓到右下角浮動按鈕，右邊不用多留 */
+  .cookie-notice {
+    padding-right: 1.25rem;
+  }
+}
+.cookie-notice-text {
+  flex: 1 1 18rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+.cookie-notice-text a {
+  color: #fff;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+.cookie-notice-btn {
+  flex: none;
+  padding: 0.4rem 1.25rem;
+  border: 0;
+  border-radius: 6px;
+  background: #fff;
+  color: #0b4fb3;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cookie-notice-btn:focus-visible,
+.cookie-notice-text a:focus-visible {
+  outline: 3px solid #ffd54f;
+  outline-offset: 2px;
+}
+
+/* 隱私權政策頁（/privacy） */
+.privacy-policy .privacy-meta {
+  margin: 0 0 1.5rem;
+  color: #666;
+  font-size: 0.9375rem;
+}
+.privacy-policy section + section {
+  margin-top: 1.75rem;
+}
+.privacy-policy h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.privacy-policy p {
+  margin: 0 0 0.75rem;
+  line-height: 1.85;
+}
+.privacy-policy ul {
+  margin: 0 0 0.75rem;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+.privacy-policy li {
+  margin-bottom: 0.4rem;
+  line-height: 1.8;
+}
+.privacy-policy a {
+  color: #0052cc;
+  text-decoration: underline;
+}

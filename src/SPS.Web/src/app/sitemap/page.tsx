@@ -25,7 +25,10 @@ const SITE_UNIT_GROUPS: SiteUnitGroup[] = [
   {
     icon: "bi-diagram-3",
     title: "網站導覽",
-    links: [{ label: "網站導覽說明", href: "/sitemap" }],
+    links: [
+      { label: "網站導覽說明", href: "/sitemap" },
+      { label: "隱私權政策", href: "/privacy" },
+    ],
   },
   {
     icon: "bi-buildings",

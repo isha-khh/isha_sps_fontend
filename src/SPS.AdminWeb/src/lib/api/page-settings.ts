@@ -138,6 +138,23 @@ export interface IndustryAiLinkSettings {
   newTab: boolean;
 }
 
+/** 隱私權政策（前台 /privacy）與 Cookie 告知橫幅 */
+export interface PrivacySection {
+  title: string;
+  body: string;
+}
+
+export interface PrivacyPolicySettings {
+  title: string;
+  /** yyyy-MM-dd；空白＝前台不顯示 */
+  updatedDate: string;
+  sections: PrivacySection[];
+  noticeEnabled: boolean;
+  noticeMessage: string;
+  noticeButtonText: string;
+  noticeLinkText: string;
+}
+
 /** 企業名錄排序：一組有優先順序的規則（陣列順序＝優先順序） */
 export type EnterpriseSortKey = 'completeness' | 'image' | 'tags' | 'createdTime';
 
@@ -233,6 +250,17 @@ export const pageSettingsApi = {
   /** PUT /api/page-settings/industry-ai-link（開啟時沒填網址、網址不是 http／https 時後端回 400 `{ error }`） */
   async updateIndustryAiLink(settings: IndustryAiLinkSettings): Promise<void> {
     await apiClient.put('/api/page-settings/industry-ai-link', settings);
+  },
+
+  /** GET /api/page-settings/privacy（沒設定過是預設範本） */
+  async getPrivacy(): Promise<PrivacyPolicySettings> {
+    const response = await apiClient.get<PrivacyPolicySettings>('/api/page-settings/privacy');
+    return response.data;
+  },
+
+  /** PUT /api/page-settings/privacy（格式或長度不符時後端回 400 `{ error }`） */
+  async updatePrivacy(settings: PrivacyPolicySettings): Promise<void> {
+    await apiClient.put('/api/page-settings/privacy', settings);
   },
 
   /** GET /api/page-settings/enterprise-sort（沒設定過是「新的在前」） */

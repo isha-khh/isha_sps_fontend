@@ -6,6 +6,7 @@ import { XrPageSection } from './XrPageSection';
 import { SupportInfoSection } from './SupportInfoSection';
 import { IndustryAiLinkSection } from './IndustryAiLinkSection';
 import { EnterpriseSortSection } from './EnterpriseSortSection';
+import { PrivacyPolicySection } from './PrivacyPolicySection';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import { pageSettingsApi, type ContributeFormatFile, type ContributePageSettings } from '@/lib/api/page-settings';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
@@ -62,7 +63,7 @@ function pickedFile(file: FileListItem | FileUploadResponse): { id: string; name
  */
 /**
  * `view` 決定這一頁顯示哪些區塊（同一個元件掛在三個後台選單項目）：
- * - `misc`（預設，「頁面設定」）：「產業AI」外部連結、企業名錄排序、補助專區資訊區塊、下載資源
+ * - `misc`（預設，「頁面設定」）：「產業AI」外部連結、企業名錄排序、隱私權政策與 Cookie 告知、補助專區資訊區塊、下載資源
  * - `contribute`（「我要投稿」）：投稿頁的主視覺圖片、投稿格式檔、聯絡資訊
  * - `about`（「關於我們」）：關於我們頁的文字內容
  */
@@ -323,6 +324,8 @@ export const PageSettingsPage = ({ view = 'misc' }: { view?: 'misc' | 'contribut
       {view === 'misc' && <IndustryAiLinkSection />}
 
       {view === 'misc' && <EnterpriseSortSection />}
+
+      {view === 'misc' && <PrivacyPolicySection />}
 
       {view === 'about' && <AboutPageSection />}
 

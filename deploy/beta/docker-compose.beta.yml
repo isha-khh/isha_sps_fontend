@@ -99,6 +99,8 @@ services:
       HOSTNAME: 0.0.0.0
       # 前台伺服器端（SSR）呼叫後端的內部位址
       API_URL: http://sps-beta-api:8080
+      # Google Analytics 4 衡量 ID（G-XXXXXXXXXX）；留空＝前台不載入 GA（CSP 也不放行 GA 網域）
+      GA_MEASUREMENT_ID: ${GA_MEASUREMENT_ID:-}
     networks:
       beta:
         ipv4_address: 172.31.50.11

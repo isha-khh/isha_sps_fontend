@@ -834,6 +834,35 @@ export async function fetchAboutPage(): Promise<AboutPageContent> {
     }
 }
 
+export type PrivacyPolicyContent = {
+    title: string;
+    /** yyyy-MM-dd；空字串＝不顯示 */
+    updatedDate: string;
+    sections: { title: string; body: string }[];
+    noticeEnabled: boolean;
+    noticeMessage: string;
+    noticeButtonText: string;
+    noticeLinkText: string;
+};
+
+/** 隱私權政策與 Cookie 告知橫幅（後台「頁面設定」維護）。快取 60 秒；取不到（後端連不到）回 null——政策頁顯示「暫時無法載入」，橫幅不顯示 */
+export async function fetchPrivacyPolicy(): Promise<PrivacyPolicyContent | null> {
+    try {
+        const data = await getBackendJson<Partial<PrivacyPolicyContent>>("/api/page-settings/privacy/public", 60);
+        return {
+            title: data.title || "隱私權政策",
+            updatedDate: data.updatedDate ?? "",
+            sections: data.sections ?? [],
+            noticeEnabled: data.noticeEnabled ?? false,
+            noticeMessage: data.noticeMessage ?? "",
+            noticeButtonText: data.noticeButtonText ?? "",
+            noticeLinkText: data.noticeLinkText ?? "",
+        };
+    } catch {
+        return null;
+    }
+}
+
 export type SupportInfoBlockContent = {
     icon: string;
     title: string;
