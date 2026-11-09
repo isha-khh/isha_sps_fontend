@@ -722,6 +722,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                     />
                   </div>
 
+                  {!config.hideOrdinal && (
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-medium">排序順序</span>
@@ -741,6 +742,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                       placeholder="0"
                     />
                   </div>
+                  )}
                 </div>
               </div>
             </div>

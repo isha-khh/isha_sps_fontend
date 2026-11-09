@@ -4,8 +4,8 @@ import Link from "next/link";
 /**
  * 積木元件：人才培訓右側欄「熱門課程」，對應設計稿
  * page/_uc/side2_course.html——版型跟通用的 `PopularPosts`（縮圖＋
- * 排名徽章）不一樣：左邊是縣市徽章＋日期＋標題，右邊是「剩餘 X 名」，
- * 沒有縮圖，資料形狀也不同，所以獨立元件，不硬套 `PopularPosts`。
+ * 排名徽章）不一樣：縣市徽章＋日期＋標題，沒有縮圖，資料形狀也不同，所以獨立元件，不硬套 `PopularPosts`。
+ * 2026-11 起拿掉右邊的「剩餘 X 名」。
  *
  * 外層 `.side2_new` 不能省略，理由跟 `PopularPosts.tsx` 那則註解
  * 一樣：卡片邊框/圓角/底色那組樣式寫在 `.side2 .side2_new .column_box`
@@ -34,13 +34,6 @@ export default function PopularCourses({ courses }: { courses: TalentCourse[] })
                   </Link>
                 </div>
 
-                {course.remainingSeats !== undefined && (
-                  <Link href={href} className="pic" title={course.title}>
-                    <div className="tit_quota">
-                      剩餘<span className="blue">{course.remainingSeats}名</span>
-                    </div>
-                  </Link>
-                )}
               </div>
             </div>
           );

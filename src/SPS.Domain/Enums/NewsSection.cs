@@ -34,10 +34,21 @@ public static class NewsSection
         [Talent] = new[]
         {
             "organizer", "dateStart", "dateEnd", "city", "contactName", "contactPhone", "courseCode", "courseDate", "courseTime",
-            "totalHours", "fee", "audience", "location", "hostOrganizer", "executor", "remainingSeats", "registerUrl",
+            "totalHours", "fee", "audience", "location", "hostOrganizer", "executor", "registerUrl",
+            // 熱門課程排序：有填整數（數字越小越前面）就列入前台「熱門課程」側欄，沒填就不列入
+            "popularOrder",
         },
         [Tutoring] = new[] { "applicant", "organizer", "contactPhone", "contributor" },
         [SupportResource] = new[] { "applicant", "amount", "organizer", "period" },
+    };
+
+    /// <summary>
+    /// 已經停用的欄位：舊資料裡還有，編輯舊項目時前端會原樣送回來，所以不拒絕、而是靜默丟掉（存檔後就清掉了）。
+    /// 人才培育的「剩餘名額」（remainingSeats）2026-11 起不再維護、前台也不顯示。
+    /// </summary>
+    public static readonly IReadOnlyDictionary<short, string[]> RetiredMetaKeys = new Dictionary<short, string[]>
+    {
+        [Talent] = new[] { "remainingSeats" },
     };
 
     public static bool IsValid(short section) => section is >= Announcement and <= SupportResource;

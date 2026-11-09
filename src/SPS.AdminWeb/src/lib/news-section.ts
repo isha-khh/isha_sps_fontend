@@ -48,6 +48,8 @@ export interface NewsSectionConfig {
   hasTags: boolean;
   /** 有「課程類型」多選（只有人才培育；類型在「課程類型」頁維護，對應前台知識加值的類型篩選） */
   hasCourseTypes?: boolean;
+  /** 不手動維護排序：編輯頁不顯示「排序順序」（人才培育課程列表固定依開課日期排序） */
+  hideOrdinal?: boolean;
   /** 專區專屬欄位 */
   metaFields?: MetaField[];
   /** 專區專屬欄位卡片的標題 */
@@ -110,6 +112,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
     hasAttachments: false,
     hasTags: true,
     hasCourseTypes: true,
+    hideOrdinal: true,
     metaTitle: '課程資訊',
     metaFields: [
       { key: 'organizer', label: '開課單位', placeholder: '例如：財團法人工業技術研究院南分院', hint: '列表表格的「開課單位」' },
@@ -127,7 +130,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
       { key: 'location', label: '上課地點' },
       { key: 'hostOrganizer', label: '主辦單位' },
       { key: 'executor', label: '執行單位' },
-      { key: 'remainingSeats', label: '剩餘名額', type: 'number', hint: '顯示在「熱門課程」側欄；不填就不顯示' },
+      { key: 'popularOrder', label: '熱門課程排序', type: 'number', placeholder: '例如：1', hint: '填數字就會列入前台「熱門課程」側欄，數字越小越前面（最多顯示 5 筆）；不填就不列入' },
       { key: 'registerUrl', label: '報名連結', type: 'url', hint: '前台「立即報名」按鈕連去的網址；不填就不顯示按鈕' },
     ],
   },

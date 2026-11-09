@@ -27,7 +27,14 @@ export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete, basePath
       title: '標題',
       render: (item) => (
         <div>
-          <div className="font-semibold">{item.title}</div>
+          <div className="font-semibold">
+            {item.title}
+            {item.meta?.popularOrder && (
+              <span className="badge badge-sm badge-warning ml-2 whitespace-nowrap" title="列入前台「熱門課程」側欄，數字越小越前面">
+                熱門 {item.meta.popularOrder}
+              </span>
+            )}
+          </div>
           {item.introduction && (
             <div className="text-sm text-base-content/60 line-clamp-1 max-w-md">
               {item.introduction}

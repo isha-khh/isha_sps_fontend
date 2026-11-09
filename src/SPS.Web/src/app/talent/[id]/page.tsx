@@ -8,9 +8,8 @@ import PopularCourses from "@/components/talent/PopularCourses";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import NewsViewTracker from "@/components/news/NewsViewTracker";
 import { PuckRenderer } from "@/components/puck/PuckRenderer";
-import { toTalentCourse, type TalentCourse } from "@/lib/talent-data";
+import { pickPopularCourses, toTalentCourse, type TalentCourse } from "@/lib/talent-data";
 import { fetchBanners, fetchSectionDetail, fetchSectionItems, NewsSections } from "@/lib/api.server";
-import { sortByViewCount } from "@/lib/content-list-utils";
 import { badgeInlineStyle } from "@/lib/badge-style";
 
 export async function generateMetadata({ params }: PageProps<"/talent/[id]">): Promise<Metadata> {
@@ -52,7 +51,7 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
 
   const course = toTalentCourse(detail);
   const rows = INFO_ROWS(course);
-  const popularCourses = sortByViewCount(popularSource.items).slice(0, 5).map(toTalentCourse);
+  const popularCourses = pickPopularCourses(popularSource.items).map(toTalentCourse);
 
   return (
     <>

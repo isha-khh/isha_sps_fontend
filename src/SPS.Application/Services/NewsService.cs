@@ -573,12 +573,16 @@ public class NewsService : INewsService
         if (meta == null || meta.Count == 0) return (result, null);
 
         var allowed = NewsSection.MetaKeys.GetValueOrDefault(section) ?? Array.Empty<string>();
+        var retired = NewsSection.RetiredMetaKeys.GetValueOrDefault(section) ?? Array.Empty<string>();
         foreach (var (key, raw) in meta)
         {
+            if (retired.Contains(key)) continue; // 已停用的舊欄位：丟掉，不報錯
             if (!allowed.Contains(key)) return (result, $"這個專區不支援欄位「{key}」");
             var value = (raw ?? string.Empty).Trim();
             if (value.Length == 0) continue;
             if (value.Length > MaxMetaValueLength) return (result, $"欄位「{key}」內容過長（上限 {MaxMetaValueLength} 字）");
+            if (key == "popularOrder" && (!int.TryParse(value, out var order) || order < 0 || order > 9999))
+                return (result, "熱門課程排序請填 0 到 9999 的整數");
             result[key] = value;
         }
         return (result, null);
