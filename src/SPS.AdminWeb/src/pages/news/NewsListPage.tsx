@@ -95,6 +95,26 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
     }
   };
 
+  // 人才培育課程：在列表直接改「熱門課程排序」。只帶 meta（整組取代），其他欄位不動；空字串＝移出熱門課程
+  const handleUpdatePopularOrder = async (item: News, order: string) => {
+    if (order !== '' && !/^\d{1,4}$/.test(order)) {
+      await notify.warning('熱門課程排序請填 0 到 9999 的整數');
+      throw new Error('invalid popular order');
+    }
+    const meta = { ...(item.meta ?? {}) };
+    if (order === '') delete meta.popularOrder;
+    else meta.popularOrder = order;
+    try {
+      await newsApi.updateNews(item.id, { meta });
+      setNews((current) => current.map((n) => (n.id === item.id ? { ...n, meta } : n)));
+    } catch (error) {
+      console.error('Failed to update popular order:', error);
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      await notify.error(message || '更新熱門課程排序失敗');
+      throw error;
+    }
+  };
+
   // 刪除公告
   const handleDelete = async (id: number) => {
     try {
@@ -267,6 +287,7 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
             noun={config.noun}
             responseCounts={responseCounts}
             onExportResponses={responseCounts ? handleExportResponses : undefined}
+            onUpdatePopularOrder={section === 3 ? handleUpdatePopularOrder : undefined}
           />
         </div>
       </div>
