@@ -17,6 +17,8 @@ export const metadata: Metadata = {
 };
 
 const SERVE_PAGE_SIZE = 9;
+/** 導覽列「服務專區」預設進入的分類（後台「服務專區分類」同名的最上層分類） */
+const DEFAULT_SERVE_CATEGORY = "技術文件";
 
 /**
  * 服務專區列表，對應舊站 serve/index.html（三欄卡片）。2026-10-13 起資料來自後台「服務專區」維護的內容
@@ -44,6 +46,14 @@ export default async function ServeIndexPage({ searchParams }: PageProps<"/serve
   const [allCategories, industryAiLink] = await Promise.all([fetchServeCategories(), fetchIndustryAiLink()]);
   // 分類有兩層：最上層是前台主選單的「技術文件」「產業AI」，後台在它們底下建立的子分類顯示在左側選單（issue #32）
   const categories = allCategories.filter((c) => !c.parentId);
+  // 直接進 `/serve`（導覽列點「服務專區」）沒帶分類：預設就是「技術文件」，導向 `?category=技術文件`，
+  // 標題、麵包屑、子選單高亮才會是「技術文件」而不是「服務專區」（issue #87）。後台還沒建立這個分類就維持原樣，不要導向空頁。
+  if (!category && categories.some((c) => c.name === DEFAULT_SERVE_CATEGORY)) {
+    const params = new URLSearchParams({ category: DEFAULT_SERVE_CATEGORY });
+    if (rawQuery && typeof rawQuery === "string") params.set("q", rawQuery);
+    if (page > 1) params.set("page", String(page));
+    redirect(`/serve?${params.toString()}`);
+  }
   const activeCategory = category ? categories.find((c) => c.name === category) : undefined;
   // 指定了分類名稱卻找不到（後台還沒建立）→ 不顯示任何項目，而不是退回「全部」誤導使用者
   const unknownCategory = category !== undefined && !activeCategory;
