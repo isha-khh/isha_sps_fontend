@@ -550,3 +550,54 @@
   color: #0052cc;
   font-size: 1rem;
 }
+
+/* 可左右捲動容器的提示（ScrollHintContainer，知識加值課程表格）：提示列、邊緣淡出陰影、箭頭。
+   內容放得下（桌機）時元件不會輸出提示，不影響版面。陰影的顯示／隱藏不做動畫。 */
+.scroll-hint-wrap {
+  width: 100%;
+}
+.scroll-hint-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  background: #f0f7ff;
+  color: #0052cc;
+  font-size: 0.875rem;
+}
+.scroll-hint-frame {
+  position: relative;
+}
+.scroll-hint-fade {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  width: 28px;
+  pointer-events: none;
+  opacity: 0;
+}
+.scroll-hint-fade.is-visible {
+  opacity: 1;
+}
+.scroll-hint-fade-left {
+  left: 1px;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
+  border-radius: 8px 0 0 8px;
+}
+.scroll-hint-fade-right {
+  right: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
+  border-radius: 0 8px 8px 0;
+}
+.scroll-hint-arrow {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.25rem;
+  color: #0052cc;
+  pointer-events: none;
+}
