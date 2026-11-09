@@ -4029,6 +4029,14 @@ a.more_x.more_x_gu,
     margin-top: 20px;
     display: block;
 }
+/* 公司名稱（標題）是連到企業名錄詳情的連結，也在 .indu_box 裡，會被上面那條「網址連結」的樣式誤傷：
+   字縮成 1rem、被往下推 20px，跟左邊藍色直條錯開。這裡還原成跟設計稿的純文字標題一樣（沿用 .me_sod_bu 的大小與位置） */
+.prom .indu_box .me_sod_bu a {
+    font-size: inherit;
+    margin-top: 0;
+    display: inline;
+    color: inherit;
+}
 .prom .indu_box {
     position: relative;
     background-color: #f0f7ff;
