@@ -1,3 +1,7 @@
+# ⚠ 後台的 Docker 映像與 CI 用 pnpm 10.32.1，而且 Dockerfile 安裝時只複製 package.json 與 pnpm-lock.yaml（不含這個檔案），
+#   pnpm 10 讀的是 package.json 裡的 `pnpm.overrides`；本機用 pnpm 11 讀的是這個檔案的 `overrides`。
+#   兩邊的 overrides 必須完全一致，否則 `pnpm install --frozen-lockfile` 會報 ERR_PNPM_LOCKFILE_CONFIG_MISMATCH（2026-11-10 踩過）。
+#   改這裡的 overrides 時，請同步改 package.json 的 pnpm.overrides，並用 `npx pnpm@10.32.1 install --frozen-lockfile` 驗證。
 allowBuilds:
   protobufjs: set this to true or false
 ignoredBuiltDependencies:
