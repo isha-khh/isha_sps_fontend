@@ -691,17 +691,19 @@
   text-decoration: underline;
 }
 
-/* 網站導覽「快速鍵設定說明」：組合鍵依瀏覽器變化（Control + Option + U 比原本設計稿的 Alt + U 長），不能再固定 130px 寬 */
-.sitemap_box .accesskey_row {
+/* 網站導覽「快速鍵設定說明」：組合鍵依瀏覽器變化（Control + Option + U 比原本設計稿的 Alt + U 長），
+   不能再固定 130px 寬；設計稿 style.css 比本檔晚載入、選擇器優先權相同會贏，所以這裡多加一層 .accesskey_list 加強優先權 */
+.sitemap_box .accesskey_list .accesskey_row {
     flex-wrap: wrap;
-    gap: 4px 16px;
+    gap: 6px 16px;
 }
-.sitemap_box .accesskey_key {
+.sitemap_box .accesskey_list .accesskey_key {
     width: auto;
     min-width: 130px;
+    flex: 0 0 auto;
     white-space: nowrap;
 }
-.sitemap_box .accesskey_desc {
+.sitemap_box .accesskey_list .accesskey_desc {
     flex: 1 1 240px;
 }
 .sitemap_box .accesskey_reference {
