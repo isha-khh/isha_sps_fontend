@@ -46,9 +46,11 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
 
-      # 站點網址（信件連結、登入導向用）
-      App__BaseUrl: https://match.isafe.org.tw/sps
-      App__AdminBaseUrl: https://match-admin.isafe.org.tw
+      # 站點網址（信件連結、登入導向用）。預設值是 beta 現況；正式切換到別的網域時，在 .env 設 APP_BASE_URL／APP_ADMIN_BASE_URL
+      # （不要直接改這個檔：update-beta.sh 每次更新都會用 repo 的版本覆蓋它）。APP_BASE_URL 要含站台路徑 /sps。
+      App__BaseUrl: ${APP_BASE_URL:-https://match.isafe.org.tw/sps}
+      App__AdminBaseUrl: ${APP_ADMIN_BASE_URL:-https://match-admin.isafe.org.tw}
+      # 目前後端程式沒有讀這個值（只在 compose 裡設定），保留原樣
       App__ApiBaseUrl: https://match.isafe.org.tw
 
       # 資料庫（SPS_dev 複本）與 Redis
@@ -61,7 +63,9 @@ services:
       JWT_Setting__Audience: SPS.API.Beta
       JWT_Setting__Expires: "1440"
 
-      CORS_Setting__WithOrigins: https://match.isafe.org.tw,https://match-admin.isafe.org.tw
+      # CORS 只管「瀏覽器跨網域」呼叫 API；前台（/sps/api）與後台（nginx 轉 /api、/hubs）都是同源，實際上用不到。
+      # 預設值是 beta 現況；正式網域不同時在 .env 設 CORS_ORIGINS（逗號分隔的完整 origin，不含路徑）。
+      CORS_Setting__WithOrigins: ${CORS_ORIGINS:-https://match.isafe.org.tw,https://match-admin.isafe.org.tw}
 
       # 上傳檔案（見 README：要跟正式機實際的存放位置一致後再複製檔案過來）
       FileStorage__RootPath: /app/Uploads
