@@ -8,6 +8,7 @@ import { authApi } from "@/lib/api/auth";
 import { INBOX_CHANGED_EVENT, memberNotificationsApi } from "@/lib/api/member-notifications";
 import { useAuthStore } from "@/store/auth-store";
 import HeaderSearch from "@/components/layout/HeaderSearch";
+import SearchAccesskey from "@/components/layout/SearchAccesskey";
 import { useIndustryAiLink, useNewsNavCategories } from "@/components/SiteLinksProvider";
 import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
 import { setupHeaderNav } from "@/components/layout/header-nav";
@@ -331,6 +332,7 @@ export default function Headers() {
       <a href="#header-block" id="header-block" accessKey="U" title="上方功能區塊" className="visually-hidden-focusable">
         ::: 上方功能區塊
       </a>
+      <SearchAccesskey />
 
       <nav className="nav" aria-label="主要導覽">
         <nav className="navbar navbar-expand-md fixed-top bsnav nav-big-wrapper" aria-label="主要導覽選單">

@@ -8,8 +8,8 @@ import { withBasePath } from "@/lib/api-client";
  *
  * 舊站 header（page/_uc/nav.html）沒有搜尋框，是 2026-10-02 新增的。用原生
  * `<form method="get">` 送出，不依賴 router，JS 還沒載入也能搜。展開後自動 focus，
- * 按 Esc 或點面板外面會收起來。快速鍵 `S`（accesskey）開啟搜尋框，網站導覽頁的「快速鍵設定說明」有列；
- * 同一頁同時有三個版型，但同一時間只有一個不是 `display: none`，隱藏的元素瀏覽器不會觸發快速鍵，所以不會衝突。
+ * 按 Esc 或點面板外面會收起來。快速鍵 `S` 不掛在這幾個元素上（隱藏的版型瀏覽器觸發不了），
+ * 由 `SearchAccesskey` 依目前看得到的版型打開，見該檔案。
  *
  * 兩種版型（`variant`）：
  * - `header`：header 列上的圖示按鈕＋展開面板，只在 ≥1400px 才顯示。桌機版主選單
@@ -47,7 +47,7 @@ export default function HeaderSearch({ variant = "header" }: { variant?: "header
   if (variant === "panel") {
     return (
       <form className="header-search-inline" role="search" method="get" action={withBasePath("/search")}>
-        <input type="search" name="q" className="form-control" placeholder="搜尋公告、案例、常見問題…" aria-label="搜尋關鍵字（快速鍵 S）" accessKey="S" maxLength={100} required />
+        <input type="search" name="q" className="form-control" placeholder="搜尋公告、案例、常見問題…" aria-label="搜尋關鍵字" maxLength={100} required />
         <button type="submit" className="btn btn-primary" title="搜尋">
           <i className="bi bi-search" aria-hidden="true"></i>
           <span className="visually-hidden">搜尋</span>
@@ -74,7 +74,6 @@ export default function HeaderSearch({ variant = "header" }: { variant?: "header
         className={`btn ${isFloat ? "btn-primary shadow" : "btn-light"} rounded-circle header-search-toggle`}
         aria-label="開啟全站搜尋（快速鍵 S）"
         aria-expanded={open}
-        accessKey="S"
         aria-controls="header-search-panel"
         title="全站搜尋"
         onClick={() => setOpen((v) => !v)}
