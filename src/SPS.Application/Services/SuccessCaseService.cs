@@ -15,11 +15,13 @@ public class SuccessCaseService : ISuccessCaseService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SuccessCaseService> _logger;
+    private readonly IContentIndexTrigger _indexTrigger;
 
-    public SuccessCaseService(IUnitOfWork unitOfWork, ILogger<SuccessCaseService> logger)
+    public SuccessCaseService(IUnitOfWork unitOfWork, ILogger<SuccessCaseService> logger, IContentIndexTrigger indexTrigger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _indexTrigger = indexTrigger;
     }
 
     public async Task<Result<object>> GetPagedAsync(SuccessCaseQueryParameters parameters)
@@ -138,6 +140,7 @@ public class SuccessCaseService : ISuccessCaseService
 
             await _unitOfWork.SuccessCases.AddAsync(successCase);
             await _unitOfWork.SaveChangesAsync();
+            _indexTrigger.Trigger(EmbeddingSourceType.Case, successCase.Id.ToString());
 
             var dto = await MapToDtoAsync(successCase);
             return Result<SuccessCaseDto>.Success(dto);
@@ -208,6 +211,7 @@ public class SuccessCaseService : ISuccessCaseService
 
             _unitOfWork.SuccessCases.Update(successCase);
             await _unitOfWork.SaveChangesAsync();
+            _indexTrigger.Trigger(EmbeddingSourceType.Case, successCase.Id.ToString());
 
             var dto = await MapToDtoAsync(successCase);
             return Result<SuccessCaseDto>.Success(dto);

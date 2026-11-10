@@ -21,9 +21,13 @@ function truncate(text: string, max = 90): string {
  * 版面是 2026-10-02 沿用既有 `.search`／`.column_box` 這幾個 class 自行設計的，
  * 不是照設計稿。
  *
- * 資料來自後端 `GET /api/Search`：一次查公告、產業案例、常見問題、影音（只含已發布的），
+ * 資料來自後端 `GET /api/Search`：一次查最新消息、服務專區、人才培育、產業輔導、補助公告、政府補助資源、企業名錄、媒合需求、產業案例、常見問題、影音（只含已發布的；
+ * 公告類連內文都會比對，企業名錄跟著後台「內容設定」的「只顯示供給端」開關），
  * 依類型分組、每組顯示前 5 筆，超過的用「查看全部」連到該類型自己的列表頁（那邊本來
  * 就有同一個關鍵字的搜尋與分頁）。
+ *
+ * 開了後台「AI 語意搜尋」時，關鍵字沒出現、但意思相關的項目會補在各分類後面，標示「語意相關」（`matchType`）；
+ * 沒開或語意搜尋暫時失敗就只有關鍵字結果，這頁不用特別處理。
  *
  * 三種狀況刻意分開處理：沒帶關鍵字（提示輸入）、後端連不到（`fetchSearch` 回 null，顯示
  * 服務暫時無法使用）、搜尋了但 0 筆（照實顯示查無結果）。
@@ -41,7 +45,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           <SearchBar defaultKeyword={query} keywordPlaceholder="請輸入想搜尋的關鍵字" />
         </div>
 
-        {!query && <p>請輸入關鍵字，搜尋公告、產業案例、常見問題與影音。</p>}
+        {!query && <p>請輸入關鍵字，搜尋最新消息、服務專區、人才培育、產業輔導、補助資源、企業名錄、媒合需求、產業案例、常見問題與影音。</p>}
 
         {query && result === null && <p>搜尋服務暫時無法使用，請稍後再試。</p>}
 
@@ -73,6 +77,11 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
                           {item.title}
                         </Link>
                         {item.date && <span className="ms-3 text-muted small">{formatIsoDate(item.date)}</span>}
+                        {item.matchType === "semantic" && (
+                          <span className="ms-3 badge text-bg-light border fw-normal" title="內容沒有出現這個關鍵字，但 AI 判斷意思相關">
+                            語意相關
+                          </span>
+                        )}
                         {item.summary && <p className="mb-0 mt-1 text-muted">{truncate(item.summary)}</p>}
                       </li>
                     ))}

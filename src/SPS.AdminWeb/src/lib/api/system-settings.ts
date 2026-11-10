@@ -272,6 +272,12 @@ export const settingsApi = {
     return response.data;
   },
 
+  /** 取得 LiteLLM 上這把金鑰可用的模型清單（設定頁模型下拉選單用，不儲存設定） */
+  async listEmbeddingModels(settings: EmbeddingSettings): Promise<{ success: boolean; models: string[]; message?: string }> {
+    const response = await apiClient.post('/api/settings/embedding/models', settings);
+    return response.data;
+  },
+
   async getEmbeddingIndexStatus(): Promise<EmbeddingIndexStatus> {
     const response = await apiClient.get('/api/settings/embedding/index-status');
     return response.data;

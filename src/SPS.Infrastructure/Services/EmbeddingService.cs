@@ -114,6 +114,63 @@ public class EmbeddingService : IEmbeddingService
         }
     }
 
+    /// <summary>全站搜尋的查詢指令（對 qwen3-embedding 這類指令式模型有效；沒有指令的模型多出這段文字影響也很小）</summary>
+    private const string SearchQueryInstructionPrefix =
+        "Instruct: 根據使用者輸入的搜尋詞，找出智慧工安平台網站上最相關的公告、課程、企業、媒合需求或常見問題\nQuery: ";
+
+    public async Task<Result<float[]>> EmbedSearchQueryAsync(string queryText, CancellationToken ct = default)
+    {
+        var settings = await GetSettingsAsync(ct);
+        if (!settings.IsEnabled)
+            return Result<float[]>.Failure("AI 語意搜尋未啟用");
+        if (string.IsNullOrEmpty(settings.ApiKey) || string.IsNullOrEmpty(settings.BaseUrl) || string.IsNullOrEmpty(settings.Model))
+            return Result<float[]>.Failure("尚未設定 AI 語意搜尋，請至系統設定完成配置");
+
+        try
+        {
+            var vector = await CallEmbeddingApiAsync(settings.BaseUrl, settings.ApiKey, settings.Model, SearchQueryInstructionPrefix + queryText, ct);
+            return Result<float[]>.Success(vector);
+        }
+        catch (Exception ex)
+        {
+            return Result<float[]>.Failure($"Embedding API 錯誤: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<List<string>>> ListModelsAsync(EmbeddingSettingsDto settings, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(settings.BaseUrl))
+            return Result<List<string>>.Failure("請先填入服務位址");
+        if (string.IsNullOrWhiteSpace(settings.ApiKey))
+            return Result<List<string>>.Failure("請先填入 API Key");
+
+        try
+        {
+            var client = _httpClientFactory.CreateClient("Embedding");
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"{settings.BaseUrl.Trim().TrimEnd('/')}/models");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey.Trim());
+
+            var response = await client.SendAsync(request, ct);
+            if (!response.IsSuccessStatusCode)
+                return Result<List<string>>.Failure($"取得模型清單失敗（status={(int)response.StatusCode}），請確認位址與金鑰");
+
+            var body = await response.Content.ReadAsStringAsync(ct);
+            using var doc = JsonDocument.Parse(body);
+            var models = doc.RootElement.GetProperty("data").EnumerateArray()
+                .Select(m => m.TryGetProperty("id", out var id) ? id.GetString() : null)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id!)
+                .Distinct()
+                .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            return Result<List<string>>.Success(models);
+        }
+        catch (Exception ex)
+        {
+            return Result<List<string>>.Failure($"取得模型清單失敗：{ex.Message}");
+        }
+    }
+
     public async Task<string?> GetActiveModelNameAsync(CancellationToken ct = default)
     {
         var settings = await GetSettingsAsync(ct);

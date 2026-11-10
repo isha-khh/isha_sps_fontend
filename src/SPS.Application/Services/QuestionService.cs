@@ -12,11 +12,13 @@ public class QuestionService : IQuestionService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<QuestionService> _logger;
+    private readonly IContentIndexTrigger _indexTrigger;
 
-    public QuestionService(IUnitOfWork unitOfWork, ILogger<QuestionService> logger)
+    public QuestionService(IUnitOfWork unitOfWork, ILogger<QuestionService> logger, IContentIndexTrigger indexTrigger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _indexTrigger = indexTrigger;
     }
 
     public async Task<Result<PagedResult<QuestionResponse>>> GetPagedAsync(
@@ -93,6 +95,7 @@ public class QuestionService : IQuestionService
 
             // 提交事務
             await transaction.CommitAsync(cancellationToken);
+            _indexTrigger.Trigger(EmbeddingSourceType.Faq, question.Id.ToString());
 
             return Result<QuestionResponse>.Success(new QuestionResponse
             {
@@ -161,6 +164,7 @@ public class QuestionService : IQuestionService
 
         await _unitOfWork.Questions.UpdateAsync(question, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _indexTrigger.Trigger(EmbeddingSourceType.Faq, question.Id.ToString());
 
         return Result<QuestionResponse>.Success(new QuestionResponse
         {

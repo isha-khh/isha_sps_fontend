@@ -148,10 +148,12 @@ export type SearchResultItem = {
     imageUrl?: string | null;
     /** 站內路徑（不含站台 basePath） */
     url: string;
+    /** keyword＝內容含關鍵字；semantic＝沒出現關鍵字、AI 語意判斷相關 */
+    matchType?: "keyword" | "semantic";
 };
 
 export type SearchGroup = {
-    /** news / case / faq / video */
+    /** news / serve / talent / tutoring / support / support-resource / company / demand / case / faq / video */
     type: string;
     label: string;
     totalCount: number;

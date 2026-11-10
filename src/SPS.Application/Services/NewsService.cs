@@ -14,11 +14,13 @@ public class NewsService : INewsService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<NewsService> _logger;
+    private readonly IContentIndexTrigger _indexTrigger;
 
-    public NewsService(IUnitOfWork unitOfWork, ILogger<NewsService> logger)
+    public NewsService(IUnitOfWork unitOfWork, ILogger<NewsService> logger, IContentIndexTrigger indexTrigger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _indexTrigger = indexTrigger;
     }
 
     public async Task<Result<PagedResult<NewsListItemResponse>>> GetPagedAsync(
@@ -194,6 +196,7 @@ public class NewsService : INewsService
 
             // 提交事務
             await transaction.CommitAsync(cancellationToken);
+            _indexTrigger.Trigger(EmbeddingSourceType.News, news.Id.ToString());
             var createdTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
             var createdCourseTypes = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken, TagType.CourseType);
 
@@ -380,6 +383,7 @@ public class NewsService : INewsService
             await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), newCourseTypeIds, cancellationToken, TagType.CourseType);
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _indexTrigger.Trigger(EmbeddingSourceType.News, news.Id.ToString());
         var updatedTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
         var updatedCourseTypes = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken, TagType.CourseType);
         var updatedCategoryNames = await GetCategoryNamesAsync(AllCategoryIds(news).Concat(news.IndustryIds), cancellationToken);

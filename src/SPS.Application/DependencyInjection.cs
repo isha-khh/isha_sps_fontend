@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IApplicationReviewService, ApplicationReviewService>();
         services.AddScoped<IScoringService, ScoringService>();
         services.AddScoped<ISearchService, SearchService>();
+        services.AddSingleton<IContentIndexTrigger, ContentIndexTrigger>();
         services.AddScoped<IFileManagementService, FileManagementService>();
         services.AddScoped<ICompanyService, CompanyService>();
         services.AddScoped<IProductService, ProductService>();

@@ -60,9 +60,20 @@ public class ContentEmbedding : BaseEntity<Guid>
 
 public enum EmbeddingSourceType
 {
+    /// <summary>需求（「查詢端」向量，含 instruction prefix；供需求反查供給端用）</summary>
     Demand = 1,
     Company = 2,
-    Product = 3
+    Product = 3,
+
+    // 以下是全站搜尋的語意搜尋用（都是「文件端」向量，不含 instruction prefix）
+    /// <summary>最新消息／服務專區／人才培育／產業輔導／補助公告／政府補助資源（News 資料表，不分專區）</summary>
+    News = 4,
+    /// <summary>常見問題</summary>
+    Faq = 5,
+    /// <summary>產業案例</summary>
+    Case = 6,
+    /// <summary>需求的「文件端」向量，只含公開欄位（名稱、公開摘要、地點、標籤），不含完整內容</summary>
+    DemandDocument = 7
 }
 
 public enum EmbeddingStatus

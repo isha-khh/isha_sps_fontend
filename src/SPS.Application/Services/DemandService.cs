@@ -838,6 +838,8 @@ public class DemandService : IDemandService
             try
             {
                 await indexingService.IndexDemandAsync(demandId, CancellationToken.None);
+                // 全站搜尋用的文件端向量（只含公開欄位）
+                await indexingService.IndexDemandDocumentAsync(demandId, CancellationToken.None);
             }
             catch (Exception ex)
             {

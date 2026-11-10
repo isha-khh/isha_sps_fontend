@@ -63,6 +63,167 @@ public class ContentIndexingService : IContentIndexingService
         return await UpsertAsync(EmbeddingSourceType.Company, companyId.ToString(), text, useQueryStyle: false, force, ct);
     }
 
+    /// <summary>語意索引文字的長度上限（字元）；內文很長的公告只取前面這一段，足以代表主題</summary>
+    private const int MaxIndexChars = 2000;
+
+    public async Task<bool> IndexNewsAsync(int newsId, CancellationToken ct = default, bool force = false)
+    {
+        var db = _unitOfWork.GetDbContext();
+        var news = await db.Set<News>().AsNoTracking()
+            .Include(n => n.Title).Include(n => n.Introduction).Include(n => n.Content)
+            .FirstOrDefaultAsync(n => n.Id == newsId, ct);
+        if (news == null) return false;
+
+        var parts = new List<string>
+        {
+            $"【{SectionLabel(news.Section)}】",
+            news.Title?.DefaultText ?? string.Empty,
+            news.Introduction?.DefaultText ?? string.Empty,
+        };
+        // 專區欄位（課程代號、開課單位、主辦／協辦／執行單位、上課地點…）也是讀者會搜的詞
+        if (SearchService.NewsMetaSearchKeys.TryGetValue(news.Section, out var metaKeys))
+            parts.AddRange(metaKeys.Select(k => news.Meta.GetValueOrDefault(k) ?? string.Empty));
+        parts.Add(RichTextMatcher.ExtractText(news.Content?.DefaultText, MaxIndexChars));
+
+        return await UpsertAsync(EmbeddingSourceType.News, newsId.ToString(), BuildIndexText(parts), useQueryStyle: false, force, ct);
+    }
+
+    public async Task<bool> IndexFaqAsync(int questionId, CancellationToken ct = default, bool force = false)
+    {
+        var db = _unitOfWork.GetDbContext();
+        var question = await db.Set<Question>().AsNoTracking()
+            .Include(q => q.Subject).Include(q => q.Answer)
+            .FirstOrDefaultAsync(q => q.Id == questionId, ct);
+        if (question == null) return false;
+
+        var text = BuildIndexText(new[] { "【常見問題】", question.Subject?.DefaultText ?? string.Empty, RichTextMatcher.ExtractText(question.Answer?.DefaultText, MaxIndexChars) });
+        return await UpsertAsync(EmbeddingSourceType.Faq, questionId.ToString(), text, useQueryStyle: false, force, ct);
+    }
+
+    public async Task<bool> IndexCaseAsync(int caseId, CancellationToken ct = default, bool force = false)
+    {
+        var db = _unitOfWork.GetDbContext();
+        var successCase = await db.Set<SuccessCase>().AsNoTracking()
+            .Include(c => c.Title).Include(c => c.Summary).Include(c => c.Content)
+            .FirstOrDefaultAsync(c => c.Id == caseId, ct);
+        if (successCase == null) return false;
+
+        var text = BuildIndexText(new[]
+        {
+            "【產業案例】",
+            successCase.Title?.DefaultText ?? string.Empty,
+            successCase.CompanyName,
+            successCase.Industry,
+            successCase.Summary?.DefaultText ?? string.Empty,
+            successCase.Tags ?? string.Empty,
+            RichTextMatcher.ExtractText(successCase.Content?.DefaultText, MaxIndexChars),
+        });
+        return await UpsertAsync(EmbeddingSourceType.Case, caseId.ToString(), text, useQueryStyle: false, force, ct);
+    }
+
+    /// <summary>
+    /// 需求的文件端向量：<b>只放公開欄位</b>（名稱、公開摘要、地點、標籤）。完整內容只有企業會員與後台看得到，
+    /// 全站搜尋是給匿名訪客用的，不能把它拿去比對。
+    /// </summary>
+    public async Task<bool> IndexDemandDocumentAsync(int demandId, CancellationToken ct = default, bool force = false)
+    {
+        var db = _unitOfWork.GetDbContext();
+        var demand = await db.Set<Demand>().AsNoTracking().FirstOrDefaultAsync(d => d.Id == demandId, ct);
+        if (demand == null) return false;
+
+        var tagNames = await GetTagNamesAsync(db, demandTagsForDemandId: demandId, companyTagsForCompanyId: null, ct);
+        var text = BuildIndexText(new[] { "【媒合需求】", demand.Name, demand.PublicSummary ?? string.Empty, demand.Location ?? string.Empty, string.Join(" ", tagNames) });
+        return await UpsertAsync(EmbeddingSourceType.DemandDocument, demandId.ToString(), text, useQueryStyle: false, force, ct);
+    }
+
+    public async Task<bool> IndexAsync(EmbeddingSourceType sourceType, string sourceId, CancellationToken ct = default, bool force = false)
+    {
+        switch (sourceType)
+        {
+            case EmbeddingSourceType.Demand:
+                return int.TryParse(sourceId, out var demandId) && await IndexDemandAsync(demandId, ct, force);
+            case EmbeddingSourceType.Company:
+                return Guid.TryParse(sourceId, out var companyId) && await IndexCompanyAsync(companyId, ct, force);
+            case EmbeddingSourceType.News:
+                return int.TryParse(sourceId, out var newsId) && await IndexNewsAsync(newsId, ct, force);
+            case EmbeddingSourceType.Faq:
+                return int.TryParse(sourceId, out var faqId) && await IndexFaqAsync(faqId, ct, force);
+            case EmbeddingSourceType.Case:
+                return int.TryParse(sourceId, out var caseId) && await IndexCaseAsync(caseId, ct, force);
+            case EmbeddingSourceType.DemandDocument:
+                return int.TryParse(sourceId, out var docDemandId) && await IndexDemandDocumentAsync(docDemandId, ct, force);
+            default:
+                return false;
+        }
+    }
+
+    private static string SectionLabel(short section) => section switch
+    {
+        NewsSection.Announcement => "最新消息",
+        NewsSection.Serve => "服務專區",
+        NewsSection.Support => "補助公告",
+        NewsSection.Talent => "人才培育課程",
+        NewsSection.Tutoring => "產業輔導",
+        NewsSection.SupportResource => "政府補助資源",
+        _ => "公告",
+    };
+
+    private static string BuildIndexText(IEnumerable<string> parts)
+    {
+        var text = string.Join("\n", parts.Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => p.Trim()));
+        return text.Length > MaxIndexChars ? text[..MaxIndexChars] : text;
+    }
+
+    /// <summary>全站搜尋語意索引涵蓋的來源類型（排程補漏與全量重新索引用）</summary>
+    private static readonly EmbeddingSourceType[] SearchSourceTypes =
+    {
+        EmbeddingSourceType.News, EmbeddingSourceType.Faq, EmbeddingSourceType.Case, EmbeddingSourceType.DemandDocument,
+    };
+
+    private static IQueryable<string> AllSourceIds(Microsoft.EntityFrameworkCore.DbContext db, EmbeddingSourceType type) => type switch
+    {
+        EmbeddingSourceType.News => db.Set<News>().Select(n => n.Id.ToString()),
+        EmbeddingSourceType.Faq => db.Set<Question>().Select(q => q.Id.ToString()),
+        EmbeddingSourceType.Case => db.Set<SuccessCase>().Select(c => c.Id.ToString()),
+        EmbeddingSourceType.DemandDocument => db.Set<Demand>().Select(d => d.Id.ToString()),
+        _ => Enumerable.Empty<string>().AsQueryable(),
+    };
+
+    /// <summary>某個來源類型的排程補漏：先補完全沒有向量的，再重試失敗的。回傳處理筆數</summary>
+    private async Task<int> ReconcileTypeAsync(EmbeddingSourceType type, int limit, CancellationToken ct)
+    {
+        if (limit <= 0) return 0;
+        var db = _unitOfWork.GetDbContext();
+        var processed = 0;
+
+        var missing = await AllSourceIds(db, type)
+            .Where(id => !db.Set<ContentEmbedding>().Any(e => e.SourceType == type && e.SourceId == id))
+            .Take(limit)
+            .ToListAsync(ct);
+        foreach (var id in missing)
+        {
+            await IndexAsync(type, id, ct);
+            processed++;
+        }
+
+        if (processed < limit)
+        {
+            var failed = await db.Set<ContentEmbedding>()
+                .Where(e => e.SourceType == type && e.Status == EmbeddingStatus.Failed && e.RetryCount < MaxRetryCount)
+                .OrderBy(e => e.UpdatedTime)
+                .Select(e => e.SourceId)
+                .Take(limit - processed)
+                .ToListAsync(ct);
+            foreach (var id in failed)
+            {
+                await IndexAsync(type, id, ct);
+                processed++;
+            }
+        }
+
+        return processed;
+    }
+
     public async Task<int> ReconcileBatchAsync(int batchSize, CancellationToken ct = default)
     {
         var db = _unitOfWork.GetDbContext();
@@ -145,6 +306,10 @@ public class ContentIndexingService : IContentIndexingService
             }
         }
 
+        // 5. 全站搜尋語意索引：公告類、常見問題、產業案例、需求公開欄位
+        foreach (var type in SearchSourceTypes)
+            processed += await ReconcileTypeAsync(type, batchSize - processed, ct);
+
         return processed;
     }
 
@@ -215,6 +380,11 @@ public class ContentIndexingService : IContentIndexingService
         var targets = new List<ReindexTarget>(demandIds.Count + companyIds.Count);
         targets.AddRange(demandIds.Select(id => new ReindexTarget(EmbeddingSourceType.Demand, id.ToString())));
         targets.AddRange(companyIds.Select(id => new ReindexTarget(EmbeddingSourceType.Company, id.ToString())));
+        foreach (var type in SearchSourceTypes)
+        {
+            var ids = await AllSourceIds(db, type).ToListAsync(ct);
+            targets.AddRange(ids.Select(id => new ReindexTarget(type, id)));
+        }
         return targets;
     }
 

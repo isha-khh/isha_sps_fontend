@@ -11,6 +11,9 @@ public class SearchResultItem
     public DateTime? Date { get; set; }
     public string? ImageUrl { get; set; }
     public string Url { get; set; } = string.Empty;
+
+    /// <summary>keyword＝標題、內文等欄位含關鍵字；semantic＝沒有出現關鍵字，但 AI 語意判斷內容相關（前台標示「語意相關」）</summary>
+    public string MatchType { get; set; } = "keyword";
 }
 
 /// <summary>
@@ -19,7 +22,7 @@ public class SearchResultItem
 /// </summary>
 public class SearchGroup
 {
-    /// <summary>news / case / faq / video</summary>
+    /// <summary>news / serve / talent / tutoring / support / support-resource / company / demand / case / faq / video</summary>
     public string Type { get; set; } = string.Empty;
     public string Label { get; set; } = string.Empty;
     public int TotalCount { get; set; }
@@ -27,6 +30,9 @@ public class SearchGroup
 
     /// <summary>該類型自己的列表頁（已帶關鍵字），查看全部用</summary>
     public string MoreUrl { get; set; } = string.Empty;
+
+    /// <summary>已經由關鍵字比對到的項目 Id（語意搜尋補結果時用來去重；內部使用，不輸出）</summary>
+    internal HashSet<string> MatchedIds { get; set; } = new();
 }
 
 public class SearchResponse

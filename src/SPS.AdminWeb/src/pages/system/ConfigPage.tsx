@@ -87,6 +87,10 @@ export const SystemConfigPage = () => {
     reconcileBatchSize: 50,
   });
   const [showEmbeddingKey, setShowEmbeddingKey] = useState(false);
+  // 模型下拉選單：清單來自 LiteLLM（這把金鑰實際能用的模型），取得失敗時退回手動輸入
+  const [embeddingModels, setEmbeddingModels] = useState<string[]>([]);
+  const [embeddingModelsState, setEmbeddingModelsState] = useState<{ status: 'idle' | 'loading' | 'error'; message?: string }>({ status: 'idle' });
+  const embeddingModelsAutoLoaded = useRef(false);
   const [embeddingTestState, setEmbeddingTestState] = useState<
     { status: 'idle' } | { status: 'testing' } | { status: 'done'; result: EmbeddingTestResult }
   >({ status: 'idle' });
@@ -260,6 +264,32 @@ export const SystemConfigPage = () => {
       setIsSaving(false);
     }
   };
+
+  const handleLoadEmbeddingModels = async () => {
+    setEmbeddingModelsState({ status: 'loading' });
+    try {
+      const result = await settingsApi.listEmbeddingModels(embeddingSettings);
+      if (result.success) {
+        setEmbeddingModels(result.models);
+        setEmbeddingModelsState({ status: 'idle' });
+      } else {
+        setEmbeddingModels([]);
+        setEmbeddingModelsState({ status: 'error', message: result.message });
+      }
+    } catch {
+      setEmbeddingModels([]);
+      setEmbeddingModelsState({ status: 'error', message: '無法取得模型清單，請確認位址與金鑰' });
+    }
+  };
+
+  // 打開「AI 語意搜尋」分頁、設定讀回來後自動載入一次模型清單；之後改位址或金鑰要按「載入模型清單」重新取得
+  useEffect(() => {
+    if (activeTab !== 'embedding' || embeddingModelsAutoLoaded.current) return;
+    if (!embeddingSettings.baseUrl || !embeddingSettings.apiKey) return;
+    embeddingModelsAutoLoaded.current = true;
+    void handleLoadEmbeddingModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, embeddingSettings.baseUrl, embeddingSettings.apiKey]);
 
   const handleTestEmbeddingConnection = async () => {
     setEmbeddingTestState({ status: 'testing' });
@@ -1283,7 +1313,7 @@ export const SystemConfigPage = () => {
                 AI 語意搜尋設定
               </h3>
               <p className="text-sm text-base-content/60 mb-4">
-                設定用於「相似供給端業者」AI 建議面板的 embedding 服務（透過 LiteLLM）
+                設定用於「相似供給端業者」AI 建議面板與前台全站搜尋「語意相關」結果的 embedding 服務（透過 LiteLLM）
               </p>
 
               <div className="space-y-4">
@@ -1302,7 +1332,7 @@ export const SystemConfigPage = () => {
                         {embeddingSettings.isEnabled ? 'AI 語意搜尋已啟用' : 'AI 語意搜尋已停用'}
                       </span>
                       <p className="text-sm text-base-content/60">
-                        停用後「相似供給端業者」面板僅顯示標籤比對結果，背景索引服務也不會呼叫外部 AI 服務
+                        停用後「相似供給端業者」面板僅顯示標籤比對結果、前台全站搜尋只有關鍵字結果，背景索引服務也不會呼叫外部 AI 服務
                       </p>
                     </div>
                   </label>
@@ -1364,19 +1394,80 @@ export const SystemConfigPage = () => {
                       Embedding 模型名稱 <span className="text-error">*</span>
                     </span>
                   </label>
-                  <input
-                    type="text"
-                    className="input input-bordered font-mono text-sm"
-                    placeholder="qwen3-embedding"
-                    value={embeddingSettings.model}
-                    onChange={(e) => {
-                      setEmbeddingSettings({ ...embeddingSettings, model: e.target.value });
-                      setEmbeddingTestState({ status: 'idle' });
-                    }}
-                    required
-                  />
+                  <div className="flex gap-2">
+                    {embeddingModels.length > 0 ? (
+                      <select
+                        className="select select-bordered font-mono text-sm flex-1"
+                        value={embeddingSettings.model}
+                        onChange={(e) => {
+                          setEmbeddingSettings({ ...embeddingSettings, model: e.target.value });
+                          setEmbeddingTestState({ status: 'idle' });
+                        }}
+                        required
+                      >
+                        <option value="" disabled>
+                          請選擇模型
+                        </option>
+                        {/* 目前儲存的模型不在清單裡（改過金鑰、或模型被下架）時保留它，免得下拉選單把它悄悄換掉 */}
+                        {embeddingSettings.model && !embeddingModels.includes(embeddingSettings.model) && (
+                          <option value={embeddingSettings.model}>{embeddingSettings.model}（目前設定，不在清單中）</option>
+                        )}
+                        {embeddingModels.some((m) => /embed/i.test(m)) && (
+                          <optgroup label="Embedding 模型">
+                            {embeddingModels
+                              .filter((m) => /embed/i.test(m))
+                              .map((m) => (
+                                <option key={m} value={m}>
+                                  {m}
+                                </option>
+                              ))}
+                          </optgroup>
+                        )}
+                        <optgroup label="其他模型">
+                          {embeddingModels
+                            .filter((m) => !/embed/i.test(m))
+                            .map((m) => (
+                              <option key={m} value={m}>
+                                {m}
+                              </option>
+                            ))}
+                        </optgroup>
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        className="input input-bordered font-mono text-sm flex-1"
+                        placeholder="qwen3-embedding"
+                        value={embeddingSettings.model}
+                        onChange={(e) => {
+                          setEmbeddingSettings({ ...embeddingSettings, model: e.target.value });
+                          setEmbeddingTestState({ status: 'idle' });
+                        }}
+                        required
+                      />
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={() => void handleLoadEmbeddingModels()}
+                      disabled={embeddingModelsState.status === 'loading' || !embeddingSettings.baseUrl || !embeddingSettings.apiKey}
+                    >
+                      {embeddingModelsState.status === 'loading' ? (
+                        <span className="loading loading-spinner loading-sm" />
+                      ) : (
+                        <span className="iconify lucide--refresh-cw size-4" />
+                      )}
+                      載入模型清單
+                    </button>
+                  </div>
                   <label className="label">
-                    <span className="label-text-alt">依實測建議使用 qwen3-embedding（詳見設計文件）</span>
+                    <span className={`label-text-alt ${embeddingModelsState.status === 'error' ? 'text-error' : ''}`}>
+                      {embeddingModelsState.status === 'error'
+                        ? `${embeddingModelsState.message ?? '無法取得模型清單'}；目前請手動輸入模型名稱`
+                        : embeddingModels.length > 0
+                          ? '從 LiteLLM 取得這把金鑰可用的模型；請選 embedding 模型（名稱含 embed 的在最上面）'
+                          : '填好服務位址與 API Key 後按「載入模型清單」，就能用下拉選單選模型'}
+                    </span>
                   </label>
                 </div>
 

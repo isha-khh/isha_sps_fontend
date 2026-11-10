@@ -145,9 +145,7 @@ public class IndexReconciliationBackgroundService : BackgroundService
                     var ok = false;
                     try
                     {
-                        ok = target.SourceType == EmbeddingSourceType.Demand
-                            ? int.TryParse(target.SourceId, out var demandId) && await indexingService.IndexDemandAsync(demandId, ct, force: true)
-                            : Guid.TryParse(target.SourceId, out var companyId) && await indexingService.IndexCompanyAsync(companyId, ct, force: true);
+                        ok = await indexingService.IndexAsync(target.SourceType, target.SourceId, ct, force: true);
                     }
                     catch (OperationCanceledException)
                     {
