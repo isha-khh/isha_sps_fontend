@@ -77,6 +77,14 @@ public class CompanyController : ControllerBase
             parameters.DirectorySortRules = EnterpriseDirectorySortValidator.Normalize(settings).Settings.Rules.Where(r => r.Enabled).ToList();
         }
 
+        // 前台企業名錄列表：後台「系統配置 → 內容設定」打開「只顯示供給端」時，需求端企業不列出（issue #94）。
+        // 只有前台名錄（傳 useDirectorySort）會套用，後台公司管理與其他呼叫端不受影響
+        if (parameters.UseDirectorySort && !User.IsInRole("Admin"))
+        {
+            var content = await _settingService.GetSettingAsync<ContentSettingsDto>("Content");
+            parameters.SupplierSideOnly = content.IsSuccess && content.Data is { BusinessListSupplierOnly: true };
+        }
+
         var result = await _companyService.GetPagedAsync(parameters, cancellationToken);
 
         if (!result.IsSuccess)

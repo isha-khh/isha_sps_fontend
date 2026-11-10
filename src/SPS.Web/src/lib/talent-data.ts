@@ -26,6 +26,7 @@ export interface TalentCourse {
   audience: string;
   location: string;
   hostOrganizer: string;
+  coOrganizer: string;
   executor: string;
   keywords: string[];
   /** 與 keywords 一一對應的標籤徽章顏色（後台「標籤管理」設定） */
@@ -104,6 +105,7 @@ export function toTalentCourse(item: NewsItem | NewsDetail): TalentCourse {
     audience: meta.audience ?? "",
     location: meta.location ?? "",
     hostOrganizer: meta.hostOrganizer ?? "",
+    coOrganizer: meta.coOrganizer ?? "",
     executor: meta.executor ?? "",
     keywords: item.tags ?? [],
     keywordBadges: tagBadgesOf(item),

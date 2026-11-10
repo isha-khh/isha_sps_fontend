@@ -162,6 +162,8 @@ export interface BounceMailSettings {
 export interface ContentSettings {
   /** 訪客是否可以查看企業名錄詳情 */
   guestCanViewBusinessDetail: boolean;
+  /** 前台企業名錄是否只顯示供給端企業（供給端與供需雙方；需求端不列出） */
+  businessListSupplierOnly: boolean;
   /** 企業列表是否顯示標籤 */
   showBusinessListTags: boolean;
   /** 企業列表是否顯示關於我們 */

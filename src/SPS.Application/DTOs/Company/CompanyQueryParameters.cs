@@ -65,6 +65,10 @@ public class CompanyQueryParameters
     /// </summary>
     public bool UseDirectorySort { get; set; }
 
+    /// <summary>只回供給端企業（供給端與供需雙方）。由 API 依後台「內容設定」填入，不接受使用者從網址傳入</summary>
+    [BindNever]
+    public bool SupplierSideOnly { get; set; }
+
     /// <summary>已啟用的名錄排序規則，由 API 讀設定後填入，不接受使用者從網址傳入</summary>
     [BindNever]
     public List<EnterpriseSortRuleDto>? DirectorySortRules { get; set; }

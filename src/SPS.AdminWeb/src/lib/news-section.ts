@@ -129,6 +129,7 @@ export const NEWS_SECTIONS: Record<NewsSection, NewsSectionConfig> = {
       { key: 'audience', label: '適合對象' },
       { key: 'location', label: '上課地點' },
       { key: 'hostOrganizer', label: '主辦單位' },
+      { key: 'coOrganizer', label: '協辦單位' },
       { key: 'executor', label: '執行單位' },
       { key: 'popularOrder', label: '熱門課程排序', type: 'number', placeholder: '例如：1', hint: '填數字就會列入前台「熱門課程」側欄，數字越小越前面（最多顯示 5 筆）；不填就不列入' },
       { key: 'registerUrl', label: '報名連結', type: 'url', hint: '前台「立即報名」按鈕連去的網址；不填就不顯示按鈕' },

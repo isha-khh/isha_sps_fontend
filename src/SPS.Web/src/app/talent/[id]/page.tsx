@@ -29,6 +29,7 @@ const INFO_ROWS = (course: TalentCourse) =>
     { icon: "bi-person", term: "適合對象", desc: course.audience },
     { icon: "bi-geo-alt", term: "上課地點", desc: course.location },
     { icon: "bi-building", term: "主辦單位", desc: course.hostOrganizer },
+    { icon: "bi-building", term: "協辦單位", desc: course.coOrganizer },
     { icon: "bi-building", term: "執行單位", desc: course.executor },
   ].filter((row) => row.desc);
 

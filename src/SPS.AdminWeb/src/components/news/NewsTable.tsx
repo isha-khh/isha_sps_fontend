@@ -19,6 +19,8 @@ interface NewsTableProps {
   onExportResponses?: (id: number) => void;
   /** 在列表上直接改「熱門課程排序」（人才培育課程）；有給才顯示該欄與鉛筆圖示。`order` 空字串＝移出熱門課程 */
   onUpdatePopularOrder?: (item: News, order: string) => Promise<void>;
+  /** 複製成一筆新的草稿（人才培育課程）；有給才在「⋯」選單出現「複製課程」 */
+  onDuplicate?: (item: News) => void;
 }
 
 /**
@@ -92,7 +94,7 @@ const PopularOrderCell = ({ item, onSave }: { item: News; onSave: (item: News, o
   );
 };
 
-export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete, basePath = '/announcements', noun = '公告', responseCounts, onExportResponses, onUpdatePopularOrder }: NewsTableProps) => {
+export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete, basePath = '/announcements', noun = '公告', responseCounts, onExportResponses, onUpdatePopularOrder, onDuplicate }: NewsTableProps) => {
   const { confirmDialog, ConfirmComponent } = useConfirm();
 
   const columns: Column<News>[] = [
@@ -226,6 +228,15 @@ export const NewsTable = ({ news, isLoading, onTogglePublish, onDelete, basePath
             icon: 'lucide--edit',
             to: (item) => `${basePath}/${item.id}/edit`,
           },
+          ...(onDuplicate
+            ? [
+                {
+                  label: '複製課程',
+                  icon: 'lucide--copy',
+                  onClick: (item: News) => onDuplicate(item),
+                },
+              ]
+            : []),
           ...(onExportResponses
             ? [
                 {

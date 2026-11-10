@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/PageTitle';
 import { NewsTable } from '@/components/news/NewsTable';
 import { newsApi } from '@/lib/api/news';
 import { categoriesApi } from '@/lib/api/category';
-import type { News, NewsSearchParams } from '@/types/news';
+import type { CreateNewsRequest, News, NewsSearchParams } from '@/types/news';
 import type { CategoryResponse } from '@/types/category';
 import { useNotify } from '@/hooks/useNotify';
 import { inquiriesApi } from '@/lib/api/inquiries';
@@ -14,6 +14,7 @@ import { NEWS_SECTIONS, type NewsSection } from '@/lib/news-section';
 export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
   const config = NEWS_SECTIONS[section];
   const notify = useNotify();
+  const navigate = useNavigate();
   const [news, setNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
@@ -112,6 +113,45 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
       const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
       await notify.error(message || '更新熱門課程排序失敗');
       throw error;
+    }
+  };
+
+  // 人才培育課程：複製一筆。同類課程常常只差日期，複製後直接進編輯頁改細項。
+  // 標題加「（複製）」、狀態一律草稿（不會直接出現在前台）、熱門課程排序清空（避免熱門區出現兩筆一樣的課程）；
+  // 其餘（內容、附件、封面、標籤、課程類型、日期、專區欄位）原樣帶過去
+  const handleDuplicate = async (item: News) => {
+    try {
+      const src = await newsApi.getNewsById(item.id);
+      const meta = { ...(src.meta ?? {}) };
+      delete meta.popularOrder;
+      // 封面圖網址是 /api/FileManagement/{檔案編號}/download（前台代理時前面可能多 /sps），從裡面取回檔案編號
+      const coverFileId = src.imageUrl?.match(/\/api\/FileManagement\/([0-9a-fA-F-]{36})\//)?.[1];
+      const request: CreateNewsRequest = {
+        title: `${src.title}（複製）`,
+        introduction: src.introduction,
+        content: src.content,
+        startDate: src.startDate,
+        endDate: src.endDate,
+        published: false,
+        ordinal: src.ordinal,
+        categoryId: src.categoryId,
+        categoryIds: src.categoryIds,
+        industryIds: src.industryIds,
+        type: src.type,
+        section: src.section ?? section,
+        attachmentFileIds: src.attachmentFileIds,
+        meta,
+        tagIds: src.tagItems?.map((t) => t.id),
+        courseTypeIds: src.courseTypes?.map((t) => t.id),
+        coverFileId,
+      };
+      const created = await newsApi.createNews(request);
+      await notify.success('已複製為草稿，請修改課程細項後再發布', '複製成功');
+      navigate(`${config.basePath}/${created.id}/edit`);
+    } catch (error) {
+      console.error('Failed to duplicate news:', error);
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      await notify.error(message || '複製課程失敗');
     }
   };
 
@@ -288,6 +328,7 @@ export const NewsListPage = ({ section = 0 }: { section?: NewsSection }) => {
             responseCounts={responseCounts}
             onExportResponses={responseCounts ? handleExportResponses : undefined}
             onUpdatePopularOrder={section === 3 ? handleUpdatePopularOrder : undefined}
+            onDuplicate={section === 3 ? handleDuplicate : undefined}
           />
         </div>
       </div>

@@ -4,6 +4,7 @@ using SPS.Application.DTOs.Common;
 using SPS.Application.DTOs.SystemSettings;
 using SPS.Application.Interfaces.IRepositories;
 using SPS.Domain.Entities;
+using SPS.Domain.Enums;
 using SPS.Infrastructure.Data;
 using SPS.Infrastructure.Repositories.Common;
 
@@ -71,6 +72,12 @@ public class CompanyRepository : Repository<Company, Guid>, ICompanyRepository
         if (parameters.Type.HasValue)
         {
             query = query.Where(c => c.Type == parameters.Type.Value);
+        }
+
+        // 前台名錄「只顯示供給端」：供給端與供需雙方（需求端不列出）
+        if (parameters.SupplierSideOnly)
+        {
+            query = query.Where(c => c.Type == CompanyType.Supplier || c.Type == CompanyType.Both);
         }
 
         // 級別過濾

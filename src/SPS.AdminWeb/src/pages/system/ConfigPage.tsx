@@ -69,6 +69,7 @@ export const SystemConfigPage = () => {
   // Content settings
   const [contentSettings, setContentSettings] = useState<ContentSettings>({
     guestCanViewBusinessDetail: true,
+    businessListSupplierOnly: false,
     showBusinessListTags: true,
     showBusinessListIntroduction: false,
     businessListIntroductionMaxLength: 100,
@@ -1122,6 +1123,32 @@ export const SystemConfigPage = () => {
                     <span>企業名錄詳情已設為需登入，未登入的訪客將看到登入提示頁面。</span>
                   </div>
                 )}
+
+                <div className="divider my-2" />
+
+                {/* 企業名錄只顯示供給端 */}
+                <div className="form-control">
+                  <label className="label cursor-pointer justify-start gap-4">
+                    <input
+                      type="checkbox"
+                      className={`toggle ${contentSettings.businessListSupplierOnly ? 'toggle-success' : 'toggle-error'}`}
+                      checked={contentSettings.businessListSupplierOnly}
+                      onChange={(e) =>
+                        setContentSettings({ ...contentSettings, businessListSupplierOnly: e.target.checked })
+                      }
+                    />
+                    <div>
+                      <span className="label-text font-medium">
+                        {contentSettings.businessListSupplierOnly ? '企業名錄只顯示供給端企業' : '企業名錄顯示全部企業'}
+                      </span>
+                      <p className="text-sm text-base-content/60">
+                        {contentSettings.businessListSupplierOnly
+                          ? '前台「我要媒合 → 企業名錄」只列出供給端（含供需雙方）企業，需求端企業不列出；後台公司管理不受影響'
+                          : '前台企業名錄列出所有已審核通過的企業（供給端、需求端、供需雙方）'}
+                      </p>
+                    </div>
+                  </label>
+                </div>
 
                 <div className="divider my-2" />
 

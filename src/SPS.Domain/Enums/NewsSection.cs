@@ -34,7 +34,7 @@ public static class NewsSection
         [Talent] = new[]
         {
             "organizer", "dateStart", "dateEnd", "city", "contactName", "contactPhone", "courseCode", "courseDate", "courseTime",
-            "totalHours", "fee", "audience", "location", "hostOrganizer", "executor", "registerUrl",
+            "totalHours", "fee", "audience", "location", "hostOrganizer", "coOrganizer", "executor", "registerUrl",
             // 熱門課程排序：有填整數（數字越小越前面）就列入前台「熱門課程」側欄，沒填就不列入
             "popularOrder",
         },
