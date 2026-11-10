@@ -1,5 +1,6 @@
 using SPS.Application.Common;
 using SPS.Application.DTOs.Analytics;
+using SPS.Application.DTOs.SystemSettings;
 using SPS.Application.Interfaces;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Entities;
@@ -10,18 +11,137 @@ public class AnalyticsService : IAnalyticsService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IGoogleAnalyticsProvider _googleProvider;
+    private readonly ISystemSettingService _settingService;
 
-    public AnalyticsService(IUnitOfWork unitOfWork, IGoogleAnalyticsProvider googleProvider)
+    // 同一個程序同時只跑一個同步（手動按鈕與排程可能撞在一起）
+    private static readonly SemaphoreSlim SyncLock = new(1, 1);
+    private const string BusyMessage = "同步正在進行中，請稍後再試";
+    private const string GaSettingsKey = "GoogleAnalytics";
+    private const string SyncStatusKey = "GoogleAnalyticsSyncStatus";
+    // 台灣沒有日光節約時間，固定 UTC+8；Linux 容器不一定有 tzdata，不用時區名稱
+    private static readonly TimeSpan TaiwanOffset = TimeSpan.FromHours(8);
+    private const int MaxAutoAttemptsPerDay = 3;
+    private static readonly TimeSpan AutoRetryInterval = TimeSpan.FromMinutes(30);
+
+    public AnalyticsService(IUnitOfWork unitOfWork, IGoogleAnalyticsProvider googleProvider, ISystemSettingService settingService)
     {
         _unitOfWork = unitOfWork;
         _googleProvider = googleProvider;
+        _settingService = settingService;
     }
 
-    public async Task<Result> SyncAnalyticsDataAsync(int daysToSync = 1)
+    public async Task<Result> SyncAnalyticsDataAsync(int daysToSync = 1, string trigger = "manual")
+    {
+        if (!await SyncLock.WaitAsync(0)) return Result.Failure(BusyMessage);
+        try
+        {
+            // 沒設定 Google Analytics 就不要去打 Google（原本會靜默回「成功」但什麼都沒同步，容易誤會）
+            var result = await _googleProvider.IsConfiguredAsync()
+                ? await SyncCoreAsync(daysToSync)
+                : Result.Failure("尚未設定 Google Analytics（資源 ID 與服務帳戶憑證），請到「系統配置 → Google Analytics」填寫");
+            await RecordRunAsync(result, daysToSync, trigger);
+            return result;
+        }
+        finally
+        {
+            SyncLock.Release();
+        }
+    }
+
+    public async Task<bool> RunAutoSyncIfDueAsync(DateTime nowUtc)
+    {
+        var settings = await LoadGaSettingsAsync();
+        if (!settings.AutoSyncEnabled || settings.ValidateAutoSync() != null) return false;
+        if (!TimeSpan.TryParse(settings.AutoSyncTime, out var dueTime)) return false;
+
+        var local = nowUtc + TaiwanOffset;
+        if (local.TimeOfDay < dueTime) return false;
+        if (!await _googleProvider.IsConfiguredAsync()) return false;
+
+        var today = local.ToString("yyyy-MM-dd");
+        var status = await LoadStatusAsync();
+        if (status.AutoDoneDate == today) return false;
+
+        var previousAttemptDate = status.AutoAttemptDate;
+        var previousAttempts = status.AutoAttempts;
+        if (previousAttemptDate == today)
+        {
+            if (previousAttempts >= MaxAutoAttemptsPerDay) return false;
+            if (status.LastAutoAttemptUtc is { } last && nowUtc - last < AutoRetryInterval) return false;
+        }
+
+        var result = await SyncAnalyticsDataAsync(settings.AutoSyncDays, "auto");
+        // 剛好有人在手動同步：不算一次嘗試，下一分鐘再看
+        if (!result.IsSuccess && result.Error == BusyMessage) return false;
+
+        status = await LoadStatusAsync();
+        status.AutoAttemptDate = today;
+        status.AutoAttempts = previousAttemptDate == today ? previousAttempts + 1 : 1;
+        status.LastAutoAttemptUtc = nowUtc;
+        if (result.IsSuccess) status.AutoDoneDate = today;
+        await SaveStatusAsync(status);
+        return true;
+    }
+
+    public async Task<AnalyticsSyncStatusResponse> GetSyncStatusAsync()
+    {
+        var settings = await LoadGaSettingsAsync();
+        var status = await LoadStatusAsync();
+        return new AnalyticsSyncStatusResponse
+        {
+            Configured = await _googleProvider.IsConfiguredAsync(),
+            AutoSyncEnabled = settings.AutoSyncEnabled,
+            AutoSyncTime = settings.AutoSyncTime,
+            AutoSyncDays = settings.AutoSyncDays,
+            LastRunUtc = status.LastRunUtc,
+            LastSuccess = status.LastSuccess,
+            LastSuccessUtc = status.LastSuccessUtc,
+            LastMessage = status.LastMessage,
+            LastTrigger = status.LastTrigger,
+            LastDays = status.LastDays,
+        };
+    }
+
+    private async Task<GoogleAnalyticsSettingsDto> LoadGaSettingsAsync()
+    {
+        var result = await _settingService.GetSettingAsync<GoogleAnalyticsSettingsDto>(GaSettingsKey);
+        return result.IsSuccess && result.Data != null ? result.Data : new GoogleAnalyticsSettingsDto();
+    }
+
+    private async Task<AnalyticsSyncStatusDto> LoadStatusAsync()
+    {
+        var result = await _settingService.GetSettingAsync<AnalyticsSyncStatusDto>(SyncStatusKey);
+        return result.IsSuccess && result.Data != null ? result.Data : new AnalyticsSyncStatusDto();
+    }
+
+    private Task SaveStatusAsync(AnalyticsSyncStatusDto status) => _settingService.UpdateSettingAsync(SyncStatusKey, status);
+
+    /// <summary>每次同步（手動或自動）結束後記錄結果；失敗的原因也留下來，讓儀表板看得到</summary>
+    private async Task RecordRunAsync(Result result, int days, string trigger)
+    {
+        try
+        {
+            var status = await LoadStatusAsync();
+            var now = DateTime.UtcNow;
+            status.LastRunUtc = now;
+            status.LastSuccess = result.IsSuccess;
+            status.LastMessage = result.IsSuccess ? $"已同步最近 {days} 天" : result.Error;
+            status.LastTrigger = trigger;
+            status.LastDays = days;
+            if (result.IsSuccess) status.LastSuccessUtc = now;
+            await SaveStatusAsync(status);
+        }
+        catch
+        {
+            // 記錄狀態失敗不影響同步本身的結果
+        }
+    }
+
+    private async Task<Result> SyncCoreAsync(int daysToSync)
     {
         // Google Analytics 數據通常會有延遲，我們預設同步「昨天」之前的數據
-        // 如果 daysToSync = 1，代表同步昨天
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
+        // 如果 daysToSync = 1，代表同步昨天；「昨天」用台灣時間算（GA 資源通常是台灣時區，UTC 的昨天會少抓一天）
+        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.Add(TaiwanOffset).AddDays(-1));
         var startDate = endDate.AddDays(-daysToSync + 1);
 
         // 如果要同步更多天，確保 startDate 不會超過 endDate

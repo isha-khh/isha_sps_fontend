@@ -152,6 +152,12 @@ public class GoogleAnalyticsProvider : IGoogleAnalyticsProvider
         }
     }
 
+    public async Task<bool> IsConfiguredAsync()
+    {
+        var (propertyId, credentials) = await GetSettingsAsync();
+        return !string.IsNullOrEmpty(propertyId) && !string.IsNullOrEmpty(credentials);
+    }
+
     private async Task<AnalyticsDataService> CreateServiceAsync()
     {
         var settings = await GetSettingsAsync();

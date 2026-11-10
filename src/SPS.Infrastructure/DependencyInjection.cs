@@ -181,6 +181,9 @@ public static class DependencyInjection
         services.AddSingleton<IEmbeddingIndexJob>(sp => sp.GetRequiredService<EmbeddingIndexJob>());
         services.AddHostedService<IndexReconciliationBackgroundService>();
 
+        // Google Analytics 自動同步（每天固定時間把最近幾天的流量資料同步到資料庫）
+        services.AddHostedService<AnalyticsSyncBackgroundService>();
+
         return services;
     }
 }

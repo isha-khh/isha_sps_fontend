@@ -13,6 +13,12 @@ export interface EmailSettings {
 export interface GoogleAnalyticsSettings {
   propertyId: string;
   credentialsJson: string;
+  /** 每天自動從 Google Analytics 同步流量資料（儀表板、分析報表用）；GA 沒設定時自動略過 */
+  autoSyncEnabled: boolean;
+  /** 自動同步時間（台灣時間 HH:mm） */
+  autoSyncTime: string;
+  /** 每次自動同步往回抓幾天（1～30） */
+  autoSyncDays: number;
 }
 
 export interface FileStorageSettings {

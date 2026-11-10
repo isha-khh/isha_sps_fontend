@@ -37,6 +37,9 @@ export const SystemConfigPage = () => {
   const [analyticsSettings, setAnalyticsSettings] = useState<GoogleAnalyticsSettings>({
     propertyId: '',
     credentialsJson: '',
+    autoSyncEnabled: true,
+    autoSyncTime: '03:00',
+    autoSyncDays: 3,
   });
 
   // File Storage settings
@@ -136,7 +139,13 @@ export const SystemConfigPage = () => {
         settingsApi.getEmbeddingSettings().catch(() => embeddingSettings),
       ]);
       setEmailSettings(email);
-      setAnalyticsSettings(analytics);
+      // 舊資料沒有自動同步欄位時用預設值（開啟、03:00、最近 3 天）
+      setAnalyticsSettings({
+        ...analytics,
+        autoSyncEnabled: analytics.autoSyncEnabled ?? true,
+        autoSyncTime: analytics.autoSyncTime || '03:00',
+        autoSyncDays: analytics.autoSyncDays || 3,
+      });
       setFileStorageSettings(fileStorage);
       setBounceMailSettings(bounceMail);
       setContentSettings(content);
@@ -891,6 +900,66 @@ export const SystemConfigPage = () => {
                       從 Google Cloud Console 下載的服務帳號 JSON 金鑰
                     </span>
                   </label>
+                </div>
+
+                <div className="divider my-2" />
+
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="font-semibold">每天自動同步</h4>
+                      <p className="text-sm text-base-content/70">
+                        每天固定時間自動把 Google Analytics 的流量資料同步到系統，後台儀表板與分析報表就不用再手動按「同步」。
+                        Google Analytics 還沒設定（上面兩個欄位沒填）時會自動略過；失敗會自動重試，最近一次結果顯示在儀表板。
+                      </p>
+                    </div>
+                    <label className="label cursor-pointer gap-2 shrink-0">
+                      <input
+                        type="checkbox"
+                        className="toggle toggle-primary"
+                        checked={analyticsSettings.autoSyncEnabled}
+                        onChange={(e) => setAnalyticsSettings({ ...analyticsSettings, autoSyncEnabled: e.target.checked })}
+                      />
+                      <span className="label-text">{analyticsSettings.autoSyncEnabled ? '已開啟' : '已關閉'}</span>
+                    </label>
+                  </div>
+
+                  {analyticsSettings.autoSyncEnabled && (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text font-medium">同步時間（台灣時間）</span>
+                        </label>
+                        <input
+                          type="time"
+                          className="input input-bordered"
+                          value={analyticsSettings.autoSyncTime}
+                          onChange={(e) => setAnalyticsSettings({ ...analyticsSettings, autoSyncTime: e.target.value })}
+                          required
+                        />
+                        <label className="label">
+                          <span className="label-text-alt">預設凌晨 03:00，避開白天的使用高峰</span>
+                        </label>
+                      </div>
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text font-medium">每次往回同步幾天</span>
+                        </label>
+                        <input
+                          type="number"
+                          className="input input-bordered"
+                          min={1}
+                          max={30}
+                          value={analyticsSettings.autoSyncDays}
+                          onChange={(e) => setAnalyticsSettings({ ...analyticsSettings, autoSyncDays: Number(e.target.value) || 1 })}
+                          required
+                        />
+                        <label className="label">
+                          <span className="label-text-alt">1 到 30。Google 的資料常在隔天或兩天後才修正，預設 3 天比只抓昨天準確</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

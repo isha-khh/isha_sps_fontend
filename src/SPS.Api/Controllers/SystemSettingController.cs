@@ -94,6 +94,8 @@ public class SystemSettingController : ControllerBase
     [SwaggerOperation(Summary = "更新 Google Analytics 設定")]
     public async Task<IActionResult> UpdateGoogleAnalyticsSettings([FromBody] GoogleAnalyticsSettingsDto settings)
     {
+        var autoSyncError = settings.ValidateAutoSync();
+        if (autoSyncError != null) return BadRequest(new { error = autoSyncError });
         var result = await _settingService.UpdateSettingAsync("GoogleAnalytics", settings);
         return result.IsSuccess ? Ok(new { message = "Google Analytics settings updated" }) : BadRequest(new { error = result.Error });
     }
