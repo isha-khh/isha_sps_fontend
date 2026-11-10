@@ -5,6 +5,7 @@ import { withBasePath } from "@/lib/api-client";
 import { fetchIndustryAiLink, fetchPublishedNewsCategories } from "@/lib/api.server";
 import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
 import Link from "next/link";
+import AccesskeyGuide from "@/components/sitemap/AccesskeyGuide";
 
 export const metadata: Metadata = {
   title: "網站導覽",
@@ -156,31 +157,7 @@ export default async function SitemapPage() {
                 </p>
                 <p className="card_intro">本網站的快速鍵（Accesskey）設定如下：</p>
 
-                <dl className="accesskey_list">
-                  <div className="accesskey_row">
-                    <dt className="accesskey_key">
-                      <kbd>Alt</kbd> + <kbd>U</kbd>
-                    </dt>
-                    <dd className="accesskey_desc">在上方功能區塊，快速瀏覽網頁：網站導覽、聯絡資訊、字體調整等。</dd>
-                  </div>
-                  <div className="accesskey_row">
-                    <dt className="accesskey_key">
-                      <kbd>Alt</kbd> + <kbd>C</kbd>
-                    </dt>
-                    <dd className="accesskey_desc">中央內容區塊，為主要互動內容區。</dd>
-                  </div>
-                  <div className="accesskey_row">
-                    <dt className="accesskey_key">
-                      <kbd>Alt</kbd> + <kbd>B</kbd>
-                    </dt>
-                    <dd className="accesskey_desc">下方功能區塊。</dd>
-                  </div>
-                </dl>
-
-                <div className="browser_tip" role="note">
-                  <i className="bi bi-info-circle me-2" aria-hidden="true" />
-                  <span>如果您打算開瀏覽器 Firefox，快速鍵可能無法透過 Shift+Alt+(快速鍵字母)，可改 Shift+Alt+C 嘗試並在單字中手動選擇，以此類推。</span>
-                </div>
+                <AccesskeyGuide />
               </div>
             </div>
           </div>

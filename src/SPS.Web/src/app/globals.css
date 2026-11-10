@@ -690,3 +690,20 @@
   color: #0052cc;
   text-decoration: underline;
 }
+
+/* 網站導覽「快速鍵設定說明」：組合鍵依瀏覽器變化（Control + Option + U 比原本設計稿的 Alt + U 長），不能再固定 130px 寬 */
+.sitemap_box .accesskey_row {
+    flex-wrap: wrap;
+    gap: 4px 16px;
+}
+.sitemap_box .accesskey_key {
+    width: auto;
+    min-width: 130px;
+    white-space: nowrap;
+}
+.sitemap_box .accesskey_desc {
+    flex: 1 1 240px;
+}
+.sitemap_box .accesskey_reference {
+    --bs-table-bg: transparent;
+}
