@@ -651,6 +651,26 @@ export const CompanyFormPage = () => {
                 </div>
               </div>
             </div>
+
+            {/* 企業標籤 */}
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <h2 className="card-title mb-4">
+                  <span className="iconify lucide--tags size-6" />
+                  企業標籤
+                  {selectedTagIds.length > 0 && (
+                    <span className="badge badge-primary badge-sm">{selectedTagIds.length}</span>
+                  )}
+                </h2>
+
+                <TagCategoryTreeSelect
+                  options={availableTags}
+                  selectedIds={selectedTagIds}
+                  onToggle={toggleTag}
+                  emptyText="尚無可用的企業標籤"
+                />
+              </div>
+            </div>
           </div>
 
           {/* 右側側邊資訊 */}
@@ -799,26 +819,6 @@ export const CompanyFormPage = () => {
                   className="textarea textarea-bordered h-24"
                   value={formData.remark}
                   onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
-                />
-              </div>
-            </div>
-
-            {/* 企業標籤 */}
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title mb-4">
-                  <span className="iconify lucide--tags size-6" />
-                  企業標籤
-                  {selectedTagIds.length > 0 && (
-                    <span className="badge badge-primary badge-sm">{selectedTagIds.length}</span>
-                  )}
-                </h2>
-
-                <TagCategoryTreeSelect
-                  options={availableTags}
-                  selectedIds={selectedTagIds}
-                  onToggle={toggleTag}
-                  emptyText="尚無可用的企業標籤"
                 />
               </div>
             </div>
