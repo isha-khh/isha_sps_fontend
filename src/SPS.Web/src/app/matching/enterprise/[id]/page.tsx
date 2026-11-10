@@ -175,25 +175,66 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
         </div>
 
         <div className="item_box_two d-flex">
-          {company.introduction && (
+          {(company.introduction || tagSections.length > 0 || techGroups.length > 0) && (
             <div className="item_box_two_1">
-              <div className="dow-name">
-                <i className="bi bi-buildings"></i>
-                <span>公司簡介</span>
-              </div>
-              {/* 後台輸入的純文字，不當 HTML 輸出；換行分段 */}
-              <div className="txt editor">
-                {company.introduction
-                  .split(/\n+/)
-                  .filter(Boolean)
-                  .map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
+              {company.introduction && (
+                <>
+                  <div className="dow-name">
+                    <i className="bi bi-buildings"></i>
+                    <span>公司簡介</span>
+                  </div>
+                  {/* 後台輸入的純文字，不當 HTML 輸出；換行分段 */}
+                  <div className="txt editor">
+                    {company.introduction
+                      .split(/\n+/)
+                      .filter(Boolean)
+                      .map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                  </div>
+                </>
+              )}
+
+              {/* 企業標籤（應用情境／應用範疇／智慧技術）：公司在後台勾選的標籤，點進去看有同樣標籤的其他企業。放在左欄，右欄的產品圖與說明才不會把標籤擠窄 */}
+              {(tagSections.length > 0 || techGroups.length > 0) && (
+                <div className={company.introduction ? "mt-4" : undefined}>
+                  <div className="dow-name">
+                    <i className="bi bi-tags"></i>
+                    <span>企業標籤</span>
+                  </div>
+                  {tagSections.map((section) => (
+                    <div key={section.label}>
+                      <h5 className="mb-3">
+                        <i className="bi bi-caret-right-fill me-1 blue"></i>
+                        {section.label}
+                      </h5>
+                      <ul className="nav ul-key mb-4">
+                        {section.items.map((tag) => (
+                          <li key={tag.id}>
+                            <Link href={`/matching/enterprise?tags=${tag.id}`} title={`查看同樣是「${tag.name}」的企業`}>
+                              {tag.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-              </div>
+
+                  {techGroups.length > 0 && (
+                    <div>
+                      <h5 className="mb-3">
+                        <i className="bi bi-caret-right-fill me-1 blue"></i>
+                        智慧技術
+                      </h5>
+                      <TechAttributeSelector groups={techGroups} name="company-tech" variant="tags" />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
-          {(company.subject || company.productImages.length > 0 || tagSections.length > 0 || techGroups.length > 0) && (
+          {(company.subject || company.productImages.length > 0) && (
             <div className="item_box_two_1">
               <div className="dow-name">
                 <i className="bi bi-file-earmark-text"></i>
@@ -211,35 +252,6 @@ export default async function MatchingEnterpriseDetailPage({ params }: PageProps
                       </div>
                     </div>
                   ))}
-                </div>
-              )}
-
-              {/* 應用情境／應用範疇／智慧技術：公司在後台勾選的標籤，點進去看有同樣標籤的其他企業 */}
-              {tagSections.map((section) => (
-                <div key={section.label}>
-                  <h5 className="mb-3">
-                    <i className="bi bi-caret-right-fill me-1 blue"></i>
-                    {section.label}
-                  </h5>
-                  <ul className="nav ul-key mb-4">
-                    {section.items.map((tag) => (
-                      <li key={tag.id}>
-                        <Link href={`/matching/enterprise?tags=${tag.id}`} title={`查看同樣是「${tag.name}」的企業`}>
-                          {tag.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-
-              {techGroups.length > 0 && (
-                <div>
-                  <h5 className="mb-3">
-                    <i className="bi bi-caret-right-fill me-1 blue"></i>
-                    智慧技術
-                  </h5>
-                  <TechAttributeSelector groups={techGroups} name="company-tech" variant="tags" />
                 </div>
               )}
             </div>
