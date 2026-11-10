@@ -671,6 +671,86 @@ export const CompanyFormPage = () => {
                 />
               </div>
             </div>
+
+            {/* 公司 Logo */}
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <h2 className="card-title mb-4">
+                  <span className="iconify lucide--image size-6" />
+                  公司 Logo
+                </h2>
+                {existingPhoto && !removePhoto ? (
+                  <div className="space-y-3">
+                    <img
+                      src={formatApiPath(existingPhoto.uri) || ''}
+                      alt="公司 Logo"
+                      className="w-full h-32 object-contain rounded-lg bg-base-200"
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-error btn-sm btn-block"
+                      onClick={() => {
+                        setRemovePhoto(true);
+                        setExistingPhoto(undefined);
+                        setPhotoId(undefined);
+                      }}
+                    >
+                      <span className="iconify lucide--trash-2 size-4" />
+                      移除 Logo
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-block"
+                    onClick={() => setIsPhotoPickerOpen(true)}
+                  >
+                    <span className="iconify lucide--upload size-4" />
+                    選擇 Logo 圖片
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* 橫幅圖片 */}
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <h2 className="card-title mb-4">
+                  <span className="iconify lucide--panorama size-6" />
+                  橫幅圖片
+                </h2>
+                {existingBanner && !removeBanner ? (
+                  <div className="space-y-3">
+                    <img
+                      src={formatApiPath(existingBanner.uri) || ''}
+                      alt="橫幅圖片"
+                      className="w-full h-32 object-cover rounded-lg bg-base-200"
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-error btn-sm btn-block"
+                      onClick={() => {
+                        setRemoveBanner(true);
+                        setExistingBanner(undefined);
+                        setBannerId(undefined);
+                      }}
+                    >
+                      <span className="iconify lucide--trash-2 size-4" />
+                      移除橫幅
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-block"
+                    onClick={() => setIsBannerPickerOpen(true)}
+                  >
+                    <span className="iconify lucide--upload size-4" />
+                    選擇橫幅圖片
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* 右側側邊資訊 */}
@@ -820,86 +900,6 @@ export const CompanyFormPage = () => {
                   value={formData.remark}
                   onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
                 />
-              </div>
-            </div>
-
-            {/* 公司 Logo */}
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title mb-4">
-                  <span className="iconify lucide--image size-6" />
-                  公司 Logo
-                </h2>
-                {existingPhoto && !removePhoto ? (
-                  <div className="space-y-3">
-                    <img
-                      src={formatApiPath(existingPhoto.uri) || ''}
-                      alt="公司 Logo"
-                      className="w-full h-32 object-contain rounded-lg bg-base-200"
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-error btn-sm btn-block"
-                      onClick={() => {
-                        setRemovePhoto(true);
-                        setExistingPhoto(undefined);
-                        setPhotoId(undefined);
-                      }}
-                    >
-                      <span className="iconify lucide--trash-2 size-4" />
-                      移除 Logo
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-outline btn-block"
-                    onClick={() => setIsPhotoPickerOpen(true)}
-                  >
-                    <span className="iconify lucide--upload size-4" />
-                    選擇 Logo 圖片
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* 橫幅圖片 */}
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title mb-4">
-                  <span className="iconify lucide--panorama size-6" />
-                  橫幅圖片
-                </h2>
-                {existingBanner && !removeBanner ? (
-                  <div className="space-y-3">
-                    <img
-                      src={formatApiPath(existingBanner.uri) || ''}
-                      alt="橫幅圖片"
-                      className="w-full h-32 object-cover rounded-lg bg-base-200"
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-error btn-sm btn-block"
-                      onClick={() => {
-                        setRemoveBanner(true);
-                        setExistingBanner(undefined);
-                        setBannerId(undefined);
-                      }}
-                    >
-                      <span className="iconify lucide--trash-2 size-4" />
-                      移除橫幅
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-outline btn-block"
-                    onClick={() => setIsBannerPickerOpen(true)}
-                  >
-                    <span className="iconify lucide--upload size-4" />
-                    選擇橫幅圖片
-                  </button>
-                )}
               </div>
             </div>
 
