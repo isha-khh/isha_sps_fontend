@@ -107,3 +107,37 @@ smoke_test() {
   [ "$ok" -eq 1 ] && green "  ✓ 後端健康檢查、前台首頁都正常"
   [ "$ok" -eq 1 ]
 }
+
+# 設定 .env 的某個變數（有就換、沒有就加在最後）。用「覆寫內容」的方式寫回，保留 .env 原本的擁有者與權限（600）。
+set_env_value() { # KEY VALUE
+  python3 - "$1" "$2" <<'PY'
+import re, sys
+key, value = sys.argv[1], sys.argv[2]
+lines = open(".env", encoding="utf-8").read().split("\n")
+pat = re.compile(r"^" + re.escape(key) + r"=")
+for i, l in enumerate(lines):
+    if pat.match(l):
+        lines[i] = "%s=%s" % (key, value); break
+else:
+    while lines and lines[-1] == "": lines.pop()
+    lines += ["%s=%s" % (key, value), ""]
+open(".env", "w", encoding="utf-8").write("\n".join(lines))
+PY
+}
+
+env_value() { grep -E "^$1=" .env 2>/dev/null | tail -n1 | cut -d= -f2- | tr -d '"' || true; }
+
+# 等 api／web／admin 容器就緒（最多 3 分鐘）
+wait_healthy() {
+  local i c state bad
+  for i in $(seq 1 36); do
+    bad=0
+    for c in "${CONTAINERS[@]}"; do
+      state=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$c" 2>/dev/null || echo missing)
+      case "$state" in healthy|running) ;; *) bad=1 ;; esac
+    done
+    [ "$bad" -eq 0 ] && return 0
+    sleep 5
+  done
+  return 1
+}

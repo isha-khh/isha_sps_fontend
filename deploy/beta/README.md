@@ -101,9 +101,10 @@ docker exec sps-beta-api sh -c 'env | grep -i email'    # 不應有任何 SMTP �
 ```bash
 cd /home/shareproject/SPS_dev
 git -C .repo pull --ff-only
-cp .repo/deploy/beta/{update-beta.sh,deploy.sh,rollback.sh,deploy-lib.sh} .
+cp .repo/deploy/beta/{update-beta.sh,deploy.sh,rollback.sh,deploy-lib.sh,cutover.sh,cutover-rollback.sh,cutover-nginx.sh} .
+cp .repo/deploy/beta/{nginx-sdd-sps.conf,nginx-sdd-maps.conf,nginx-match-redirect.conf,nginx-security-headers.conf} .
 cp .repo/deploy/beta/README.md readme.md
-chmod +x update-beta.sh deploy.sh rollback.sh
+chmod +x update-beta.sh deploy.sh rollback.sh cutover.sh cutover-rollback.sh cutover-nginx.sh
 ```
 
 主機需要有 `pg_dump`、`pg_restore`、`psql`（`postgresql-client` 套件，版本不要比資料庫舊）與 `docker`、`curl`。
@@ -137,9 +138,9 @@ cd /home/shareproject/SPS_dev
 
 `backups/` 不會自動刪除。主機磁碟用量偏高時，確認新版穩定後請手動清掉舊的 `.dump`（保留最近一兩份）。備份檔含完整資料庫內容，權限已設為只有擁有者可讀，不要複製到別處。
 
-### nginx 不在腳本裡
+### nginx 與 deploy.sh／rollback.sh
 
-主機 nginx 是共用設定（`sdd.conf` 另有 AInspec 等其他系統的區塊），**腳本不會碰**。範本變動時 `update-beta.sh` 會提醒「nginx 設定範本有變動」，請自己比對後手動套用，`nginx -t` 通過才 reload。部署／回滾前後都不需要動 nginx，除非範本有提醒。
+`deploy.sh`／`rollback.sh` **不碰 nginx**。日常部署與回滾都不需要動 nginx；範本變動時 `update-beta.sh` 會提醒，請自己比對後手動套用，`nginx -t` 通過才 reload。nginx 的切換只在「切換到 sdd.nat.gov.tw」那一次（見下一節，由 `cutover-nginx.sh` 處理）。
 
 ### 網站網址（切換到正式網域時）
 
@@ -160,6 +161,63 @@ tail -n 5 .deploy-history                                                  # 最
 ```
 
 在瀏覽器：前台首頁、一個有圖的內容頁、後台登入各看一次。
+
+## 切換到 sdd.nat.gov.tw（正式上線）
+
+目標：新系統上線到 `https://sdd.nat.gov.tw/sps`，`match.isafe.org.tw/sps` 301 導向 `sdd.nat.gov.tw/sps`，後台維持 `https://match-admin.isafe.org.tw`。資料庫維持 `SPS_dev`（不改名）。
+
+| 腳本／範本 | 用途 |
+|---|---|
+| `cutover.sh` | 備份資料庫與 `.env` → 改 `.env` 網址 → 重建 api／web 容器 → 呼叫 `cutover-nginx.sh` 切 nginx |
+| `cutover-nginx.sh` | **需要 sudo**。把 `sdd.conf` 與 match 站台設定裡我們的 `/sps` location 換成一行 `include`，其他內容一字不動 |
+| `cutover-rollback.sh` | 全部還原（nginx、`.env`、容器）；資料庫不動 |
+| `nginx-sdd-sps.conf`／`nginx-sdd-maps.conf` | sdd 的 `/sps`、`/sps/api/`、`/sps/hubs/` location，與 http 層的兩個 `map`（用戶 IP、擋 PUT／PATCH／DELETE） |
+| `nginx-match-redirect.conf` | match 網域 `/sps` 的 301 |
+
+### 切換前
+
+1. 先用 `./deploy.sh` 部署到 beta.33 以上（圖片網址補 `/sps` 前綴、`.env` 可覆蓋網址都要這個版本以上）。
+2. 確認：後台「系統設定 → 郵件」已啟用並寄過測試信；`GA_MEASUREMENT_ID` 是正式資料流（GA 後台「管理 → 資料串流」）；**舊系統的容器維持執行**（腳本不會停它，回滾要靠它）。
+3. 先預覽，什麼都不會改：
+
+```bash
+cd /home/shareproject/SPS_dev
+./cutover.sh --dry-run
+```
+
+會列出 `.env` 的變更與 nginx 的 diff。**請看 diff**：只應該是兩個 `/sps` location（sdd）、三個 `/sps` location（match）換成一行 `include`，`^~ /sps/AInspec/` 完全不動。`cutover-nginx.sh` 找不到預期的區塊會中止、不會亂改；match 站台設定檔判斷不出來時，用 `MATCH_SITE=/etc/nginx/sites-available/檔名 ./cutover.sh` 指定。
+
+### 切換
+
+```bash
+./cutover.sh
+```
+
+流程中會要你輸入 `cutover`（開始）、`yes`（套用 sdd 的 nginx）、確認 sdd 正常後再決定要不要做 match 的 301。每一步 nginx 都會：先備份（`/var/backups/sps-nginx/<時間>-sdd|match/`）→ `nginx -t` → reload → 用 curl 檢查（sdd：`/sps`、`/sps/api/health` 為 200，AInspec 與根路徑的回應和修改前相同；match：301 目標正確），**任何一步不如預期自動還原**。
+
+切完用瀏覽器確認：首頁、登入、一個有圖的內容頁、「我要投稿」頁下載、後台（`match-admin`）、會員信的連結（`App__BaseUrl` 是 `https://sdd.nat.gov.tw/sps`）。
+
+**301 注意**：瀏覽器會長期快取 301。如果之後又要回到 match 網域，已經被導走的使用者會繼續被導向 sdd，直到快取失效。要先試用可以先只做 sdd（`cutover.sh` 問到 match 時選 N），穩定後再做：`sudo ./cutover-nginx.sh apply --only match`。
+
+### 回滾
+
+```bash
+./cutover-rollback.sh
+```
+
+nginx（match、sdd）依序還原成切換前的備份、`.env` 還原、api／web 重建；流量回到舊系統。**資料庫不會動**：切換後新系統新增的資料（新會員、申請、內容）只在 `SPS_dev`，舊系統看不到。真的要把 `SPS_dev` 還原到切換前（會丟掉切換後的資料），先停 api／web／admin，再用切換時留的備份：
+
+```bash
+docker compose -f docker-compose.beta.yml -f docker-compose.kms.yml stop api web admin
+pg_restore --clean --if-exists --no-owner --no-privileges --single-transaction -d SPS_dev backups/<切換時的備份>.dump   # 先設好 PG* 連線環境變數
+```
+
+### 腳本不處理的
+
+- DNS／F5：`sdd.nat.gov.tw` 本來就指向這台主機、經 F5，這部分不在我們控制。
+- `sdd.conf` 裡 `^~ /sps/AInspec/` 是另一個系統，對方之後還會改（`$petroweld_client_ip`）。我們的 `map` 用另外的變數名稱（`$sdd_client_ip`），不依賴它；腳本只換我們自己的兩個 location，改對方區塊不會被我們覆蓋。
+- 主機 nginx 要有 `include /etc/nginx/conf.d/*.conf;`（Ubuntu 預設有），`sps-sdd-maps.conf` 才會被載入；`nginx -t` 不通過就會自動還原。
+- `cutover-nginx.sh status` 可以看兩個站台目前是否已切換；`restore [備份資料夾]` 可單獨還原。
 
 ## 還原／移除 beta
 
