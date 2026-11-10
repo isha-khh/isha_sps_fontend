@@ -60,7 +60,12 @@ resolve_match() {
   local hits=() f
   for f in "$NGINX_DIR"/sites-enabled/* "$NGINX_DIR"/conf.d/*.conf; do
     [ -f "$f" ] || continue
-    if grep -qE 'server_name[^;]*[[:space:]]match\.isafe\.org\.tw([[:space:];])' "$f"; then hits+=("$(readlink -f "$f")"); fi
+    # 要同時符合：server_name 有 match.isafe.org.tw，而且檔案裡有我們的 /sps location（或已套用過的 include）。
+    # 只看 server_name 會誤判：match-admin 的設定檔有一個 80 埠的 server 也列了 match.isafe.org.tw（只做 http→https 轉址）。
+    if grep -qE 'server_name[^;]*[[:space:]]match\.isafe\.org\.tw([[:space:];])' "$f" \
+       && grep -qE "^[[:space:]]*location[[:space:]]+/sps(/api/|/hubs/)?[[:space:]]*\{|sps-match-redirect\.conf" "$f"; then
+      hits+=("$(readlink -f "$f")")
+    fi
   done
   local uniq; uniq=$(printf '%s\n' "${hits[@]:-}" | sort -u | grep -v '^$' || true)
   [ "$(printf '%s\n' "$uniq" | grep -c .)" -eq 1 ] || die "無法唯一判定 match.isafe.org.tw 的設定檔（找到：${uniq:-無}）。請用 MATCH_SITE=/路徑 指定。"
