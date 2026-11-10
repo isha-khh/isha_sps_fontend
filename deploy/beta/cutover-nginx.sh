@@ -20,7 +20,7 @@ BACKUP_ROOT="${SPS_NGINX_BACKUP_ROOT:-/var/backups/sps-nginx}"
 SDD_INCLUDE='include snippets/sps-sdd-locations.conf;'
 MATCH_INCLUDE='include snippets/sps-match-redirect.conf;'
 
-red()   { printf '\033[31m%s\033[0m\n' "$*"; }
+red()   { printf '\033[31m%s\033[0m\n' "$*" >&2; }
 green() { printf '\033[32m%s\033[0m\n' "$*"; }
 die()   { red "$*"; exit 1; }
 ts()    { date +%Y%m%d-%H%M%S; }

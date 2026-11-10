@@ -8,7 +8,7 @@ CONTAINERS=(sps-beta-api sps-beta-web sps-beta-admin)
 COMPOSE_FILES=(-f docker-compose.beta.yml)
 [ -f docker-compose.kms.yml ] && COMPOSE_FILES+=(-f docker-compose.kms.yml)
 
-red()   { printf '\033[31m%s\033[0m\n' "$*"; }
+red()   { printf '\033[31m%s\033[0m\n' "$*" >&2; }
 green() { printf '\033[32m%s\033[0m\n' "$*"; }
 bold()  { printf '\033[1m%s\033[0m\n' "$*"; }
 die()   { red "$*"; exit 1; }

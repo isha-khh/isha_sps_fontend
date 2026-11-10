@@ -69,7 +69,7 @@ echo
 if [ "$DRY_RUN" -eq 1 ]; then
   if [ "$SKIP_NGINX" -eq 0 ]; then
     echo "--- nginx 預覽（--dry-run，不會修改任何檔案）---"
-    ./cutover-nginx.sh apply --dry-run || true
+    ./cutover-nginx.sh apply --dry-run || red "（nginx 預覽失敗或不完整，請看上面的訊息；正式切換前必須先解決）"
   fi
   echo "（--dry-run：什麼都沒改）"
   exit 0
