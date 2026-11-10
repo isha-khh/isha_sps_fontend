@@ -287,7 +287,9 @@ case "$CMD" in
       sdd|match) apply_site "$ONLY" ;;
       *) die "--only 只能是 sdd 或 match" ;;
     esac
-    [ "${#APPLIED_DIRS[@]}" -gt 0 ] && printf 'NGINX_BACKUP_DIRS=%s\n' "${APPLIED_DIRS[*]}"
+    # 注意：不能寫成 `[ … ] && printf …`——沒有套用任何站台時（--dry-run、已套用過而略過）這個測試是 false，
+    # 會變成整支腳本的結束碼 1，讓 cutover.sh 誤判成失敗。
+    if [ "${#APPLIED_DIRS[@]}" -gt 0 ]; then printf 'NGINX_BACKUP_DIRS=%s\n' "${APPLIED_DIRS[*]}"; fi
     ;;
   restore)
     need_root restore
