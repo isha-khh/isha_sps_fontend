@@ -39,6 +39,9 @@ public static class EnterpriseDirectorySortKeys
     /// <summary>新舊：企業加入（建立）的時間</summary>
     public const string Newest = "createdTime";
 
+    /// <summary>設定存在 <c>SystemSetting</c> 的 Category</summary>
+    public const string SettingCategory = "PageEnterpriseSort";
+
     public static readonly string[] All = { Completeness, Image, Tags, Newest };
 
     /// <summary>預設：只有「新舊（新的在前）」啟用，行為與設定功能出現之前相同</summary>

@@ -21,7 +21,7 @@ namespace SPS.Application.Services;
 /// <item>公告類（News）：標題、簡介、<b>內文</b>；人才培育／產業輔導／政府補助資源另外比對專區欄位（<see cref="NewsMetaSearchKeys"/>，
 /// 例如課程代號、開課單位、主辦／協辦／執行單位、上課地點）。內文與常見問題答案是 Puck 區塊 JSON，
 /// 用 <see cref="RichTextMatcher"/> 只比對讀者看得到的文字，不會被 <c>type</c>、<c>props</c> 這類結構字誤中。</item>
-/// <item>企業名錄：名稱、統編、英文名稱、標語、簡介（跟名錄列表的搜尋一致），只含已審核通過且啟用的企業；
+/// <item>企業名錄：名稱、統編、英文名稱、標語、簡介（跟名錄列表的搜尋一致），只含已審核通過且啟用的企業，排序跟名錄列表一致（後台「企業名錄排序」）；
 /// 後台「內容設定」打開「企業名錄只顯示供給端」時，需求端企業也不出現在這裡。</item>
 /// <item>媒合需求：名稱、編號、公開摘要、地點。<b>不比對完整內容</b>——完整內容只有企業會員與後台看得到，
 /// 搜尋給匿名訪客用，比對它會洩漏內容。</item>
@@ -117,11 +117,13 @@ public class SearchService : ISearchService
             // 同一個 DbContext 不能同時跑多個查詢，所以依序執行
             var db = _unitOfWork.GetDbContext();
             var supplierOnly = await IsSupplierOnlyAsync();
+            // 企業結果跟前台企業名錄用同一套排序（後台「頁面設定 → 企業名錄排序」）
+            var companySortRules = await CompanyDirectoryOrdering.LoadEnabledRulesAsync(_settingService, cancellationToken);
 
             var groups = new List<SearchGroup>();
             foreach (var def in NewsGroupDefs)
                 groups.Add(await SearchNewsAsync(db, kw, limit, encoded, cancellationToken, def.Section, def.Type, def.Label, def.BasePath, def.HasDetailPage));
-            groups.Add(await SearchCompaniesAsync(db, kw, limit, encoded, supplierOnly, cancellationToken));
+            groups.Add(await SearchCompaniesAsync(db, kw, limit, encoded, supplierOnly, companySortRules, cancellationToken));
             groups.Add(await SearchDemandsAsync(db, kw, limit, encoded, cancellationToken));
             groups.Add(await SearchCasesAsync(db, kw, limit, encoded, cancellationToken));
             groups.Add(await SearchFaqAsync(db, kw, limit, encoded, cancellationToken));
@@ -242,7 +244,7 @@ public class SearchService : ISearchService
     }
 
     private static async Task<SearchGroup> SearchCompaniesAsync(
-        DbContext db, string kw, int limit, string encoded, bool supplierOnly, CancellationToken ct)
+        DbContext db, string kw, int limit, string encoded, bool supplierOnly, List<EnterpriseSortRuleDto> sortRules, CancellationToken ct)
     {
         var query = db.Set<Company>().Where(c => c.DataMode == DataMode.Normal && c.IsVerified && c.Status == Status.Active &&
             (c.Name.ToLower().Contains(kw) ||
@@ -255,8 +257,7 @@ public class SearchService : ISearchService
             query = query.Where(c => c.Type == CompanyType.Supplier || c.Type == CompanyType.Both);
 
         var total = await query.CountAsync(ct);
-        var rows = await query
-            .OrderBy(c => c.Name)
+        var rows = await CompanyDirectoryOrdering.Apply(query, sortRules, db)
             .Take(limit)
             .Select(c => new { c.Id, c.Name, c.Subject })
             .ToListAsync(ct);

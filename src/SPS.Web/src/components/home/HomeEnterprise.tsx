@@ -1,6 +1,6 @@
 import SectionTitle from "@/components/ui/SectionTitle";
 import MoreLink from "@/components/ui/MoreLink";
-import { fetchCompanies, fetchTagTaxonomy } from "@/lib/api.server";
+import { fetchCompaniesPage, fetchTagTaxonomy } from "@/lib/api.server";
 import { techGroupLabels, type TagTaxonomy } from "@/lib/company-tags";
 import type { CompanyList } from "@/lib/types";
 import { withBasePath } from "@/lib/api-client";
@@ -49,28 +49,16 @@ function toListingData(company: CompanyList, taxonomy: TagTaxonomy): EnterpriseL
 }
 
 /**
- * 排序：有掛標籤（`tagNames`）的業者優先顯示——首頁版位只有 3 格，
- * 沒有標籤的企業卡片只能靠通用字樣「企業會員」當分類徽章、也沒有
- * 關鍵字列表可以顯示（見 `toListingData`），版面會比較空、對使用者
- * 也比較沒有篩選/瀏覽的線索，所以優先把「資料比較完整」的企業排到
- * 前面。同樣有沒有標籤的兩家企業之間，再用 `createdTime` 新到舊排。
- */
-function byTagsThenNewest(a: CompanyList, b: CompanyList): number {
-  const aHasTags = a.tagNames.length > 0;
-  const bHasTags = b.tagNames.length > 0;
-  if (aHasTags !== bHasTags) return aHasTags ? -1 : 1;
-  return a.createdTime < b.createdTime ? 1 : -1;
-}
-
-/**
  * 首頁「企業刊登」，對應舊站 page/_uc/home/home_enterprise.html。
  *
- * 對到真後端 `GET /api/Company`（見 `fetchCompanies`）。「已審核通過、
- * 可公開刊登」用 `isVerified` 篩，取排序後前 3 家（見
- * `byTagsThenNewest`：有標籤優先，其餘新到舊）——跟 News/Promotion
- * 一樣，`backendAvailable:false`（連不到後端）才退回假資料，真後端
- * 回應但剛好 0 家已驗證企業時要照實顯示（見下面 `visibleListings`
- * 的判斷）。
+ * 對到真後端 `GET /api/Company`（見 `fetchCompaniesPage`），直接要前 3 家。
+ * 後端只回「已審核通過且啟用」的企業，並且套用跟「我要媒合 → 企業名錄」同一套設定：
+ * 後台「頁面設定 → 企業名錄排序」的排序，以及「內容設定 → 企業名錄只顯示供給端」的篩選
+ * （都靠傳 `useDirectorySort`），所以首頁這 3 張卡片永遠是名錄列表的前 3 家。
+ * （原本這裡自己撈 100 筆、在前台依「有標籤優先、再新到舊」排，不看後台設定；
+ * 想要「標籤多的優先」請在後台企業名錄排序打開「標籤」。）
+ * 跟 News/Promotion 一樣，`backendAvailable:false`（連不到後端）才退回假資料，
+ * 真後端回應但剛好 0 家企業時要照實顯示（見下面 `visibleListings` 的判斷）。
  *
  * 這裡目前沒有輪播、沒有頁籤，就是純粹三張並排的企業卡片，所以卡片
  * 本身先不抽成獨立元件——等「我要媒合」的企業名錄頁真的要蓋的時候，
@@ -78,10 +66,11 @@ function byTagsThenNewest(a: CompanyList, b: CompanyList): number {
  * 共用介面。
  */
 export default async function HomeEnterprise() {
-  const [{ items, backendAvailable }, taxonomy] = await Promise.all([fetchCompanies(), fetchTagTaxonomy()]);
-  const visibleListings = backendAvailable
-    ? items.slice().sort(byTagsThenNewest).slice(0, 3).map((company) => toListingData(company, taxonomy))
-    : LISTINGS;
+  const [{ items, backendAvailable }, taxonomy] = await Promise.all([
+    fetchCompaniesPage({ page: 1, pageSize: 3, useDirectorySort: true }),
+    fetchTagTaxonomy(),
+  ]);
+  const visibleListings = backendAvailable ? items.map((company) => toListingData(company, taxonomy)) : LISTINGS;
 
   return (
     <div className="home_enterprise">

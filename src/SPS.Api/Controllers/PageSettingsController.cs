@@ -24,7 +24,7 @@ public class PageSettingsController : ControllerBase
     private const string XrKey = "PageXr";
     private const string SupportInfoKey = "PageSupportInfo";
     private const string IndustryAiKey = "PageIndustryAiLink";
-    public const string EnterpriseSortKey = "PageEnterpriseSort";
+    public const string EnterpriseSortKey = EnterpriseDirectorySortKeys.SettingCategory;
     private const string PrivacyKey = "PagePrivacy";
 
     private readonly ISystemSettingService _settingService;
