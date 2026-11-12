@@ -114,7 +114,7 @@ chmod +x update-beta.sh deploy.sh rollback.sh cutover.sh cutover-rollback.sh cut
 ```bash
 cd /home/shareproject/SPS_dev
 ./deploy.sh                    # 有新版就問你，確認後：備份資料庫 → 更新 → 冒煙測試
-./deploy.sh 1.0.0-beta.39      # 指定版本
+./deploy.sh 1.0.0-beta.40      # 指定版本
 ./deploy.sh -y                 # 不問直接做
 ```
 
