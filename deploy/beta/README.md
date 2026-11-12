@@ -193,7 +193,7 @@ cd /home/shareproject/SPS_dev
 ./cutover.sh
 ```
 
-流程中會要你輸入 `cutover`（開始）、`yes`（套用 sdd 的 nginx）、確認 sdd 正常後再決定要不要做 match 的 301。每一步 nginx 都會：先備份（`/var/backups/sps-nginx/<時間>-sdd|match/`）→ `nginx -t` → reload → 用 curl 檢查（sdd：`/sps`、`/sps/api/health` 為 200，AInspec 與根路徑的回應和修改前相同；match：301 目標正確），**任何一步不如預期自動還原**。
+流程中會要你輸入 `cutover`（開始）、`yes`（套用 sdd 的 nginx）、確認 sdd 正常後再決定要不要做 match 的 301。每一步 nginx 都會：先備份（`/var/backups/sps-nginx/<時間>-sdd|match/`）→ `nginx -t` → reload → 用 curl 檢查（sdd：`/sps`、`/sps/api/health` 為 200，AInspec 與根路徑的回應和修改前相同；match：`/sps` 與根網址 `/` 都是 301 到 sdd，目標正確），**任何一步不如預期自動還原**。
 
 切完用瀏覽器確認：首頁、登入、一個有圖的內容頁、「我要投稿」頁下載、後台（`match-admin`）、會員信的連結（`App__BaseUrl` 是 `https://sdd.nat.gov.tw/sps`）。
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 正式切換：新系統上線到 https://sdd.nat.gov.tw/sps，match.isafe.org.tw/sps 301 到 sdd.nat.gov.tw/sps。
+# 正式切換：新系統上線到 https://sdd.nat.gov.tw/sps，match.isafe.org.tw 與 match.isafe.org.tw/sps 301 到 sdd.nat.gov.tw/sps。
 #
 # 放在 SPS_dev 頂層（跟 .env 同一層），用一般帳號執行（只有 nginx 那段會呼叫 sudo）：
 #   ./cutover.sh --dry-run     只顯示會做什麼（含 nginx 的 diff），什麼都不改
@@ -13,7 +13,7 @@
 #   3. 改 .env：APP_BASE_URL（信件連結）、APP_ADMIN_BASE_URL、CORS_ORIGINS；沒有 GA_MEASUREMENT_ID 時問你要不要填
 #   4. 重建 api／web 容器，確認容器裡的網址值正確
 #   5. sudo ./cutover-nginx.sh apply --only sdd：sdd.nat.gov.tw/sps 改指向新系統（先備份、nginx -t、curl 檢查，失敗自動還原）
-#   6. 問你要不要接著做 match.isafe.org.tw/sps 的 301（apply --only match）
+#   6. 問你要不要接著做 match.isafe.org.tw（根網址與 /sps）的 301（apply --only match）
 # 舊系統的容器（sps-nginx 等）這支腳本完全不碰，會繼續跑著，回滾時才有地方可以回去。
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -63,7 +63,7 @@ show_change APP_ADMIN_BASE_URL "$(env_value APP_ADMIN_BASE_URL)" "$NEW_ADMIN_URL
 show_change CORS_ORIGINS "$(env_value CORS_ORIGINS)" "$NEW_CORS"
 echo "  GA_MEASUREMENT_ID：$([ -n "$(env_value GA_MEASUREMENT_ID)" ] && echo '已設定，不變' || echo '目前沒有（切換時會問你要不要填）')"
 echo "  重建容器：api、web（admin、redis 不動）"
-if [ "$SKIP_NGINX" -eq 1 ]; then echo "  nginx：略過（--skip-nginx）"; else echo "  nginx：sdd.nat.gov.tw/sps 改指向新系統 → 再問你要不要把 match.isafe.org.tw/sps 301 到 sdd.nat.gov.tw/sps"; fi
+if [ "$SKIP_NGINX" -eq 1 ]; then echo "  nginx：略過（--skip-nginx）"; else echo "  nginx：sdd.nat.gov.tw/sps 改指向新系統 → 再問你要不要把 match.isafe.org.tw（根網址與 /sps）301 到 sdd.nat.gov.tw/sps"; fi
 echo
 
 if [ "$DRY_RUN" -eq 1 ]; then
@@ -133,7 +133,7 @@ run_nginx --only sdd || die "nginx（sdd）沒有套用成功（已由腳本還�
 
 echo
 echo "請先用瀏覽器確認 https://sdd.nat.gov.tw/sps 是新系統：首頁、登入、一個有圖的內容頁、後台（https://match-admin.isafe.org.tw）。"
-if ask_yes "確認 sdd 正常，要接著把 match.isafe.org.tw/sps 301 到 sdd.nat.gov.tw/sps 嗎？（301 會被瀏覽器長期快取）"; then
+if ask_yes "確認 sdd 正常，要接著把 match.isafe.org.tw（根網址與 /sps）301 到 sdd.nat.gov.tw/sps 嗎？（301 會被瀏覽器長期快取）"; then
   run_nginx --only match || red "match 的 301 沒有套用成功（已還原）。sdd 已切換完成；可稍後重跑 sudo ./cutover-nginx.sh apply --only match"
 else
   echo "略過。之後要做：sudo ./cutover-nginx.sh apply --only match"

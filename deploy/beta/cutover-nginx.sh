@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# 切換主機 nginx（需要 root）：sdd.nat.gov.tw/sps 改指向新系統，match.isafe.org.tw/sps 301 到 sdd.nat.gov.tw/sps。
+# 切換主機 nginx（需要 root）：sdd.nat.gov.tw/sps 改指向新系統，match.isafe.org.tw 與 match.isafe.org.tw/sps（含其下所有路徑）301 到 sdd.nat.gov.tw/sps。
 # 通常由 cutover.sh／cutover-rollback.sh 呼叫；也可以單獨執行：
 #   sudo ./cutover-nginx.sh apply --dry-run        只顯示會做的修改（diff），什麼都不動（不需要 sudo 也能看，除非檔案有權限限制）
 #   sudo ./cutover-nginx.sh apply --only sdd       只做 sdd.nat.gov.tw
-#   sudo ./cutover-nginx.sh apply --only match     只做 match.isafe.org.tw 的 301（要在 sdd 切換並確認正常之後）
+#   sudo ./cutover-nginx.sh apply --only match     只做 match.isafe.org.tw 的 301（根網址與 /sps；要在 sdd 切換並確認正常之後；已套用過但範本更新時會只更新 snippet）
 #   sudo ./cutover-nginx.sh apply                  兩個都做（先 sdd 再 match）
 #   sudo ./cutover-nginx.sh restore [備份資料夾]   還原（預設最近一次）
 #   sudo ./cutover-nginx.sh status
@@ -198,6 +198,29 @@ restore_dir() { # dir
   green "已還原並 reload（備份資料夾：$d）"
 }
 
+# match 已經套用過（站台設定檔裡已有 include），但範本（例如新增「根網址也轉址」）更新了：只更新 snippet，不動站台設定檔
+refresh_match_snippet() {
+  local f_redir dest="$NGINX_DIR/snippets/sps-match-redirect.conf"
+  f_redir=$(find_src nginx-match-redirect.conf)
+  if [ -e "$dest" ] && cmp -s "$f_redir" "$dest"; then echo "  略過（已套用，轉址 snippet 也是最新的）"; return 0; fi
+  echo "  已套用過，但轉址 snippet 與範本不同，只更新 $dest（會先備份）"
+  [ "${DRY_RUN:-0}" -eq 1 ] && { echo "  --- 將更新的內容（diff）---"; diff -u "$dest" "$f_redir" 2>/dev/null | sed 's/^/  /' || true; echo "  （--dry-run：什麼都沒改）"; return 0; }
+  nginx_test || die "套用前 nginx -t 就已經失敗，請先修好現有設定（沒有修改任何檔案）"
+  read -r -p "確定更新？（nginx -t 與 curl 檢查失敗會自動還原）請輸入 yes：" ans || ans=""
+  [ "$ans" = yes ] || { echo "已取消。"; return 0; }
+  BK="$BACKUP_ROOT/$(ts)-match-snippet"; mkdir -p "$BK"; chmod 700 "$BK"
+  install_file "$f_redir" "$dest"
+  if ! nginx_test; then red "nginx -t 失敗，自動還原..."; restore_dir "$BK"; die "已還原，沒有任何變更生效。"; fi
+  reload_nginx; sleep 1
+  local ok=1 r
+  r=$(probe match.isafe.org.tw /sps); [ "$r" = "301|https://sdd.nat.gov.tw/sps" ] || { red "  ✗ /sps 應為 301，實際 $r"; ok=0; }
+  r=$(probe match.isafe.org.tw /);    [ "$r" = "301|https://sdd.nat.gov.tw/sps" ] || { red "  ✗ 根網址 / 應為 301，實際 $r"; ok=0; }
+  if [ "$ok" -ne 1 ]; then red "檢查不如預期，自動還原..."; restore_dir "$BK"; die "已還原到修改前。"; fi
+  ln -sfn "$BK" "$BACKUP_ROOT/latest"; echo "$BK" >> "$BACKUP_ROOT/applied.list"
+  green "  ✓ match 轉址 snippet 已更新（備份：$BK）"
+  APPLIED_DIRS+=("$BK")
+}
+
 apply_site() { # sdd|match
   local name="$1" site tmp before_root before_extra
   if [ "$name" = sdd ]; then site=$(resolve_sdd); else site=$(resolve_match); fi
@@ -206,7 +229,10 @@ apply_site() { # sdd|match
   tmp=$(mktemp); TMPS+=("$tmp")
   local rc=0
   edit_site "$name" "$site" "$tmp" || rc=$?
-  if [ "$rc" -eq 3 ]; then echo "  略過（已套用）"; return 0; fi
+  if [ "$rc" -eq 3 ]; then
+    if [ "$name" = match ]; then refresh_match_snippet; return 0; fi
+    echo "  略過（已套用）"; return 0
+  fi
   [ "$rc" -eq 0 ] || die "無法產生新設定，沒有修改任何檔案"
   echo "  --- 將修改的內容（diff）---"
   diff -u "$site" "$tmp" | sed 's/^/  /' || true
@@ -228,7 +254,7 @@ apply_site() { # sdd|match
   if [ "$name" = sdd ]; then
     before_root=$(probe sdd.nat.gov.tw /); before_extra=$(probe sdd.nat.gov.tw /sps/AInspec/)
   else
-    before_root=$(probe match.isafe.org.tw /); before_extra=""
+    before_root=""; before_extra=""
   fi
 
   BK="$BACKUP_ROOT/$(ts)-$name"; mkdir -p "$BK"; chmod 700 "$BK"
@@ -257,7 +283,7 @@ apply_site() { # sdd|match
   else
     r=$(probe match.isafe.org.tw /sps);              [ "$r" = "301|https://sdd.nat.gov.tw/sps" ] || { red "  ✗ /sps 應為 301 到 https://sdd.nat.gov.tw/sps，實際 $r"; ok=0; }
     r=$(probe match.isafe.org.tw "/sps/news?a=1");   [ "$r" = "301|https://sdd.nat.gov.tw/sps/news?a=1" ] || { red "  ✗ /sps/news?a=1 轉址不對，實際 $r"; ok=0; }
-    r=$(probe match.isafe.org.tw /);                 [ "$r" = "$before_root" ] || { red "  ✗ 根路徑回應改變：之前 $before_root，現在 $r"; ok=0; }
+    r=$(probe match.isafe.org.tw /);                 [ "$r" = "301|https://sdd.nat.gov.tw/sps" ] || { red "  ✗ 根網址 / 應為 301 到 https://sdd.nat.gov.tw/sps，實際 $r"; ok=0; }
   fi
   if [ "$ok" -ne 1 ]; then
     red "檢查不如預期，自動還原..."; restore_dir "$BK"; die "已還原到修改前。"
