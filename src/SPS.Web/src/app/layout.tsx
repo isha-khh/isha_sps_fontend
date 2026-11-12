@@ -68,11 +68,12 @@ const LEGACY_SITE_STYLESHEETS = [
 
 export const metadata: Metadata = {
   // 每個頁面用 `export const metadata = { title: "頁面名稱" }` 就好，
-  // Next 會自動套進這個 template 變成「頁面名稱 | 高雄技術處」。
+  // Next 會自動套進這個 template 變成「頁面名稱 | 智慧工安技術產業資訊暨媒合平台」。
   // 只有首頁（沒有自己 title 的路由）會顯示 default 這個值。
+  // 網站名稱用完整名稱「智慧工安技術產業資訊暨媒合平台」（issue #100；原本是簡稱「智慧工安媒合平台」）。
   title: {
-    default: "智慧工安媒合平台",
-    template: "%s | 智慧工安媒合平台",
+    default: "智慧工安技術產業資訊暨媒合平台",
+    template: "%s | 智慧工安技術產業資訊暨媒合平台",
   },
   description: "智慧工安技術產業資訊暨媒合平台",
   // 之前這裡漏了 `public/favicon.ico`（客戶實際的品牌 icon）會被

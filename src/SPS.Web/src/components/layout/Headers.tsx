@@ -340,8 +340,11 @@ export default function Headers() {
             {/* 品牌 Logo 區塊 */}
             <div className="nav-brand-wrapper">
               <Link className="navbar-brand" href="/">
+                {/* 連結文字就是網站名稱（讀屏、把連結拖進書籤時都會帶出這段）。畫面上看到的是 CSS 背景的 LOGO 圖，
+                    `.navbar-brand` 用 text-indent 把文字推出畫面，但寬度只有 227px，名稱超過一行時第二行會露出來，
+                    所以整段放進 visually-hidden（issue #100：之前是「高雄技術處logo」） */}
                 <h1 className="fs-6 m-0 p-0">
-                  高雄技術處<span className="visually-hidden">logo</span>
+                  <span className="visually-hidden">智慧工安技術產業資訊暨媒合平台</span>
                 </h1>
               </Link>
             </div>
