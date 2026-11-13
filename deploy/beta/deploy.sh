@@ -3,7 +3,7 @@
 #
 # 放在 SPS_dev 頂層（跟 .env、update-beta.sh、deploy-lib.sh 同一層），在那裡執行：
 #   ./deploy.sh                 有新版就問你、備份、更新（互動）
-#   ./deploy.sh 1.0.0-beta.43   指定版本
+#   ./deploy.sh 1.0.0   指定版本
 #   ./deploy.sh -y [版本]       不問直接做
 #
 # 做的事：
