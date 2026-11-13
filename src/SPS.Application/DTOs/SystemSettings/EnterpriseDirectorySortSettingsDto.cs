@@ -36,13 +36,16 @@ public static class EnterpriseDirectorySortKeys
     /// <summary>標籤：勾選的企業標籤數量</summary>
     public const string Tags = "tags";
 
+    /// <summary>成功對接次數：這家供給端企業出現在幾筆需求的對接結果裡（issue #98；同一筆需求只算一次）</summary>
+    public const string Matches = "matches";
+
     /// <summary>新舊：企業加入（建立）的時間</summary>
     public const string Newest = "createdTime";
 
     /// <summary>設定存在 <c>SystemSetting</c> 的 Category</summary>
     public const string SettingCategory = "PageEnterpriseSort";
 
-    public static readonly string[] All = { Completeness, Image, Tags, Newest };
+    public static readonly string[] All = { Completeness, Image, Tags, Matches, Newest };
 
     /// <summary>預設：只有「新舊（新的在前）」啟用，行為與設定功能出現之前相同</summary>
     public static List<EnterpriseSortRuleDto> DefaultRules() => new()
@@ -50,6 +53,7 @@ public static class EnterpriseDirectorySortKeys
         new() { Key = Completeness, Enabled = false, Descending = true },
         new() { Key = Image, Enabled = false, Descending = true },
         new() { Key = Tags, Enabled = false, Descending = true },
+        new() { Key = Matches, Enabled = false, Descending = true },
         new() { Key = Newest, Enabled = true, Descending = true },
     };
 }

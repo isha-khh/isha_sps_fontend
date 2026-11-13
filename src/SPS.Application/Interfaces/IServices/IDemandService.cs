@@ -28,6 +28,18 @@ public interface IDemandService
 
     /// <summary>發布需求時，預設勾選通知的供應業者「標籤符合度」門檻（百分比）；系統管理員在「內容設定」調整，預設 70</summary>
     Task<int> GetMatchThresholdPercentAsync();
+    /// <summary>需求的對接結果（後台）</summary>
+    Task<Result<DemandMatchesResponse>> GetMatchesAsync(int demandId, CancellationToken ct = default);
+
+    /// <summary>後台設定需求的對接結果（整組覆寫）</summary>
+    Task<Result<DemandMatchesResponse>> SetMatchesByAdminAsync(Guid? userId, int demandId, SetDemandMatchesRequest request, CancellationToken ct = default);
+
+    /// <summary>前台刊登端設定需求的對接結果：只有刊登的會員與同一家公司的會員可以，需求要已上架</summary>
+    Task<Result<DemandMatchesResponse>> SetMatchesByMemberAsync(Guid memberId, int demandId, SetDemandMatchesRequest request, CancellationToken ct = default);
+
+    /// <summary>對接結果選企業用的選項（已審核通過、啟用的供給端與供需雙方企業，最多 30 筆）</summary>
+    Task<List<MatchCompanyOptionDto>> SearchMatchCompanyOptionsAsync(string? search, CancellationToken ct = default);
+
     Task<Result<DemandTagsResponse>> GetTagsAsync(int id, CancellationToken ct = default);
     Task<Result<DemandTagsResponse>> SetTagsAsync(int id, SetDemandTagsRequest request, CancellationToken ct = default);
     Task<Result<List<SimilarCompanyResponse>>> GetSimilarCompaniesAsync(List<int> tagIds, CancellationToken ct = default);

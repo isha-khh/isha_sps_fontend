@@ -158,6 +158,27 @@ public class MemberFavoritesController : ControllerBase
         return r.Error == "需求不存在" ? NotFound(new { error = r.Error }) : BadRequest(new { error = r.Error });
     }
 
+    /// <summary>
+    /// 填報需求的對接結果：選對接到哪些供給端企業（整組覆寫，空陣列＝移除全部）。只有刊登的會員與同一家公司的會員可以，
+    /// 需求要已上架；填了就生效（前台狀態變「已成功對接」），不需要審核，後台看得到並可以撤銷
+    /// </summary>
+    [HttpPut("demands/{id:int}/matches")]
+    [Authorize]
+    [ProducesResponseType(typeof(SPS.Application.DTOs.Demand.DemandMatchesResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SetMyDemandMatches(int id, [FromBody] SPS.Application.DTOs.Demand.SetDemandMatchesRequest request, CancellationToken ct)
+    {
+        var memberId = GetMemberId();
+        if (memberId == null) return Unauthorized(new { error = "Invalid token" });
+        var r = await _demands.SetMatchesByMemberAsync(memberId.Value, id, request, ct);
+        if (r.IsSuccess)
+        {
+            // 前台不需要知道是誰填的
+            foreach (var c in r.Data!.Companies) c.ReportedBy = null;
+            return Ok(r.Data);
+        }
+        return r.Error == "需求不存在" ? NotFound(new { error = r.Error }) : BadRequest(new { error = r.Error });
+    }
+
     /// <summary>撤回自己刊登、還沒上架的需求</summary>
     [HttpDelete("demands/{id:int}")]
     [Authorize]

@@ -1329,6 +1329,42 @@ namespace SPS.Infrastructure.Migrations
                     b.ToTable("Demands");
                 });
 
+            modelBuilder.Entity("SPS.Domain.Entities.DemandMatchResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DemandId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ReportedByMemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ReportedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("DemandId", "CompanyId")
+                        .IsUnique();
+
+                    b.ToTable("DemandMatchResult", (string)null);
+                });
+
             modelBuilder.Entity("SPS.Domain.Entities.DemandNotification", b =>
                 {
                     b.Property<int>("Id")
@@ -4395,6 +4431,25 @@ namespace SPS.Infrastructure.Migrations
                     b.Navigation("Company");
 
                     b.Navigation("Picture");
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.DemandMatchResult", b =>
+                {
+                    b.HasOne("SPS.Domain.Entities.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SPS.Domain.Entities.Demand", "Demand")
+                        .WithMany()
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Demand");
                 });
 
             modelBuilder.Entity("SPS.Domain.Entities.DemandNotification", b =>

@@ -27,6 +27,12 @@ public class DemandResponse
     public string? CompanyName { get; set; }
     public bool Published { get; set; }
 
+    /// <summary>已成功對接（有任何對接結果）；前台列表與詳情的狀態標籤「已成功對接」／「徵求中」用，公開</summary>
+    public bool Matched { get; set; }
+
+    /// <summary>對接到哪些企業：<b>只有後台使用者拿得到</b>（編輯表單用），公開呼叫一律是 null</summary>
+    public List<MatchedCompanyDto>? MatchedCompanies { get; set; }
+
     /// <summary>true = 會員從前台「我要刊登」送出的（未發布時就是待後台審核）</summary>
     public bool MemberSubmitted { get; set; }
     public DateTime CreatedTime { get; set; }
@@ -123,4 +129,8 @@ public class DemandQueryParameters
     public List<int>? TagIds { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 20;
+
+    /// <summary>已成功對接的排在後面（前台公開列表用；同組內仍依上架時間新到舊）。由 API 對非後台呼叫者填入，不接受網址傳入</summary>
+    [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+    public bool UnmatchedFirst { get; set; }
 }

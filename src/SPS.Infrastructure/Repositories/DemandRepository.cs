@@ -33,7 +33,12 @@ public class DemandRepository : Repository<Demand, int>, IDemandRepository
             query = query.Where(d => d.Status == (parameters.Published.Value ? SPS.Domain.Enums.Status.Active : SPS.Domain.Enums.Status.Inactive));
         
         var totalCount = await query.CountAsync(ct);
-        var items = await query.OrderByDescending(d => d.PublishedTime ?? d.CreatedTime)
+        // 前台公開列表：還在徵求的排前面、已成功對接的排後面（issue #98）；同組內依上架時間新到舊
+        var ordered = parameters.UnmatchedFirst
+            ? query.OrderBy(d => _context.Set<DemandMatchResult>().Any(m => m.DemandId == d.Id) ? 1 : 0)
+                .ThenByDescending(d => d.PublishedTime ?? d.CreatedTime)
+            : query.OrderByDescending(d => d.PublishedTime ?? d.CreatedTime);
+        var items = await ordered
             .Skip((parameters.Page - 1) * parameters.PageSize).Take(parameters.PageSize).ToListAsync(ct);
         return new PagedResult<Demand> { Items = items, TotalCount = totalCount, Page = parameters.Page, PageSize = parameters.PageSize };
     }

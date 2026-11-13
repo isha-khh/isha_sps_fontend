@@ -42,6 +42,9 @@ public static class CompanyDirectoryOrdering
                 case EnterpriseDirectorySortKeys.Tags:
                     ordered = Add(c => db.Set<CompanyTagCategory>().Count(t => t.CompanyId == c.Id), rule.Descending);
                     break;
+                case EnterpriseDirectorySortKeys.Matches:
+                    ordered = Add(c => db.Set<DemandMatchResult>().Count(m => m.CompanyId == c.Id), rule.Descending);
+                    break;
                 case EnterpriseDirectorySortKeys.Newest:
                     ordered = Add(c => c.CreatedTime, rule.Descending);
                     usedNewest = true;

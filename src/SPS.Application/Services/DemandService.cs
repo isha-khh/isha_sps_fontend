@@ -51,6 +51,7 @@ public class DemandService : IDemandService
         var tagIdsMap = await GetTagCategoryIdsMapAsync(demandIds, ct);
         var allTagIds = tagIdsMap.Values.SelectMany(ids => ids).Distinct().ToList();
         var tagNamesMap = await GetCategoryNamesAsync(allTagIds, ct);
+        var matchedIds = await GetMatchedDemandIdsAsync(demandIds, ct);
 
         var response = new PagedResult<DemandResponse>
         {
@@ -70,6 +71,7 @@ public class DemandService : IDemandService
                     CompanyId = d.CompanyId,
                     CompanyName = d.Company?.Name,
                     Published = d.Status == Status.Active,
+                    Matched = matchedIds.Contains(d.Id),
                     MemberSubmitted = d.SubmittedByMemberId != null,
                     CreatedTime = d.CreatedTime,
                     PublishedTime = d.PublishedTime ?? (d.Status == Status.Active ? d.CreatedTime : null),
@@ -183,19 +185,29 @@ public class DemandService : IDemandService
 
     public async Task<Result<List<MemberDemandResponse>>> GetMemberDemandsAsync(Guid memberId, CancellationToken ct = default)
     {
+        // 自己刊登的（待審核或已上架），加上同一家公司其他同事刊登／後台代刊登、已上架的需求：
+        // 後者只能填報對接結果（見 SetMatchesByMemberAsync），不能改、不能撤回（UpdateByMemberAsync／DeleteByMemberAsync 仍只認刊登者）
+        var myCompanyId = await _unitOfWork.GetDbContext().Set<Member>().Where(m => m.Id == memberId).Select(m => m.CompanyId).FirstOrDefaultAsync(ct);
         var demands = await _unitOfWork.Demands.GetQueryable()
-            .Where(d => d.SubmittedByMemberId == memberId)
+            .Where(d => d.SubmittedByMemberId == memberId
+                || (myCompanyId != null && d.CompanyId == myCompanyId && d.Status == Status.Active))
             .OrderByDescending(d => d.CreatedTime)
             .Take(200)
             .ToListAsync(ct);
 
         var tagIdsMap = await GetTagCategoryIdsMapAsync(demands.Select(d => d.Id).ToList(), ct);
         var namesMap = await GetCategoryNamesAsync(tagIdsMap.Values.SelectMany(ids => ids).Distinct().ToList(), ct);
+        var matchesMap = await GetMatchedCompaniesMapAsync(demands.Select(d => d.Id).ToList(), ct);
         var result = demands.Select(d =>
         {
             var tagIds = tagIdsMap.GetValueOrDefault(d.Id) ?? new List<int>();
+            var matches = matchesMap.GetValueOrDefault(d.Id) ?? new List<MatchedCompanyDto>();
             return new MemberDemandResponse
             {
+                SubmittedByMe = d.SubmittedByMemberId == memberId,
+                Matched = matches.Count > 0,
+                // 前台不需要知道是誰填的
+                MatchedCompanies = matches.Select(m => new MatchedCompanyDto { CompanyId = m.CompanyId, CompanyName = m.CompanyName, Number = m.Number, ReportedTime = m.ReportedTime }).ToList(),
                 Id = d.Id,
                 Number = d.Number,
                 Name = d.Name,
@@ -399,10 +411,12 @@ public class DemandService : IDemandService
         var tagIdsMap = await GetTagCategoryIdsMapAsync(new[] { d.Id }, ct);
         var tagIds = tagIdsMap.GetValueOrDefault(d.Id) ?? new List<int>();
         var tagNamesMap = await GetCategoryNamesAsync(tagIds, ct);
-        return MapToResponse(
+        var response = MapToResponse(
             d,
             tagIds,
             tagIds.Where(tagNamesMap.ContainsKey).Select(i => tagNamesMap[i]).ToList());
+        response.Matched = (await GetMatchedDemandIdsAsync(new[] { d.Id }, ct)).Contains(d.Id);
+        return response;
     }
 
     private async Task<DemandTagsResponse> BuildTagsResponseAsync(int demandId, List<int> tagIds, CancellationToken ct)
@@ -447,6 +461,142 @@ public class DemandService : IDemandService
         TagIds = tagIds,
         TagNames = tagNames
     };
+
+    // ===== 對接結果（issue #98）=====
+
+    /// <summary>一筆需求最多對接幾家供給端（避免亂填）</summary>
+    private const int MaxMatchesPerDemand = 20;
+
+    private async Task<HashSet<int>> GetMatchedDemandIdsAsync(IReadOnlyCollection<int> demandIds, CancellationToken ct)
+    {
+        if (demandIds.Count == 0) return new HashSet<int>();
+        var ids = await _unitOfWork.GetDbContext().Set<DemandMatchResult>()
+            .Where(m => demandIds.Contains(m.DemandId))
+            .Select(m => m.DemandId)
+            .Distinct()
+            .ToListAsync(ct);
+        return ids.ToHashSet();
+    }
+
+    private async Task<Dictionary<int, List<MatchedCompanyDto>>> GetMatchedCompaniesMapAsync(IReadOnlyCollection<int> demandIds, CancellationToken ct)
+    {
+        if (demandIds.Count == 0) return new Dictionary<int, List<MatchedCompanyDto>>();
+        var db = _unitOfWork.GetDbContext();
+        var rows = await db.Set<DemandMatchResult>()
+            .Where(m => demandIds.Contains(m.DemandId))
+            .OrderBy(m => m.CreatedTime)
+            .Select(m => new { m.DemandId, m.CompanyId, CompanyName = m.Company.Name, m.Company.Number, m.CreatedTime, m.ReportedByMemberId })
+            .ToListAsync(ct);
+
+        var memberIds = rows.Where(r => r.ReportedByMemberId != null).Select(r => r.ReportedByMemberId!.Value).Distinct().ToList();
+        var emails = memberIds.Count == 0
+            ? new Dictionary<Guid, string>()
+            : await db.Set<Member>().Where(m => memberIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, m => m.Email, ct);
+
+        return rows
+            .GroupBy(r => r.DemandId)
+            .ToDictionary(g => g.Key, g => g.Select(r => new MatchedCompanyDto
+            {
+                CompanyId = r.CompanyId,
+                CompanyName = r.CompanyName,
+                Number = r.Number,
+                ReportedTime = r.CreatedTime,
+                ReportedBy = r.ReportedByMemberId != null ? (emails.GetValueOrDefault(r.ReportedByMemberId.Value) ?? "會員") : "後台",
+            }).ToList());
+    }
+
+    public async Task<Result<DemandMatchesResponse>> GetMatchesAsync(int demandId, CancellationToken ct = default)
+    {
+        var demand = await _unitOfWork.Demands.GetByIdAsync(demandId, ct);
+        if (demand == null) return Result<DemandMatchesResponse>.Failure("需求不存在");
+        return Result<DemandMatchesResponse>.Success(await BuildMatchesResponseAsync(demandId, ct));
+    }
+
+    private async Task<DemandMatchesResponse> BuildMatchesResponseAsync(int demandId, CancellationToken ct)
+    {
+        var map = await GetMatchedCompaniesMapAsync(new[] { demandId }, ct);
+        var companies = map.GetValueOrDefault(demandId) ?? new List<MatchedCompanyDto>();
+        return new DemandMatchesResponse { DemandId = demandId, Matched = companies.Count > 0, Companies = companies };
+    }
+
+    public async Task<Result<DemandMatchesResponse>> SetMatchesByAdminAsync(Guid? userId, int demandId, SetDemandMatchesRequest request, CancellationToken ct = default)
+    {
+        var demand = await _unitOfWork.Demands.GetByIdAsync(demandId, ct);
+        if (demand == null) return Result<DemandMatchesResponse>.Failure("需求不存在");
+        return await SetMatchesCoreAsync(demand, request, reportedByMemberId: null, reportedByUserId: userId, ct);
+    }
+
+    public async Task<Result<DemandMatchesResponse>> SetMatchesByMemberAsync(Guid memberId, int demandId, SetDemandMatchesRequest request, CancellationToken ct = default)
+    {
+        var demand = await _unitOfWork.Demands.GetByIdAsync(demandId, ct);
+        var myCompanyId = await _unitOfWork.GetDbContext().Set<Member>().Where(m => m.Id == memberId).Select(m => m.CompanyId).FirstOrDefaultAsync(ct);
+
+        // 只有刊登的會員、或同一家公司的會員可以；不是的一律當作不存在，不洩漏別人的需求
+        var allowed = demand != null
+            && (demand.SubmittedByMemberId == memberId || (demand.CompanyId != null && demand.CompanyId == myCompanyId));
+        if (!allowed) return Result<DemandMatchesResponse>.Failure("需求不存在");
+        if (demand!.Status != Status.Active) return Result<DemandMatchesResponse>.Failure("需求上架後才能填報對接結果");
+
+        return await SetMatchesCoreAsync(demand, request, reportedByMemberId: memberId, reportedByUserId: null, ct);
+    }
+
+    /// <summary>整組覆寫：新增沒有的、移除不在名單裡的；已經有的保留（保留原本的填報者與時間）。企業名錄的「成功對接次數」直接數這張表</summary>
+    private async Task<Result<DemandMatchesResponse>> SetMatchesCoreAsync(
+        Demand demand, SetDemandMatchesRequest request, Guid? reportedByMemberId, Guid? reportedByUserId, CancellationToken ct)
+    {
+        var wanted = (request.CompanyIds ?? new List<Guid>()).Where(id => id != Guid.Empty).Distinct().ToList();
+        if (wanted.Count > MaxMatchesPerDemand)
+            return Result<DemandMatchesResponse>.Failure($"一筆需求最多填報 {MaxMatchesPerDemand} 家對接企業");
+        if (demand.CompanyId != null && wanted.Contains(demand.CompanyId.Value))
+            return Result<DemandMatchesResponse>.Failure("不能選刊登需求的企業自己");
+
+        var db = _unitOfWork.GetDbContext();
+        if (wanted.Count > 0)
+        {
+            // 只能選已審核通過、啟用的供給端（含供需雙方）企業
+            var valid = await db.Set<Company>()
+                .Where(c => wanted.Contains(c.Id) && c.DataMode == DataMode.Normal && c.IsVerified && c.Status == Status.Active
+                    && (c.Type == CompanyType.Supplier || c.Type == CompanyType.Both))
+                .Select(c => c.Id)
+                .ToListAsync(ct);
+            if (valid.Count != wanted.Count)
+                return Result<DemandMatchesResponse>.Failure("選擇的企業不存在，或不是已審核通過的供給端企業");
+        }
+
+        var existing = await db.Set<DemandMatchResult>().Where(m => m.DemandId == demand.Id).ToListAsync(ct);
+        var toRemove = existing.Where(m => !wanted.Contains(m.CompanyId)).ToList();
+        var toAdd = wanted.Where(id => existing.All(m => m.CompanyId != id)).ToList();
+
+        if (toRemove.Count > 0) db.Set<DemandMatchResult>().RemoveRange(toRemove);
+        foreach (var companyId in toAdd)
+        {
+            db.Set<DemandMatchResult>().Add(new DemandMatchResult
+            {
+                DemandId = demand.Id,
+                CompanyId = companyId,
+                ReportedByMemberId = reportedByMemberId,
+                ReportedByUserId = reportedByUserId,
+            });
+        }
+        if (toRemove.Count > 0 || toAdd.Count > 0) await _unitOfWork.SaveChangesAsync(ct);
+
+        return Result<DemandMatchesResponse>.Success(await BuildMatchesResponseAsync(demand.Id, ct));
+    }
+
+    public async Task<List<MatchCompanyOptionDto>> SearchMatchCompanyOptionsAsync(string? search, CancellationToken ct = default)
+    {
+        var query = _unitOfWork.GetDbContext().Set<Company>()
+            .Where(c => c.DataMode == DataMode.Normal && c.IsVerified && c.Status == Status.Active
+                && (c.Type == CompanyType.Supplier || c.Type == CompanyType.Both));
+
+        var kw = search?.Trim().ToLower();
+        if (!string.IsNullOrEmpty(kw))
+            query = query.Where(c => c.Name.ToLower().Contains(kw) || c.Number.ToLower().Contains(kw) || (c.EnglishName != null && c.EnglishName.ToLower().Contains(kw)));
+
+        return await query.OrderBy(c => c.Name).Take(30)
+            .Select(c => new MatchCompanyOptionDto { Id = c.Id, Name = c.Name, Number = c.Number })
+            .ToListAsync(ct);
+    }
 
     // ===== 需求標籤分類綁定（DemandTagCategory，共用 CompanyTag 分類）=====
 
