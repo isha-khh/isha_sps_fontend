@@ -7,6 +7,7 @@ import { memberFavoritesApi, type MemberDemand } from "@/lib/api/member-favorite
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import ReceivedReplies from "@/components/member/panels/ReceivedReplies";
+import MatchResultEditor from "@/components/member/panels/MatchResultEditor";
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -16,7 +17,9 @@ function formatDate(value: string) {
 /**
  * 積木元件：會員中心「媒合資料維護」面板——企業會員在媒合對接用「我要刊登」送出的需求，在這裡看審核進度、
  * 修改或撤回。**待審核**的可以改標題、內容與標籤、也可以撤回；**已上架**的不能自己改（內容已公開，要改請聯絡承辦單位）。
- * 接 `GET/PUT/DELETE /api/member/demands`；後端只允許操作自己刊登的需求。
+ * 接 `GET/PUT/DELETE /api/member/demands`；後端只允許修改、撤回自己刊登的需求。
+ * 已上架的需求可以填報**對接結果**（`MatchResultEditor`，issue #98）：刊登的會員與同一家公司的會員都可以，
+ * 所以這裡也會列出同公司同事刊登、後台代刊登的已上架需求（`submittedByMe = false`，只能填報對接結果）。
  */
 export default function MatchDataPanel() {
   const { taxonomy } = useTagTaxonomy();
@@ -105,6 +108,7 @@ export default function MatchDataPanel() {
     <div>
       <p className="small text-muted">
         這裡列出您在媒合對接送出的需求。送出後要經承辦單位審核才會上架；待審核的可以修改或撤回，已上架的如需修改請聯絡承辦單位。
+        需求成功對接後，請在已上架的需求填報「對接結果」，前台就會顯示為「已成功對接」。
       </p>
 
       {message && (
@@ -132,6 +136,7 @@ export default function MatchDataPanel() {
                 <div>
                   <strong>{demand.name}</strong>
                   <span className={`badge ms-2 ${demand.published ? "bg-success" : "bg-warning text-dark"}`}>{demand.published ? "已上架" : "待審核"}</span>
+                  {!demand.submittedByMe && <span className="badge ms-2 bg-light text-dark border">同公司刊登</span>}
                   <div className="small text-muted">
                     編號 {demand.number}　送出於 {formatDate(demand.createdTime)}
                   </div>
@@ -144,7 +149,7 @@ export default function MatchDataPanel() {
                     </div>
                   )}
                 </div>
-                {!demand.published && (
+                {demand.submittedByMe && !demand.published && (
                   <div className="d-flex gap-2 align-items-start">
                     <button type="button" className="tier-reset-btn" onClick={() => openEdit(demand)} disabled={busy}>
                       修改
@@ -156,9 +161,10 @@ export default function MatchDataPanel() {
                 )}
               </div>
 
-              {demand.published && <ReceivedReplies demandId={demand.id} />}
+              {demand.published && demand.submittedByMe && <ReceivedReplies demandId={demand.id} />}
+              {demand.published && <MatchResultEditor demand={demand} onSaved={load} />}
 
-              {editing === demand.id && (
+              {demand.submittedByMe && editing === demand.id && (
                 <div className="mt-3">
                   <div className="form-group mb-3">
                     <label className="mb-2" htmlFor={`md-title-${demand.id}`}>

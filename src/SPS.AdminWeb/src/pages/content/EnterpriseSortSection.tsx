@@ -22,6 +22,12 @@ const CRITERIA: Record<EnterpriseSortKey, { label: string; hint: string; high: s
     high: '標籤越多越前面',
     low: '標籤越少越前面',
   },
+  matches: {
+    label: '成功對接次數',
+    hint: '這家供給端企業出現在幾筆需求的對接結果裡（需求端在會員中心或後台填報的「對接結果」；同一筆需求同一家只算一次）。',
+    high: '對接次數越多越前面',
+    low: '對接次數越少越前面',
+  },
   createdTime: {
     label: '新舊',
     hint: '企業加入（建立）的時間。',
@@ -34,11 +40,12 @@ const DEFAULT_RULES: EnterpriseSortRule[] = [
   { key: 'completeness', enabled: false, descending: true },
   { key: 'image', enabled: false, descending: true },
   { key: 'tags', enabled: false, descending: true },
+  { key: 'matches', enabled: false, descending: true },
   { key: 'createdTime', enabled: true, descending: true },
 ];
 
 /**
- * 企業名錄排序：前台「我要媒合 → 企業名錄」列表的排列順序。四個排序依據（新舊、資料完整度、圖片、標籤）可以各自開關、
+ * 企業名錄排序：前台「我要媒合 → 企業名錄」列表（以及首頁「企業刊登」、全站搜尋的企業結果）的排列順序。五個排序依據（新舊、資料完整度、圖片、標籤、成功對接次數）可以各自開關、
  * 調整方向與優先順序：排在上面的先看，前面的依據分不出高下（例如兩家都有圖片）才看下一個；全部都一樣時，固定由新到舊。
  * 沒設定過＝只有「新舊（新的在前）」，跟原本相同。有自己的儲存按鈕；前台企業名錄沒有快取，儲存後重新整理就會套用。
  */

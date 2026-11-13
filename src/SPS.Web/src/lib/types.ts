@@ -358,6 +358,8 @@ export type DemandItem = {
     /** 附件（只有企業會員與後台看得到，且只在詳情回傳） */
     attachments?: { fileId: string; fileName: string; formattedFileSize: string; url: string }[];
     published: boolean;
+    /** 已成功對接（issue #98）；前台只公開這個狀態，對接到哪些企業不公開 */
+    matched?: boolean;
     createdTime: string;
     /** 上架時間（列表依這個排序）；舊資料是建立時間 */
     publishedTime?: string | null;

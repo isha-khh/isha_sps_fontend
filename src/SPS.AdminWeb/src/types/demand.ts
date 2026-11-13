@@ -22,6 +22,10 @@ export interface Demand {
   companyId?: string;
   companyName?: string;
   published: boolean;
+  /** 已成功對接（有對接結果）；前台公開頁顯示「已成功對接」 */
+  matched?: boolean;
+  /** 對接到哪些供給端企業（只有後台拿得到，詳情 API 回傳） */
+  matchedCompanies?: DemandMatchCompany[];
   /** 會員從前台「我要刊登」送出的（未發布時就是待審核） */
   memberSubmitted?: boolean;
   createdAt: string;
@@ -88,4 +92,21 @@ export interface DemandNotificationRecord {
   errorMessage: string | null;
   sentAt: string | null;
   createdTime: string;
+}
+
+/** 需求對接到的供給端企業（issue #98） */
+export interface DemandMatchCompany {
+  companyId: string;
+  companyName: string;
+  number?: string | null;
+  reportedTime: string;
+  /** 前台會員的 email，或「後台」 */
+  reportedBy?: string | null;
+}
+
+/** 對接結果選企業用的選項（已審核通過的供給端企業） */
+export interface MatchCompanyOption {
+  id: string;
+  name: string;
+  number?: string | null;
 }

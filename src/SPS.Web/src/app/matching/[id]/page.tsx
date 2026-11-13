@@ -7,6 +7,7 @@ import AttachmentsPanel from "@/components/ui/AttachmentsPanel";
 import Link from "next/link";
 import SidebarBanner from "@/components/layout/SidebarBanner";
 import RelatedNeeds from "@/components/matching/RelatedNeeds";
+import NeedStatusBadge from "@/components/matching/NeedStatusBadge";
 import ReplyNeedModal from "@/components/matching/ReplyNeedModal";
 import ReplyNeedButton from "@/components/matching/ReplyNeedButton";
 import FollowButton from "@/components/matching/FollowButton";
@@ -77,7 +78,7 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
           <div className="tit">
             <div className="tit_nsl">
               <div className="tag-wrap">
-                <span className="badge-tag">{need.statusLabel}</span>
+                <NeedStatusBadge need={need} />
               </div>
 
               <h3>{need.title}</h3>

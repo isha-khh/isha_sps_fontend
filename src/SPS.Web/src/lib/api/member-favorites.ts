@@ -42,6 +42,26 @@ export interface MemberDemand {
   /** true = 已上架，會員不能再改；false = 待審核 */
   published: boolean;
   createdTime: string;
+  /** true = 自己刊登的（可以改、撤回）；false = 同公司同事或後台代刊登的，只能填報對接結果 */
+  submittedByMe: boolean;
+  /** 已成功對接（有填報對接結果）；前台公開頁只顯示這個狀態 */
+  matched: boolean;
+  /** 對接到哪些供給端企業（只有刊登端自己看得到） */
+  matchedCompanies: MatchedCompany[];
+}
+
+export interface MatchedCompany {
+  companyId: string;
+  companyName: string;
+  number?: string | null;
+  reportedTime: string;
+}
+
+/** 對接結果選企業用的選項（已審核通過的供給端企業） */
+export interface MatchCompanyOption {
+  id: string;
+  name: string;
+  number?: string | null;
 }
 
 /** 自己刊登的需求收到的、審核通過的供應業者回應（可以對回應者開啟對話） */
@@ -85,6 +105,13 @@ export const memberFavoritesApi = {
   },
   async updateMyDemand(id: number, request: { name: string; introduction: string | null; tagIds: number[] }): Promise<MemberDemand> {
     return (await apiClient.put<MemberDemand>(`/api/member/demands/${id}`, request)).data;
+  },
+  /** 填報需求的對接結果：整組覆寫，空陣列＝移除全部（前台狀態回到「徵求中」）；填了就生效，不需要審核 */
+  async setMyDemandMatches(id: number, companyIds: string[]): Promise<{ demandId: number; matched: boolean; companies: MatchedCompany[] }> {
+    return (await apiClient.put(`/api/member/demands/${id}/matches`, { companyIds })).data;
+  },
+  async searchMatchCompanies(search: string): Promise<MatchCompanyOption[]> {
+    return (await apiClient.get<MatchCompanyOption[]>("/api/Demand/match-companies", { params: { search: search || undefined } })).data;
   },
   async deleteMyDemand(id: number): Promise<void> {
     await apiClient.delete(`/api/member/demands/${id}`);

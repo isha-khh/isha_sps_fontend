@@ -156,7 +156,7 @@ export interface PrivacyPolicySettings {
 }
 
 /** 企業名錄排序：一組有優先順序的規則（陣列順序＝優先順序） */
-export type EnterpriseSortKey = 'completeness' | 'image' | 'tags' | 'createdTime';
+export type EnterpriseSortKey = 'completeness' | 'image' | 'tags' | 'matches' | 'createdTime';
 
 export interface EnterpriseSortRule {
   key: EnterpriseSortKey;
