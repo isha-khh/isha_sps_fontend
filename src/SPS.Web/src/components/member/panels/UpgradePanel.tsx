@@ -1,6 +1,8 @@
 "use client";
 
 import CompanyProfileFields from "@/components/member/CompanyProfileFields";
+import IndustrySelect from "@/components/member/IndustrySelect";
+import { industryError } from "@/lib/member-registration-data";
 import { emptyProfile, profileToRequest, validateProfile, type ProfileState } from "@/lib/company-profile";
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
 import { useState } from "react";
@@ -116,6 +118,8 @@ export default function UpgradePanel() {
     if (!phone || !password || !confirmPassword || !companyName || !industry || !position) {
       return "請完整填寫必填欄位";
     }
+    const industryMsg = industryError(industry);
+    if (industryMsg) return industryMsg;
     if (password !== confirmPassword) return "兩次密碼輸入不一致";
     if (!contactPerson || !unifiedSocialCreditCode) {
       return "請完整填寫公司資料必填欄位";
@@ -248,7 +252,7 @@ export default function UpgradePanel() {
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">{REQUIRED}產業別</label>
-              <input type="text" className="form-control" value={industry} onChange={(e) => setIndustry(e.target.value)} />
+              <IndustrySelect value={industry} onChange={setIndustry} />
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">{REQUIRED}職稱</label>

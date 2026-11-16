@@ -322,10 +322,10 @@ export const SUPPLIER_TIER_RESULT_OPTIONS: Record<"excellent" | "emerging", Memb
 };
 
 /**
- * 個人會員註冊頁「產業別」的下拉選項（issue #101，行政院主計總處行業分類大類）。
- * 後端欄位是自由文字，存的就是選項文字；企業會員註冊仍是自行填寫，不用這份清單。
+ * 會員註冊「產業別」的下拉選項（issue #101，行政院主計總處行業標準分類大類，個人、企業會員都用）。
+ * 後端欄位是自由文字，存的就是選項文字；選「製造業」時要再選中類，存成「製造業／食品製造業」（見 INDUSTRY_SEPARATOR）。
  */
-export const PERSONAL_INDUSTRY_OPTIONS = [
+export const INDUSTRY_OPTIONS = [
   "農、林、漁、牧業",
   "礦業及土石採取業",
   "製造業",
@@ -347,3 +347,43 @@ export const PERSONAL_INDUSTRY_OPTIONS = [
   "藝術、運動及休閒服務業",
   "其他服務業",
 ] as const;
+
+/** 「製造業」的第二層（行業標準分類中類，issue #101）；選了製造業一定要再選一個 */
+export const MANUFACTURING_LABEL = "製造業";
+export const MANUFACTURING_SUBCATEGORIES = [
+  "食品製造業",
+  "飲料製造業",
+  "菸草製造業",
+  "紡織業",
+  "成衣及服飾品製造業",
+  "皮革、毛皮及其製品製造業",
+  "木竹製品製造業",
+  "紙漿、紙及紙製品製造業",
+  "印刷及資料儲存媒體複製業",
+  "石油及煤製品製造業",
+  "化學原材料、肥料、氮化合物、塑橡膠原料及人造纖維製造業",
+  "其他化學製品製造業",
+  "藥品製造業",
+  "橡膠製品製造業",
+  "塑膠製品製造業",
+  "非金屬礦物製品製造業",
+  "基本金屬製造業",
+  "金屬製品製造業",
+  "電子零組件製造業",
+  "電腦、電子產品及光學製品製造業",
+  "電力設備製造業",
+  "機械設備製造業",
+  "汽車及其零件製造業",
+  "其他運輸工具及其零件製造業",
+  "家具製造業",
+  "其他製造業",
+  "產業用機械設備維修及安裝業",
+] as const;
+
+/** 大類與中類合在一起存進同一個欄位時的分隔符，例如「製造業／食品製造業」 */
+export const INDUSTRY_SEPARATOR = "／";
+
+/** 產業別欄位的檢查：選了「製造業」卻沒選中類時回傳錯誤訊息，其他情況回傳 null */
+export function industryError(value: string): string | null {
+  return value === MANUFACTURING_LABEL ? "產業別選擇「製造業」時，請再選擇製造業中類" : null;
+}

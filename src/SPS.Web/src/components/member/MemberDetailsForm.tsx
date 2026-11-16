@@ -11,7 +11,8 @@ import { applicationDocumentUrl, applicationsApi } from "@/lib/api/applications"
 import CompanyProfileFields from "@/components/member/CompanyProfileFields";
 import { emptyProfile, profileFromApplication, profileToRequest, validateProfile, type ProfileState } from "@/lib/company-profile";
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
-import { PERSONAL_INDUSTRY_OPTIONS } from "@/lib/member-registration-data";
+import IndustrySelect from "@/components/member/IndustrySelect";
+import { industryError } from "@/lib/member-registration-data";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { DocumentType } from "@/types/api";
 import { ApplicantType as ApplicantTypeEnum, CompanyLevel, MemberRole, type ApplicationResponse, type CreateApplicationRequest } from "@/types/application";
@@ -148,6 +149,8 @@ export default function MemberDetailsForm({
     if (!email || !password || !confirmPassword || !contactName || !phone || !companyName || !industry || !position) {
       return "請完整填寫必填欄位";
     }
+    const industryMsg = industryError(industry);
+    if (industryMsg) return industryMsg;
     if (password.length < 8) {
       return "密碼長度不能少於 8 位";
     }
@@ -381,25 +384,11 @@ export default function MemberDetailsForm({
 
         <div className="menb_inp_tit form-group">
           <label className="mb-2">{requiredMark}產業別</label>
-          {isCompany || disabled ? (
-            <input
-              type="text"
-              className="form-control"
-              placeholder="請輸入產業別"
-              value={disabled ? reviewValue(application?.industry) : industry}
-              onChange={(e) => setIndustry(e.target.value)}
-              disabled={disabled}
-            />
+          {disabled ? (
+            <input type="text" className="form-control" value={reviewValue(application?.industry)} disabled />
           ) : (
-            // 個人會員：下拉選單（issue #101）；企業會員維持自行填寫
-            <select className="form-select" value={industry} onChange={(e) => setIndustry(e.target.value)}>
-              <option value="">請選擇產業別</option>
-              {PERSONAL_INDUSTRY_OPTIONS.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            // issue #101：個人、企業會員都用下拉選單；選「製造業」要再選中類
+            <IndustrySelect value={industry} onChange={setIndustry} />
           )}
         </div>
 
