@@ -3913,6 +3913,9 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<long>("FileSize")
                         .HasColumnType("bigint");
 
+                    b.Property<DateTime?>("ImageOptimizedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("IsFolder")
                         .HasColumnType("boolean");
 

@@ -37,6 +37,14 @@ public interface IFileStorageProvider
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 把檔案搬到儲存根目錄底下的封存資料夾（保留原本的相對路徑），用來備份被取代的原檔。檔案不存在回 false。
+    /// </summary>
+    Task<bool> ArchiveFileAsync(
+        string storagePath,
+        string archiveFolderName,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 檢查文件是否存在
     /// </summary>
     /// <param name="storagePath">存儲路徑</param>

@@ -161,6 +161,9 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageProvider, LocalFileStorageProvider>();
         // 上傳圖片最佳化（轉 WebP、過大縮小）
         services.AddSingleton<IImageOptimizer, ImageOptimizer>();
+        // 背景壓縮服務：把既有的舊圖原地轉成 WebP（預設關閉，見 ImageOptimizationOptions）
+        services.Configure<ImageOptimizationOptions>(configuration.GetSection(ImageOptimizationOptions.SectionName));
+        services.AddHostedService<ImageOptimizationBackgroundService>();
 
         // 資料庫序列修復服務 (啟動時檢查並修復 Identity Sequence)
         services.AddHostedService<DatabaseSequenceFixerService>();

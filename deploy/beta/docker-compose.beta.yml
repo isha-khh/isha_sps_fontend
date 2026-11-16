@@ -70,6 +70,11 @@ services:
       # 上傳檔案（見 README：要跟正式機實際的存放位置一致後再複製檔案過來）
       FileStorage__RootPath: /app/Uploads
 
+      # 圖片背景壓縮服務：離峰時段把舊圖原地轉成 WebP（檔案 ID 與網址不變），原檔搬到 Uploads/_originals。
+      # 預設關閉；要用時先 IMAGE_OPTIMIZATION_DRYRUN=true 啟用看日誌預估，再把 DRYRUN 關掉正式處理（見 .env 範例）
+      ImageOptimization__Enabled: ${IMAGE_OPTIMIZATION_ENABLED:-false}
+      ImageOptimization__DryRun: ${IMAGE_OPTIMIZATION_DRYRUN:-false}
+
       # 郵件由資料庫的設定決定，啟動前已用 sanitize-beta-db.sql 停用，所以不設 SMTP 主機／帳密。
       # 但映像裡 Email_Setting__SmtpPort 預設是空字串，.NET 綁定成整數時會丟例外，
       # 造成後台登入等 API 回 500，所以一定要給一個數值（不會用來寄信）。

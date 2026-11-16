@@ -218,6 +218,23 @@ public class LocalFileStorageProvider : IFileStorageProvider
         }
     }
 
+    public async Task<bool> ArchiveFileAsync(
+        string storagePath,
+        string archiveFolderName,
+        CancellationToken cancellationToken = default)
+    {
+        var rootPath = await GetRootPathAsync();
+        var source = Path.GetFullPath(Path.Combine(rootPath, storagePath));
+        // 路徑必須在儲存根目錄底下，資料庫裡的路徑不能帶出根目錄之外
+        if (!source.StartsWith(rootPath + Path.DirectorySeparatorChar, StringComparison.Ordinal) || !File.Exists(source))
+            return false;
+
+        var target = Path.GetFullPath(Path.Combine(rootPath, archiveFolderName, storagePath));
+        Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+        File.Move(source, target, overwrite: true);
+        return true;
+    }
+
     public bool FileExists(string storagePath)
     {
         var rootPath = GetRootPathAsync().GetAwaiter().GetResult();

@@ -98,6 +98,8 @@ public class FileManagementService : IFileManagementService
                 Tags = request.Tags != null ? JsonSerializer.Serialize(request.Tags.Split(',').Select(t => t.Trim()).ToList()) : null,
                 IsPublic = request.IsPublic,
                 ExpiresAt = request.ExpiresAt,
+                // 上傳時已經評估過圖片最佳化（轉了或維持原檔），背景壓縮服務不用再處理
+                ImageOptimizedAt = request.OptimizeImage ? DateTime.UtcNow : null,
                 CreatedTime = DateTime.UtcNow
             };
 
