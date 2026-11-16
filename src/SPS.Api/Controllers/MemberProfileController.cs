@@ -319,12 +319,12 @@ public class MemberProfileController : ControllerBase
         };
 
         var upload = await _fileService.UploadFileAsync(
-            new FileUploadRequest { File = safeFile, Description = "企業會員上傳的公司圖片", Tags = "company-image", IsPublic = true },
+            new FileUploadRequest { File = safeFile, Description = "企業會員上傳的公司圖片", Tags = "company-image", IsPublic = true, OptimizeImage = true },
             memberId.Value,
             cancellationToken);
         if (!upload.IsSuccess) return BadRequest(new { error = upload.Error });
 
-        return Ok(new { fileId = upload.Data!.FileId, fileName = upload.Data.FileName, url = $"/api/FileManagement/{upload.Data.FileId}/download", contentType });
+        return Ok(new { fileId = upload.Data!.FileId, fileName = upload.Data.FileName, url = $"/api/FileManagement/{upload.Data.FileId}/download", contentType = upload.Data.ContentType });
     }
 
     private static string? DetectImageType(byte[] h)

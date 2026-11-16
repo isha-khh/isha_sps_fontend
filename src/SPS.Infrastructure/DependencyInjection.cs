@@ -159,6 +159,8 @@ public static class DependencyInjection
         var fileStorageSection = configuration.GetSection("FileStorage");
         services.Configure<FileStorageSettings>(fileStorageSection);
         services.AddScoped<IFileStorageProvider, LocalFileStorageProvider>();
+        // 上傳圖片最佳化（轉 WebP、過大縮小）
+        services.AddSingleton<IImageOptimizer, ImageOptimizer>();
 
         // 資料庫序列修復服務 (啟動時檢查並修復 Identity Sequence)
         services.AddHostedService<DatabaseSequenceFixerService>();

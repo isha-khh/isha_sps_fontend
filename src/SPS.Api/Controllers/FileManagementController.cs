@@ -53,6 +53,8 @@ public class FileManagementController : ControllerBase
             return Unauthorized(new { message = "未授權的請求" });
         }
 
+        // 後台上傳的內容圖片：轉成 WebP、過大縮小（申請文件走別的路，不受影響）
+        request.OptimizeImage = true;
         var result = await _fileManagementService.UploadFileAsync(request, userId.Value, cancellationToken);
 
         if (!result.IsSuccess)
@@ -84,6 +86,7 @@ public class FileManagementController : ControllerBase
             return Unauthorized(new { message = "未授權的請求" });
         }
 
+        request.OptimizeImage = true;
         var result = await _fileManagementService.UploadFilesAsync(request, userId.Value, cancellationToken);
 
         if (!result.IsSuccess)

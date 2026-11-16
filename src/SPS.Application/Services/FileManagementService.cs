@@ -18,6 +18,7 @@ public class FileManagementService : IFileManagementService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IFileStorageProvider _storageProvider;
+    private readonly IImageOptimizer _imageOptimizer;
     private readonly ILogger<FileManagementService> _logger;
 
     // 批量操作任務狀態追蹤
@@ -26,10 +27,12 @@ public class FileManagementService : IFileManagementService
     public FileManagementService(
         IUnitOfWork unitOfWork,
         IFileStorageProvider storageProvider,
+        IImageOptimizer imageOptimizer,
         ILogger<FileManagementService> logger)
     {
         _unitOfWork = unitOfWork;
         _storageProvider = storageProvider;
+        _imageOptimizer = imageOptimizer;
         _logger = logger;
     }
 
@@ -51,8 +54,27 @@ public class FileManagementService : IFileManagementService
             var contentType = request.File.ContentType;
             var fileSize = request.File.Length;
 
+            await using var sourceStream = request.File.OpenReadStream();
+            Stream stream = sourceStream;
+
+            // 後台內容與公司圖片：JPG／PNG／BMP 轉成 WebP、過大縮小（失敗或不適用就照原檔存）
+            ImageOptimizeResult? optimized = null;
+            if (request.OptimizeImage)
+            {
+                // SkiaSharp 解碼是同步 CPU 運算，放到背景執行緒，不佔用請求執行緒
+                optimized = await Task.Run(() => _imageOptimizer.TryOptimize(sourceStream, originalFileName), cancellationToken);
+                if (optimized != null)
+                {
+                    stream = optimized.Data;
+                    originalFileName = optimized.FileName;
+                    fileExtension = ".webp";
+                    contentType = optimized.ContentType;
+                    fileSize = optimized.Length;
+                }
+            }
+
             // 保存文件到存儲
-            await using var stream = request.File.OpenReadStream();
+            await using var optimizedDisposer = optimized?.Data;
             var (storagePath, fileHash) = await _storageProvider.SaveFileAsync(
                 stream,
                 originalFileName,
@@ -124,7 +146,8 @@ public class FileManagementService : IFileManagementService
             {
                 File = file,
                 IsPublic = request.IsPublic,
-                ExpiresAt = request.ExpiresAt
+                ExpiresAt = request.ExpiresAt,
+                OptimizeImage = request.OptimizeImage
             };
 
             var result = await UploadFileAsync(uploadRequest, uploaderId, cancellationToken);
