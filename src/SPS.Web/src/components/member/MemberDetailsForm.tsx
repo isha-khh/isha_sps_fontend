@@ -11,6 +11,7 @@ import { applicationDocumentUrl, applicationsApi } from "@/lib/api/applications"
 import CompanyProfileFields from "@/components/member/CompanyProfileFields";
 import { emptyProfile, profileFromApplication, profileToRequest, validateProfile, type ProfileState } from "@/lib/company-profile";
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
+import { PERSONAL_INDUSTRY_OPTIONS } from "@/lib/member-registration-data";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { DocumentType } from "@/types/api";
 import { ApplicantType as ApplicantTypeEnum, CompanyLevel, MemberRole, type ApplicationResponse, type CreateApplicationRequest } from "@/types/application";
@@ -380,14 +381,26 @@ export default function MemberDetailsForm({
 
         <div className="menb_inp_tit form-group">
           <label className="mb-2">{requiredMark}產業別</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="請輸入產業別"
-            value={disabled ? reviewValue(application?.industry) : industry}
-            onChange={(e) => setIndustry(e.target.value)}
-            disabled={disabled}
-          />
+          {isCompany || disabled ? (
+            <input
+              type="text"
+              className="form-control"
+              placeholder="請輸入產業別"
+              value={disabled ? reviewValue(application?.industry) : industry}
+              onChange={(e) => setIndustry(e.target.value)}
+              disabled={disabled}
+            />
+          ) : (
+            // 個人會員：下拉選單（issue #101）；企業會員維持自行填寫
+            <select className="form-select" value={industry} onChange={(e) => setIndustry(e.target.value)}>
+              <option value="">請選擇產業別</option>
+              {PERSONAL_INDUSTRY_OPTIONS.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="menb_inp_tit form-group">
