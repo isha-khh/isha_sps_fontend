@@ -29,6 +29,8 @@ export interface MemberInfo {
   companyId?: string;
   companyName?: string;
   avatarUrl?: string | null;
+  /** 信箱還沒驗證（且郵件服務有啟用）：登入後要先到 `/member/verify-email` 驗證 */
+  requireEmailVerification?: boolean;
 }
 
 export interface TokenResponse {

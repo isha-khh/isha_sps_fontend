@@ -62,6 +62,12 @@ export default function MemberCenterContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 信箱還沒驗證：先到驗證頁（登入後會直接導過去，這裡擋的是直接輸入網址進來的情況）
+  const needEmailVerification = Boolean(member?.requireEmailVerification);
+  useEffect(() => {
+    if (needEmailVerification) router.replace("/member/verify-email");
+  }, [needEmailVerification, router]);
+
   async function handleLogout() {
     setLoggingOut(true);
     try {
@@ -74,7 +80,7 @@ export default function MemberCenterContent() {
     }
   }
 
-  if (loading) {
+  if (loading || needEmailVerification) {
     return <p className="text-muted">載入中…</p>;
   }
 

@@ -55,6 +55,16 @@ export default function MemberLoginForm() {
     };
   }, []);
 
+  // 信箱還沒驗證的會員（密碼或 Passkey 登入都一樣）先去驗證信箱，驗證完再回原本要去的頁面
+  function goAfterLogin(requireEmailVerification?: boolean) {
+    const next = readNextFromLocation();
+    if (requireEmailVerification) {
+      router.push(next ? `/member/verify-email?next=${encodeURIComponent(next)}` : "/member/verify-email");
+      return;
+    }
+    router.push(next ?? "/member");
+  }
+
   async function handlePasskeyLogin() {
     setError(undefined);
     setSubmitting(true);
@@ -64,7 +74,7 @@ export default function MemberLoginForm() {
       if (!credential) throw new Error("cancelled");
       const { member } = await authApi.fido2AuthenticateComplete({ assertionResponse: fromAssertionResponse(credential) });
       setMember(member);
-      router.push(readNextFromLocation() ?? "/member");
+      goAfterLogin(member.requireEmailVerification);
     } catch (err) {
       const name = (err as { name?: string }).name;
       if (name === "NotAllowedError" || (err as Error).message === "cancelled") setError("已取消 Passkey 登入。");
@@ -89,7 +99,7 @@ export default function MemberLoginForm() {
     try {
       const { member } = await authApi.login({ email: account, password, captcha });
       setMember(member);
-      router.push(readNextFromLocation() ?? "/member");
+      goAfterLogin(member.requireEmailVerification);
     } catch (err) {
       setError(getApiErrorMessage(err, "登入失敗，請確認帳號密碼是否正確"));
       captchaRef.current?.refresh();

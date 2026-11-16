@@ -47,4 +47,9 @@ public interface IAuthService
     /// 驗證重置密碼 Token 是否有效
     /// </summary>
     Task<Result<string>> ValidateResetTokenAsync(string token, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 這位會員登入後是否要先驗證信箱：信箱還沒驗證，而且郵件服務有啟用（停用時寄不出驗證碼，不擋人）。
+    /// </summary>
+    Task<bool> RequiresEmailVerificationAsync(Guid memberId, CancellationToken cancellationToken = default);
 }
