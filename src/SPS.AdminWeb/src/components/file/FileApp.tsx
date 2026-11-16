@@ -9,6 +9,7 @@ import { filesManagementApi } from '@/lib/api/files-management.ts';
 import type {FileListItem, FileStatistics, BatchOperationResponse} from '@/types/files';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useNotify } from '@/hooks/useNotify';
+import { isImageCompressionActive, useImageCompressionStore } from '@/stores/image-compression-store';
 
 const FileApp = () => {
     const notify = useNotify();
@@ -69,6 +70,64 @@ const FileApp = () => {
       }, 300);
       return () => clearTimeout(timer);
     }, [search, fileType, currentPage, fetchFiles]);
+
+    // ========== 壓縮所有圖片 ==========
+    const compressJob = useImageCompressionStore((s) => s.job);
+    const pendingImages = useImageCompressionStore((s) => s.pendingCount);
+    const setCompressJob = useImageCompressionStore((s) => s.setJob);
+    const setPendingImages = useImageCompressionStore((s) => s.setPendingCount);
+    const compressActive = isImageCompressionActive(compressJob);
+
+    useEffect(() => {
+        filesManagementApi.getImageCompressionStatus()
+            .then((st) => setPendingImages(st.pendingCount))
+            .catch(() => { /* 查不到就不顯示數量 */ });
+    }, [setPendingImages]);
+
+    const handleCompressAll = async () => {
+        const count = pendingImages;
+        if (count === 0) {
+            await notify.success('目前沒有需要壓縮的圖片，全部都已經處理過了');
+            return;
+        }
+        const confirmed = await confirmDialog({
+            cardTitle: '壓縮所有圖片',
+            message:
+                `${count === null ? '' : `目前有 ${count} 張圖片尚未壓縮。\n\n`}` +
+                '會把它們原地轉成 WebP（品質 80、PNG 為 90，最長邊超過 2560px 會縮小）。\n' +
+                '• 檔案 ID 與網址不變，公告、Banner 裡的圖不用重貼\n' +
+                '• 原檔會備份到伺服器 Uploads/_originals，確認沒問題後再手動刪除\n' +
+                '• 申請文件、靜態檔案不處理\n' +
+                '• 進入佇列後在背景執行，進度會顯示在右下角通知；可以離開本頁',
+            buttonConfirm: '開始壓縮',
+            confirmStyle: 'bg-primary',
+        });
+        if (!confirmed) return;
+        try {
+            const res = await filesManagementApi.enqueueImageCompression();
+            setCompressJob(res.job, { show: true });
+            if (res.alreadyActive) await notify.success('已經有壓縮任務在進行中，進度請看右下角通知');
+        } catch (error) {
+            console.error('Failed to enqueue image compression:', error);
+            await notify.error('無法開始壓縮，請稍後再試');
+        }
+    };
+
+    // 壓縮任務結束後，刷新列表與統計（檔案大小、副檔名都變了）
+    const compressStatus = compressJob?.status;
+    useEffect(() => {
+        if (compressStatus === 'Completed' || compressStatus === 'Cancelled') {
+            const t = setTimeout(() => {
+                void fetchFiles();
+                void fetchStats();
+            }, 0);
+            filesManagementApi.getImageCompressionStatus()
+                .then((st) => setPendingImages(st.pendingCount))
+                .catch(() => undefined);
+            return () => clearTimeout(t);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [compressStatus]);
 
     const handleRecycle = async (id: string) => {
         const confirmed = await confirmDialog({
@@ -270,6 +329,17 @@ const FileApp = () => {
                                 </div>
                             </div>
                         </div>
+                        <button
+                            className="btn btn-ghost border-base-300 btn-sm"
+                            onClick={() => void handleCompressAll()}
+                            disabled={compressActive}
+                            title="把還沒壓縮的圖片轉成 WebP（背景執行，進度顯示在右下角）">
+                            <Icons.ImageDown size={16}/>
+                            {compressActive ? '壓縮中…' : '壓縮所有圖片'}
+                            {!compressActive && pendingImages !== null && pendingImages > 0 && (
+                                <span className="badge badge-sm badge-warning">{pendingImages}</span>
+                            )}
+                        </button>
                         <UploadButton onSuccess={()=>{ void fetchFiles(); void fetchStats(); }} />
                     </div>
                 </div>

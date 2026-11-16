@@ -8,6 +8,8 @@ import { Rightbar } from '@/components/admin-layout/Rightbar';
 import { ChatBubble } from '@/components/chat/ChatBubble';
 import { CampaignProgressNotifications } from '@/components/mail-center/CampaignProgressNotifications';
 import { useCampaignProgressPolling } from '@/hooks/useCampaignProgressPolling';
+import { ImageCompressionNotification } from '@/components/file/ImageCompressionNotification';
+import { useImageCompressionPolling } from '@/hooks/useImageCompressionPolling';
 import { usePermission, Permission } from '@/hooks/usePermission';
 import type { ISidebarMenuItem } from '@/components/admin-layout/SidebarMenuItem';
 
@@ -286,6 +288,9 @@ export const AdminLayout = () => {
   // 全域輪詢追蹤中的群發郵件進度
   useCampaignProgressPolling();
 
+  // 全域追蹤「壓縮所有圖片」任務進度（只有檔案管理權限者才查）
+  useImageCompressionPolling(hasAny([Permission.ManageFiles]));
+
   // 根據使用者權限過濾選單
   const filteredMenuItems = useMemo(() => {
     return filterMenuByPermissions(allMenuItems, hasAny, isSuperAdmin());
@@ -317,8 +322,11 @@ export const AdminLayout = () => {
       {/* 全局聊天泡泡 */}
       <ChatBubble />
 
-      {/* 全域群發郵件進度通知 */}
-      <CampaignProgressNotifications />
+      {/* 全域背景任務進度通知（群發郵件、壓縮所有圖片） */}
+      <div className="fixed bottom-24 right-4 z-50 flex flex-col gap-2 w-80 max-w-[calc(100vw-2rem)]">
+        <ImageCompressionNotification />
+        <CampaignProgressNotifications />
+      </div>
     </ConfigProvider>
   );
 };

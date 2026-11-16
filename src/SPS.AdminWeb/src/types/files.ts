@@ -192,3 +192,39 @@ export interface BatchOperationResponse {
   failedItems: BatchOperationFailedItem[];
   createdFiles?: FileInfo[];
 }
+
+/**
+ * 「壓縮所有圖片」任務（後端佇列 + 背景執行）
+ */
+export type ImageCompressionJobStatus = 'Queued' | 'Running' | 'Completed' | 'Failed' | 'Cancelled';
+
+export interface ImageCompressionJob {
+  id: string;
+  status: ImageCompressionJobStatus;
+  /** 開始處理時待處理的圖片總數（排隊中為 0） */
+  total: number;
+  /** 已處理數（轉檔 + 維持原檔 + 失敗） */
+  processed: number;
+  converted: number;
+  keptOriginal: number;
+  failed: number;
+  /** 已省下的容量（bytes） */
+  savedBytes: number;
+  requestedBy?: string | null;
+  createdAt: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  error?: string | null;
+}
+
+export interface ImageCompressionStatus {
+  /** 目前還沒壓縮過的圖片數 */
+  pendingCount: number;
+  job: ImageCompressionJob | null;
+}
+
+export interface ImageCompressionEnqueueResult {
+  job: ImageCompressionJob;
+  /** 已有任務在排隊或執行中，回傳的是那個任務 */
+  alreadyActive: boolean;
+}
