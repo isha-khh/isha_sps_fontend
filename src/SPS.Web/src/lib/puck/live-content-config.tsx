@@ -441,7 +441,18 @@ export const puckConfig: Config<Props> = {
             <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "center", flexDirection: layout === "right" ? "row-reverse" : "row" }}>
               <div style={{ flex: isTop || !hasText ? "1 1 100%" : "1 1 320px", minWidth: 0 }}>
                 {linkable ? (
-                  <a href={linkable} target="_blank" rel="noopener noreferrer" title="點擊另開視窗看原圖">
+                  // 點圖用站內燈箱放大（整站 coreScript.js 對 `[data-fancybox]` 做了全域綁定，同一篇內容的圖片歸同一組可左右切換）；
+                  // 圖片網址常是沒有副檔名的 `/api/FileManagement/<id>/download`，要明講 `data-type="image"` 燈箱才會當圖片載入。
+                  // 沒有 JS 時仍是一般連結，另開視窗看原圖。
+                  <a
+                    href={linkable}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="點擊放大看原圖"
+                    data-fancybox="content-images"
+                    data-type="image"
+                    data-caption={typeof imageCaption === "string" && imageCaption.trim() ? imageCaption : undefined}
+                  >
                     {image}
                   </a>
                 ) : (
