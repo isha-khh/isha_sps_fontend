@@ -1,6 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SPS.Application.Interfaces;
+using SPS.Application.Interfaces.IServices;
+using SPS.Domain.Enums;
+using SPS.Infrastructure.Data;
 
 namespace SPS.Infrastructure.Services;
 
@@ -49,18 +55,28 @@ public class ImageOptimizationOptions
 /// </summary>
 public class ImageOptimizationBackgroundService : BackgroundService
 {
-    private readonly ImageOptimizationProcessor _processor;
+    private static readonly string[] Extensions = { ".jpg", ".jpeg", ".png", ".bmp", ".webp" };
+
+    private readonly IServiceProvider _services;
     private readonly IOptionsMonitor<ImageOptimizationOptions> _options;
     private readonly ILogger<ImageOptimizationBackgroundService> _logger;
 
     public ImageOptimizationBackgroundService(
-        ImageOptimizationProcessor processor,
+        IServiceProvider services,
         IOptionsMonitor<ImageOptimizationOptions> options,
         ILogger<ImageOptimizationBackgroundService> logger)
     {
-        _processor = processor;
+        _services = services;
         _options = options;
         _logger = logger;
+    }
+
+    private sealed class Totals
+    {
+        public int Converted;
+        public int KeptOriginal;
+        public int Failed;
+        public long SavedBytes;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -82,7 +98,7 @@ public class ImageOptimizationBackgroundService : BackgroundService
             await Task.Delay(TimeSpan.FromSeconds(Math.Max(0, options.StartupDelaySeconds)), stoppingToken);
 
             var seen = new HashSet<Guid>();
-            var totals = new ImageOptimizationTotals();
+            var totals = new Totals();
             while (!stoppingToken.IsCancellationRequested)
             {
                 options = _options.CurrentValue;
@@ -94,7 +110,7 @@ public class ImageOptimizationBackgroundService : BackgroundService
                     continue;
                 }
 
-                var handled = await _processor.RunBatchAsync(options.BatchSize, options.DryRun, options.KeepOriginals, options.ArchiveFolder, seen, totals, stoppingToken);
+                var handled = await RunBatchAsync(options, seen, totals, stoppingToken);
                 if (handled > 0)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(Math.Max(0, options.PauseSeconds)), stoppingToken);
@@ -108,7 +124,7 @@ public class ImageOptimizationBackgroundService : BackgroundService
                 if (options.DryRun) return; // 試算只跑一輪
 
                 seen.Clear();
-                totals = new ImageOptimizationTotals();
+                totals = new Totals();
                 await Task.Delay(TimeSpan.FromHours(Math.Max(1, options.RescanHours)), stoppingToken);
             }
         }
@@ -132,5 +148,113 @@ public class ImageOptimizationBackgroundService : BackgroundService
         return options.WindowStartHour < options.WindowEndHour
             ? hour >= options.WindowStartHour && hour < options.WindowEndHour
             : hour >= options.WindowStartHour || hour < options.WindowEndHour; // 跨午夜，例如 22–4
+    }
+
+    /// <summary>處理一批，回傳這批實際處理了幾個檔案（0 ＝ 沒有待處理的了）。</summary>
+    private async Task<int> RunBatchAsync(ImageOptimizationOptions options, HashSet<Guid> seen, Totals totals, CancellationToken ct)
+    {
+        using var scope = _services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var storage = scope.ServiceProvider.GetRequiredService<IFileStorageProvider>();
+        var optimizer = scope.ServiceProvider.GetRequiredService<IImageOptimizer>();
+
+        var seenIds = seen.ToList();
+        var batch = await db.UploadedFiles
+            .Where(f => !f.IsFolder && !f.IsStaticFile && f.Status != FileStatus.Deleted && f.ImageOptimizedAt == null
+                        && Extensions.Contains(f.FileExtension)
+                        && !(f.Tags ?? "").Contains("application")
+                        && !seenIds.Contains(f.Id))
+            .OrderBy(f => f.CreatedTime)
+            .Take(Math.Max(1, options.BatchSize))
+            .ToListAsync(ct);
+
+        foreach (var file in batch)
+        {
+            ct.ThrowIfCancellationRequested();
+            seen.Add(file.Id);
+            try
+            {
+                using var source = new MemoryStream();
+                await using (var read = await storage.ReadFileAsync(file.StoragePath, ct))
+                {
+                    await read.CopyToAsync(source, ct);
+                }
+
+                source.Position = 0;
+                // 解碼與編碼是同步的 CPU 運算，放到背景執行緒
+                var optimized = await Task.Run(() => optimizer.TryOptimize(source, $"image{file.FileExtension}"), ct);
+                if (optimized == null)
+                {
+                    totals.KeptOriginal++;
+                    if (!options.DryRun)
+                    {
+                        file.ImageOptimizedAt = DateTime.UtcNow;
+                        await db.SaveChangesAsync(ct);
+                    }
+                    continue;
+                }
+
+                await using var optimizedData = optimized.Data;
+                var saved = file.FileSize - optimized.Length;
+                totals.Converted++;
+                totals.SavedBytes += saved;
+
+                if (options.DryRun)
+                {
+                    _logger.LogInformation("[試算] {File} {Old:F0}KB → {New:F0}KB（{W}×{H}{Resized}）",
+                        file.OriginalFileName, file.FileSize / 1024.0, optimized.Length / 1024.0, optimized.Width, optimized.Height, optimized.Resized ? "，縮小" : "");
+                    continue;
+                }
+
+                var oldPath = file.StoragePath;
+                var (newPath, newHash) = await storage.SaveFileAsync(optimized.Data, optimized.FileName, ct);
+                try
+                {
+                    file.StoragePath = newPath;
+                    file.StoredFileName = Path.GetFileName(newPath);
+                    file.FileExtension = ".webp";
+                    file.ContentType = optimized.ContentType;
+                    file.FileSize = optimized.Length;
+                    file.FileHash = newHash;
+                    if (!string.IsNullOrWhiteSpace(file.OriginalFileName))
+                        file.OriginalFileName = Path.ChangeExtension(file.OriginalFileName, ".webp");
+                    file.UpdatedTime = DateTime.UtcNow;
+                    file.ImageOptimizedAt = DateTime.UtcNow;
+                    await db.SaveChangesAsync(ct);
+                }
+                catch
+                {
+                    // 資料庫沒更新成功：把剛寫的新檔清掉，原檔與資料庫維持原狀
+                    await storage.DeleteFileAsync(newPath, CancellationToken.None);
+                    throw;
+                }
+
+                // 資料庫已指向新檔，才處理舊檔（失敗只記警告，不影響結果）
+                try
+                {
+                    if (options.KeepOriginals) await storage.ArchiveFileAsync(oldPath, options.ArchiveFolder, ct);
+                    else await storage.DeleteFileAsync(oldPath, ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "圖片已轉成 WebP，但舊檔處理失敗（檔案還留在原處）：{Path}", oldPath);
+                }
+
+                _logger.LogInformation("圖片已轉成 WebP：{File} {Old:F0}KB → {New:F0}KB（{W}×{H}{Resized}）",
+                    file.OriginalFileName, (file.FileSize + saved) / 1024.0, file.FileSize / 1024.0, optimized.Width, optimized.Height, optimized.Resized ? "，縮小" : "");
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                totals.Failed++;
+                _logger.LogWarning(ex, "圖片背景壓縮失敗，跳過這個檔案（下次啟動會再試）：{Id} {Path}", file.Id, file.StoragePath);
+                db.ChangeTracker.Clear();
+            }
+        }
+
+        return batch.Count;
     }
 }

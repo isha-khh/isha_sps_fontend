@@ -163,12 +163,7 @@ public static class DependencyInjection
         services.AddSingleton<IImageOptimizer, ImageOptimizer>();
         // 背景壓縮服務：把既有的舊圖原地轉成 WebP（預設關閉，見 ImageOptimizationOptions）
         services.Configure<ImageOptimizationOptions>(configuration.GetSection(ImageOptimizationOptions.SectionName));
-        services.AddSingleton<ImageOptimizationProcessor>();
         services.AddHostedService<ImageOptimizationBackgroundService>();
-        // 後台「壓縮所有圖片」手動任務（佇列 + 背景執行）
-        services.AddSingleton<ImageCompressionJobService>();
-        services.AddSingleton<IImageCompressionJobService>(sp => sp.GetRequiredService<ImageCompressionJobService>());
-        services.AddHostedService(sp => sp.GetRequiredService<ImageCompressionJobService>());
 
         // 資料庫序列修復服務 (啟動時檢查並修復 Identity Sequence)
         services.AddHostedService<DatabaseSequenceFixerService>();
