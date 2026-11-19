@@ -54,9 +54,6 @@ public class EmbeddingIndexJobDto
     public int ReindexProcessed { get; set; }
     public int ReindexFailed { get; set; }
 
-    /// <summary>全量重新索引期間，被內容檢查發現問題而自動轉成草稿的文章篇數（原因寫在各文章的 UnpublishReason）</summary>
-    public int ReindexDrafted { get; set; }
-
     /// <summary>全量重新索引開始／結束時間（UTC）。結束時間為 null 且 Phase=reindexing 表示進行中。</summary>
     public DateTime? ReindexStartedAt { get; set; }
     public DateTime? ReindexFinishedAt { get; set; }

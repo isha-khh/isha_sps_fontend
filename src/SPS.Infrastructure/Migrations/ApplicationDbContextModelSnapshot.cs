@@ -3413,6 +3413,9 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<short>("Type")
                         .HasColumnType("smallint");
 
+                    b.Property<string>("UnpublishReason")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedTime")
                         .HasColumnType("timestamp with time zone");
 

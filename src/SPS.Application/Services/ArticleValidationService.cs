@@ -1,10 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using SPS.Application.Interfaces;
 using SPS.Application.Interfaces.IServices;
 using SPS.Domain.Entities;
-using SPS.Domain.Enums;
 
 namespace SPS.Application.Services;
 
@@ -15,85 +13,91 @@ public class ArticleValidationService : IArticleValidationService
     private const int MaxReasonChars = 1500;
 
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IOptionsMonitor<ContentValidationOptions> _options;
     private readonly ILogger<ArticleValidationService> _logger;
 
-    public ArticleValidationService(
-        IUnitOfWork unitOfWork,
-        IOptionsMonitor<ContentValidationOptions> options,
-        ILogger<ArticleValidationService> logger)
+    public ArticleValidationService(IUnitOfWork unitOfWork, ILogger<ArticleValidationService> logger)
     {
         _unitOfWork = unitOfWork;
-        _options = options;
         _logger = logger;
     }
 
     public IReadOnlyList<ArticleContentIssue> Validate(string? contentJson) => ArticleContentRules.Validate(contentJson);
 
-    public async Task<bool> EnforceAsync(EmbeddingSourceType sourceType, string sourceId, CancellationToken ct = default)
+    public async Task<List<ArticleRef>> ListPublishedAsync(CancellationToken ct = default)
+    {
+        var db = _unitOfWork.GetDbContext();
+        var refs = new List<ArticleRef>();
+        refs.AddRange((await db.Set<News>().AsNoTracking().Where(n => n.Published).OrderBy(n => n.Id).Select(n => n.Id).ToListAsync(ct)).Select(id => new ArticleRef(ArticleKind.News, id)));
+        refs.AddRange((await db.Set<Question>().AsNoTracking().Where(q => q.Published).OrderBy(q => q.Id).Select(q => q.Id).ToListAsync(ct)).Select(id => new ArticleRef(ArticleKind.Faq, id)));
+        refs.AddRange((await db.Set<SuccessCase>().AsNoTracking().Where(c => c.IsPublished).OrderBy(c => c.Id).Select(c => c.Id).ToListAsync(ct)).Select(id => new ArticleRef(ArticleKind.Case, id)));
+        refs.AddRange((await db.Set<Regulations>().AsNoTracking().Where(r => r.Published).OrderBy(r => r.Id).Select(r => r.Id).ToListAsync(ct)).Select(id => new ArticleRef(ArticleKind.Regulation, id)));
+        return refs;
+    }
+
+    public async Task<ArticleCheckResult> CheckAsync(ArticleKind kind, int id, bool applyDraft, CancellationToken ct = default)
     {
         var db = _unitOfWork.GetDbContext();
 
-        switch (sourceType)
+        string? title;
+        string? content;
+        Action<string>? draft;
+
+        switch (kind)
         {
-            case EmbeddingSourceType.News when int.TryParse(sourceId, out var newsId):
+            case ArticleKind.News:
             {
-                var news = await db.Set<News>().Include(n => n.Content).Include(n => n.Title).FirstOrDefaultAsync(n => n.Id == newsId, ct);
-                if (news is not { Published: true }) return false;
-                var errors = Errors(news.Content?.DefaultText);
-                if (errors.Count == 0) return false;
-                return await DraftAsync(db, "公告", newsId, news.Title?.DefaultText, errors, () =>
-                {
-                    news.Published = false;
-                    news.UnpublishReason = BuildReason(errors);
-                }, ct);
+                var news = await db.Set<News>().Include(n => n.Content).Include(n => n.Title).FirstOrDefaultAsync(n => n.Id == id, ct);
+                if (news is not { Published: true }) return Skipped(kind, id);
+                title = news.Title?.DefaultText; content = news.Content?.DefaultText;
+                draft = reason => { news.Published = false; news.UnpublishReason = reason; };
+                break;
             }
-            case EmbeddingSourceType.Faq when int.TryParse(sourceId, out var questionId):
+            case ArticleKind.Faq:
             {
-                var question = await db.Set<Question>().Include(q => q.Answer).Include(q => q.Subject).FirstOrDefaultAsync(q => q.Id == questionId, ct);
-                if (question is not { Published: true }) return false;
-                var errors = Errors(question.Answer?.DefaultText);
-                if (errors.Count == 0) return false;
-                return await DraftAsync(db, "常見問題", questionId, question.Subject?.DefaultText, errors, () =>
-                {
-                    question.Published = false;
-                    question.UnpublishReason = BuildReason(errors);
-                }, ct);
+                var question = await db.Set<Question>().Include(q => q.Answer).Include(q => q.Subject).FirstOrDefaultAsync(q => q.Id == id, ct);
+                if (question is not { Published: true }) return Skipped(kind, id);
+                title = question.Subject?.DefaultText; content = question.Answer?.DefaultText;
+                draft = reason => { question.Published = false; question.UnpublishReason = reason; };
+                break;
             }
-            case EmbeddingSourceType.Case when int.TryParse(sourceId, out var caseId):
+            case ArticleKind.Case:
             {
-                var successCase = await db.Set<SuccessCase>().Include(c => c.Content).Include(c => c.Title).FirstOrDefaultAsync(c => c.Id == caseId, ct);
-                if (successCase is not { IsPublished: true }) return false;
-                var errors = Errors(successCase.Content?.DefaultText);
-                if (errors.Count == 0) return false;
-                return await DraftAsync(db, "產業案例", caseId, successCase.Title?.DefaultText, errors, () =>
-                {
-                    successCase.IsPublished = false;
-                    successCase.UnpublishReason = BuildReason(errors);
-                }, ct);
+                var successCase = await db.Set<SuccessCase>().Include(c => c.Content).Include(c => c.Title).FirstOrDefaultAsync(c => c.Id == id, ct);
+                if (successCase is not { IsPublished: true }) return Skipped(kind, id);
+                title = successCase.Title?.DefaultText; content = successCase.Content?.DefaultText;
+                draft = reason => { successCase.IsPublished = false; successCase.UnpublishReason = reason; };
+                break;
+            }
+            case ArticleKind.Regulation:
+            {
+                var regulation = await db.Set<Regulations>().FirstOrDefaultAsync(r => r.Id == id, ct);
+                if (regulation is not { Published: true }) return Skipped(kind, id);
+                title = string.IsNullOrWhiteSpace(regulation.Title) ? regulation.Name : regulation.Title; content = regulation.Content;
+                draft = reason => { regulation.Published = false; regulation.UnpublishReason = reason; };
+                break;
             }
             default:
-                return false; // 其他來源類型（需求、企業）不是文章，不檢查
+                return Skipped(kind, id);
         }
-    }
 
-    private List<ArticleContentIssue> Errors(string? content) => Validate(content).Where(i => i.IsError).ToList();
+        var errors = Validate(content).Where(i => i.IsError).ToList();
+        if (errors.Count == 0) return new ArticleCheckResult(kind, id, title, ArticleCheckOutcome.Ok, errors, null);
 
-    private async Task<bool> DraftAsync(DbContext db, string kind, int id, string? title, List<ArticleContentIssue> errors, Action apply, CancellationToken ct)
-    {
-        if (!_options.CurrentValue.DraftOnViolation)
+        var reason = BuildReason(errors);
+        if (!applyDraft)
         {
-            _logger.LogWarning("內容檢查：{Kind} #{Id}「{Title}」有 {Count} 個錯誤，但 DraftOnViolation 關閉，不轉草稿：{Reason}",
-                kind, id, title, errors.Count, string.Join("；", errors));
-            return false;
+            _logger.LogInformation("內容檢查（預覽）：{Kind} #{Id}「{Title}」有 {Count} 個錯誤：{Reason}", kind, id, title, errors.Count, string.Join("；", errors));
+            return new ArticleCheckResult(kind, id, title, ArticleCheckOutcome.WouldDraft, errors, reason);
         }
 
-        apply();
+        draft!(reason);
         await db.SaveChangesAsync(ct);
-        _logger.LogWarning("內容檢查：{Kind} #{Id}「{Title}」有 {Count} 個錯誤，已自動轉為草稿：{Reason}",
-            kind, id, title, errors.Count, string.Join("；", errors));
-        return true;
+        _logger.LogWarning("內容檢查：{Kind} #{Id}「{Title}」有 {Count} 個錯誤，已自動轉為草稿：{Reason}", kind, id, title, errors.Count, string.Join("；", errors));
+        return new ArticleCheckResult(kind, id, title, ArticleCheckOutcome.Drafted, errors, reason);
     }
+
+    private static ArticleCheckResult Skipped(ArticleKind kind, int id) =>
+        new(kind, id, null, ArticleCheckOutcome.Skipped, Array.Empty<ArticleContentIssue>(), null);
 
     private static string BuildReason(List<ArticleContentIssue> errors)
     {

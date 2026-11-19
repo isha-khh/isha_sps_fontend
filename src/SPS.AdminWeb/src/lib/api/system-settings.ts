@@ -20,7 +20,6 @@ import type {
   EmbeddingSettings,
   EmbeddingTestResult,
   EmbeddingIndexStatus,
-  EmbeddingIndexJob,
 } from '@/types/settings';
 
 export const settingsApi = {
@@ -281,12 +280,6 @@ export const settingsApi = {
 
   async getEmbeddingIndexStatus(): Promise<EmbeddingIndexStatus> {
     const response = await apiClient.get('/api/settings/embedding/index-status');
-    return response.data;
-  },
-
-  /** 只取背景索引工作狀態（輕量，通知列輪詢用） */
-  async getEmbeddingIndexJob(): Promise<EmbeddingIndexJob> {
-    const response = await apiClient.get('/api/settings/embedding/index-job');
     return response.data;
   },
 

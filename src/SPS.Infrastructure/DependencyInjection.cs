@@ -163,9 +163,6 @@ public static class DependencyInjection
         services.AddSingleton<IImageOptimizer, ImageOptimizer>();
         // 背景壓縮服務：把既有的舊圖原地轉成 WebP（預設關閉，見 ImageOptimizationOptions）
         services.Configure<ImageOptimizationOptions>(configuration.GetSection(ImageOptimizationOptions.SectionName));
-
-        // 內容檢查（背景索引時把有問題的文章轉成草稿）：DraftOnViolation 預設 true，見 ContentValidationOptions
-        services.Configure<SPS.Application.Interfaces.IServices.ContentValidationOptions>(configuration.GetSection(SPS.Application.Interfaces.IServices.ContentValidationOptions.SectionName));
         services.AddHostedService<ImageOptimizationBackgroundService>();
 
         // 資料庫序列修復服務 (啟動時檢查並修復 Identity Sequence)
@@ -188,6 +185,13 @@ public static class DependencyInjection
         services.AddSingleton<EmbeddingIndexJob>();
         services.AddSingleton<IEmbeddingIndexJob>(sp => sp.GetRequiredService<EmbeddingIndexJob>());
         services.AddHostedService<IndexReconciliationBackgroundService>();
+
+        // 後台「內容檢查」任務：逐篇檢查已發布文章，有問題依選項轉草稿；進度經 IAdminRealtimeNotifier 推給後台
+        // （API 專案會註冊真正的 SignalR 實作蓋掉這裡的預設值）
+        services.AddSingleton<IAdminRealtimeNotifier, NullAdminRealtimeNotifier>();
+        services.AddSingleton<ArticleCheckJobService>();
+        services.AddSingleton<IArticleCheckJobService>(sp => sp.GetRequiredService<ArticleCheckJobService>());
+        services.AddHostedService(sp => sp.GetRequiredService<ArticleCheckJobService>());
 
         // Google Analytics 自動同步（每天固定時間把最近幾天的流量資料同步到資料庫）
         services.AddHostedService<AnalyticsSyncBackgroundService>();

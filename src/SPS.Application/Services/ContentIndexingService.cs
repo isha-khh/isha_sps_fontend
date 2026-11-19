@@ -17,7 +17,6 @@ public class ContentIndexingService : IContentIndexingService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEmbeddingService _embeddingService;
-    private readonly IArticleValidationService _articleValidation;
     private readonly ILogger<ContentIndexingService> _logger;
 
     private const int MaxRetryCount = 5;
@@ -25,12 +24,10 @@ public class ContentIndexingService : IContentIndexingService
     public ContentIndexingService(
         IUnitOfWork unitOfWork,
         IEmbeddingService embeddingService,
-        IArticleValidationService articleValidation,
         ILogger<ContentIndexingService> logger)
     {
         _unitOfWork = unitOfWork;
         _embeddingService = embeddingService;
-        _articleValidation = articleValidation;
         _logger = logger;
     }
 
@@ -205,9 +202,7 @@ public class ContentIndexingService : IContentIndexingService
             .ToListAsync(ct);
         foreach (var id in missing)
         {
-            // 內容檢查有錯誤的文章會被轉成草稿，不用索引（見 IArticleValidationService）
-            if (!await _articleValidation.EnforceAsync(type, id, ct))
-                await IndexAsync(type, id, ct);
+            await IndexAsync(type, id, ct);
             processed++;
         }
 
@@ -221,8 +216,7 @@ public class ContentIndexingService : IContentIndexingService
                 .ToListAsync(ct);
             foreach (var id in failed)
             {
-                if (!await _articleValidation.EnforceAsync(type, id, ct))
-                    await IndexAsync(type, id, ct);
+                await IndexAsync(type, id, ct);
                 processed++;
             }
         }

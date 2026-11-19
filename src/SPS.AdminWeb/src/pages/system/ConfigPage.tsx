@@ -4,8 +4,9 @@ import { TabSelector } from '@/components/common/TabSelector';
 import { settingsApi } from '@/lib/api/system-settings';
 import type { EmailSettings, GoogleAnalyticsSettings, FileStorageSettings, BounceMailSettings, BounceProcessingResult, ContentSettings, EmbeddingSettings, EmbeddingTestResult, EmbeddingIndexStatus } from '@/types/settings';
 import { useNotify } from '@/hooks/useNotify';
+import { ContentCheckSection } from '@/components/system/ContentCheckSection';
 
-type SettingTab = 'email' | 'analytics' | 'fileStorage' | 'content' | 'embedding';
+type SettingTab = 'email' | 'analytics' | 'fileStorage' | 'content' | 'embedding' | 'contentCheck';
 
 const SETTING_TABS = [
   { value: 'email' as const, label: '電子郵件', icon: 'lucide--mail' },
@@ -13,11 +14,16 @@ const SETTING_TABS = [
   { value: 'fileStorage' as const, label: '檔案儲存', icon: 'lucide--hard-drive' },
   { value: 'content' as const, label: '內容設定', icon: 'lucide--layout' },
   { value: 'embedding' as const, label: 'AI 語意搜尋', icon: 'lucide--sparkles' },
+  { value: 'contentCheck' as const, label: '內容檢查', icon: 'lucide--shield-check' },
 ];
 
 export const SystemConfigPage = () => {
   const notify = useNotify();
-  const [activeTab, setActiveTab] = useState<SettingTab>('email');
+  // 網址帶 ?tab=contentCheck（鈴鐺的「查看詳情」）就直接開那一頁
+  const [activeTab, setActiveTab] = useState<SettingTab>(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab');
+    return SETTING_TABS.some((tab) => tab.value === requested) ? (requested as SettingTab) : 'email';
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -1302,6 +1308,9 @@ export const SystemConfigPage = () => {
           </div>
         </form>
       )}
+
+      {/* 內容檢查：逐篇檢查已發布文章，有問題轉草稿（進度即時推到鈴鐺） */}
+      {activeTab === 'contentCheck' && <ContentCheckSection />}
 
       {/* AI 語意搜尋設定 */}
       {activeTab === 'embedding' && (
