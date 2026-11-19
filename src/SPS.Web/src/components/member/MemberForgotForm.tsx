@@ -6,6 +6,7 @@ import CaptchaField, { type CaptchaFieldHandle } from "@/components/member/Captc
 import { authApi } from "@/lib/api/auth";
 import { captchaApi } from "@/lib/api/captcha";
 import { getApiErrorMessage } from "@/lib/error-utils";
+import FormError from "@/components/ui/FormError";
 
 /**
  * 積木元件：忘記密碼表單，對應舊站 forgot.html 的 `.melo_box_left`。
@@ -115,10 +116,10 @@ export default function MemberForgotForm() {
       )}
 
       {error && (
-        <p className="text-danger mb-3" role="alert">
+        <FormError as="p" className="text-danger mb-3">
           <i className="bi bi-exclamation-circle-fill me-1" aria-hidden="true"></i>
           {error}
-        </p>
+        </FormError>
       )}
 
       <button type="submit" title="送出" className="more_x" style={{ margin: "0 auto" }} disabled={submitting}>

@@ -38,9 +38,10 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
     <div className="col-lg-4 col-md-6 col-12 item mb-md-4 mb-4">
       <div className="item_box">
         {data.image && (
-          <Link href={data.href} className="pic" title={data.title}>
+          // 圖片連結跟下面的標題連結是同一個目的地：圖片連結不進 Tab 順序、不給輔助科技念（HM1240402E），名稱由標題連結負責
+          <Link href={data.href} className="pic" tabIndex={-1} aria-hidden="true">
             <div className="ratio ratio-4x3">
-              <img className="img-fluid d-block" src={data.image} alt={data.title} />
+              <img className="img-fluid d-block" src={data.image} alt="" />
             </div>
           </Link>
         )}
@@ -76,9 +77,9 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
             <ul className="nav ul-key">
               {data.keywords.map((keyword, index) => (
                 <li key={keyword}>
-                  <a href="#" title={`前往${keyword}`} tabIndex={0} style={badgeInlineStyle(data.keywordBadges?.[index])}>
+                  <span style={badgeInlineStyle(data.keywordBadges?.[index])}>
                     {keyword}
-                  </a>
+                  </span>
                 </li>
               ))}
             </ul>

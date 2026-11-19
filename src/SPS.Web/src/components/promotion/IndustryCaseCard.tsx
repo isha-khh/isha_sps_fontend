@@ -24,9 +24,10 @@ export default function IndustryCaseCard({ data }: { data: IndustryCaseCardData 
   return (
     <div className="col-lg-4 col-md-6 col-12 item mb-md-4 mb-4">
       <div className="item_box">
-        <Link href={data.href} className="pic" title={data.title}>
+        {/* 縮圖連結跟標題連結同一目的地：不進 Tab 順序、不給輔助科技念（HM1240402E） */}
+        <Link href={data.href} className="pic" tabIndex={-1} aria-hidden="true">
           <div className="ratio ratio-4x3">
-            <img className="img-fluid d-block" src={data.image} alt={data.title} />
+            <img className="img-fluid d-block" src={data.image} alt="" />
           </div>
         </Link>
 
@@ -54,9 +55,9 @@ export default function IndustryCaseCard({ data }: { data: IndustryCaseCardData 
             <ul className="nav ul-key">
               {data.keywords.map((keyword) => (
                 <li key={keyword}>
-                  <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                  <span>
                     {keyword}
-                  </a>
+                  </span>
                 </li>
               ))}
             </ul>

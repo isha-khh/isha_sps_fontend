@@ -45,16 +45,17 @@ export default function PopularPosts({
   return (
     <div className="side2_new">
       <div className="column_box">
-        <h4 className="mb-4">{heading}</h4>
+        <h2 className="mb-4">{heading}</h2>
 
         {items.map((item, index) => (
           <div className={item.image ? "item" : "item no-pic"} key={index}>
             <div className="d-flex">
               {item.image && (
-                <a href={withBasePath(item.href)} className="pic" title={item.title}>
+                // 縮圖連結跟標題連結同一目的地：不進 Tab 順序、不給輔助科技念（HM1240402E）
+                <a href={withBasePath(item.href)} className="pic" tabIndex={-1} aria-hidden="true">
                   <div className="ranking">{String(index + 1).padStart(2, "0")}</div>
                   <div className={`ratio ${imageRatio}`}>
-                    <img className="img-fluid d-block" src={item.image} alt={item.title} />
+                    <img className="img-fluid d-block" src={item.image} alt="" />
                   </div>
                 </a>
               )}

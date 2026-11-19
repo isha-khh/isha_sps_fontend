@@ -28,6 +28,9 @@ export interface TabItem {
  *     ]}
  *   />
  *
+ * 每個頁籤按鈕都能用 Tab 鍵走到、Enter／空白鍵切換（不做「只有目前頁籤可聚焦、其餘靠方向鍵」的 roving tabindex：
+ * 無障礙檢測 GN1210100E 只用 Tab 鍵走，方向鍵那套會被判成「無法用鍵盤切換頁籤」）；方向鍵 bootstrap 本來就支援。
+ *
  * 這也表示點擊切換頁籤後 active/aria-selected 的變化是 bootstrap
  * 直接操作真實 DOM，不會反映回這個元件的 props——只要這棵樹不會
  * 因為別的原因重新 render，就不會被蓋掉，跟 AOS/bsnav 是同一種
@@ -65,7 +68,6 @@ export default function Tabs({
                 role="tab"
                 aria-controls={item.id}
                 aria-selected={isActive}
-                tabIndex={isActive ? 0 : -1}
                 aria-label={item.ariaLabel ?? (typeof item.label === "string" ? item.label : undefined)}
               >
                 {item.label}

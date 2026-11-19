@@ -144,9 +144,10 @@ function ServicePanel({ category }: { category: ServiceCategory }) {
         }}
         slides={category.slides.map((slide) => (
           <div className="d-flex" key={slide.href}>
-            <Link href={slide.href} className="pic" title={`查看更多${slide.title}內容`}>
+            {/* 縮圖連結跟下面的「查看更多」是同一個目的地：不進 Tab 順序、不給輔助科技念（HM1240402E） */}
+            <Link href={slide.href} className="pic" tabIndex={-1} aria-hidden="true">
               <div className="ratio ratio-4x3">
-                <img className="img-fluid d-block" src={slide.image} alt={`查看更多${slide.title}內容`} />
+                <img className="img-fluid d-block" src={slide.image} alt="" />
               </div>
             </Link>
 

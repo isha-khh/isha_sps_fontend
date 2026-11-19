@@ -5,6 +5,7 @@ import TaiwanAddressSelector from "@/components/ui/TaiwanAddressSelector";
 import ImageListEditor from "@/components/member/ImageListEditor";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { memberCompanyApi, type MemberCompany, type MemberCompanyImage, type MemberUpdateCompanyRequest } from "@/lib/api/member-company";
+import FormError from "@/components/ui/FormError";
 
 interface CompanyForm {
   englishName: string;
@@ -280,9 +281,9 @@ export default function CompanyPanel() {
       </div>
 
       {error && (
-        <div className="alert alert-danger mt-3" role="alert">
+        <FormError as="div" className="alert alert-danger mt-3">
           {error}
-        </div>
+        </FormError>
       )}
       {message && (
         <div className="alert alert-success mt-3" role="status">

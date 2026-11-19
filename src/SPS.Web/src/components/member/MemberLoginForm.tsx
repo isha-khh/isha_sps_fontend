@@ -10,6 +10,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { fromAssertionResponse, toRequestOptions } from "@/lib/webauthn";
 import { readNextFromLocation } from "@/lib/login-next";
+import FormError from "@/components/ui/FormError";
 
 /**
  * 積木元件：會員登入表單本體，對應舊站 login.html 的 `.melo_box_left`。
@@ -149,10 +150,10 @@ export default function MemberLoginForm() {
       </div>
 
       {error && (
-        <p className="text-danger mb-3" role="alert">
+        <FormError as="p" className="text-danger mb-3">
           <i className="bi bi-exclamation-circle-fill me-1" aria-hidden="true"></i>
           {error}
-        </p>
+        </FormError>
       )}
 
       <button type="submit" title="登入" className="more_x" style={{ margin: "0 auto" }} disabled={submitting}>

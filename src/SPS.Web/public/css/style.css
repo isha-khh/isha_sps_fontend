@@ -1196,13 +1196,17 @@ body   .main .side .nav > li + li {
 
   /*side2*/
     .side2 h4.mb-3,
-    .side2 h4.mb-4 {
+    .side2 h4.mb-4,
+    .side2 h2.mb-3,
+    .side2 h2.mb-4 {
     position: relative;
     padding-left: 12px;
  
 }
         .side2 h4.mb-3:before,
-        .side2 h4.mb-4:before {
+        .side2 h4.mb-4:before,
+        .side2 h2.mb-3:before,
+        .side2 h2.mb-4:before {
             content: " ";
             display: block;
             position: absolute;
@@ -3009,7 +3013,8 @@ a.more_x.more_x_gu,
 .news.show .breadcrumb {
     margin-top: 110px;
 }
-.news.show .column_box .tit h3 {
+.news.show .column_box .tit h3,
+.news.show .column_box .tit h2 {
     font-size: 2rem;
 }
 .news.show .content   .column_box .tit {
@@ -3868,7 +3873,7 @@ a.more_x.more_x_gu,
 }
 .video .item_video .date {
     position: relative;
-    color: #00b09b;
+    color: #007a6a;
     font-size: 1rem;
     padding-left: 15px;
     margin-bottom: 5px;
@@ -4832,14 +4837,14 @@ h2.h2 {
         .new_box .news-date .day {
             font-weight: bold;
             line-height: 1;
-            color: #00d2aa;
+            color: #007a6a;
             font-size: 4.375rem;
         }
 
         .new_box .news-date .year-month {
             font-size: 1.125rem;
             font-weight: bold;
-            color: #00d2aa;
+            color: #007a6a;
             margin-top: 6px;
         }
 
@@ -5118,12 +5123,14 @@ ul.ul-key{
         box-shadow: 0 5px 9px rgba(0, 102, 255, 0.38);
     }
 
-    ul.ul-key li a {
+    ul.ul-key li a,
+    ul.ul-key li span {
         font-size: 0.875rem;
         display: table;
         padding: 5px 10px;
         background: #0474D7;
-        background: linear-gradient(-180deg,rgba(4, 116, 215, 1) 0%, rgba(3, 149, 187, 1) 100%);
+        /* 漸層終點原本是 rgb(3,149,187)，跟白字只有 3.5:1；改 rgb(2,120,154) 讓整條都 ≥ 4.5:1（無障礙檢測 GN2140300E） */
+        background: linear-gradient(-180deg,rgba(4, 116, 215, 1) 0%, rgba(2, 120, 154, 1) 100%);
         color: #fff;
         border-radius: 5px;
         margin-bottom: 8px;
@@ -5380,7 +5387,7 @@ body  .slick-track {
 
 
     .home_enterprise_box .tit h3 {
-        color: #00b09b;
+        color: #007a6a;
         font-size: 1.5rem;
         font-weight: bold;
         margin-top: 6px;
@@ -5498,7 +5505,7 @@ wid-video  .slick-list{
 
 .wid-video .video-card .date {
     position: relative;
-    color: #00b09b;
+    color: #007a6a;
     font-size: 1rem;
     padding-left: 15px;
     margin-bottom: 5px;
@@ -5721,12 +5728,12 @@ wid-video  .slick-list{
     }
 
 .footer-title {
-    color: #00a0e9;
+    color: #0069a8;
     font-size: 1.25rem;
     font-weight: bold;
     margin-bottom: 16px;
-    background: #33daff;
-    background: linear-gradient(to right, #33daff 35%, #3ca6ff 100%);
+    background: #005f99;
+    background: linear-gradient(to right, #005f99 35%, #0069a8 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;

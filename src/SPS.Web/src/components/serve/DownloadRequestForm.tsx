@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import PersonalDataConsentNotice from "@/components/member/PersonalDataConsentNotice";
 import { requestServeDownload, type ServeDownloadLink } from "@/lib/api/inquiries";
@@ -22,12 +22,29 @@ import { resolveBackendAssetUrl } from "@/lib/content-list-utils";
  * 2026-10-13 服務專區改接後台內容：改呼叫 `POST /api/Inquiry/download/{項目編號}`（`requestServeDownload`），**送出成功後直接顯示這個項目的附件下載連結**
  * （詢問單照樣存下申請人資料，針對的項目由後端決定）。附件不在公開頁面列出，沒填表單拿不到連結；項目沒有附件時父頁面不顯示這個表單。
  */
+const FIELD_LABELS = { companyName: "公司名稱", userName: "姓名", userUnit: "單位", userTitle: "職稱", userTel: "電話", userEmail: "信箱" } as const;
+
 export default function DownloadRequestForm({ itemId }: { itemId: number | string; itemTitle?: string }) {
   const [form, setForm] = useState({ companyName: "", userName: "", userUnit: "", userTitle: "", userTel: "", userEmail: "" });
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [links, setLinks] = useState<ServeDownloadLink[] | null>(null);
+
+  // 驗證沒過：錯誤區塊列出哪些欄位沒填、每一項都是連結，點了（或自動）把焦點帶到該欄位（無障礙檢測 GN2330300E）
+  const [missing, setMissing] = useState<{ id: string; label: string }[]>([]);
+  const errorRef = useRef<HTMLDivElement>(null);
+  const [errorSeq, setErrorSeq] = useState(0);
+  useEffect(() => {
+    if (errorSeq > 0) errorRef.current?.focus();
+  }, [errorSeq]);
+
+  function focusField(id: string) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.focus({ preventScroll: true });
+    element.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
 
   const bind = (key: keyof typeof form) => ({
     value: form[key],
@@ -38,8 +55,14 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
     event.preventDefault();
     if (submitting) return;
     setError(null);
-    if (Object.values(form).some((value) => !value.trim())) return setError("請完整填寫所有欄位");
-    if (!agreed) return setError("請勾選已閱讀並同意個資蒐集同意");
+    const emptyFields = (Object.keys(FIELD_LABELS) as (keyof typeof form)[]).filter((key) => !form[key].trim()).map((key): { id: string; label: string } => ({ id: key, label: FIELD_LABELS[key] }));
+    if (!agreed) emptyFields.push({ id: "agreePrivacy", label: "個資蒐集同意（請勾選）" });
+    setMissing(emptyFields);
+    if (emptyFields.length > 0) {
+      setError(agreed || emptyFields.length > 1 ? "以下欄位還沒填寫：" : "請勾選已閱讀並同意個資蒐集同意");
+      setErrorSeq((n) => n + 1);
+      return;
+    }
 
     setSubmitting(true);
     const result = await requestServeDownload(itemId, {
@@ -95,7 +118,7 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
                 *
               </span>
             </label>
-            <input id="companyName" name="companyName" {...bind("companyName")} type="text" className="form-control" placeholder="請輸入公司名稱" required aria-required="true" />
+            <input id="companyName" name="companyName" aria-invalid={missing.some((m) => m.id === "companyName") || undefined} {...bind("companyName")} type="text" className="form-control" placeholder="請輸入公司名稱" required aria-required="true" />
           </div>
 
           <div className="col-md-6 col-12">
@@ -105,7 +128,7 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
                 *
               </span>
             </label>
-            <input id="userName" name="userName" {...bind("userName")} type="text" className="form-control" placeholder="請輸入姓名" required aria-required="true" />
+            <input id="userName" name="userName" aria-invalid={missing.some((m) => m.id === "userName") || undefined} {...bind("userName")} type="text" className="form-control" placeholder="請輸入姓名" required aria-required="true" />
           </div>
 
           <div className="col-md-6 col-12">
@@ -115,7 +138,7 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
                 *
               </span>
             </label>
-            <input id="userUnit" name="userUnit" {...bind("userUnit")} type="text" className="form-control" placeholder="請輸入單位" required aria-required="true" />
+            <input id="userUnit" name="userUnit" aria-invalid={missing.some((m) => m.id === "userUnit") || undefined} {...bind("userUnit")} type="text" className="form-control" placeholder="請輸入單位" required aria-required="true" />
           </div>
 
           <div className="col-md-6 col-12">
@@ -125,7 +148,7 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
                 *
               </span>
             </label>
-            <input id="userTitle" name="userTitle" {...bind("userTitle")} type="text" className="form-control" placeholder="請輸入職稱" required aria-required="true" />
+            <input id="userTitle" name="userTitle" aria-invalid={missing.some((m) => m.id === "userTitle") || undefined} {...bind("userTitle")} type="text" className="form-control" placeholder="請輸入職稱" required aria-required="true" />
           </div>
 
           <div className="col-md-6 col-12">
@@ -135,7 +158,7 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
                 *
               </span>
             </label>
-            <input id="userTel" name="userTel" {...bind("userTel")} type="tel" className="form-control" placeholder="請輸入電話" required aria-required="true" />
+            <input id="userTel" name="userTel" aria-invalid={missing.some((m) => m.id === "userTel") || undefined} {...bind("userTel")} type="tel" className="form-control" placeholder="請輸入電話" required aria-required="true" />
           </div>
 
           <div className="col-md-6 col-12">
@@ -145,7 +168,7 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
                 *
               </span>
             </label>
-            <input id="userEmail" name="userEmail" {...bind("userEmail")} type="email" className="form-control" placeholder="請輸入信箱" required aria-required="true" />
+            <input id="userEmail" name="userEmail" aria-invalid={missing.some((m) => m.id === "userEmail") || undefined} {...bind("userEmail")} type="email" className="form-control" placeholder="請輸入信箱" required aria-required="true" />
           </div>
         </div>
 
@@ -165,9 +188,27 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
         </div>
 
         {error && (
-          <p className="text-center mb-3" role="alert" style={{ color: "#c0392b" }}>
-            {error}
-          </p>
+          <div className="text-center mb-3" role="alert" ref={errorRef} tabIndex={-1} style={{ color: "#c0392b" }}>
+            <p className="mb-1">{error}</p>
+            {missing.length > 0 && error.endsWith("：") && (
+              <ul className="list-unstyled mb-0 d-inline-block text-start">
+                {missing.map((item) => (
+                  <li key={item.id}>
+                    <a
+                      href={`#${item.id}`}
+                      style={{ color: "#c0392b", textDecoration: "underline" }}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        focusField(item.id);
+                      }}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
 
         <a href="#" title="提交" className="more_x" aria-disabled={submitting} onClick={(event) => void submit(event)}>

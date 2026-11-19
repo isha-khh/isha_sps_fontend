@@ -6,6 +6,7 @@ import PasswordField from "@/components/member/PasswordField";
 import { memberprofileApi } from "@/lib/api/memberprofile";
 import type { CreateCompanyMemberRequest, MemberListItemResponse } from "@/types/memberprofile";
 import { getApiErrorMessage } from "@/lib/error-utils";
+import FormError from "@/components/ui/FormError";
 
 /** 後端 `Status`：成員帳號只能在啟用與停用之間切換（鎖定、待審核由後台管理） */
 const STATUS_ACTIVE = 1;
@@ -210,10 +211,10 @@ export default function MembersPanel() {
         </p>
       )}
       {error && (
-        <p className="text-danger" role="alert">
+        <FormError as="p" className="text-danger">
           <i className="bi bi-exclamation-circle-fill me-1" aria-hidden="true"></i>
           {error}
-        </p>
+        </FormError>
       )}
 
       {editing && (

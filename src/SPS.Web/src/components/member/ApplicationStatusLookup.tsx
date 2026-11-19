@@ -5,6 +5,7 @@ import Link from "next/link";
 import { applicationsApi } from "@/lib/api/applications";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import type { ApplicationStatusResponse } from "@/types/application";
+import FormError from "@/components/ui/FormError";
 
 /**
  * 積木元件：會員申請進度查詢。
@@ -201,10 +202,10 @@ export default function ApplicationStatusLookup({ initialApplicationNumber = "" 
         </div>
 
         {error && (
-          <p className="text-danger mb-3" role="alert">
+          <FormError as="p" className="text-danger mb-3">
             <i className="bi bi-exclamation-circle-fill me-1" aria-hidden="true"></i>
             {error}
-          </p>
+          </FormError>
         )}
 
         <button type="submit" title="查詢" className="more_x" style={{ margin: "0 auto" }} disabled={submitting}>

@@ -9,6 +9,7 @@ import { memberprofileApi } from "@/lib/api/memberprofile";
 import { VerificationCodePurpose } from "@/types/memberprofile";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { readNextFromLocation } from "@/lib/login-next";
+import FormError from "@/components/ui/FormError";
 
 /** 寄驗證碼後要等多久才能再寄（後端冷卻期是 60 秒，這裡跟著擋，避免按了只拿到錯誤訊息） */
 const RESEND_SECONDS = 60;
@@ -143,10 +144,10 @@ export default function EmailVerifyForm() {
       </div>
 
       {error && (
-        <p className="text-danger mb-3" role="alert">
+        <FormError as="p" className="text-danger mb-3">
           <i className="bi bi-exclamation-circle-fill me-1" aria-hidden="true"></i>
           {error}
-        </p>
+        </FormError>
       )}
 
       <button type="submit" title="驗證" className="more_x" style={{ margin: "0 auto" }} disabled={verifying}>

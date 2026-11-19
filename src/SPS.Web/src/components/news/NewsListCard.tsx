@@ -42,9 +42,10 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
     <div className={data.image ? "item" : "item no-pic"}>
       <div className="d-flex">
         {data.image && (
-          <Link href={data.href} className="pic" title={data.title}>
+          // 縮圖連結跟標題連結同一目的地：不進 Tab 順序、不給輔助科技念（HM1240402E）
+          <Link href={data.href} className="pic" tabIndex={-1} aria-hidden="true">
             <div className="ratio ratio-4x3">
-              <img className="img-fluid d-block" src={data.image} alt={data.title} />
+              <img className="img-fluid d-block" src={data.image} alt="" />
             </div>
           </Link>
         )}

@@ -709,3 +709,22 @@
 .sitemap_box .accesskey_reference {
     --bs-table-bg: transparent;
 }
+
+/*
+ * 內容圖片連結（點圖放大）的鍵盤焦點框（無障礙檢測 CS1140101E）。
+ * 圖片是滿版寬，全站的 `a:focus-visible`（外側 2px 的框）會被內容區的 overflow 截掉，看起來「焦點移到圖片沒有變化」；
+ * 改成畫在圖片內側，再把圖片略為調暗，讓焦點在哪裡一眼看得出來。
+ */
+a[data-fancybox][data-type="image"] {
+  display: block;
+}
+a[data-fancybox][data-type="image"]:focus-visible,
+a.ratio[data-fancybox]:focus-visible {
+  outline: 4px solid #0d6efd !important;
+  outline-offset: -4px !important;
+  border-radius: 20px;
+}
+a[data-fancybox][data-type="image"]:focus-visible img,
+a.ratio[data-fancybox]:focus-visible img {
+  filter: brightness(0.9);
+}

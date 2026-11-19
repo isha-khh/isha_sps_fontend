@@ -26,7 +26,7 @@ export default function SidebarBanner({ banners, heading }: { banners: BannerIte
   return (
     <div className={heading ? "side2_banner2" : "side2_banner"}>
       <div className="column_box">
-        {heading && <h4 className="mb-4">{heading}</h4>}
+        {heading && <h2 className="mb-4">{heading}</h2>}
         {items.map((item) => {
           const title = item.title || item.name || "廣告";
           const picture = (
