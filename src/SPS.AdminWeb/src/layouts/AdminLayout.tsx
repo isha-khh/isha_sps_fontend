@@ -8,6 +8,8 @@ import { Rightbar } from '@/components/admin-layout/Rightbar';
 import { ChatBubble } from '@/components/chat/ChatBubble';
 import { CampaignProgressNotifications } from '@/components/mail-center/CampaignProgressNotifications';
 import { useCampaignProgressPolling } from '@/hooks/useCampaignProgressPolling';
+import { useIndexProgressPolling } from '@/hooks/useIndexProgressPolling';
+import { IndexProgressNotification } from '@/components/system/IndexProgressNotification';
 import { usePermission, Permission } from '@/hooks/usePermission';
 import type { ISidebarMenuItem } from '@/components/admin-layout/SidebarMenuItem';
 
@@ -286,6 +288,9 @@ export const AdminLayout = () => {
   // 全域輪詢追蹤中的群發郵件進度
   useCampaignProgressPolling();
 
+  // 全域追蹤背景索引（AI 向量索引 + 內容檢查）的進度，只有「系統設定」權限的人會查
+  useIndexProgressPolling(hasAny([Permission.ManageSettings]));
+
   // 根據使用者權限過濾選單
   const filteredMenuItems = useMemo(() => {
     return filterMenuByPermissions(allMenuItems, hasAny, isSuperAdmin());
@@ -319,6 +324,9 @@ export const AdminLayout = () => {
 
       {/* 全域群發郵件進度通知 */}
       <CampaignProgressNotifications />
+
+      {/* 背景索引（AI 向量索引 + 內容檢查）進度 */}
+      <IndexProgressNotification />
     </ConfigProvider>
   );
 };

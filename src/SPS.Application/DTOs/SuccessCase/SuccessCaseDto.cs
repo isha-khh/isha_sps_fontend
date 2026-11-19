@@ -15,6 +15,9 @@ public class SuccessCaseDto
     public List<string>? Tags { get; set; }
     public DateTime? PublishedDate { get; set; }
     public bool IsPublished { get; set; }
+
+    /// <summary>被內容檢查自動轉成草稿的原因；沒有則為 null（後台表單用來顯示提示）</summary>
+    public string? UnpublishReason { get; set; }
     public int ViewCount { get; set; }
     public List<Guid> CompanyIds { get; set; } = new();
 

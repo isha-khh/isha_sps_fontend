@@ -1158,6 +1158,12 @@ public class SystemSettingController : ControllerBase
         return Ok(new { message = "AI 語意搜尋設定已更新" });
     }
 
+    /// <summary>只回背景索引工作狀態（不算筆數統計）：後台右下角的進度通知每幾秒輪詢一次，要很輕</summary>
+    [HttpGet("embedding/index-job")]
+    [RequirePermission(UserPermission.ManageSettings)]
+    [SwaggerOperation(Summary = "取得背景索引工作狀態（進度、已處理筆數、內容檢查轉草稿篇數；輕量，給通知列輪詢用）")]
+    public IActionResult GetEmbeddingIndexJob() => Ok(_embeddingIndexJob.GetSnapshot());
+
     [HttpGet("embedding/index-status")]
     [RequirePermission(UserPermission.ManageSettings)]
     [SwaggerOperation(Summary = "取得 AI 語意搜尋索引進度（筆數統計 + 背景工作狀態）")]

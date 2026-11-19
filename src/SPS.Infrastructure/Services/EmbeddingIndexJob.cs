@@ -17,6 +17,7 @@ public class EmbeddingIndexJob : IEmbeddingIndexJob
     private int _reindexTotal;
     private int _reindexProcessed;
     private int _reindexFailed;
+    private int _reindexDrafted;
     private DateTime? _reindexStartedAt;
     private DateTime? _reindexFinishedAt;
     private DateTime? _lastScanAt;
@@ -35,6 +36,7 @@ public class EmbeddingIndexJob : IEmbeddingIndexJob
                 ReindexTotal = _reindexTotal,
                 ReindexProcessed = _reindexProcessed,
                 ReindexFailed = _reindexFailed,
+                ReindexDrafted = _reindexDrafted,
                 ReindexStartedAt = _reindexStartedAt,
                 ReindexFinishedAt = _reindexFinishedAt,
                 LastScanAt = _lastScanAt,
@@ -54,6 +56,7 @@ public class EmbeddingIndexJob : IEmbeddingIndexJob
             _reindexTotal = 0;
             _reindexProcessed = 0;
             _reindexFailed = 0;
+            _reindexDrafted = 0;
             _reindexStartedAt = null;
             _reindexFinishedAt = null;
         }
@@ -95,6 +98,7 @@ public class EmbeddingIndexJob : IEmbeddingIndexJob
             _reindexTotal = total;
             _reindexProcessed = 0;
             _reindexFailed = 0;
+            _reindexDrafted = 0;
             _reindexStartedAt = DateTime.UtcNow;
             _reindexFinishedAt = null;
             _lastError = null;
@@ -107,6 +111,16 @@ public class EmbeddingIndexJob : IEmbeddingIndexJob
         {
             _reindexProcessed++;
             if (!success) _reindexFailed++;
+        }
+    }
+
+    /// <summary>這一筆被內容檢查轉成草稿了（同時算進已處理，不算失敗）</summary>
+    public void AdvanceReindexDrafted()
+    {
+        lock (_lock)
+        {
+            _reindexProcessed++;
+            _reindexDrafted++;
         }
     }
 

@@ -2922,6 +2922,9 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<short>("Type")
                         .HasColumnType("smallint");
 
+                    b.Property<string>("UnpublishReason")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -3353,6 +3356,9 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<int?>("SubjectId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UnpublishReason")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -3767,6 +3773,9 @@ namespace SPS.Infrastructure.Migrations
 
                     b.Property<int>("TitleId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("UnpublishReason")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedTime")
                         .HasColumnType("timestamp with time zone");

@@ -139,12 +139,20 @@ public class IndexReconciliationBackgroundService : BackgroundService
                 ct.ThrowIfCancellationRequested();
                 using var scope = _serviceProvider.CreateScope();
                 var indexingService = scope.ServiceProvider.GetRequiredService<IContentIndexingService>();
+                var articleValidation = scope.ServiceProvider.GetRequiredService<IArticleValidationService>();
 
                 foreach (var target in chunk)
                 {
                     var ok = false;
                     try
                     {
+                        // 先做內容檢查：文章有錯誤就轉成草稿並寫下原因，不用索引（草稿不會出現在搜尋）
+                        if (await articleValidation.EnforceAsync(target.SourceType, target.SourceId, ct))
+                        {
+                            _job.AdvanceReindexDrafted();
+                            continue;
+                        }
+
                         ok = await indexingService.IndexAsync(target.SourceType, target.SourceId, ct, force: true);
                     }
                     catch (OperationCanceledException)
@@ -166,7 +174,7 @@ public class IndexReconciliationBackgroundService : BackgroundService
         }
 
         var snapshot = _job.GetSnapshot();
-        _logger.LogInformation("AI 向量媒合全量重新索引完成：{Processed}/{Total} 筆，失敗 {Failed} 筆",
-            snapshot.ReindexProcessed, snapshot.ReindexTotal, snapshot.ReindexFailed);
+        _logger.LogInformation("AI 向量媒合全量重新索引完成：{Processed}/{Total} 筆，失敗 {Failed} 筆，內容檢查轉草稿 {Drafted} 篇",
+            snapshot.ReindexProcessed, snapshot.ReindexTotal, snapshot.ReindexFailed, snapshot.ReindexDrafted);
     }
 }

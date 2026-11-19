@@ -163,6 +163,9 @@ public static class DependencyInjection
         services.AddSingleton<IImageOptimizer, ImageOptimizer>();
         // 背景壓縮服務：把既有的舊圖原地轉成 WebP（預設關閉，見 ImageOptimizationOptions）
         services.Configure<ImageOptimizationOptions>(configuration.GetSection(ImageOptimizationOptions.SectionName));
+
+        // 內容檢查（背景索引時把有問題的文章轉成草稿）：DraftOnViolation 預設 true，見 ContentValidationOptions
+        services.Configure<SPS.Application.Interfaces.IServices.ContentValidationOptions>(configuration.GetSection(SPS.Application.Interfaces.IServices.ContentValidationOptions.SectionName));
         services.AddHostedService<ImageOptimizationBackgroundService>();
 
         // 資料庫序列修復服務 (啟動時檢查並修復 Identity Sequence)

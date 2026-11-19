@@ -11,6 +11,8 @@ export interface SuccessCase {
   tags?: string[];
   publishedDate?: string;
   isPublished: boolean;
+  /** 被內容檢查（背景索引時跑）自動轉成草稿的原因；沒有則為空。重新發布後會清掉 */
+  unpublishReason?: string | null;
   viewCount: number;
   /** 關聯企業（平台上的企業 Id，依顯示順序）：前台案例頁的「公司簡介」區塊用 */
   companyIds?: string[];

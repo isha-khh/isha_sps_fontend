@@ -8,6 +8,8 @@ export interface QuestionResponse {
   subject?: string;
   answer?: string;
   published: boolean;
+  /** 被內容檢查（背景索引時跑）自動轉成草稿的原因；沒有則為空。重新發布後會清掉 */
+  unpublishReason?: string | null;
   ordinal: number;
   categoryId?: number;
   categoryName?: string;

@@ -252,6 +252,8 @@ export interface EmbeddingIndexJob {
   reindexTotal: number;
   reindexProcessed: number;
   reindexFailed: number;
+  /** 全量重新索引期間，被內容檢查發現問題而自動轉成草稿的文章篇數 */
+  reindexDrafted: number;
   reindexStartedAt?: string | null;
   reindexFinishedAt?: string | null;
   lastScanAt?: string | null;
