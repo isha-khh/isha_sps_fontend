@@ -110,6 +110,18 @@
 }
 
 /*
+ * 鍵盤焦點框（無障礙檢測 CS2240700E／2.4.7 焦點可視）：頁籤列是橫向可捲動容器（`overflow-x: auto`，另一軸會跟著變成也裁切），
+ * 全站 `a:focus-visible` 畫在連結外側的 3px 框，最左／最右那顆的外側、以及所有頁籤的上下都被截掉，
+ * 只剩兩顆頁籤之間的一條粗線，看起來像分隔線畫歪了、焦點在哪裡不明顯。改成畫在每個頁籤內側，並加淡藍底色。
+ */
+.category-tab-strip a:focus-visible {
+  outline: 3px solid #0d6efd !important;
+  outline-offset: -3px !important;
+  background: #e8f0ff;
+  border-radius: 0.5rem;
+}
+
+/*
  * 手機版：頁籤下面那個三欄 `.row.gy-4` 自己有 -24px 的上邊距，平常靠子欄位的 margin-top（也是 24px）補回來；
  * 但 style_rwd.css 在手機（max-width: 767px）把 `.main .content` 的 margin-top 改成 5px，補不回來，
  * 搜尋列（年份下拉）就整個往上頂、蓋到頁籤（實測重疊約 3px，應該有 16px 間距）。
