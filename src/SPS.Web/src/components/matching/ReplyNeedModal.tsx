@@ -6,6 +6,7 @@ import Modal from "@/components/ui/Modal";
 import SubmitResultModal from "@/components/matching/SubmitResultModal";
 import { swapModal } from "@/lib/bootstrap-modal";
 import { demandRepliesApi } from "@/lib/api/demand-replies";
+import FormError from "@/components/ui/FormError";
 
 /**
  * 積木元件：需求詳情頁「我要回應」彈窗（取代原本寫進詢問單的「我要提案」彈窗），只有供應端企業會員開得起來。
@@ -110,9 +111,9 @@ export default function ReplyNeedModal({ id, demandId, demandTitle, followerCoun
       </div>
 
       {error && (
-        <p className="mb-3" role="alert" style={{ color: "#c0392b" }}>
+        <FormError as="p" className="mb-3" style={{ color: "#c0392b" }}>
           {error}
-        </p>
+        </FormError>
       )}
       {submitted && <p className="text-success mb-3">已收到您的回應，審核通過後會寄給刊登者與追蹤者，可以到會員中心「我的回應」查看審核狀態。</p>}
 

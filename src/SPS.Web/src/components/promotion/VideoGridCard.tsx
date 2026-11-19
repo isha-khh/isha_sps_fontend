@@ -67,9 +67,10 @@ export default function VideoGridCard({ data, group }: { data: VideoGridCardData
   return (
     <div className="col-lg-4 col-md-6 col-12 item item_video mb-md-4 mb-4">
       <div className="item_box">
-        <a href={data.href} className="pic" title={watchTitle} target="_blank" rel="noopener noreferrer" {...fancyboxProps}>
+        {/* 縮圖連結跟標題連結同一目的地：不進 Tab 順序、不給輔助科技念（HM1240402E）；標題連結會代為觸發它 */}
+        <a href={data.href} className="pic" tabIndex={-1} aria-hidden="true" target="_blank" rel="noopener noreferrer" {...fancyboxProps}>
           <div className="ratio ratio-16x9">
-            <img className="img-fluid d-block" src={data.thumbnail} alt={watchTitle} />
+            <img className="img-fluid d-block" src={data.thumbnail} alt="" />
           </div>
         </a>
 
@@ -85,9 +86,9 @@ export default function VideoGridCard({ data, group }: { data: VideoGridCardData
             <ul className="nav ul-key">
               {data.keywords.map((keyword) => (
                 <li key={keyword}>
-                  <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                  <span>
                     {keyword}
-                  </a>
+                  </span>
                 </li>
               ))}
             </ul>

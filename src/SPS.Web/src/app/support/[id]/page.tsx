@@ -38,7 +38,7 @@ export default async function SupportNoticePage({ params }: PageProps<"/support/
         <div className="column_box">
           <div className="tit">
             <div className="tit_nsl">
-              <h3>{detail.title}</h3>
+              <h2>{detail.title}</h2>
 
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">

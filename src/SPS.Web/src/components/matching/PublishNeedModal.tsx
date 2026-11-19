@@ -8,6 +8,7 @@ import TechAttributeSelector from "@/components/matching/TechAttributeSelector";
 import { apiClient } from "@/lib/api-client";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import type { TagTaxonomy } from "@/lib/company-tags";
+import FormError from "@/components/ui/FormError";
 
 /**
  * 積木元件：「媒合對接」列表頁「我要刊登」彈窗，對應設計稿
@@ -186,9 +187,9 @@ export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonom
       </div>
 
       {error && (
-        <p className="mb-3" role="alert" style={{ color: "#c0392b" }}>
+        <FormError as="p" className="mb-3" style={{ color: "#c0392b" }}>
           {error}
-        </p>
+        </FormError>
       )}
       {inlineNotice && submittedNumber && <p className="text-success mb-3">已收到您的刊登需求（編號 {submittedNumber}），將於審核後上架。</p>}
 

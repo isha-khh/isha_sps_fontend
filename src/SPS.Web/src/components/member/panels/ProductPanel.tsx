@@ -7,6 +7,7 @@ import { getApiErrorMessage } from "@/lib/error-utils";
 import { splitTagsByKind, type TagTaxonomy } from "@/lib/company-tags";
 import { memberCompanyApi, type MemberCompany, type MemberCompanyImage } from "@/lib/api/member-company";
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
+import FormError from "@/components/ui/FormError";
 
 /**
  * 積木元件：會員中心「產品相關資訊」面板（供給端）——維護前台企業詳情頁「主要產品暨服務」與
@@ -160,9 +161,9 @@ export default function ProductPanel() {
       </div>
 
       {error && (
-        <div className="alert alert-danger mt-3" role="alert">
+        <FormError as="div" className="alert alert-danger mt-3">
           {error}
-        </div>
+        </FormError>
       )}
       {message && (
         <div className="alert alert-success mt-3" role="status">

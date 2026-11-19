@@ -15,6 +15,7 @@ import CompanyRoleTierSelector, { type CompanyRoleTierSelection } from "@/compon
 import DocumentUploadField from "@/components/member/DocumentUploadField";
 import PersonalDataConsentNotice from "@/components/member/PersonalDataConsentNotice";
 import Modal from "@/components/ui/Modal";
+import FormError from "@/components/ui/FormError";
 
 const REQUIRED = (
   <span className="red me-1" aria-hidden="true">
@@ -351,9 +352,9 @@ export default function UpgradePanel() {
           </div>
 
           {error && (
-            <div className="alert alert-danger" role="alert">
+            <FormError as="div" className="alert alert-danger">
               {error}
-            </div>
+            </FormError>
           )}
 
           <button type="button" className="tier-submit-btn" onClick={handleSubmit} disabled={submitting}>

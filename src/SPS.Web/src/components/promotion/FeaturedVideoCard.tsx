@@ -48,9 +48,10 @@ export default function FeaturedVideoCard({ data, group }: { data: FeaturedVideo
   return (
     <div className="sele_video">
       <div className="video-card">
-        <a href={data.href} className="pic" title={watchTitle} target="_blank" rel="noopener noreferrer" {...fancyboxProps}>
+        {/* 縮圖、標題、「立即觀看」是同一個目的地：只留標題連結給鍵盤與輔助科技，縮圖與立即觀看不進 Tab 順序（HM1240402E）；標題連結會代為觸發縮圖播放 */}
+        <a href={data.href} className="pic" tabIndex={-1} aria-hidden="true" target="_blank" rel="noopener noreferrer" {...fancyboxProps}>
           <div className="ratio ratio-16x9">
-            <img className="img-fluid d-block" src={data.thumbnail} alt={`${data.title} 影片封面`} />
+            <img className="img-fluid d-block" src={data.thumbnail} alt="" />
           </div>
         </a>
 
@@ -71,15 +72,15 @@ export default function FeaturedVideoCard({ data, group }: { data: FeaturedVideo
               <ul className="nav ul-key">
                 {data.keywords.map((keyword) => (
                   <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                    <span>
                       {keyword}
-                    </a>
+                    </span>
                   </li>
                 ))}
               </ul>
             )}
 
-            <VideoPlayLink playOnSite={hasSource} href={data.href} title={watchTitle} className="more_x" target="_blank" rel="noopener noreferrer">
+            <VideoPlayLink playOnSite={hasSource} href={data.href} className="more_x" tabIndex={-1} aria-hidden="true" target="_blank" rel="noopener noreferrer">
               <span>立即觀看</span>
               <i className="bi bi-arrow-right" aria-hidden="true"></i>
             </VideoPlayLink>

@@ -71,7 +71,7 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
         <div className="column_box">
           <div className="tit">
             <div className="tit_nsl">
-              <h3>{course.title}</h3>
+              <h2>{course.title}</h2>
 
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">
@@ -89,9 +89,9 @@ export default async function TalentShowPage({ params }: PageProps<"/talent/[id]
               <ul className="nav ul-key">
                 {course.keywords.map((keyword, index) => (
                   <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`} tabIndex={0} style={badgeInlineStyle(course.keywordBadges?.[index])}>
+                    <span style={badgeInlineStyle(course.keywordBadges?.[index])}>
                       {keyword}
-                    </a>
+                    </span>
                   </li>
                 ))}
               </ul>

@@ -81,7 +81,7 @@ export default async function MatchingNeedDetailPage({ params }: PageProps<"/mat
                 <NeedStatusBadge need={need} />
               </div>
 
-              <h3>{need.title}</h3>
+              <h2>{need.title}</h2>
 
               <ul className="nav mb-4">
                 {need.location && (

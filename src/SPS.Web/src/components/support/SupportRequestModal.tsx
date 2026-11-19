@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import { InquiryType, submitInquiry } from "@/lib/api/inquiries";
+import FormError from "@/components/ui/FormError";
 
 /**
  * 積木元件：政府補助資源卡片「索取資料協助評估」彈窗，對應設計稿
@@ -130,9 +131,9 @@ export default function SupportRequestModal({ id, resourceId, resourceTitle }: {
           </div>
 
           {error && (
-            <p className="mb-3" role="alert" style={{ color: "#c0392b" }}>
+            <FormError as="p" className="mb-3" style={{ color: "#c0392b" }}>
               {error}
-            </p>
+            </FormError>
           )}
 
           <div className="card-footer d-flex justify-content-center">

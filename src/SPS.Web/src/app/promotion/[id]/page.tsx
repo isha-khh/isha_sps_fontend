@@ -112,7 +112,7 @@ export default async function PromotionShowPage({ params }: PageProps<"/promotio
         <div className="column_box">
           <div className="tit">
             <div className="tit_nsl">
-              <h3>{item.title}</h3>
+              <h2>{item.title}</h2>
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">
                   <div className="date">{formatIsoDate(item.publishedDate)}</div>
@@ -125,9 +125,9 @@ export default async function PromotionShowPage({ params }: PageProps<"/promotio
               <ul className="nav ul-key">
                 {item.tags.map((keyword) => (
                   <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                    <span>
                       {keyword}
-                    </a>
+                    </span>
                   </li>
                 ))}
               </ul>

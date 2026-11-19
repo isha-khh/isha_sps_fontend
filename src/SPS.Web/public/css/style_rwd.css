@@ -564,7 +564,8 @@
             height: 42px;
         }
 
-        ul.ul-key li a {
+        ul.ul-key li a,
+        ul.ul-key li span {
             font-size: 0.75rem;
             padding: 4px 6px;
         }
@@ -1511,7 +1512,8 @@
             padding-bottom: 0;
         }
 
-        .news.show .column_box .tit h3 {
+        .news.show .column_box .tit h3,
+        .news.show .column_box .tit h2 {
             font-size: 1.5rem;
             margin-top: 20px;
         }

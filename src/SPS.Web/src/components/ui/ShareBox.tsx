@@ -37,7 +37,7 @@ export default function ShareBox() {
         <li>
           <a
             href="#"
-            title="分享到 Facebook"
+            title="分享到 Facebook（另開新視窗）"
             onClick={(event) => {
               event.preventDefault();
               shareToFB();
@@ -50,7 +50,7 @@ export default function ShareBox() {
         <li>
           <a
             href="#"
-            title="分享到 LINE"
+            title="分享到 LINE（另開新視窗）"
             onClick={(event) => {
               event.preventDefault();
               shareToLine();
@@ -63,7 +63,7 @@ export default function ShareBox() {
         <li>
           <a
             href="#"
-            title="分享到 Threads"
+            title="分享到 Threads（另開新視窗）"
             onClick={(event) => {
               event.preventDefault();
               shareToThreads();
