@@ -7,6 +7,7 @@ import { companiesApi } from '@/lib/api/companies';
 import { Status } from '@/types/company';
 import type { Company } from '@/types/company';
 import { PuckEditor } from '@/components/puck/PuckEditor';
+import { guardPublish } from '@/lib/puck/content-guard';
 import { ImageUploadField } from '@/components/puck/ImageUploadField';
 import type { CreateSuccessCaseRequest } from '@/types/success-case';
 import type { CategoryResponse } from '@/types/category';
@@ -116,6 +117,7 @@ export const SuccessCaseFormPage = () => {
 
     // 使用 ref 中的最新內容
     const latestContent = puckContentRef.current;
+    if (publish && !guardPublish(latestContent, notify)) return;
 
     setIsSaving(true);
     try {

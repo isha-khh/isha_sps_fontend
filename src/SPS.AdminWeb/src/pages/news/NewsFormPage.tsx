@@ -8,6 +8,7 @@ import { TagType, type Tag } from '@/types/taxonomy';
 import type { CreateNewsRequest, UpdateNewsRequest } from '@/types/news';
 import type { CategoryResponse } from '@/types/category';
 import { PuckEditor } from '@/components/puck/PuckEditor';
+import { guardPublish } from '@/lib/puck/content-guard';
 import { useNotify } from '@/hooks/useNotify';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
@@ -170,6 +171,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
 
     // 使用 ref 中的最新內容
     const latestContent = puckContentRef.current;
+    if (publish && !guardPublish(latestContent, notify)) return;
     console.log('[NewsFormPage] Submitting news');
     console.log('  - Content from state:', formData.content?.length || 0, 'chars');
     console.log('  - Content from ref:', latestContent?.length || 0, 'chars');

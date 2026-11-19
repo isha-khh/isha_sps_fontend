@@ -1,13 +1,40 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Puck, Render, type Data } from '@puckeditor/core';
 import "@puckeditor/core/puck.css";
 import { puckConfig } from '@/lib/puck/config';
+import { checkContentRules, formatIssue, type ContentIssue } from '@/lib/puck/content-rules';
 
 interface PuckEditorProps {
   initialContent?: string;
   onChange: (jsonContent: string) => void;
   onSave?: (jsonContent: string) => void;
 }
+
+/**
+ * 內容檢查結果（規則見 lib/puck/content-rules.ts）：標題列上的小徽章，點開看清單。
+ * 只是提醒；「錯誤」會在表單頁按「發布」時擋下（lib/puck/content-guard.ts），草稿不受影響。
+ */
+const ContentIssues = ({ issues }: { issues: ContentIssue[] }) => {
+  if (issues.length === 0) {
+    return <span className="text-xs text-success px-2">內容檢查：沒有問題</span>;
+  }
+  const errors = issues.filter((issue) => issue.level === 'error').length;
+  return (
+    <details className="relative text-sm" onMouseDown={(e) => e.stopPropagation()}>
+      <summary className={`btn btn-xs ${errors > 0 ? 'btn-error' : 'btn-warning'} list-none`}>
+        內容檢查：{errors > 0 ? `${errors} 個錯誤` : ''}{errors > 0 && issues.length > errors ? '、' : ''}{issues.length > errors ? `${issues.length - errors} 個提醒` : ''}
+      </summary>
+      <ul className="absolute right-0 top-full z-50 mt-1 w-[28rem] max-w-[90vw] space-y-2 rounded-lg border border-base-300 bg-base-100 p-3 text-xs shadow-lg">
+        {issues.map((issue, index) => (
+          <li key={index} className={issue.level === 'error' ? 'text-error' : 'text-warning-content'}>
+            <span className="font-bold">{issue.level === 'error' ? '【錯誤】' : '【提醒】'}</span>
+            {formatIssue(issue)}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+};
 
 export const PuckEditor = ({ initialContent, onChange, onSave }: PuckEditorProps) => {
   const [data, setData] = useState<Data | null>(null);
@@ -16,6 +43,8 @@ export const PuckEditor = ({ initialContent, onChange, onSave }: PuckEditorProps
   const [initialized, setInitialized] = useState(false);
   // 全螢幕編輯器的外層容器：下面用原生事件擋掉裡面的表單送出（見 useEffect）
   const editorContainerRef = useRef<HTMLDivElement>(null);
+  // 每次內容改變就重新檢查（標題跳級、圖片沒有替代文字、連結文字…）
+  const issues = useMemo(() => (data ? checkContentRules(data) : []), [data]);
 
   useEffect(() => {
     // Only load initial content once
@@ -142,6 +171,7 @@ export const PuckEditor = ({ initialContent, onChange, onSave }: PuckEditorProps
         <div className="border border-base-300 rounded-lg overflow-hidden">
           <div className="flex items-center justify-between px-4 py-2 bg-base-200 border-b border-base-300">
             <span className="text-sm text-base-content/60">內容預覽</span>
+            <ContentIssues issues={issues} />
             <button
               type="button"
               onClick={toggleFullscreen}
@@ -187,6 +217,7 @@ export const PuckEditor = ({ initialContent, onChange, onSave }: PuckEditorProps
                       <span className="iconify lucide--minimize size-4" />
                       退出全螢幕
                     </button>
+                    <ContentIssues issues={issues} />
                     <div className="text-sm text-base-content/60 flex items-center px-2">
                       內容會自動儲存，請使用頁面底部的按鈕發布
                     </div>
