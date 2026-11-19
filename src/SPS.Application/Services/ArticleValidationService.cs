@@ -83,13 +83,13 @@ public class ArticleValidationService : IArticleValidationService
         var errors = Validate(content).Where(i => i.IsError).ToList();
         if (errors.Count == 0) return new ArticleCheckResult(kind, id, title, ArticleCheckOutcome.Ok, errors, null);
 
-        var reason = BuildReason(errors);
         if (!applyDraft)
         {
             _logger.LogInformation("內容檢查（預覽）：{Kind} #{Id}「{Title}」有 {Count} 個錯誤：{Reason}", kind, id, title, errors.Count, string.Join("；", errors));
-            return new ArticleCheckResult(kind, id, title, ArticleCheckOutcome.WouldDraft, errors, reason);
+            return new ArticleCheckResult(kind, id, title, ArticleCheckOutcome.WouldDraft, errors, BuildReason(errors, drafted: false));
         }
 
+        var reason = BuildReason(errors, drafted: true);
         draft!(reason);
         await db.SaveChangesAsync(ct);
         _logger.LogWarning("內容檢查：{Kind} #{Id}「{Title}」有 {Count} 個錯誤，已自動轉為草稿：{Reason}", kind, id, title, errors.Count, string.Join("；", errors));
@@ -99,11 +99,19 @@ public class ArticleValidationService : IArticleValidationService
     private static ArticleCheckResult Skipped(ArticleKind kind, int id) =>
         new(kind, id, null, ArticleCheckOutcome.Skipped, Array.Empty<ArticleContentIssue>(), null);
 
-    private static string BuildReason(List<ArticleContentIssue> errors)
+    /// <summary>
+    /// 原因文字。<paramref name="drafted"/>=true 是寫進文章 <c>UnpublishReason</c> 的版本（已轉草稿、請修正後重新發布）；
+    /// false 是預覽模式的版本（只說發現了什麼，沒有動文章，不能寫「已轉草稿」）。
+    /// 每個問題的句尾本來就有「。」，用「；」接起來之前先去掉，才不會出現「。。」。
+    /// </summary>
+    private static string BuildReason(List<ArticleContentIssue> errors, bool drafted)
     {
         // 固定用台北時間（UTC+8，沒有日光節約）顯示，後台使用者看得懂
         var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8));
-        var reason = $"內容檢查（{now:yyyy-MM-dd HH:mm}）發現 {errors.Count} 個問題，已自動轉為草稿：{string.Join("；", errors)}。請修正後重新發布。";
+        var problems = string.Join("；", errors.Select(e => e.ToString().TrimEnd('。')));
+        var reason = drafted
+            ? $"內容檢查（{now:yyyy-MM-dd HH:mm}）發現 {errors.Count} 個問題，已自動轉為草稿：{problems}。請修正後重新發布。"
+            : $"內容檢查（{now:yyyy-MM-dd HH:mm}）發現 {errors.Count} 個問題：{problems}。";
         return reason.Length > MaxReasonChars ? reason[..(MaxReasonChars - 1)] + "…" : reason;
     }
 }

@@ -153,7 +153,7 @@ export const ContentCheckSection = () => {
                         <td>{CONTENT_CHECK_KIND_LABELS[f.kind] ?? f.kind}</td>
                         <td>#{f.id}</td>
                         <td className="max-w-48 truncate" title={f.title ?? ''}>{f.title || '（無標題）'}</td>
-                        <td className="text-xs whitespace-pre-line">{f.reason.replace(/^內容檢查（[^）]*）發現 \d+ 個問題，已自動轉為草稿：/, '').replace(/。請修正後重新發布。$/, '')}</td>
+                        <td className="text-xs whitespace-pre-line">{f.reason.replace(/^內容檢查（[^）]*）發現 \d+ 個問題(，已自動轉為草稿)?：/, '').replace(/。請修正後重新發布。$/, '').replace(/。$/, '')}</td>
                         <td>
                           {f.drafted ? <span className="badge badge-warning badge-sm">已轉草稿</span> : <span className="badge badge-ghost badge-sm">預覽</span>}
                         </td>
