@@ -103,6 +103,7 @@ public class QuestionService : IQuestionService
                 Subject = request.Subject,
                 Answer = request.Answer,
                 Published = question.Published,
+                UnpublishReason = question.UnpublishReason,
                 Ordinal = question.Ordinal,
                 CategoryId = question.CategoryId,
                 CreatedTime = question.CreatedTime,
@@ -158,6 +159,7 @@ public class QuestionService : IQuestionService
         }
 
         if (request.Published.HasValue) question.Published = request.Published.Value;
+        if (question.Published) question.UnpublishReason = null;
         if (request.Ordinal.HasValue) question.Ordinal = request.Ordinal.Value;
         question.CategoryId = request.CategoryId;
         question.UpdatedTime = DateTime.UtcNow;
@@ -172,6 +174,7 @@ public class QuestionService : IQuestionService
             Subject = question.Subject?.DefaultText ?? request.Subject,
             Answer = question.Answer?.DefaultText ?? request.Answer,
             Published = question.Published,
+            UnpublishReason = question.UnpublishReason,
             Ordinal = question.Ordinal,
             CategoryId = question.CategoryId,
             CategoryName = question.Category?.Name,
@@ -201,6 +204,7 @@ public class QuestionService : IQuestionService
             Subject = question.Subject?.DefaultText,
             Answer = question.Answer?.DefaultText,
             Published = question.Published,
+            UnpublishReason = question.UnpublishReason,
             Ordinal = question.Ordinal,
             CategoryId = question.CategoryId,
             CategoryName = question.Category?.Name,

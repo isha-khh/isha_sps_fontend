@@ -8,8 +8,7 @@ import { Rightbar } from '@/components/admin-layout/Rightbar';
 import { ChatBubble } from '@/components/chat/ChatBubble';
 import { CampaignProgressNotifications } from '@/components/mail-center/CampaignProgressNotifications';
 import { useCampaignProgressPolling } from '@/hooks/useCampaignProgressPolling';
-import { ImageCompressionNotification } from '@/components/file/ImageCompressionNotification';
-import { useImageCompressionPolling } from '@/hooks/useImageCompressionPolling';
+import { useAdminRealtime } from '@/hooks/useAdminRealtime';
 import { usePermission, Permission } from '@/hooks/usePermission';
 import type { ISidebarMenuItem } from '@/components/admin-layout/SidebarMenuItem';
 
@@ -288,8 +287,11 @@ export const AdminLayout = () => {
   // 全域輪詢追蹤中的群發郵件進度
   useCampaignProgressPolling();
 
-  // 全域追蹤「壓縮所有圖片」任務進度（只有檔案管理權限者才查）
-  useImageCompressionPolling(hasAny([Permission.ManageFiles]));
+  // 後台即時通知（SignalR `/hubs/admin`）：內容檢查（需「系統設定」權限）與「壓縮所有圖片」（需「檔案管理」權限）的進度推到鈴鐺。沒有對應權限的就不查那一項
+  useAdminRealtime({
+    contentCheck: hasAny([Permission.ManageSettings]),
+    imageCompression: hasAny([Permission.ManageFiles]),
+  });
 
   // 根據使用者權限過濾選單
   const filteredMenuItems = useMemo(() => {
@@ -322,11 +324,8 @@ export const AdminLayout = () => {
       {/* 全局聊天泡泡 */}
       <ChatBubble />
 
-      {/* 全域背景任務進度通知（群發郵件、壓縮所有圖片） */}
-      <div className="fixed bottom-24 right-4 z-50 flex flex-col gap-2 w-80 max-w-[calc(100vw-2rem)]">
-        <ImageCompressionNotification />
-        <CampaignProgressNotifications />
-      </div>
+      {/* 全域群發郵件進度通知 */}
+      <CampaignProgressNotifications />
     </ConfigProvider>
   );
 };

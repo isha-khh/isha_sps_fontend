@@ -7,6 +7,12 @@ public class News : BaseEntity<int>
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public bool Published { get; set; }
+
+    /// <summary>
+    /// 內容檢查（背景索引時跑）發現問題而自動轉成草稿時，寫下原因（哪個區塊、什麼規則）；沒被自動轉草稿過、或重新發布之後為 null。
+    /// 規則見 <c>ArticleContentRules</c>。重新發布（<c>Published = true</c>）會清掉這個欄位。
+    /// </summary>
+    public string? UnpublishReason { get; set; }
     public int Ordinal { get; set; }
     public int? TitleId { get; set; }
     public int? IntroductionId { get; set; }

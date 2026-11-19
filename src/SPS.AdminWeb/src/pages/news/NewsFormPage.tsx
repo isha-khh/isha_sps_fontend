@@ -29,6 +29,8 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
     type: 0,
     section,
   });
+  // 被內容檢查（背景索引時跑）自動轉成草稿的原因，有的話在表單上方提示；重新發布後後端會清掉
+  const [unpublishReason, setUnpublishReason] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
@@ -113,6 +115,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
       setIsLoading(true);
       try {
         const data = await newsApi.getNewsById(Number(id));
+        setUnpublishReason(data.unpublishReason ?? null);
         const newsData = {
           title: data.title,
           introduction: data.introduction,
@@ -258,6 +261,16 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           { label: isEditMode ? '編輯' : '新增', active: true },
         ]}
       />
+
+      {unpublishReason && !formData.published && (
+        <div role="alert" className="alert alert-warning items-start">
+          <span className="iconify lucide--triangle-alert mt-0.5 size-5 shrink-0" />
+          <div>
+            <div className="font-semibold">這篇內容被內容檢查自動轉成草稿</div>
+            <div className="text-sm whitespace-pre-line">{unpublishReason}</div>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-4">
         <button onClick={() => navigate(-1)} className="btn btn-ghost">

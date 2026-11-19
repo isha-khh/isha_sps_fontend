@@ -47,6 +47,7 @@ public class NewsService : INewsService
                 StartDate = n.StartDate,
                 EndDate = n.EndDate,
                 Published = n.Published,
+                UnpublishReason = n.UnpublishReason,
                 CategoryId = n.CategoryId,
                 CategoryName = n.Category?.Name,
                 CategoryBadge = BadgeStyleDto.From(n.Category?.BadgeColor, n.Category?.BadgeTextColor, n.Category?.BadgeBorderColor),
@@ -95,6 +96,7 @@ public class NewsService : INewsService
             StartDate = news.StartDate,
             EndDate = news.EndDate,
             Published = news.Published,
+            UnpublishReason = news.UnpublishReason,
             Ordinal = news.Ordinal,
             CategoryId = news.CategoryId,
             CategoryName = news.Category?.Name,
@@ -209,6 +211,7 @@ public class NewsService : INewsService
                 StartDate = news.StartDate,
                 EndDate = news.EndDate,
                 Published = news.Published,
+                UnpublishReason = news.UnpublishReason,
                 Ordinal = news.Ordinal,
                 CategoryId = news.CategoryId,
                 CategoryIds = AllCategoryIds(news).ToList(),
@@ -346,6 +349,8 @@ public class NewsService : INewsService
         if (request.ClearEndDate == true) news.EndDate = null;
         else if (request.EndDate.HasValue) news.EndDate = request.EndDate;
         if (request.Published.HasValue) news.Published = request.Published.Value;
+        // 重新發布就清掉「被內容檢查轉草稿」的原因（存成草稿時保留，後台才看得到為什麼）
+        if (news.Published) news.UnpublishReason = null;
         if (request.Ordinal.HasValue) news.Ordinal = request.Ordinal.Value;
         if (newCategoryIds != null)
         {
@@ -397,6 +402,7 @@ public class NewsService : INewsService
             StartDate = news.StartDate,
             EndDate = news.EndDate,
             Published = news.Published,
+            UnpublishReason = news.UnpublishReason,
             Ordinal = news.Ordinal,
             CategoryId = news.CategoryId,
             CategoryName = updatedCategoryNames.GetValueOrDefault(news.CategoryId ?? 0),

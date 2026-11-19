@@ -45,7 +45,7 @@ public class FileManagementController : ControllerBase
     public async Task<IActionResult> EnqueueImageCompression(CancellationToken cancellationToken)
     {
         var who = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity?.Name;
-        var result = await _imageCompression.EnqueueAsync(who, cancellationToken);
+        var result = await _imageCompression.EnqueueAsync(who, User.FindFirst(ClaimTypes.NameIdentifier)?.Value, cancellationToken);
         return Ok(result);
     }
 

@@ -46,12 +46,15 @@ public class ImageCompressionEnqueueResult
 }
 
 /// <summary>
-/// 後台手動「壓縮所有圖片」：任務進佇列、由背景工作逐批處理，前端輪詢進度。
+/// 後台手動「壓縮所有圖片」：任務進佇列、由背景工作逐批處理，進度即時推給後台鈴鐺（<see cref="IAdminRealtimeNotifier"/>，需要「檔案管理」權限），
+/// 結束時寫一則「系統」通知給啟動的人。
 /// 任務狀態存在記憶體；伺服器重啟會中斷，但已處理的檔案都有標記，再按一次會從剩下的接續。
 /// </summary>
 public interface IImageCompressionJobService
 {
-    Task<ImageCompressionEnqueueResult> EnqueueAsync(string? requestedBy, CancellationToken ct);
+    /// <param name="requestedBy">顯示用的啟動者名稱</param>
+    /// <param name="recipient">結束通知的收件人（後台使用者 Id，鈴鐺依這個撈）；null 就不寫通知</param>
+    Task<ImageCompressionEnqueueResult> EnqueueAsync(string? requestedBy, string? recipient, CancellationToken ct);
     Task<ImageCompressionStatusDto> GetStatusAsync(CancellationToken ct);
     bool Cancel(Guid jobId);
 }
