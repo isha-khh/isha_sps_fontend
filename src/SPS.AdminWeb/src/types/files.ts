@@ -207,6 +207,8 @@ export interface ImageCompressionJob {
   processed: number;
   converted: number;
   keptOriginal: number;
+  /** 資料庫有紀錄但磁碟上找不到檔案（已略過並標記為已評估，不算失敗） */
+  missing: number;
   failed: number;
   /** 已省下的容量（bytes） */
   savedBytes: number;

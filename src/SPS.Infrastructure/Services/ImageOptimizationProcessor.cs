@@ -14,10 +14,14 @@ public sealed class ImageOptimizationTotals
 {
     public int Converted;
     public int KeptOriginal;
+    /// <summary>處理時丟了例外的（解碼、寫檔、資料庫…）；不會被標記，下次執行會再試</summary>
     public int Failed;
+    /// <summary>資料庫有這筆紀錄、磁碟上卻沒有實體檔案（<see cref="FileNotFoundException"/>）。不是壓縮的問題，是舊資料
+    /// （例如資料庫是從別處複製、上傳檔案沒跟著來），所以另外計、不算失敗，也不會被一直重試</summary>
+    public int Missing;
     public long SavedBytes;
 
-    public int Processed => Converted + KeptOriginal + Failed;
+    public int Processed => Converted + KeptOriginal + Failed + Missing;
 }
 
 /// <summary>
@@ -85,6 +89,26 @@ public sealed class ImageOptimizationProcessor
                 catch (OperationCanceledException)
                 {
                     throw;
+                }
+                catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+                {
+                    // 檔案不見了：重試也不會變出檔案，所以標記成「已評估」，不再出現在待處理數字裡、也不會每次都報一次失敗。
+                    // 標記的是「評估過、沒有東西可處理」；之後若把檔案補回磁碟，要重新壓縮就把該筆的 ImageOptimizedAt 清成 null
+                    totals.Missing++;
+                    _logger.LogWarning("圖片壓縮：資料庫有紀錄但磁碟上找不到檔案，已略過並標記為已評估：{Id} {Path}", file.Id, file.StoragePath);
+                    if (!dryRun)
+                    {
+                        try
+                        {
+                            file.ImageOptimizedAt = DateTime.UtcNow;
+                            await db.SaveChangesAsync(ct);
+                        }
+                        catch (Exception markEx) when (markEx is not OperationCanceledException)
+                        {
+                            _logger.LogWarning(markEx, "標記遺失檔案失敗：{Id}", file.Id);
+                            db.ChangeTracker.Clear();
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {

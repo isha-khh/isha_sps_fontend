@@ -125,6 +125,7 @@ public sealed class ImageCompressionJobService : BackgroundService, IImageCompre
         Converted = j.Totals.Converted,
         KeptOriginal = j.Totals.KeptOriginal,
         Failed = j.Totals.Failed,
+        Missing = j.Totals.Missing,
         SavedBytes = j.Totals.SavedBytes,
         RequestedBy = j.RequestedBy,
         CreatedAt = j.CreatedAt,
@@ -193,8 +194,8 @@ public sealed class ImageCompressionJobService : BackgroundService, IImageCompre
                 job.Status = "Completed";
                 job.FinishedAt = DateTime.UtcNow;
             }
-            _logger.LogInformation("圖片壓縮任務完成：{Id}，轉成 WebP {C} 個、維持原檔 {K} 個、失敗 {F} 個，省 {S:F1} MB",
-                job.Id, job.Totals.Converted, job.Totals.KeptOriginal, job.Totals.Failed, job.Totals.SavedBytes / 1048576.0);
+            _logger.LogInformation("圖片壓縮任務完成：{Id}，轉成 WebP {C} 個、維持原檔 {K} 個、檔案遺失 {M} 個、失敗 {F} 個，省 {S:F1} MB",
+                job.Id, job.Totals.Converted, job.Totals.KeptOriginal, job.Totals.Missing, job.Totals.Failed, job.Totals.SavedBytes / 1048576.0);
         }
         catch (OperationCanceledException)
         {
@@ -234,7 +235,7 @@ public sealed class ImageCompressionJobService : BackgroundService, IImageCompre
                 "Cancelled" => "壓縮所有圖片已取消",
                 _ => "壓縮所有圖片中斷",
             };
-            var content = $"已處理 {dto.Processed} / {dto.Total} 個：轉成 WebP {dto.Converted} 個、維持原檔 {dto.KeptOriginal} 個、失敗 {dto.Failed} 個，共省下 {dto.SavedBytes / 1048576.0:F1} MB。";
+            var content = $"已處理 {dto.Processed} / {dto.Total} 個：轉成 WebP {dto.Converted} 個、維持原檔 {dto.KeptOriginal} 個、檔案遺失 {dto.Missing} 個、失敗 {dto.Failed} 個，共省下 {dto.SavedBytes / 1048576.0:F1} MB。";
             if (!string.IsNullOrEmpty(dto.Error)) content += $"\n錯誤：{dto.Error}";
 
             using var scope = _scopes.CreateScope();

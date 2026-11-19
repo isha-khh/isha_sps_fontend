@@ -25,6 +25,7 @@ export const ImageCompressionBellItem = () => {
   const queued = job.status === 'Queued';
   const pct = job.total > 0 ? Math.min(100, Math.round((job.processed / job.total) * 100)) : 0;
 
+  // 失敗才用警告色；檔案遺失是舊資料問題（不是壓縮的錯），在文字裡另外說明就好
   const warn = job.status === 'Completed' && job.failed > 0;
   const color = active ? 'bg-info' : job.status === 'Completed' ? (warn ? 'bg-warning' : 'bg-success') : job.status === 'Cancelled' ? 'bg-neutral' : 'bg-error';
   const icon = active ? 'lucide--image-down' : job.status === 'Completed' ? (warn ? 'lucide--alert-triangle' : 'lucide--check-circle') : job.status === 'Cancelled' ? 'lucide--circle' : 'lucide--x-circle';
@@ -65,9 +66,10 @@ export const ImageCompressionBellItem = () => {
             <p className="text-error mt-1 text-xs">{job.error || '處理過程發生錯誤'}</p>
           ) : (
             <p className="text-base-content/70 mt-1 text-xs whitespace-pre-line">
-              {job.processed} / {job.total} 張（轉成 WebP {job.converted}・維持原檔 {job.keptOriginal}・失敗 {job.failed}）{'\n'}
+              {job.processed} / {job.total} 張（轉成 WebP {job.converted}・維持原檔 {job.keptOriginal}{job.missing > 0 ? `・檔案遺失 ${job.missing}` : ''}・失敗 {job.failed}）{'\n'}
               {active ? '已省下' : '共省下'} {formatBytes(job.savedBytes)}
               {job.status === 'Cancelled' ? '\n再按一次「壓縮所有圖片」會從剩下的接續。' : ''}
+              {!active && job.missing > 0 ? `\n檔案遺失：資料庫有 ${job.missing} 筆圖片紀錄，但磁碟上找不到檔案，已略過（伺服器日誌有清單）。` : ''}
             </p>
           )}
 

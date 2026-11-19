@@ -18,6 +18,9 @@ public class ImageCompressionJobDto
     public int KeptOriginal { get; set; }
     public int Failed { get; set; }
 
+    /// <summary>資料庫有紀錄但磁碟上找不到檔案的數量（已略過並標記為已評估，不算失敗）</summary>
+    public int Missing { get; set; }
+
     /// <summary>已省下的容量（bytes）</summary>
     public long SavedBytes { get; set; }
 

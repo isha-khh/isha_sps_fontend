@@ -102,8 +102,8 @@ public class ImageOptimizationBackgroundService : BackgroundService
                 }
 
                 _logger.LogInformation(
-                    "圖片背景壓縮：這一輪處理完畢——轉成 WebP {Converted} 個、維持原檔 {Kept} 個、失敗 {Failed} 個，{Mode}共省 {Saved:F1} MB",
-                    totals.Converted, totals.KeptOriginal, totals.Failed, options.DryRun ? "預估" : "實際", totals.SavedBytes / 1048576.0);
+                    "圖片背景壓縮：這一輪處理完畢——轉成 WebP {Converted} 個、維持原檔 {Kept} 個、檔案遺失 {Missing} 個、失敗 {Failed} 個，{Mode}共省 {Saved:F1} MB",
+                    totals.Converted, totals.KeptOriginal, totals.Missing, totals.Failed, options.DryRun ? "預估" : "實際", totals.SavedBytes / 1048576.0);
 
                 if (options.DryRun) return; // 試算只跑一輪
 
