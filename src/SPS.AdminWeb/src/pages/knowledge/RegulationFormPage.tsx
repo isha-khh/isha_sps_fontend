@@ -29,6 +29,8 @@ export const RegulationFormPage = () => {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
+  // 被內容檢查（系統設定 → 內容檢查）自動轉成草稿的原因，有的話在表單上方提示；重新發布後後端會清掉
+  const [unpublishReason, setUnpublishReason] = useState<string | null>(null);
 
   // 使用 ref 保存最新的 Puck 內容
   const puckContentRef = useRef<string>('');
@@ -54,6 +56,7 @@ export const RegulationFormPage = () => {
       setIsLoading(true);
       try {
         const data = await regulationsApi.getById(Number(id));
+        setUnpublishReason(data.unpublishReason ?? null);
         setFormData({
           name: data.name || '',
           title: data.title || '',
@@ -132,6 +135,16 @@ export const RegulationFormPage = () => {
           { label: isEditMode ? '編輯' : '新增', active: true },
         ]}
       />
+
+      {unpublishReason && !formData.published && (
+        <div role="alert" className="alert alert-warning items-start">
+          <span className="iconify lucide--triangle-alert mt-0.5 size-5 shrink-0" />
+          <div>
+            <div className="font-semibold">這篇內容被內容檢查自動轉成草稿</div>
+            <div className="text-sm whitespace-pre-line">{unpublishReason}</div>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-4">
         <button onClick={() => navigate(-1)} className="btn btn-ghost">

@@ -9,6 +9,8 @@ export interface RegulationsResponse {
   title?: string;
   content?: string;
   published: boolean;
+  /** 被內容檢查自動轉成草稿的原因；沒有則為空。重新發布後會清掉 */
+  unpublishReason?: string | null;
   type: number;
   ordinal: number;
   categoryId?: number;

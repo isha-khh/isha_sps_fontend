@@ -174,6 +174,7 @@ public class SuccessCaseService : ISuccessCaseService
                 successCase.PublishedDate = request.PublishedDate;
             if (request.IsPublished.HasValue)
                 successCase.IsPublished = request.IsPublished.Value;
+            if (successCase.IsPublished) successCase.UnpublishReason = null;
             if (request.CompanyIds != null)
                 successCase.CompanyIds = request.CompanyIds.Distinct().ToList();
             // 已發布的案例一定要有發布日期（排序與前台顯示用）：清除後仍是發布狀態就補上當下時間
@@ -252,6 +253,7 @@ public class SuccessCaseService : ISuccessCaseService
                 return Result<SuccessCaseDto>.Failure("成功案例不存在");
 
             successCase.IsPublished = isPublished;
+            if (isPublished) successCase.UnpublishReason = null;
             if (isPublished && !successCase.PublishedDate.HasValue)
                 successCase.PublishedDate = DateTime.UtcNow;
 
@@ -362,6 +364,7 @@ public class SuccessCaseService : ISuccessCaseService
             Tags = tags,
             PublishedDate = successCase.PublishedDate,
             IsPublished = successCase.IsPublished,
+            UnpublishReason = successCase.UnpublishReason,
             ViewCount = successCase.ViewCount,
             CompanyIds = successCase.CompanyIds,
             CreatedTime = successCase.CreatedTime,

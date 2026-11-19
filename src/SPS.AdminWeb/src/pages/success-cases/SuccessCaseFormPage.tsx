@@ -22,6 +22,8 @@ export const SuccessCaseFormPage = () => {
   const navigate = useNavigate();
   const isEditMode = id !== 'new';
 
+  // 被內容檢查（背景索引時跑）自動轉成草稿的原因，有的話在表單上方提示；重新發布後後端會清掉
+  const [unpublishReason, setUnpublishReason] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -74,6 +76,7 @@ export const SuccessCaseFormPage = () => {
     setIsLoading(true);
     try {
       const data = await successCasesApi.getSuccessCaseById(caseId);
+      setUnpublishReason(data.unpublishReason ?? null);
       setFormData({
         title: data.title,
         companyName: data.companyName,
@@ -163,6 +166,16 @@ export const SuccessCaseFormPage = () => {
           { label: isEditMode ? '編輯案例' : '新增案例', active: true },
         ]}
       />
+
+      {unpublishReason && !formData.isPublished && (
+        <div role="alert" className="alert alert-warning items-start">
+          <span className="iconify lucide--triangle-alert mt-0.5 size-5 shrink-0" />
+          <div>
+            <div className="font-semibold">這篇內容被內容檢查自動轉成草稿</div>
+            <div className="text-sm whitespace-pre-line">{unpublishReason}</div>
+          </div>
+        </div>
+      )}
 
       {/*
         視覺化編輯器（Puck）整個放在這個 <form> 裡，而它的富文字工具列按鈕（粗體、斜體、底線、標題、清單、對齊）

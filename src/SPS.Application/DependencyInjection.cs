@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<ILicenseService, SPS.Application.Services.Licensing.LicenseService>();
         services.AddSingleton<IStaffNotifier, StaffNotifier>();
         services.AddScoped<IMemberFavoriteService, MemberFavoriteService>();
+        services.AddScoped<IArticleValidationService, ArticleValidationService>();
         services.AddScoped<IContentIndexingService, ContentIndexingService>();
         services.AddScoped<INewsService, NewsService>();
         services.AddScoped<IPopupAnnouncementService, PopupAnnouncementService>();

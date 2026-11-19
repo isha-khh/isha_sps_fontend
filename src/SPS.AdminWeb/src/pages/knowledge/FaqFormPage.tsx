@@ -24,6 +24,8 @@ export const FaqFormPage = () => {
     published: false,
     ordinal: 0,
   });
+  // 被內容檢查（背景索引時跑）自動轉成草稿的原因，有的話在表單上方提示；重新發布後後端會清掉
+  const [unpublishReason, setUnpublishReason] = useState<string | null>(null);
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
@@ -52,6 +54,7 @@ export const FaqFormPage = () => {
       setIsLoading(true);
       try {
         const data = await questionsApi.getById(Number(id));
+        setUnpublishReason(data.unpublishReason ?? null);
         setFormData({
           subject: data.subject || '',
           answer: data.answer || '',
@@ -128,6 +131,16 @@ export const FaqFormPage = () => {
           { label: isEditMode ? '編輯' : '新增', active: true },
         ]}
       />
+
+      {unpublishReason && !formData.published && (
+        <div role="alert" className="alert alert-warning items-start">
+          <span className="iconify lucide--triangle-alert mt-0.5 size-5 shrink-0" />
+          <div>
+            <div className="font-semibold">這篇內容被內容檢查自動轉成草稿</div>
+            <div className="text-sm whitespace-pre-line">{unpublishReason}</div>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-4">
         <button onClick={() => navigate(-1)} className="btn btn-ghost">

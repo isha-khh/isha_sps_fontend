@@ -83,6 +83,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 // 讓共用路徑也優先取 adminAccessToken。這只是「先取哪個 cookie」的提示，
                 // token 本身仍會完整驗簽，角色/權限檢查也照常，帶這個標頭不會得到任何額外權限
                 var preferAdminToken = context.Request.Path.StartsWithSegments("/api/admin")
+                    || context.Request.Path.StartsWithSegments("/hubs/admin") // WebSocket 連線無法帶自訂標頭，後台 hub 直接用路徑判斷
                     || context.Request.Headers["X-Admin-Client"] == "1";
                 if (preferAdminToken)
                 {
@@ -133,6 +134,8 @@ builder.Services.AddControllers(options =>
 
 // Add SignalR
 builder.Services.AddSignalR();
+// 後台即時通知（內容檢查進度推給鈴鐺）：蓋掉 Infrastructure 註冊的「什麼都不做」版本
+builder.Services.AddSingleton<SPS.Application.Interfaces.IServices.IAdminRealtimeNotifier, SPS.Api.Hubs.AdminRealtimeNotifier>();
 
 // Forwarded Headers (Nginx reverse proxy 轉發 HTTPS 資訊)
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -351,6 +354,7 @@ app.MapGet("/api/health", () => Results.Ok(new
 // Map SignalR Hubs
 app.MapHub<SPS.Api.Hubs.CustomerHub>("/hubs/customer");
 app.MapHub<SPS.Api.Hubs.MemberHub>("/hubs/member");
+app.MapHub<SPS.Api.Hubs.AdminHub>("/hubs/admin");
 
 app.MapControllers();
 
