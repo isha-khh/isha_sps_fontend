@@ -287,8 +287,11 @@ export const AdminLayout = () => {
   // 全域輪詢追蹤中的群發郵件進度
   useCampaignProgressPolling();
 
-  // 後台即時通知（SignalR）：內容檢查進度推到鈴鐺。只有「系統設定」權限的人連
-  useAdminRealtime(hasAny([Permission.ManageSettings]));
+  // 後台即時通知（SignalR `/hubs/admin`）：內容檢查（需「系統設定」權限）與「壓縮所有圖片」（需「檔案管理」權限）的進度推到鈴鐺。沒有對應權限的就不查那一項
+  useAdminRealtime({
+    contentCheck: hasAny([Permission.ManageSettings]),
+    imageCompression: hasAny([Permission.ManageFiles]),
+  });
 
   // 根據使用者權限過濾選單
   const filteredMenuItems = useMemo(() => {

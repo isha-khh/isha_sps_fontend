@@ -4,6 +4,8 @@ import { notificationsApi } from '@/lib/api/notifications';
 import { adminAuthApi } from '@/lib/api/admin-auth';
 import type { NotificationResponse } from '@/types/notification';
 import { ContentCheckBellItem } from '@/components/system/ContentCheckBellItem';
+import { ImageCompressionBellItem } from '@/components/file/ImageCompressionBellItem';
+import { isImageCompressionActive, useImageCompressionStore } from '@/stores/image-compression-store';
 import { isContentCheckActive, useContentCheckStore } from '@/stores/content-check-store';
 
 export const TopbarNotificationButton = () => {
@@ -20,6 +22,12 @@ export const TopbarNotificationButton = () => {
   const checkDismissed = useContentCheckStore((s) => s.dismissed);
   const checkVisible = checkJob !== null && !checkDismissed;
   const checkStatus = checkJob?.status;
+
+  // 「壓縮所有圖片」（背景任務）的進度卡片，同樣由 SignalR 推進來
+  const compressJob = useImageCompressionStore((s) => s.job);
+  const compressDismissed = useImageCompressionStore((s) => s.dismissed);
+  const compressVisible = compressJob !== null && !compressDismissed;
+  const compressStatus = compressJob?.status;
 
   useEffect(() => {
     void fetchCurrentUser();
@@ -43,6 +51,10 @@ export const TopbarNotificationButton = () => {
     if (currentUser && checkStatus && !isContentCheckActive(checkJob)) void fetchNotifications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkStatus]);
+  useEffect(() => {
+    if (currentUser && compressStatus && !isImageCompressionActive(compressJob)) void fetchNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [compressStatus]);
 
   const fetchCurrentUser = async () => {
     try {
@@ -121,10 +133,10 @@ export const TopbarNotificationButton = () => {
   // 計算各標籤的數量
   const teamCount = notifications.filter((n) => n.category === 'team').length;
   const aiCount = notifications.filter((n) => n.category === 'ai').length;
-  const systemCount = notifications.filter((n) => n.category === 'system').length + (checkVisible ? 1 : 0);
+  const systemCount = notifications.filter((n) => n.category === 'system').length + (checkVisible ? 1 : 0) + (compressVisible ? 1 : 0);
   const csCount = notifications.filter((n) => n.category === 'CustomerService').length;
 
-  const totalNotificationBadge = unreadCount + totalUnreadCount + (checkVisible ? 1 : 0);
+  const totalNotificationBadge = unreadCount + totalUnreadCount + (checkVisible ? 1 : 0) + (compressVisible ? 1 : 0);
 
   return (
     <div className="dropdown dropdown-bottom dropdown-end">
@@ -200,6 +212,7 @@ export const TopbarNotificationButton = () => {
 
         {/* 內容檢查進度（全部／系統分頁最上面） */}
         {(activeTab === 'all' || activeTab === 'system') && <ContentCheckBellItem />}
+        {(activeTab === 'all' || activeTab === 'system') && <ImageCompressionBellItem />}
 
         {/* 聊天未讀消息通知 */}
         {totalUnreadCount > 0 && (

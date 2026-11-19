@@ -8,6 +8,8 @@ import type {
   BatchMoveRequest,
   BatchCopyRequest,
   BatchOperationResponse,
+  ImageCompressionStatus,
+  ImageCompressionEnqueueResult,
 } from '@/types/files';
 import type { PagedResponse } from '@/types/api';
 
@@ -248,5 +250,24 @@ export const filesManagementApi = {
       };
       void poll();
     });
-  }
+  },
+
+  // ========== 壓縮所有圖片 ==========
+
+  /** 待壓縮圖片數 + 最近一次（或進行中）任務的進度 */
+  async getImageCompressionStatus(): Promise<ImageCompressionStatus> {
+    const response = await apiClient.get('/api/FileManagement/images/compress/status');
+    return response.data;
+  },
+
+  /** 把所有還沒壓縮過的圖片排進佇列（已有任務進行中時回傳那個任務） */
+  async enqueueImageCompression(): Promise<ImageCompressionEnqueueResult> {
+    const response = await apiClient.post('/api/FileManagement/images/compress');
+    return response.data;
+  },
+
+  /** 取消排隊中或執行中的壓縮任務 */
+  async cancelImageCompression(jobId: string): Promise<void> {
+    await apiClient.post(`/api/FileManagement/images/compress/${jobId}/cancel`);
+  },
 };

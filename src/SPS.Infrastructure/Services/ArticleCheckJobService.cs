@@ -11,7 +11,7 @@ namespace SPS.Infrastructure.Services;
 /// <summary>什麼都不做的即時通知（沒有 API 專案的 SignalR hub 時用，例如測試或背景工具）。API 專案會註冊真的實作蓋掉它。</summary>
 public sealed class NullAdminRealtimeNotifier : IAdminRealtimeNotifier
 {
-    public Task PublishAsync(string eventName, object payload, CancellationToken ct = default) => Task.CompletedTask;
+    public Task PublishAsync(UserPermission requiredPermission, string eventName, object payload, CancellationToken ct = default) => Task.CompletedTask;
 }
 
 /// <summary>
@@ -118,7 +118,7 @@ public sealed class ArticleCheckJobService : BackgroundService, IArticleCheckJob
     {
         try
         {
-            await _notifier.PublishAsync(ProgressEvent, dto, ct);
+            await _notifier.PublishAsync(UserPermission.ManageSettings, ProgressEvent, dto, ct);
         }
         catch (Exception ex)
         {

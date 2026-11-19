@@ -1,3 +1,5 @@
+using SPS.Domain.Enums;
+
 namespace SPS.Application.Interfaces.IServices;
 
 /// <summary>檢查結果裡有問題的一篇（任務狀態裡最多留 <c>MaxFindings</c> 筆，給後台顯示）</summary>
@@ -59,10 +61,12 @@ public interface IArticleCheckJobService
 }
 
 /// <summary>
-/// 把事件即時推給在線的後台使用者（有「系統設定」權限的）。實作在 API 專案（SignalR hub），
-/// 背景服務在 Infrastructure，所以用介面隔開；沒有實作時（測試、背景工具）用什麼都不做的版本。
+/// 把事件即時推給在線的後台使用者。實作在 API 專案（SignalR hub），背景服務在 Infrastructure，所以用介面隔開；
+/// 沒有實作時（測試、背景工具）用什麼都不做的版本。
 /// </summary>
 public interface IAdminRealtimeNotifier
 {
-    Task PublishAsync(string eventName, object payload, CancellationToken ct = default);
+    /// <param name="requiredPermission">只推給有這項後台權限的連線（連線時依 token 的 Permissions claim 分組；
+    /// 目前支援 <see cref="UserPermission.ManageSettings"/>、<see cref="UserPermission.ManageFiles"/>）</param>
+    Task PublishAsync(UserPermission requiredPermission, string eventName, object payload, CancellationToken ct = default);
 }
