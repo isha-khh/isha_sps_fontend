@@ -98,7 +98,7 @@ const FileApp = () => {
                 '• 檔案 ID 與網址不變，公告、Banner 裡的圖不用重貼\n' +
                 '• 原檔會備份到伺服器 Uploads/_originals，確認沒問題後再手動刪除\n' +
                 '• 申請文件、靜態檔案不處理\n' +
-                '• 進入佇列後在背景執行，進度會顯示在右下角通知；可以離開本頁',
+                '• 進入佇列後在背景執行，進度會顯示在右上角鈴鐺；可以離開本頁',
             buttonConfirm: '開始壓縮',
             confirmStyle: 'bg-primary',
         });
@@ -106,7 +106,7 @@ const FileApp = () => {
         try {
             const res = await filesManagementApi.enqueueImageCompression();
             setCompressJob(res.job, { show: true });
-            if (res.alreadyActive) await notify.success('已經有壓縮任務在進行中，進度請看右下角通知');
+            if (res.alreadyActive) await notify.success('已經有壓縮任務在進行中，進度請看右上角鈴鐺');
         } catch (error) {
             console.error('Failed to enqueue image compression:', error);
             await notify.error('無法開始壓縮，請稍後再試');
@@ -333,7 +333,7 @@ const FileApp = () => {
                             className="btn btn-ghost border-base-300 btn-sm"
                             onClick={() => void handleCompressAll()}
                             disabled={compressActive}
-                            title="把還沒壓縮的圖片轉成 WebP（背景執行，進度顯示在右下角）">
+                            title="把還沒壓縮的圖片轉成 WebP（背景執行，進度顯示在右上角鈴鐺）">
                             <Icons.ImageDown size={16}/>
                             {compressActive ? '壓縮中…' : '壓縮所有圖片'}
                             {!compressActive && pendingImages !== null && pendingImages > 0 && (
