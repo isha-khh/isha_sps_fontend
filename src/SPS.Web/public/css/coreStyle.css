@@ -42,7 +42,7 @@ a:hover {
 
 .h3 {
   font-size: 1.625rem;
-  color: var(--main-color);
+  color: #4f7a0f;
   font-weight: bold;
   text-align: center;
   margin-bottom: 30px;
@@ -59,7 +59,7 @@ a:hover {
   color: #000;
   margin-bottom: 20px;
   font-weight: bold;
-  color: var(--main-color);
+  color: #4f7a0f;
 }
 
 .h5 .sub-txt {

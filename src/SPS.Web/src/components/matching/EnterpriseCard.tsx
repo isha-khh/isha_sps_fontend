@@ -20,9 +20,10 @@ export default function EnterpriseCard({ data }: { data: EnterpriseCardData }) {
   return (
     <div className="col-lg-3 col-md-4 col-12 item equal_card mb-md-4 mb-4">
       <div className="item_box">
-        <Link href={data.href} className="pic" title={data.title}>
+        {/* 圖片連結、「詳細資料」都跟標題連結同一目的地：不進 Tab 順序、不給輔助科技念（HM1240402E） */}
+        <Link href={data.href} className="pic" tabIndex={-1} aria-hidden="true">
           <div className="ratio ratio-4x3">
-            <img className="img-fluid d-block" src={data.image} alt={data.title} />
+            <img className="img-fluid d-block" src={data.image} alt="" />
           </div>
         </Link>
 
@@ -40,15 +41,15 @@ export default function EnterpriseCard({ data }: { data: EnterpriseCardData }) {
             <ul className="nav ul-key">
               {data.keywords.map((keyword) => (
                 <li key={keyword}>
-                  <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                  <span>
                     {keyword}
-                  </a>
+                  </span>
                 </li>
               ))}
             </ul>
           )}
 
-          <Link href={data.href} title="詳細資料" className="det_more">
+          <Link href={data.href} className="det_more" tabIndex={-1} aria-hidden="true">
             詳細資料
           </Link>
         </div>

@@ -9,6 +9,7 @@
  */
 
 import type { ReactNode } from "react";
+import { normalizeHeadingLevels } from "@/lib/heading-levels";
 
 interface RichTextContentProps {
   html: string | ReactNode | undefined | null;
@@ -26,7 +27,7 @@ export function RichTextContent({ html, className }: RichTextContentProps) {
     );
   }
 
-  const safeHtml = toHtml(html);
+  const safeHtml = normalizeHeadingLevels(toHtml(html));
   return (
     <>
       <div
@@ -67,22 +68,24 @@ const richTextStyles = `
   .rich-text-content li {
     margin-bottom: 0.25em;
   }
-  .rich-text-content h2 {
+  /* 標題大小跟「層級」走：內容最上層標題（normalizeHeadingLevels 後是 h3）維持原本 h2 的大小，往下依序縮小 */
+  .rich-text-content h2,
+  .rich-text-content h3 {
     font-size: 1.5em;
     font-weight: 700;
     margin: 0.8em 0 0.4em;
   }
-  .rich-text-content h3 {
+  .rich-text-content h4 {
     font-size: 1.25em;
     font-weight: 600;
     margin: 0.6em 0 0.3em;
   }
-  .rich-text-content h4 {
+  .rich-text-content h5 {
     font-size: 1.1em;
     font-weight: 600;
     margin: 0.5em 0 0.25em;
   }
-  .rich-text-content h5 {
+  .rich-text-content h6 {
     font-size: 1em;
     font-weight: 600;
     margin: 0.4em 0 0.2em;

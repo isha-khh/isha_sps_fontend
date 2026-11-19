@@ -89,17 +89,18 @@ export default async function HomeEnterprise() {
               <ul className="nav ul-key">
                 {listing.keywords.map((keyword) => (
                   <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`}>
+                    <span>
                       {keyword}
-                    </a>
+                    </span>
                   </li>
                 ))}
               </ul>
 
               <p>{listing.description}</p>
 
-              <Link href={listing.href} className="news-arrow" title={listing.name}>
-                <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt={`查看${listing.name}`} />
+              {/* 箭頭跟上面的企業名稱連結同一目的地：不進 Tab 順序、不給輔助科技念（HM1240402E） */}
+              <Link href={listing.href} className="news-arrow" tabIndex={-1} aria-hidden="true">
+                <img className="img-fluid d-block" src={withBasePath("/images/home/arrow.svg")} alt="" />
               </Link>
             </div>
           ))}

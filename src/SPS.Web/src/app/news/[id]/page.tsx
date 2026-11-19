@@ -116,7 +116,7 @@ export default async function NewsShowPage({ params }: PageProps<"/news/[id]">) 
         <div className="column_box">
           <div className="tit">
             <div className="tit_nsl">
-              <h3>{article.title}</h3>
+              <h2>{article.title}</h2>
 
               <div className="tit_three d-flex mb-2">
                 <div className="tit_three_left">

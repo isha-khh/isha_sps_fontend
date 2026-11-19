@@ -4,6 +4,7 @@ import { PageTitle } from '@/components/PageTitle';
 import { regulationsApi } from '@/lib/api/regulations';
 import { categoriesApi } from '@/lib/api/category';
 import { PuckEditor } from '@/components/puck/PuckEditor';
+import { guardPublish } from '@/lib/puck/content-guard';
 import type { CreateRegulationsRequest, UpdateRegulationsRequest } from '@/types/regulations';
 import type { CategoryResponse } from '@/types/category';
 import { useNotify } from '@/hooks/useNotify';
@@ -87,6 +88,7 @@ export const RegulationFormPage = () => {
 
     // 使用 ref 中的最新內容
     const latestContent = puckContentRef.current;
+    if (publish && !guardPublish(latestContent, notify)) return;
 
     setIsSaving(true);
     try {

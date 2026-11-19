@@ -15,7 +15,7 @@ export default function PopularCourses({ courses }: { courses: TalentCourse[] })
   return (
     <div className="side2_new">
       <div className="column_box column_course">
-        <h4 className="mb-3">熱門課程</h4>
+        <h2 className="mb-3">熱門課程</h2>
 
         {courses.map((course) => {
           const href = `/talent/${course.id}`;

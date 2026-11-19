@@ -98,7 +98,7 @@ function MemberNavItem() {
 
   return (
     <li className="nav-item dropdown dropdown-left fadeup">
-      <Link href={member ? "/member" : "/member/login"} className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+      <Link href={member ? "/member" : "/member/login"} className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
         <span className="title-main">會員中心</span>
         {unreadShown > 0 && (
           <span className="badge rounded-pill bg-danger ms-1" aria-label={`${unreadShown} 則未讀通知`}>
@@ -165,7 +165,7 @@ function NavLinks() {
 
       {/* 公告事項：/news 已經做出來了，這裡改成真的路由（其他還沒蓋的頁面暫時維持舊站路徑字串） */}
       <li className="nav-item dropdown dropdown-left fadeup">
-        <Link href="/news" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+        <Link href="/news" className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
           <span className="title-main">公告事項</span>
         </Link>
         <ul className="dropdown-menu">
@@ -191,7 +191,7 @@ function NavLinks() {
           （知識加值／輔導／本計畫補助）目前變成沒有連結指過去的孤兒
           資料，還沒清掉，記在 docs/改版規劃.md。 */}
       <li className="nav-item dropdown dropdown-left fadeup">
-        <Link href="/serve" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+        <Link href="/serve" className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
           <span className="title-main">服務專區</span>
         </Link>
         <ul className="dropdown-menu">
@@ -270,7 +270,7 @@ function NavLinks() {
 
       {/* 推廣專區 */}
       <li className="nav-item dropdown dropdown-left fadeup">
-        <Link href="/promotion" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+        <Link href="/promotion" className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
           <span className="title-main">推廣專區</span>
         </Link>
         <ul className="dropdown-menu">
@@ -294,7 +294,7 @@ function NavLinks() {
 
       {/* 我要媒合：企業名錄／媒合對接都已經做出來了，兩個子項都改成真的路由。 */}
       <li className="nav-item dropdown dropdown-left fadeup">
-        <Link href="/matching/enterprise" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+        <Link href="/matching/enterprise" className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
           <span className="title-main">我要媒合</span>
         </Link>
         <ul className="dropdown-menu">

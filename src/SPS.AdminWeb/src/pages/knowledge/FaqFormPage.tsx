@@ -4,6 +4,7 @@ import { PageTitle } from '@/components/PageTitle';
 import { questionsApi } from '@/lib/api/questions';
 import { categoriesApi } from '@/lib/api/category';
 import { PuckEditor } from '@/components/puck/PuckEditor';
+import { guardPublish } from '@/lib/puck/content-guard';
 import type { CreateQuestionRequest, UpdateQuestionRequest } from '@/types/question';
 import type { CategoryResponse } from '@/types/category';
 import { useNotify } from '@/hooks/useNotify';
@@ -83,6 +84,7 @@ export const FaqFormPage = () => {
 
     // 使用 ref 中的最新內容
     const latestAnswer = puckAnswerRef.current;
+    if (publish && !guardPublish(latestAnswer, notify)) return;
 
     setIsSaving(true);
     try {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import { apiClient } from "@/lib/api-client";
+import FormError from "@/components/ui/FormError";
 
 const SCOPE_OPTIONS = ["感測端點", "系統部署", "通訊方式", "作業輔助", "模擬決策", "未指定"];
 
@@ -113,9 +114,9 @@ export default function EnterpriseContactModal({ id, companyId }: { id: string; 
       </div>
 
       {error && (
-        <p className="text-center mt-3" role="alert" style={{ color: "#c0392b" }}>
+        <FormError as="p" className="text-center mt-3" style={{ color: "#c0392b" }}>
           {error}
-        </p>
+        </FormError>
       )}
 
       <div className="co_m_botom" id={`${id}-contact-info`} style={contact ? undefined : { display: "none" }}>

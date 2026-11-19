@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import PasswordField from "@/components/member/PasswordField";
 import DocumentUploadField, { type DocumentPreviewData } from "@/components/member/DocumentUploadField";
@@ -14,6 +14,7 @@ import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
 import IndustrySelect from "@/components/member/IndustrySelect";
 import { industryError } from "@/lib/member-registration-data";
 import { getApiErrorMessage } from "@/lib/error-utils";
+import { focusFirstInvalidField } from "@/lib/form-focus";
 import { DocumentType } from "@/types/api";
 import { ApplicantType as ApplicantTypeEnum, CompanyLevel, MemberRole, type ApplicationResponse, type CreateApplicationRequest } from "@/types/application";
 
@@ -140,6 +141,13 @@ export default function MemberDetailsForm({
   const [docs, setDocs] = useState<DocumentSlots>({ companyRegistration: null, capability: null, application: null, other: null });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>();
+  // 驗證沒過時把焦點帶到第一個沒填的必填欄位（或錯誤訊息），見 lib/form-focus.ts
+  const errorRef = useRef<HTMLDivElement>(null);
+  const [errorSeq, setErrorSeq] = useState(0);
+  useEffect(() => {
+    if (errorSeq === 0) return;
+    focusFirstInvalidField(errorRef.current?.closest("main"), errorRef.current);
+  }, [errorSeq]);
 
   // ---- Step4（mode="review"）送出狀態 ----
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
@@ -188,6 +196,7 @@ export default function MemberDetailsForm({
     const validationError = validateEditForm();
     if (validationError) {
       setError(validationError);
+      setErrorSeq((n) => n + 1);
       return;
     }
 
@@ -564,7 +573,7 @@ export default function MemberDetailsForm({
       )}
 
       {mode === "edit" && error && (
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger" role="alert" ref={errorRef} tabIndex={-1}>
           {error}
         </div>
       )}
