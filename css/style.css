@@ -5412,7 +5412,7 @@ wid-video  .slick-list{
 
 .wid-video .video-card .date {
     position: relative;
-    color: #00b09b;
+    color: #008575;
     font-size: 1rem;
     padding-left: 15px;
     margin-bottom: 5px;
@@ -5635,17 +5635,17 @@ wid-video  .slick-list{
     }
 
 .footer-title {
-    color: #00a0e9;
+    color: #084cbb;
     font-size: 1.25rem;
     font-weight: bold;
     margin-bottom: 16px;
-    background: #33daff;
+    /*    background: #33daff;
     background: linear-gradient(to right, #33daff 35%, #3ca6ff 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    color: transparent;
-    display:table;
+    color: transparent;*/
+    display: table;
 }
 
 
