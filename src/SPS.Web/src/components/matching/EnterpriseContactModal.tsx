@@ -95,11 +95,12 @@ export default function EnterpriseContactModal({ id, companyId }: { id: string; 
       </div>
 
       <div className="card-footer d-flex justify-content-center">
-        <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
+        <a className="btn-outline-dark me-2" href="#" role="button" title="取消" data-bs-dismiss="modal">
           取消
         </a>
         <a
           href="#"
+          role="button"
           className="btn-theme mat_Send"
           aria-expanded={contact !== null}
           aria-controls={`${id}-contact-info`}

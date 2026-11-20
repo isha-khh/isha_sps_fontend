@@ -194,11 +194,12 @@ export default function PublishNeedModal({ id, taxonomy }: { id: string; taxonom
       {inlineNotice && submittedNumber && <p className="text-success mb-3">已收到您的刊登需求（編號 {submittedNumber}），將於審核後上架。</p>}
 
       <div className="card-footer d-flex justify-content-center">
-        <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
+        <a className="btn-outline-dark me-2" href="#" role="button" title="取消" data-bs-dismiss="modal">
           取消
         </a>
         <a
           href="#"
+          role="button"
           className="btn-theme mat_Send"
           aria-disabled={submitting}
           onClick={(event) => {

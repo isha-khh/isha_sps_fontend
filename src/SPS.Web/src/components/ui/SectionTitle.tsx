@@ -24,7 +24,7 @@ export default function SectionTitle({
 }) {
   return (
     <>
-      <div className="sub_tag">{eyebrow}</div>
+      <div className="sub_tag" lang="en">{eyebrow}</div>
       <h2 className="h2">{children}</h2>
       {description && <p>{description}</p>}
     </>
