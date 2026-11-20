@@ -57,8 +57,7 @@ export default function NotFound() {
               <div className="content" style={{ flex: "1 1 100%", width: "100%", maxWidth: "100%" }}>
                 <div className="error_wrap">
                   <div className="error_wrap_top">
-                    <img className="img-fluid d-block" src={withBasePath("/images/all/logo.svg")} alt="智慧工安技術 產業資訊暨媒合平台" />
-
+                    {/* 這裡原本有一顆大 LOGO（設計稿 httpstatus.html 的樣子），但上方 header 已經有 LOGO，重複了（issue #99），拿掉 */}
                     <div className="error_content">
                       <h2 className="error_title">找不到網路資源</h2>
                       <p className="error_desc">

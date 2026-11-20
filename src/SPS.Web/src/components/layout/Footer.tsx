@@ -144,6 +144,11 @@ export default async function Footer() {
                     網站導覽
                   </Link>
                 </li>
+                <li>
+                  <Link href="/privacy" title="前往 隱私權政策">
+                    隱私權政策
+                  </Link>
+                </li>
               </ul>
             </div>
 

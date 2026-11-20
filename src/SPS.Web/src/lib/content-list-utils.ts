@@ -58,7 +58,17 @@ export function resolveBackendAssetUrl(path?: string | null): string | undefined
   if (/^https?:\/\//i.test(path)) return path; // 已經是完整網址，不用處理
 
   const base = process.env.NEXT_PUBLIC_API_BASE?.trim().replace(/\/+$/, "");
-  if (!base) return path; // 沒設定 base 的話至少退回原始相對路徑，不要整個丟掉
+  if (!base) {
+    // 沒設定公開後端位址：正式環境是前台與後端同網域，由外部 nginx 把 `/{站台路徑}/api/` 轉給後端。
+    // 這時「不帶站台前綴」的 `/api/FileManagement/…` 會打到網域根目錄的 `/api/`——正式網域（sdd.nat.gov.tw）
+    // 根目錄不屬於本站，會 404——所以補上站台 basePath（跟 api-client.ts 的 `withBasePath` 同一套規則：
+    // 只處理 `/` 開頭、已經有前綴的不重複補）。走 `apiClient` 的資料已經被攔截器補過，這裡不會重複補；
+    // 走 `fetch` 的（例如「我要投稿」頁的下載檔案與圖片）才是這裡真正補上的。
+    const raw = process.env.NEXT_PUBLIC_BASE_PATH?.trim() ?? "";
+    const basePath = raw ? (raw.startsWith("/") ? raw : `/${raw}`) : "";
+    if (!basePath || !path.startsWith("/") || path === basePath || path.startsWith(`${basePath}/`)) return path;
+    return `${basePath}${path}`;
+  }
 
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }

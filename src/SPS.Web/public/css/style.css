@@ -1196,13 +1196,17 @@ body   .main .side .nav > li + li {
 
   /*side2*/
     .side2 h4.mb-3,
-    .side2 h4.mb-4 {
+    .side2 h4.mb-4,
+    .side2 h2.mb-3,
+    .side2 h2.mb-4 {
     position: relative;
     padding-left: 12px;
  
 }
         .side2 h4.mb-3:before,
-        .side2 h4.mb-4:before {
+        .side2 h4.mb-4:before,
+        .side2 h2.mb-3:before,
+        .side2 h2.mb-4:before {
             content: " ";
             display: block;
             position: absolute;
@@ -1671,6 +1675,84 @@ a.det_more {
     text-align: center;
     border-radius: 5px;
     margin: 10px 0 20px;
+}
+/* 卡片等高（企業名錄 EnterpriseCard、政府補助資源）：同一列卡片拉成一樣高，標籤區固定保留兩行，按鈕貼底 */
+.item.equal_card .item_box {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.item.equal_card .item_box .tit {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.item.equal_card .item_box .tit ul.ul-key {
+    /* 兩行標籤：每行 = 標籤高（行高 1.5 × 0.875rem + 上下 padding 10px）+ 下方間距 8px */
+    min-height: calc(2 * (1.3125rem + 18px));
+    align-content: flex-start;
+}
+.item.equal_card .item_box .tit .tit_nsl {
+    margin-bottom: 10px; /* 按鈕貼底後，內容與按鈕之間至少留的間距 */
+}
+.item.equal_card .item_box .tit a.det_more {
+    margin-top: auto;
+}
+/* 政府補助資源（support_card）：標題、簡介固定保留兩行，下方條列資訊每項最多兩行，各欄有沒有填、字多字少都不會讓卡片錯位（issue #85） */
+.item.support_card .item_box .tit h3 {
+    min-height: calc(2 * 1lh);
+}
+.item.support_card .item_box .tit .tit_nsl > p {
+    min-height: calc(2 * 1lh);
+}
+.item.support_card .item_box .tit ul.nav.d-block li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+.item.support_card .item_box .tit ul.nav.d-block li > i {
+    flex: none;
+    margin: 0 !important;
+}
+.item.support_card .item_box .tit ul.nav.d-block li > span {
+    flex: 1;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+/* 被「…」截斷的標題、簡介、條列資訊（企業名錄、政府補助資源卡片）的展開方式：
+   - 有滑鼠的裝置（桌機）：滑鼠移上卡片或鍵盤聚焦時展開成全文，移開恢復截斷；
+   - 觸控裝置（手機、平板，沒有 hover）：沒辦法 hover，直接一律顯示全文，不截斷。
+   展開後卡片會往下變高，同一列的卡片跟著等高。 */
+@media (hover: hover) {
+    .item.equal_card:hover .item_box .tit h3,
+    .item.equal_card:focus-within .item_box .tit h3,
+    .item.equal_card:hover .item_box .tit .tit_nsl > p,
+    .item.equal_card:focus-within .item_box .tit .tit_nsl > p,
+    .item.support_card:hover .item_box .tit ul.nav.d-block li > span,
+    .item.support_card:focus-within .item_box .tit ul.nav.d-block li > span {
+        -webkit-line-clamp: unset;
+        line-clamp: unset;
+        display: block;
+        overflow: visible;
+    }
+}
+@media (hover: none) {
+    .item.equal_card .item_box .tit h3,
+    .item.equal_card .item_box .tit .tit_nsl > p,
+    .item.support_card .item_box .tit ul.nav.d-block li > span {
+        -webkit-line-clamp: unset;
+        line-clamp: unset;
+        display: block;
+        overflow: visible;
+    }
+    /* 不再截斷，就不需要替標題、簡介預留固定的兩行高度 */
+    .item.support_card .item_box .tit h3,
+    .item.support_card .item_box .tit .tit_nsl > p {
+        min-height: 0;
+    }
 }
 .matching_sear {
     gap: 0 10px;
@@ -2931,7 +3013,8 @@ a.more_x.more_x_gu,
 .news.show .breadcrumb {
     margin-top: 110px;
 }
-.news.show .column_box .tit h3 {
+.news.show .column_box .tit h3,
+.news.show .column_box .tit h2 {
     font-size: 2rem;
 }
 .news.show .content   .column_box .tit {
@@ -3790,7 +3873,7 @@ a.more_x.more_x_gu,
 }
 .video .item_video .date {
     position: relative;
-    color: #00b09b;
+    color: #007a6a;
     font-size: 1rem;
     padding-left: 15px;
     margin-bottom: 5px;
@@ -3950,6 +4033,14 @@ a.more_x.more_x_gu,
     font-size: 1rem;
     margin-top: 20px;
     display: block;
+}
+/* 公司名稱（標題）是連到企業名錄詳情的連結，也在 .indu_box 裡，會被上面那條「網址連結」的樣式誤傷：
+   字縮成 1rem、被往下推 20px，跟左邊藍色直條錯開。這裡還原成跟設計稿的純文字標題一樣（沿用 .me_sod_bu 的大小與位置） */
+.prom .indu_box .me_sod_bu a {
+    font-size: inherit;
+    margin-top: 0;
+    display: inline;
+    color: inherit;
 }
 .prom .indu_box {
     position: relative;
@@ -4746,14 +4837,14 @@ h2.h2 {
         .new_box .news-date .day {
             font-weight: bold;
             line-height: 1;
-            color: #00d2aa;
+            color: #007a6a;
             font-size: 4.375rem;
         }
 
         .new_box .news-date .year-month {
             font-size: 1.125rem;
             font-weight: bold;
-            color: #00d2aa;
+            color: #007a6a;
             margin-top: 6px;
         }
 
@@ -5032,12 +5123,14 @@ ul.ul-key{
         box-shadow: 0 5px 9px rgba(0, 102, 255, 0.38);
     }
 
-    ul.ul-key li a {
+    ul.ul-key li a,
+    ul.ul-key li span {
         font-size: 0.875rem;
         display: table;
         padding: 5px 10px;
         background: #0474D7;
-        background: linear-gradient(-180deg,rgba(4, 116, 215, 1) 0%, rgba(3, 149, 187, 1) 100%);
+        /* 漸層終點原本是 rgb(3,149,187)，跟白字只有 3.5:1；改 rgb(2,120,154) 讓整條都 ≥ 4.5:1（無障礙檢測 GN2140300E） */
+        background: linear-gradient(-180deg,rgba(4, 116, 215, 1) 0%, rgba(2, 120, 154, 1) 100%);
         color: #fff;
         border-radius: 5px;
         margin-bottom: 8px;
@@ -5294,7 +5387,7 @@ body  .slick-track {
 
 
     .home_enterprise_box .tit h3 {
-        color: #00b09b;
+        color: #007a6a;
         font-size: 1.5rem;
         font-weight: bold;
         margin-top: 6px;
@@ -5412,7 +5505,7 @@ wid-video  .slick-list{
 
 .wid-video .video-card .date {
     position: relative;
-    color: #00b09b;
+    color: #007a6a;
     font-size: 1rem;
     padding-left: 15px;
     margin-bottom: 5px;
@@ -5635,12 +5728,12 @@ wid-video  .slick-list{
     }
 
 .footer-title {
-    color: #00a0e9;
+    color: #0069a8;
     font-size: 1.25rem;
     font-weight: bold;
     margin-bottom: 16px;
-    background: #33daff;
-    background: linear-gradient(to right, #33daff 35%, #3ca6ff 100%);
+    background: #005f99;
+    background: linear-gradient(to right, #005f99 35%, #0069a8 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;

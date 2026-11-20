@@ -10,6 +10,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { fromAssertionResponse, toRequestOptions } from "@/lib/webauthn";
 import { readNextFromLocation } from "@/lib/login-next";
+import FormError from "@/components/ui/FormError";
 
 /**
  * 積木元件：會員登入表單本體，對應舊站 login.html 的 `.melo_box_left`。
@@ -55,6 +56,16 @@ export default function MemberLoginForm() {
     };
   }, []);
 
+  // 信箱還沒驗證的會員（密碼或 Passkey 登入都一樣）先去驗證信箱，驗證完再回原本要去的頁面
+  function goAfterLogin(requireEmailVerification?: boolean) {
+    const next = readNextFromLocation();
+    if (requireEmailVerification) {
+      router.push(next ? `/member/verify-email?next=${encodeURIComponent(next)}` : "/member/verify-email");
+      return;
+    }
+    router.push(next ?? "/member");
+  }
+
   async function handlePasskeyLogin() {
     setError(undefined);
     setSubmitting(true);
@@ -64,7 +75,7 @@ export default function MemberLoginForm() {
       if (!credential) throw new Error("cancelled");
       const { member } = await authApi.fido2AuthenticateComplete({ assertionResponse: fromAssertionResponse(credential) });
       setMember(member);
-      router.push(readNextFromLocation() ?? "/member");
+      goAfterLogin(member.requireEmailVerification);
     } catch (err) {
       const name = (err as { name?: string }).name;
       if (name === "NotAllowedError" || (err as Error).message === "cancelled") setError("已取消 Passkey 登入。");
@@ -89,7 +100,7 @@ export default function MemberLoginForm() {
     try {
       const { member } = await authApi.login({ email: account, password, captcha });
       setMember(member);
-      router.push(readNextFromLocation() ?? "/member");
+      goAfterLogin(member.requireEmailVerification);
     } catch (err) {
       setError(getApiErrorMessage(err, "登入失敗，請確認帳號密碼是否正確"));
       captchaRef.current?.refresh();
@@ -139,10 +150,10 @@ export default function MemberLoginForm() {
       </div>
 
       {error && (
-        <p className="text-danger mb-3" role="alert">
+        <FormError as="p" className="text-danger mb-3">
           <i className="bi bi-exclamation-circle-fill me-1" aria-hidden="true"></i>
           {error}
-        </p>
+        </FormError>
       )}
 
       <button type="submit" title="登入" className="more_x" style={{ margin: "0 auto" }} disabled={submitting}>

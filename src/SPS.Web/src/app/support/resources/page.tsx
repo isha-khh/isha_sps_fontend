@@ -10,6 +10,7 @@ import { toSupportResource } from "@/lib/support-data";
 import { withBasePath } from "@/lib/api-client";
 import { fetchSectionCategories, fetchSectionItems, NewsSections, SectionCategoryTypes } from "@/lib/api.server";
 import { buildListHref, readListQuery } from "@/lib/list-query";
+import { badgeInlineStyle } from "@/lib/badge-style";
 
 export const metadata: Metadata = {
   title: "政府補助資源",
@@ -117,7 +118,7 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
           {filteredResources.map((resource) => {
             const modalId = `support-request-${resource.id}`;
             return (
-              <div className="col-lg-4 col-md-6 col-12 item mb-md-4 mb-4" key={resource.id}>
+              <div className="col-lg-4 col-md-6 col-12 item equal_card support_card mb-md-4 mb-4" key={resource.id}>
                 <div className="item_box">
                   {resource.image && (
                     <div className="pic">
@@ -132,7 +133,8 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
                       <div className="h3_solid">
                         <h3>{resource.title}</h3>
                       </div>
-                      <p>{resource.description}</p>
+                      {/* 沒填簡介就不產生這一段（樣式固定保留兩行高度，空的會在分隔線下留一大塊空白） */}
+                      {resource.description && <p>{resource.description}</p>}
                       <ul className="nav d-block mb-3">
                         {resource.industries.length > 0 && (
                           <li className="mb-2">
@@ -182,15 +184,17 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
                       </ul>
                     </div>
 
-                    <ul className="nav ul-key">
-                      {resource.keywords.map((keyword) => (
-                        <li key={keyword}>
-                          <a href="#" title={keyword} tabIndex={0}>
-                            {keyword}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                    {resource.keywords.length > 0 && (
+                      <ul className="nav ul-key">
+                        {resource.keywords.map((keyword, index) => (
+                          <li key={keyword}>
+                            <a href="#" title={keyword} tabIndex={0} style={badgeInlineStyle(resource.keywordBadges?.[index])}>
+                              {keyword}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
 
                     <a
                       href="#"

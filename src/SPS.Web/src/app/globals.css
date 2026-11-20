@@ -110,6 +110,18 @@
 }
 
 /*
+ * 鍵盤焦點框（無障礙檢測 CS2240700E／2.4.7 焦點可視）：頁籤列是橫向可捲動容器（`overflow-x: auto`，另一軸會跟著變成也裁切），
+ * 全站 `a:focus-visible` 畫在連結外側的 3px 框，最左／最右那顆的外側、以及所有頁籤的上下都被截掉，
+ * 只剩兩顆頁籤之間的一條粗線，看起來像分隔線畫歪了、焦點在哪裡不明顯。改成畫在每個頁籤內側，並加淡藍底色。
+ */
+.category-tab-strip a:focus-visible {
+  outline: 3px solid #0d6efd !important;
+  outline-offset: -3px !important;
+  background: #e8f0ff;
+  border-radius: 0.5rem;
+}
+
+/*
  * 手機版：頁籤下面那個三欄 `.row.gy-4` 自己有 -24px 的上邊距，平常靠子欄位的 margin-top（也是 24px）補回來；
  * 但 style_rwd.css 在手機（max-width: 767px）把 `.main .content` 的 margin-top 改成 5px，補不回來，
  * 搜尋列（年份下拉）就整個往上頂、蓋到頁籤（實測重疊約 3px，應該有 16px 間距）。
@@ -118,121 +130,6 @@
 @media (max-width: 767px) {
   .category-tab-strip + .row {
     margin-top: 0;
-  }
-}
-
-/*
- * 手機版：知識加值（/talent）課程表格改成直向卡片。7 欄的表格在手機只能縮字加橫向捲動，
- * 「聯絡人」「課程網址」會被切掉。`CourseTable` 每個 `td` 已有 `data-label`，這裡用它顯示欄名。
- * 設計稿的 style.css／style_rwd.css 沒有這段，所以寫在這裡（不透過 @layer，才蓋得過設計稿的欄寬）。
- */
-@media (max-width: 767px) {
-  .course-table-container {
-    overflow: visible;
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-  }
-
-  .course-table-container .course-table,
-  .course-table-container .course-table tbody,
-  .course-table-container .course-table tr,
-  .course-table-container .course-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .course-table-container .course-table thead {
-    display: none;
-  }
-
-  .course-table-container .course-table tr {
-    margin-bottom: 1rem;
-    border: 1px solid #e9ecef;
-    border-radius: 0.5rem;
-    background: #fff;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-    overflow: hidden;
-  }
-
-  .course-table-container .course-table td {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 0.6rem 1rem;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 0.9rem;
-    text-align: right;
-    white-space: normal;
-  }
-
-  .course-table-container .course-table td::before {
-    content: attr(data-label);
-    flex: 0 0 5em;
-    font-weight: 700;
-    color: #0d6efd;
-    text-align: left;
-  }
-
-  /* 序號不用欄名，當卡片左上角的小標；課程名稱當標題整列顯示 */
-  .course-table-container .course-table td.td-seq {
-    justify-content: flex-start;
-    padding: 0.4rem 1rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-align: left;
-  }
-
-  .course-table-container .course-table td.td-seq::before {
-    flex: 0 0 auto;
-  }
-
-  .course-table-container .course-table td.td-name {
-    display: block;
-    padding-top: 0.75rem;
-    font-size: 1.05rem;
-    font-weight: 700;
-    text-align: left;
-  }
-
-  .course-table-container .course-table td.td-name::before {
-    display: none;
-  }
-
-  .course-table-container .course-table td.td-date {
-    white-space: normal;
-  }
-
-  /* 聯絡人有「姓名」「電話」兩個子元素，用 grid 讓它們疊在右欄、欄名佔左欄 */
-  .course-table-container .course-table td.td-contact {
-    display: grid;
-    grid-template-columns: 5em 1fr;
-    column-gap: 0.75rem;
-  }
-
-  .course-table-container .course-table td.td-contact::before {
-    grid-row: 1 / span 2;
-  }
-
-  .course-table-container .course-table td.td-contact > * {
-    grid-column: 2;
-  }
-
-  .course-table-container .course-table td.td-link {
-    display: block;
-    border-bottom: 0;
-    text-align: center;
-  }
-
-  .course-table-container .course-table td.td-link::before {
-    display: none;
-  }
-
-  .course-table-container .course-table .btn-course-link {
-    display: block;
-    padding: 0.6rem 1rem;
-    font-size: 0.95rem;
   }
 }
 
@@ -664,4 +561,182 @@
   transform: translateY(-50%);
   color: #0052cc;
   font-size: 1rem;
+}
+
+/* 可左右捲動容器的提示（ScrollHintContainer，知識加值課程表格）：提示列、邊緣淡出陰影、箭頭。
+   內容放得下（桌機）時元件不會輸出提示，不影響版面。陰影的顯示／隱藏不做動畫。 */
+.scroll-hint-wrap {
+  width: 100%;
+}
+.scroll-hint-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  background: #f0f7ff;
+  color: #0052cc;
+  font-size: 0.875rem;
+}
+.scroll-hint-frame {
+  position: relative;
+}
+.scroll-hint-fade {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  width: 28px;
+  pointer-events: none;
+  opacity: 0;
+}
+.scroll-hint-fade.is-visible {
+  opacity: 1;
+}
+.scroll-hint-fade-left {
+  left: 1px;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
+  border-radius: 8px 0 0 8px;
+}
+.scroll-hint-fade-right {
+  right: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
+  border-radius: 0 8px 8px 0;
+}
+.scroll-hint-arrow {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.25rem;
+  color: #0052cc;
+  pointer-events: none;
+}
+
+/* 知識加值「熱門課程」側欄（PopularCourses）：右邊的「剩餘 X 名」欄已經拿掉，標題不用再替它預留寬度。
+   通用的 `.column_box .item .tit` 是 70%（手機斷點 75%、80%），這裡還原成滿寬；多一層 class 讓優先權蓋過設計稿的樣式。 */
+.column_box.column_course .item .tit {
+  width: 100%;
+}
+
+/* 第一次造訪的 Cookie 告知橫幅（CookieNotice）：固定在畫面底部，低於彈窗（1055）、高於一般內容 */
+.cookie-notice {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1040;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  /* 右邊多留一點：站台右下角有浮動按鈕（搜尋／回到頁首），不要壓住「我知道了」 */
+  padding: 0.75rem 5rem calc(0.75rem + env(safe-area-inset-bottom, 0px)) 1.25rem;
+  background: #0b4fb3;
+  color: #fff;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.18);
+}
+@media (max-width: 575px) {
+  /* 手機：按鈕會換到下一行靠左，不會壓到右下角浮動按鈕，右邊不用多留 */
+  .cookie-notice {
+    padding-right: 1.25rem;
+  }
+}
+.cookie-notice-text {
+  flex: 1 1 18rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+.cookie-notice-text a {
+  color: #fff;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+.cookie-notice-btn {
+  flex: none;
+  padding: 0.4rem 1.25rem;
+  border: 0;
+  border-radius: 6px;
+  background: #fff;
+  color: #0b4fb3;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cookie-notice-btn:focus-visible,
+.cookie-notice-text a:focus-visible {
+  outline: 3px solid #ffd54f;
+  outline-offset: 2px;
+}
+
+/* 隱私權政策頁（/privacy） */
+.privacy-policy .privacy-meta {
+  margin: 0 0 1.5rem;
+  color: #666;
+  font-size: 0.9375rem;
+}
+.privacy-policy section + section {
+  margin-top: 1.75rem;
+}
+.privacy-policy h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.privacy-policy p {
+  margin: 0 0 0.75rem;
+  line-height: 1.85;
+}
+.privacy-policy ul {
+  margin: 0 0 0.75rem;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+.privacy-policy li {
+  margin-bottom: 0.4rem;
+  line-height: 1.8;
+}
+.privacy-policy a {
+  color: #0052cc;
+  text-decoration: underline;
+}
+
+/* 網站導覽「快速鍵設定說明」：組合鍵依瀏覽器變化（Control + Option + U 比原本設計稿的 Alt + U 長），
+   不能再固定 130px 寬；設計稿 style.css 比本檔晚載入、選擇器優先權相同會贏，所以這裡多加一層 .accesskey_list 加強優先權 */
+.sitemap_box .accesskey_list .accesskey_row {
+    flex-wrap: wrap;
+    gap: 6px 16px;
+}
+.sitemap_box .accesskey_list .accesskey_key {
+    width: auto;
+    min-width: 130px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+.sitemap_box .accesskey_list .accesskey_desc {
+    flex: 1 1 240px;
+}
+.sitemap_box .accesskey_reference {
+    --bs-table-bg: transparent;
+}
+
+/*
+ * 內容圖片連結（點圖放大）的鍵盤焦點框（無障礙檢測 CS1140101E）。
+ * 圖片是滿版寬，全站的 `a:focus-visible`（外側 2px 的框）會被內容區的 overflow 截掉，看起來「焦點移到圖片沒有變化」；
+ * 改成畫在圖片內側，再把圖片略為調暗，讓焦點在哪裡一眼看得出來。
+ */
+a[data-fancybox][data-type="image"] {
+  display: block;
+}
+a[data-fancybox][data-type="image"]:focus-visible,
+a.ratio[data-fancybox]:focus-visible {
+  outline: 4px solid #0d6efd !important;
+  outline-offset: -4px !important;
+  border-radius: 20px;
+}
+a[data-fancybox][data-type="image"]:focus-visible img,
+a.ratio[data-fancybox]:focus-visible img {
+  filter: brightness(0.9);
 }

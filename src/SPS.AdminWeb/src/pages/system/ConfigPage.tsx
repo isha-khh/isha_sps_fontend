@@ -4,8 +4,9 @@ import { TabSelector } from '@/components/common/TabSelector';
 import { settingsApi } from '@/lib/api/system-settings';
 import type { EmailSettings, GoogleAnalyticsSettings, FileStorageSettings, BounceMailSettings, BounceProcessingResult, ContentSettings, EmbeddingSettings, EmbeddingTestResult, EmbeddingIndexStatus } from '@/types/settings';
 import { useNotify } from '@/hooks/useNotify';
+import { ContentCheckSection } from '@/components/system/ContentCheckSection';
 
-type SettingTab = 'email' | 'analytics' | 'fileStorage' | 'content' | 'embedding';
+type SettingTab = 'email' | 'analytics' | 'fileStorage' | 'content' | 'embedding' | 'contentCheck';
 
 const SETTING_TABS = [
   { value: 'email' as const, label: '電子郵件', icon: 'lucide--mail' },
@@ -13,11 +14,16 @@ const SETTING_TABS = [
   { value: 'fileStorage' as const, label: '檔案儲存', icon: 'lucide--hard-drive' },
   { value: 'content' as const, label: '內容設定', icon: 'lucide--layout' },
   { value: 'embedding' as const, label: 'AI 語意搜尋', icon: 'lucide--sparkles' },
+  { value: 'contentCheck' as const, label: '內容檢查', icon: 'lucide--shield-check' },
 ];
 
 export const SystemConfigPage = () => {
   const notify = useNotify();
-  const [activeTab, setActiveTab] = useState<SettingTab>('email');
+  // 網址帶 ?tab=contentCheck（鈴鐺的「查看詳情」）就直接開那一頁
+  const [activeTab, setActiveTab] = useState<SettingTab>(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab');
+    return SETTING_TABS.some((tab) => tab.value === requested) ? (requested as SettingTab) : 'email';
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -37,6 +43,9 @@ export const SystemConfigPage = () => {
   const [analyticsSettings, setAnalyticsSettings] = useState<GoogleAnalyticsSettings>({
     propertyId: '',
     credentialsJson: '',
+    autoSyncEnabled: true,
+    autoSyncTime: '03:00',
+    autoSyncDays: 3,
   });
 
   // File Storage settings
@@ -66,6 +75,7 @@ export const SystemConfigPage = () => {
   // Content settings
   const [contentSettings, setContentSettings] = useState<ContentSettings>({
     guestCanViewBusinessDetail: true,
+    businessListSupplierOnly: false,
     showBusinessListTags: true,
     showBusinessListIntroduction: false,
     businessListIntroductionMaxLength: 100,
@@ -83,6 +93,10 @@ export const SystemConfigPage = () => {
     reconcileBatchSize: 50,
   });
   const [showEmbeddingKey, setShowEmbeddingKey] = useState(false);
+  // 模型下拉選單：清單來自 LiteLLM（這把金鑰實際能用的模型），取得失敗時退回手動輸入
+  const [embeddingModels, setEmbeddingModels] = useState<string[]>([]);
+  const [embeddingModelsState, setEmbeddingModelsState] = useState<{ status: 'idle' | 'loading' | 'error'; message?: string }>({ status: 'idle' });
+  const embeddingModelsAutoLoaded = useRef(false);
   const [embeddingTestState, setEmbeddingTestState] = useState<
     { status: 'idle' } | { status: 'testing' } | { status: 'done'; result: EmbeddingTestResult }
   >({ status: 'idle' });
@@ -136,7 +150,13 @@ export const SystemConfigPage = () => {
         settingsApi.getEmbeddingSettings().catch(() => embeddingSettings),
       ]);
       setEmailSettings(email);
-      setAnalyticsSettings(analytics);
+      // 舊資料沒有自動同步欄位時用預設值（開啟、03:00、最近 3 天）
+      setAnalyticsSettings({
+        ...analytics,
+        autoSyncEnabled: analytics.autoSyncEnabled ?? true,
+        autoSyncTime: analytics.autoSyncTime || '03:00',
+        autoSyncDays: analytics.autoSyncDays || 3,
+      });
       setFileStorageSettings(fileStorage);
       setBounceMailSettings(bounceMail);
       setContentSettings(content);
@@ -250,6 +270,32 @@ export const SystemConfigPage = () => {
       setIsSaving(false);
     }
   };
+
+  const handleLoadEmbeddingModels = async () => {
+    setEmbeddingModelsState({ status: 'loading' });
+    try {
+      const result = await settingsApi.listEmbeddingModels(embeddingSettings);
+      if (result.success) {
+        setEmbeddingModels(result.models);
+        setEmbeddingModelsState({ status: 'idle' });
+      } else {
+        setEmbeddingModels([]);
+        setEmbeddingModelsState({ status: 'error', message: result.message });
+      }
+    } catch {
+      setEmbeddingModels([]);
+      setEmbeddingModelsState({ status: 'error', message: '無法取得模型清單，請確認位址與金鑰' });
+    }
+  };
+
+  // 打開「AI 語意搜尋」分頁、設定讀回來後自動載入一次模型清單；之後改位址或金鑰要按「載入模型清單」重新取得
+  useEffect(() => {
+    if (activeTab !== 'embedding' || embeddingModelsAutoLoaded.current) return;
+    if (!embeddingSettings.baseUrl || !embeddingSettings.apiKey) return;
+    embeddingModelsAutoLoaded.current = true;
+    void handleLoadEmbeddingModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, embeddingSettings.baseUrl, embeddingSettings.apiKey]);
 
   const handleTestEmbeddingConnection = async () => {
     setEmbeddingTestState({ status: 'testing' });
@@ -892,6 +938,66 @@ export const SystemConfigPage = () => {
                     </span>
                   </label>
                 </div>
+
+                <div className="divider my-2" />
+
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="font-semibold">每天自動同步</h4>
+                      <p className="text-sm text-base-content/70">
+                        每天固定時間自動把 Google Analytics 的流量資料同步到系統，後台儀表板與分析報表就不用再手動按「同步」。
+                        Google Analytics 還沒設定（上面兩個欄位沒填）時會自動略過；失敗會自動重試，最近一次結果顯示在儀表板。
+                      </p>
+                    </div>
+                    <label className="label cursor-pointer gap-2 shrink-0">
+                      <input
+                        type="checkbox"
+                        className="toggle toggle-primary"
+                        checked={analyticsSettings.autoSyncEnabled}
+                        onChange={(e) => setAnalyticsSettings({ ...analyticsSettings, autoSyncEnabled: e.target.checked })}
+                      />
+                      <span className="label-text">{analyticsSettings.autoSyncEnabled ? '已開啟' : '已關閉'}</span>
+                    </label>
+                  </div>
+
+                  {analyticsSettings.autoSyncEnabled && (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text font-medium">同步時間（台灣時間）</span>
+                        </label>
+                        <input
+                          type="time"
+                          className="input input-bordered"
+                          value={analyticsSettings.autoSyncTime}
+                          onChange={(e) => setAnalyticsSettings({ ...analyticsSettings, autoSyncTime: e.target.value })}
+                          required
+                        />
+                        <label className="label">
+                          <span className="label-text-alt">預設凌晨 03:00，避開白天的使用高峰</span>
+                        </label>
+                      </div>
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text font-medium">每次往回同步幾天</span>
+                        </label>
+                        <input
+                          type="number"
+                          className="input input-bordered"
+                          min={1}
+                          max={30}
+                          value={analyticsSettings.autoSyncDays}
+                          onChange={(e) => setAnalyticsSettings({ ...analyticsSettings, autoSyncDays: Number(e.target.value) || 1 })}
+                          required
+                        />
+                        <label className="label">
+                          <span className="label-text-alt">1 到 30。Google 的資料常在隔天或兩天後才修正，預設 3 天比只抓昨天準確</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1056,6 +1162,32 @@ export const SystemConfigPage = () => {
 
                 <div className="divider my-2" />
 
+                {/* 企業名錄只顯示供給端 */}
+                <div className="form-control">
+                  <label className="label cursor-pointer justify-start gap-4">
+                    <input
+                      type="checkbox"
+                      className={`toggle ${contentSettings.businessListSupplierOnly ? 'toggle-success' : 'toggle-error'}`}
+                      checked={contentSettings.businessListSupplierOnly}
+                      onChange={(e) =>
+                        setContentSettings({ ...contentSettings, businessListSupplierOnly: e.target.checked })
+                      }
+                    />
+                    <div>
+                      <span className="label-text font-medium">
+                        {contentSettings.businessListSupplierOnly ? '企業名錄只顯示供給端企業' : '企業名錄顯示全部企業'}
+                      </span>
+                      <p className="text-sm text-base-content/60">
+                        {contentSettings.businessListSupplierOnly
+                          ? '前台「我要媒合 → 企業名錄」只列出供給端（含供需雙方）企業，需求端企業不列出；後台公司管理不受影響'
+                          : '前台企業名錄列出所有已審核通過的企業（供給端、需求端、供需雙方）'}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="divider my-2" />
+
                 {/* 企業列表標籤 */}
                 <div className="form-control">
                   <label className="label cursor-pointer justify-start gap-4">
@@ -1177,6 +1309,9 @@ export const SystemConfigPage = () => {
         </form>
       )}
 
+      {/* 內容檢查：逐篇檢查已發布文章，有問題轉草稿（進度即時推到鈴鐺） */}
+      {activeTab === 'contentCheck' && <ContentCheckSection />}
+
       {/* AI 語意搜尋設定 */}
       {activeTab === 'embedding' && (
         <form onSubmit={handleSaveEmbedding}>
@@ -1187,7 +1322,7 @@ export const SystemConfigPage = () => {
                 AI 語意搜尋設定
               </h3>
               <p className="text-sm text-base-content/60 mb-4">
-                設定用於「相似供給端業者」AI 建議面板的 embedding 服務（透過 LiteLLM）
+                設定用於「相似供給端業者」AI 建議面板與前台全站搜尋「語意相關」結果的 embedding 服務（透過 LiteLLM）
               </p>
 
               <div className="space-y-4">
@@ -1206,7 +1341,7 @@ export const SystemConfigPage = () => {
                         {embeddingSettings.isEnabled ? 'AI 語意搜尋已啟用' : 'AI 語意搜尋已停用'}
                       </span>
                       <p className="text-sm text-base-content/60">
-                        停用後「相似供給端業者」面板僅顯示標籤比對結果，背景索引服務也不會呼叫外部 AI 服務
+                        停用後「相似供給端業者」面板僅顯示標籤比對結果、前台全站搜尋只有關鍵字結果，背景索引服務也不會呼叫外部 AI 服務
                       </p>
                     </div>
                   </label>
@@ -1268,19 +1403,80 @@ export const SystemConfigPage = () => {
                       Embedding 模型名稱 <span className="text-error">*</span>
                     </span>
                   </label>
-                  <input
-                    type="text"
-                    className="input input-bordered font-mono text-sm"
-                    placeholder="qwen3-embedding"
-                    value={embeddingSettings.model}
-                    onChange={(e) => {
-                      setEmbeddingSettings({ ...embeddingSettings, model: e.target.value });
-                      setEmbeddingTestState({ status: 'idle' });
-                    }}
-                    required
-                  />
+                  <div className="flex gap-2">
+                    {embeddingModels.length > 0 ? (
+                      <select
+                        className="select select-bordered font-mono text-sm flex-1"
+                        value={embeddingSettings.model}
+                        onChange={(e) => {
+                          setEmbeddingSettings({ ...embeddingSettings, model: e.target.value });
+                          setEmbeddingTestState({ status: 'idle' });
+                        }}
+                        required
+                      >
+                        <option value="" disabled>
+                          請選擇模型
+                        </option>
+                        {/* 目前儲存的模型不在清單裡（改過金鑰、或模型被下架）時保留它，免得下拉選單把它悄悄換掉 */}
+                        {embeddingSettings.model && !embeddingModels.includes(embeddingSettings.model) && (
+                          <option value={embeddingSettings.model}>{embeddingSettings.model}（目前設定，不在清單中）</option>
+                        )}
+                        {embeddingModels.some((m) => /embed/i.test(m)) && (
+                          <optgroup label="Embedding 模型">
+                            {embeddingModels
+                              .filter((m) => /embed/i.test(m))
+                              .map((m) => (
+                                <option key={m} value={m}>
+                                  {m}
+                                </option>
+                              ))}
+                          </optgroup>
+                        )}
+                        <optgroup label="其他模型">
+                          {embeddingModels
+                            .filter((m) => !/embed/i.test(m))
+                            .map((m) => (
+                              <option key={m} value={m}>
+                                {m}
+                              </option>
+                            ))}
+                        </optgroup>
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        className="input input-bordered font-mono text-sm flex-1"
+                        placeholder="qwen3-embedding"
+                        value={embeddingSettings.model}
+                        onChange={(e) => {
+                          setEmbeddingSettings({ ...embeddingSettings, model: e.target.value });
+                          setEmbeddingTestState({ status: 'idle' });
+                        }}
+                        required
+                      />
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={() => void handleLoadEmbeddingModels()}
+                      disabled={embeddingModelsState.status === 'loading' || !embeddingSettings.baseUrl || !embeddingSettings.apiKey}
+                    >
+                      {embeddingModelsState.status === 'loading' ? (
+                        <span className="loading loading-spinner loading-sm" />
+                      ) : (
+                        <span className="iconify lucide--refresh-cw size-4" />
+                      )}
+                      載入模型清單
+                    </button>
+                  </div>
                   <label className="label">
-                    <span className="label-text-alt">依實測建議使用 qwen3-embedding（詳見設計文件）</span>
+                    <span className={`label-text-alt ${embeddingModelsState.status === 'error' ? 'text-error' : ''}`}>
+                      {embeddingModelsState.status === 'error'
+                        ? `${embeddingModelsState.message ?? '無法取得模型清單'}；目前請手動輸入模型名稱`
+                        : embeddingModels.length > 0
+                          ? '從 LiteLLM 取得這把金鑰可用的模型；請選 embedding 模型（名稱含 embed 的在最上面）'
+                          : '填好服務位址與 API Key 後按「載入模型清單」，就能用下拉選單選模型'}
+                    </span>
                   </label>
                 </div>
 

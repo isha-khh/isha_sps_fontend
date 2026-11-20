@@ -1,5 +1,6 @@
 import type { TutoringItem } from "@/lib/tutoring-data";
 import Link from "next/link";
+import { badgeInlineStyle } from "@/lib/badge-style";
 
 /**
  * 積木元件：產業輔導列表卡片，對應設計稿 page/tutoring/index.html 的
@@ -14,9 +15,10 @@ export default function TutoringItemCard({ item }: { item: TutoringItem }) {
     <div className="item">
       <div className="d-flex">
         {item.image && (
-          <Link href={href} className="pic" title={item.title}>
+          // 縮圖連結跟標題連結同一目的地：不進 Tab 順序、不給輔助科技念（HM1240402E）
+          <Link href={href} className="pic" tabIndex={-1} aria-hidden="true">
             <div className="ratio ratio-4x3">
-              <img className="img-fluid d-block" src={item.image} alt={item.title} />
+              <img className="img-fluid d-block" src={item.image} alt="" />
             </div>
           </Link>
         )}
@@ -25,11 +27,11 @@ export default function TutoringItemCard({ item }: { item: TutoringItem }) {
           <div>
             <div className="tit_nsl">
               <ul className="nav ul-key">
-                {item.keywords.map((keyword) => (
+                {item.keywords.map((keyword, index) => (
                   <li key={keyword}>
-                    <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                    <span style={badgeInlineStyle(item.keywordBadges?.[index])}>
                       {keyword}
-                    </a>
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -74,7 +76,7 @@ export default function TutoringItemCard({ item }: { item: TutoringItem }) {
                 )}
               </ul>
 
-              <Link href={href} title={`了解詳情：${item.title}`} className="more_x more_x_gu">
+              <Link href={href} className="more_x more_x_gu" tabIndex={-1} aria-hidden="true">
                 <span>了解詳情</span>
                 <i className="bi bi-arrow-right" />
               </Link>

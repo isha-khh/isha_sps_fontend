@@ -119,7 +119,7 @@ export const PermissionLabels: Record<PermissionKey, string> = {
   ManageProducts: '產品管理',
   ManageDemands: '需求管理',
   ManageNews: '公告管理',
-  ManageBanners: '橫幅管理',
+  ManageBanners: '廣告管理',
   ManageSiteContent: '網站內容管理',
   ManageMedia: '媒體管理',
   ManageFiles: '系統檔案管理',

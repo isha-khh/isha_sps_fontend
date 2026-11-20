@@ -109,7 +109,9 @@ public class CaptchaController : ControllerBase
             return BadRequest(new { error = result.Error });
         }
 
-        return File(result.Data!, "audio/wav", "captcha.wav");
+        // 前台用 <audio> 直接串流這個網址播放：Safari 要求媒體檔支援 HTTP Range（回 206 與 Accept-Ranges），沒開的話 Safari 不播；
+        // 也不要帶下載檔名（Content-Disposition: attachment），這是要播放的、不是要下載的
+        return File(result.Data!, "audio/wav", enableRangeProcessing: true);
     }
 
     /// <summary>

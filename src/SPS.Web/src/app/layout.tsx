@@ -4,8 +4,10 @@ import { connection } from "next/server";
 import BootstrapModalRouteCleanup from "@/components/BootstrapModalRouteCleanup";
 import SiteVisitTracker from "@/components/SiteVisitTracker";
 import PopupAnnouncements from "@/components/PopupAnnouncements";
+import CookieNotice from "@/components/CookieNotice";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { SiteLinksProvider } from "@/components/SiteLinksProvider";
-import { fetchIndustryAiLink, fetchPublishedNewsCategories } from "@/lib/api.server";
+import { fetchIndustryAiLink, fetchPrivacyPolicy, fetchPublishedNewsCategories } from "@/lib/api.server";
 import { notoSansTC } from "@/lib/fonts";
 import "./globals.css";
 import { withBasePath } from "@/lib/api-client";
@@ -66,11 +68,12 @@ const LEGACY_SITE_STYLESHEETS = [
 
 export const metadata: Metadata = {
   // 每個頁面用 `export const metadata = { title: "頁面名稱" }` 就好，
-  // Next 會自動套進這個 template 變成「頁面名稱 | 高雄技術處」。
+  // Next 會自動套進這個 template 變成「頁面名稱 | 智慧工安技術產業資訊暨媒合平台」。
   // 只有首頁（沒有自己 title 的路由）會顯示 default 這個值。
+  // 網站名稱用完整名稱「智慧工安技術產業資訊暨媒合平台」（issue #100；原本是簡稱「智慧工安媒合平台」）。
   title: {
-    default: "智慧工安媒合平台",
-    template: "%s | 智慧工安媒合平台",
+    default: "智慧工安技術產業資訊暨媒合平台",
+    template: "%s | 智慧工安技術產業資訊暨媒合平台",
   },
   description: "智慧工安技術產業資訊暨媒合平台",
   // 之前這裡漏了 `public/favicon.ico`（客戶實際的品牌 icon）會被
@@ -104,7 +107,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // 靜態預先產生的頁面沒有請求標頭、沒有 nonce，所以整站要動態渲染。
   await connection();
   // 後台「頁面設定」的「產業AI」外部連結開關（取不到就是關閉）
-  const [industryAi, newsCategories] = await Promise.all([fetchIndustryAiLink(), fetchPublishedNewsCategories()]);
+  const [industryAi, newsCategories, privacy] = await Promise.all([fetchIndustryAiLink(), fetchPublishedNewsCategories(), fetchPrivacyPolicy()]);
   return (
     <html lang="zh-tw" data-scroll-behavior="smooth" className={notoSansTC.variable}>
       <body>
@@ -114,6 +117,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <BootstrapModalRouteCleanup />
         <SiteVisitTracker />
         <PopupAnnouncements />
+        {/* 後台「頁面設定 → 隱私權政策」的 Cookie 告知橫幅（關閉或後端連不到時不顯示） */}
+        {privacy?.noticeEnabled && privacy.noticeMessage && privacy.noticeButtonText && (
+          <CookieNotice message={privacy.noticeMessage} buttonText={privacy.noticeButtonText} linkText={privacy.noticeLinkText || undefined} />
+        )}
+        {/* Google Analytics：只有設定了執行時環境變數 GA_MEASUREMENT_ID 才會載入 */}
+        <GoogleAnalytics />
 
         <SiteLinksProvider industryAi={industryAi} newsCategories={newsCategories?.filter((c) => !c.parentId).map(({ id, name }) => ({ id, name })) ?? null}>{children}</SiteLinksProvider>
 

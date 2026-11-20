@@ -22,7 +22,7 @@ public class SearchController : ControllerBase
     }
 
     /// <summary>
-    /// 全站搜尋：同時查公告、產業案例、常見問題、影音，只回傳已發布的內容
+    /// 全站搜尋：同時查最新消息、服務專區、人才培育、產業輔導、補助公告、政府補助資源、企業名錄、媒合需求、產業案例、常見問題、影音，只回傳已發布的內容
     /// </summary>
     /// <param name="q">搜尋關鍵字（最多 100 字）</param>
     /// <param name="limit">每個類型最多回傳幾筆（1-20，預設 5）</param>

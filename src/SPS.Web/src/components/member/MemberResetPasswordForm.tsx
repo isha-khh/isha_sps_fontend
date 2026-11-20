@@ -5,6 +5,7 @@ import Link from "next/link";
 import PasswordField from "@/components/member/PasswordField";
 import { authApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/error-utils";
+import FormError from "@/components/ui/FormError";
 
 /**
  * 積木元件：重設密碼表單。忘記密碼信裡的連結是 `/member/reset-password?token=…`，
@@ -118,10 +119,10 @@ export default function MemberResetPasswordForm({ token }: { token: string }) {
       </div>
 
       {error && (
-        <p className="text-danger mb-3" role="alert">
+        <FormError as="p" className="text-danger mb-3">
           <i className="bi bi-exclamation-circle-fill me-1" aria-hidden="true"></i>
           {error}
-        </p>
+        </FormError>
       )}
 
       <button type="submit" title="送出" className="more_x" style={{ margin: "0 auto" }} disabled={submitting}>

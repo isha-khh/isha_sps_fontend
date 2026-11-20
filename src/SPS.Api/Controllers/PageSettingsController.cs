@@ -24,6 +24,8 @@ public class PageSettingsController : ControllerBase
     private const string XrKey = "PageXr";
     private const string SupportInfoKey = "PageSupportInfo";
     private const string IndustryAiKey = "PageIndustryAiLink";
+    public const string EnterpriseSortKey = EnterpriseDirectorySortKeys.SettingCategory;
+    private const string PrivacyKey = "PagePrivacy";
 
     private readonly ISystemSettingService _settingService;
     private readonly IFileManagementService _fileService;
@@ -248,6 +250,59 @@ public class PageSettingsController : ControllerBase
     [SwaggerOperation(Summary = "取得產業AI外部連結公開資料")]
     public async Task<IActionResult> GetIndustryAiLinkPublic(CancellationToken cancellationToken) =>
         Ok(IndustryAiLinkValidator.ToPublic(await LoadSettingAsync<IndustryAiLinkSettingsDto>(IndustryAiKey, cancellationToken)));
+
+    /// <summary>取得企業名錄的排序設定（後台編輯用）；沒設定過就是「新的在前」</summary>
+    [HttpGet("enterprise-sort")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得企業名錄排序設定（後台）")]
+    public async Task<IActionResult> GetEnterpriseSort(CancellationToken cancellationToken)
+    {
+        var settings = await LoadSettingAsync<EnterpriseDirectorySortSettingsDto>(EnterpriseSortKey, cancellationToken);
+        // 舊資料或手動改過的資料也整理成完整、合法的規則清單再回給後台
+        return Ok(EnterpriseDirectorySortValidator.Normalize(settings).Settings);
+    }
+
+    /// <summary>更新企業名錄的排序設定：規則順序就是優先順序；只接受已知的排序依據</summary>
+    [HttpPut("enterprise-sort")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新企業名錄排序設定（後台）")]
+    public async Task<IActionResult> UpdateEnterpriseSort([FromBody] EnterpriseDirectorySortSettingsDto settings, CancellationToken cancellationToken)
+    {
+        var (normalized, error) = EnterpriseDirectorySortValidator.Normalize(settings);
+        if (error != null) return BadRequest(new { error });
+        var result = await _settingService.UpdateSettingAsync(EnterpriseSortKey, normalized);
+        return result.IsSuccess ? Ok(new { message = "Enterprise sort settings updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>取得隱私權政策與 Cookie 告知橫幅設定（後台編輯用）；沒設定過就是預設範本</summary>
+    [HttpGet("privacy")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "取得隱私權政策設定（後台）")]
+    public async Task<IActionResult> GetPrivacy(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<PrivacyPolicySettingsDto>(PrivacyKey, cancellationToken));
+
+    /// <summary>更新隱私權政策與 Cookie 告知橫幅設定；內容是純文字區塊，後端只做長度、格式與空白整理</summary>
+    [HttpPut("privacy")]
+    [Authorize(Roles = "Admin")]
+    [RequirePermission(UserPermission.ManageSiteContent)]
+    [SwaggerOperation(Summary = "更新隱私權政策設定（後台）")]
+    public async Task<IActionResult> UpdatePrivacy([FromBody] PrivacyPolicySettingsDto settings, CancellationToken cancellationToken)
+    {
+        var (normalized, error) = PrivacyPolicyValidator.Normalize(settings);
+        if (error != null) return BadRequest(new { error });
+        var result = await _settingService.UpdateSettingAsync(PrivacyKey, normalized);
+        return result.IsSuccess ? Ok(new { message = "Privacy settings updated" }) : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>取得隱私權政策與 Cookie 告知橫幅（前台使用）</summary>
+    [HttpGet("privacy/public")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "取得隱私權政策公開資料")]
+    public async Task<IActionResult> GetPrivacyPublic(CancellationToken cancellationToken) =>
+        Ok(await LoadSettingAsync<PrivacyPolicySettingsDto>(PrivacyKey, cancellationToken));
 
     private async Task<T> LoadSettingAsync<T>(string key, CancellationToken cancellationToken) where T : class, new()
     {

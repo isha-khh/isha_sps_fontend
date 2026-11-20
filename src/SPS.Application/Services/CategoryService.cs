@@ -93,6 +93,9 @@ public class CategoryService : ICategoryService
             ParentId = request.ParentId,
             HasChild = false,
             Remark = request.Remark,
+            BadgeColor = BadgeColorAttribute.Apply(request.BadgeColor, null),
+            BadgeTextColor = BadgeColorAttribute.Apply(request.BadgeTextColor, null),
+            BadgeBorderColor = BadgeColorAttribute.Apply(request.BadgeBorderColor, null),
             DataMode = DataMode.Normal,
             CreatedTime = DateTime.UtcNow,
             UpdatedTime = DateTime.UtcNow
@@ -147,6 +150,9 @@ public class CategoryService : ICategoryService
         if (request.Ordinal.HasValue) category.Ordinal = request.Ordinal.Value;
         if (request.ParentId.HasValue) category.ParentId = request.ParentId;
         if (request.Remark != null) category.Remark = request.Remark;
+        category.BadgeColor = BadgeColorAttribute.Apply(request.BadgeColor, category.BadgeColor);
+        category.BadgeTextColor = BadgeColorAttribute.Apply(request.BadgeTextColor, category.BadgeTextColor);
+        category.BadgeBorderColor = BadgeColorAttribute.Apply(request.BadgeBorderColor, category.BadgeBorderColor);
         category.UpdatedTime = DateTime.UtcNow;
 
         await _unitOfWork.Categories.UpdateAsync(category, cancellationToken);
@@ -234,6 +240,9 @@ public class CategoryService : ICategoryService
             ParentName = category.Parent?.Name,
             HasChild = category.HasChild,
             Remark = category.Remark,
+            BadgeColor = category.BadgeColor,
+            BadgeTextColor = category.BadgeTextColor,
+            BadgeBorderColor = category.BadgeBorderColor,
             CreatedTime = category.CreatedTime,
             UpdatedTime = category.UpdatedTime
         };

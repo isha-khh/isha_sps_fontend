@@ -21,15 +21,50 @@ namespace SPS.Api.Controllers;
 public class FileManagementController : ControllerBase
 {
     private readonly IFileManagementService _fileManagementService;
+    private readonly IImageCompressionJobService _imageCompression;
     private readonly ILogger<FileManagementController> _logger;
 
     public FileManagementController(
         IFileManagementService fileManagementService,
+        IImageCompressionJobService imageCompression,
         ILogger<FileManagementController> logger)
     {
         _fileManagementService = fileManagementService;
+        _imageCompression = imageCompression;
         _logger = logger;
     }
+
+    /// <summary>
+    /// 壓縮所有圖片：把還沒壓縮過的既有圖片排進佇列，由背景逐批原地轉成 WebP（ID 與網址不變、原檔備份）。
+    /// 已有任務排隊或執行中時，回傳那個任務（alreadyActive = true），不會重複建立。
+    /// </summary>
+    [HttpPost("images/compress")]
+    [RequirePermission(UserPermission.ManageFiles)]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ImageCompressionEnqueueResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> EnqueueImageCompression(CancellationToken cancellationToken)
+    {
+        var who = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity?.Name;
+        var result = await _imageCompression.EnqueueAsync(who, User.FindFirst(ClaimTypes.NameIdentifier)?.Value, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>取得待壓縮的圖片數，以及最近一次（或進行中）壓縮任務的進度</summary>
+    [HttpGet("images/compress/status")]
+    [RequirePermission(UserPermission.ManageFiles)]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ImageCompressionStatusDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetImageCompressionStatus(CancellationToken cancellationToken)
+        => Ok(await _imageCompression.GetStatusAsync(cancellationToken));
+
+    /// <summary>取消排隊中或執行中的壓縮任務（已轉好的檔案維持不變，再按一次會接續剩下的）</summary>
+    [HttpPost("images/compress/{id:guid}/cancel")]
+    [RequirePermission(UserPermission.ManageFiles)]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult CancelImageCompression(Guid id)
+        => _imageCompression.Cancel(id) ? Ok() : NotFound(new { message = "任務不存在或已結束" });
 
     /// <summary>
     /// 上傳文件
@@ -53,6 +88,8 @@ public class FileManagementController : ControllerBase
             return Unauthorized(new { message = "未授權的請求" });
         }
 
+        // 後台上傳的內容圖片：轉成 WebP、過大縮小（申請文件走別的路，不受影響）
+        request.OptimizeImage = true;
         var result = await _fileManagementService.UploadFileAsync(request, userId.Value, cancellationToken);
 
         if (!result.IsSuccess)
@@ -84,6 +121,7 @@ public class FileManagementController : ControllerBase
             return Unauthorized(new { message = "未授權的請求" });
         }
 
+        request.OptimizeImage = true;
         var result = await _fileManagementService.UploadFilesAsync(request, userId.Value, cancellationToken);
 
         if (!result.IsSuccess)

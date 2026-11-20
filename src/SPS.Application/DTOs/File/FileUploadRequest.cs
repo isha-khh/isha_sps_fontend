@@ -31,6 +31,13 @@ public class FileUploadRequest
     /// 過期時間（可選）
     /// </summary>
     public DateTime? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// 是否做圖片最佳化（JPG／PNG／BMP 轉 WebP、過大縮小）。只有後台內容上傳與企業會員的公司圖片會開啟；
+    /// 申請文件（證明文件）要保留原檔，預設不轉。
+    /// </summary>
+    [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+    public bool OptimizeImage { get; set; } = false;
 }
 
 /// <summary>
@@ -52,4 +59,8 @@ public class BatchFileUploadRequest
     /// 過期時間（可選）
     /// </summary>
     public DateTime? ExpiresAt { get; set; }
+
+    /// <summary>是否做圖片最佳化，由控制器決定，見 <see cref="FileUploadRequest.OptimizeImage"/></summary>
+    [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+    public bool OptimizeImage { get; set; } = false;
 }

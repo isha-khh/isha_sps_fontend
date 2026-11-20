@@ -5,6 +5,7 @@ import { withBasePath } from "@/lib/api-client";
 import { fetchIndustryAiLink, fetchPublishedNewsCategories } from "@/lib/api.server";
 import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
 import Link from "next/link";
+import AccesskeyGuide from "@/components/sitemap/AccesskeyGuide";
 
 export const metadata: Metadata = {
   title: "網站導覽",
@@ -25,7 +26,10 @@ const SITE_UNIT_GROUPS: SiteUnitGroup[] = [
   {
     icon: "bi-diagram-3",
     title: "網站導覽",
-    links: [{ label: "網站導覽說明", href: "/sitemap" }],
+    links: [
+      { label: "網站導覽說明", href: "/sitemap" },
+      { label: "隱私權政策", href: "/privacy" },
+    ],
   },
   {
     icon: "bi-buildings",
@@ -44,8 +48,10 @@ const SITE_UNIT_GROUPS: SiteUnitGroup[] = [
   },
 ];
 
-// 這四個是分組標題（沒有自己的頁面），只有子項目是連結
-const SERVICE_LINKS = [
+// 「技術工具」「人才培育」「補助資源」是分組標題（沒有自己的頁面），只有子項目是連結；
+// 「產業輔導」底下只有一個頁面，跟主選單一樣不再多一層，直接是連結（有 `href`）
+type ServiceLink = { label: string; href: string } | { label: string; children: { label: string; href: string }[] };
+const SERVICE_LINKS: ServiceLink[] = [
   {
     label: "技術工具",
     children: [
@@ -62,7 +68,7 @@ const SERVICE_LINKS = [
   },
   {
     label: "產業輔導",
-    children: [{ label: "輔導", href: "/tutoring" }],
+    href: "/tutoring",
   },
   {
     label: "補助資源",
@@ -151,31 +157,7 @@ export default async function SitemapPage() {
                 </p>
                 <p className="card_intro">本網站的快速鍵（Accesskey）設定如下：</p>
 
-                <dl className="accesskey_list">
-                  <div className="accesskey_row">
-                    <dt className="accesskey_key">
-                      <kbd>Alt</kbd> + <kbd>U</kbd>
-                    </dt>
-                    <dd className="accesskey_desc">在上方功能區塊，快速瀏覽網頁：網站導覽、聯絡資訊、字體調整等。</dd>
-                  </div>
-                  <div className="accesskey_row">
-                    <dt className="accesskey_key">
-                      <kbd>Alt</kbd> + <kbd>C</kbd>
-                    </dt>
-                    <dd className="accesskey_desc">中央內容區塊，為主要互動內容區。</dd>
-                  </div>
-                  <div className="accesskey_row">
-                    <dt className="accesskey_key">
-                      <kbd>Alt</kbd> + <kbd>B</kbd>
-                    </dt>
-                    <dd className="accesskey_desc">下方功能區塊。</dd>
-                  </div>
-                </dl>
-
-                <div className="browser_tip" role="note">
-                  <i className="bi bi-info-circle me-2" aria-hidden="true" />
-                  <span>如果您打算開瀏覽器 Firefox，快速鍵可能無法透過 Shift+Alt+(快速鍵字母)，可改 Shift+Alt+C 嘗試並在單字中手動選擇，以此類推。</span>
-                </div>
+                <AccesskeyGuide />
               </div>
             </div>
           </div>
@@ -218,27 +200,35 @@ export default async function SitemapPage() {
                   <ul className="unit_links list-unstyled">
                     {SERVICE_LINKS.map((group) => (
                       <li key={group.label}>
-                        {/* 「技術工具」「人才培育」等只是分組標題、沒有對應頁面（主選單裡也是不能點的），不做成連結（issue #58） */}
-                        <span className="unit_label">{group.label}</span>
-                        <ul className="list-unstyled">
-                          {group.children.map((child) => (
-                            <li key={child.label}>
-                              {child.label === "產業AI" && industryAi.external ? (
-                                <a
-                                  href={industryAi.href}
-                                  title={`前往 ${child.label}`}
-                                  {...(industryAi.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                                >
-                                  {child.label}
-                                </a>
-                              ) : (
-                                <Link href={child.href} title={`前往 ${child.label}`}>
-                                  {child.label}
-                                </Link>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
+                        {"href" in group ? (
+                          <Link href={group.href} title={`前往 ${group.label}`}>
+                            {group.label}
+                          </Link>
+                        ) : (
+                          <>
+                            {/* 「技術工具」「人才培育」等只是分組標題、沒有對應頁面（主選單裡也是不能點的），不做成連結（issue #58） */}
+                            <span className="unit_label">{group.label}</span>
+                            <ul className="list-unstyled">
+                              {group.children.map((child) => (
+                                <li key={child.label}>
+                                  {child.label === "產業AI" && industryAi.external ? (
+                                    <a
+                                      href={industryAi.href}
+                                      title={`前往 ${child.label}`}
+                                      {...(industryAi.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                                    >
+                                      {child.label}
+                                    </a>
+                                  ) : (
+                                    <Link href={child.href} title={`前往 ${child.label}`}>
+                                      {child.label}
+                                    </Link>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
                       </li>
                     ))}
                   </ul>

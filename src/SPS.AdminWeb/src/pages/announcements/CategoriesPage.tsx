@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { PageTitle } from '@/components/PageTitle';
 import { categoriesApi } from '@/lib/api/category';
 import type { CategoryResponse, CreateCategoryRequest, UpdateCategoryRequest } from '@/types/category';
+import { BadgeColorFields, badgeColorsFrom, badgeColorsToRequest, badgeColorsValid, badgePreviewStyle, emptyBadgeColors, type BadgeColors } from '@/components/shared/BadgeColorFields';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useNotify } from '@/hooks/useNotify';
 
 import { NEWS_SECTIONS, type NewsSection } from '@/lib/news-section';
 
-interface CategoryFormData {
+interface CategoryFormData extends BadgeColors {
   name: string;
   remark: string;
   ordinal: number;
@@ -21,6 +22,8 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
   const config = NEWS_SECTIONS[section];
   // `industry`：管理該專區的「適用產業」（例如政府補助資源的產業別），而不是主分類
   const NEWS_CATEGORY_TYPE = industry ? (config.industryCategoryType ?? 1) : (config.categoryType ?? 1);
+  // 主分類在前台是彩色徽章，才開放設定顏色；「適用產業」不是徽章
+  const showBadgeColors = !industry;
   const noun = industry ? `${config.noun}${config.industryLabel ?? '產業別'}` : `${config.noun}分類`;
   const notify = useNotify();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
@@ -35,6 +38,7 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
     remark: '',
     ordinal: 0,
     published: true,
+    ...emptyBadgeColors,
   });
 
   useEffect(() => {
@@ -71,10 +75,11 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
         ordinal: category.ordinal,
         published: category.published,
         parentId: category.parentId,
+        ...badgeColorsFrom(category),
       });
     } else {
       setEditingCategory(null);
-      setFormData({ name: '', remark: '', ordinal: 0, published: true });
+      setFormData({ name: '', remark: '', ordinal: 0, published: true, ...emptyBadgeColors });
     }
     setIsModalOpen(true);
   };
@@ -82,7 +87,7 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingCategory(null);
-    setFormData({ name: '', remark: '', ordinal: 0, published: true });
+    setFormData({ name: '', remark: '', ordinal: 0, published: true, ...emptyBadgeColors });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,6 +98,12 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
       return;
     }
 
+    if (showBadgeColors && !badgeColorsValid(formData)) {
+      await notify.warning('徽章顏色格式必須是 #RRGGBB');
+      return;
+    }
+
+    const colors = showBadgeColors ? badgeColorsToRequest(formData) : {};
     setIsSaving(true);
     try {
       if (editingCategory) {
@@ -101,6 +112,7 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
           remark: formData.remark,
           ordinal: formData.ordinal,
           published: formData.published,
+          ...colors,
           ...(config.hasSubCategories && !industry && formData.parentId ? { parentId: formData.parentId } : {}),
         };
         await categoriesApi.updateCategory(editingCategory.id, updateRequest);
@@ -111,6 +123,7 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
           remark: formData.remark,
           ordinal: formData.ordinal,
           published: formData.published,
+          ...colors,
           ...(config.hasSubCategories && !industry && formData.parentId ? { parentId: formData.parentId } : {}),
         };
         await categoriesApi.createCategory(createRequest);
@@ -201,6 +214,11 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
                         ) : (
                           <div className="font-semibold">{category.name}</div>
                         )}
+                        {showBadgeColors && (category.badgeColor || category.badgeTextColor || category.badgeBorderColor) && (
+                          <span className="mt-1 inline-block text-sm" style={badgePreviewStyle(badgeColorsFrom(category), 'category')}>
+                            {category.name}
+                          </span>
+                        )}
                       </td>
                       <td>
                         <div className="text-sm text-base-content/70 max-w-md line-clamp-2">
@@ -254,7 +272,7 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
       {/* 新增/編輯 Modal */}
       {isModalOpen && (
         <div className="modal modal-open">
-          <div className="modal-box">
+          <div className="modal-box max-w-2xl">
             <h3 className="font-bold text-lg mb-4">
               {editingCategory ? '編輯類別' : '新增類別'}
             </h3>
@@ -297,6 +315,15 @@ export const AnnouncementCategoriesPage = ({ section = 0, industry = false }: { 
                         ))}
                     </select>
                   </div>
+                )}
+
+                {showBadgeColors && (
+                  <BadgeColorFields
+                    kind="category"
+                    previewText={formData.name}
+                    value={formData}
+                    onChange={(colors) => setFormData({ ...formData, ...colors })}
+                  />
                 )}
 
                 <div className="form-control">

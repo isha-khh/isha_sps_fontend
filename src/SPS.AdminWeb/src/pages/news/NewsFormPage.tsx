@@ -8,6 +8,7 @@ import { TagType, type Tag } from '@/types/taxonomy';
 import type { CreateNewsRequest, UpdateNewsRequest } from '@/types/news';
 import type { CategoryResponse } from '@/types/category';
 import { PuckEditor } from '@/components/puck/PuckEditor';
+import { guardPublish } from '@/lib/puck/content-guard';
 import { useNotify } from '@/hooks/useNotify';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
@@ -29,6 +30,8 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
     type: 0,
     section,
   });
+  // 被內容檢查（背景索引時跑）自動轉成草稿的原因，有的話在表單上方提示；重新發布後後端會清掉
+  const [unpublishReason, setUnpublishReason] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
@@ -113,6 +116,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
       setIsLoading(true);
       try {
         const data = await newsApi.getNewsById(Number(id));
+        setUnpublishReason(data.unpublishReason ?? null);
         const newsData = {
           title: data.title,
           introduction: data.introduction,
@@ -170,6 +174,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
 
     // 使用 ref 中的最新內容
     const latestContent = puckContentRef.current;
+    if (publish && !guardPublish(latestContent, notify)) return;
     console.log('[NewsFormPage] Submitting news');
     console.log('  - Content from state:', formData.content?.length || 0, 'chars');
     console.log('  - Content from ref:', latestContent?.length || 0, 'chars');
@@ -258,6 +263,16 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
           { label: isEditMode ? '編輯' : '新增', active: true },
         ]}
       />
+
+      {unpublishReason && !formData.published && (
+        <div role="alert" className="alert alert-warning items-start">
+          <span className="iconify lucide--triangle-alert mt-0.5 size-5 shrink-0" />
+          <div>
+            <div className="font-semibold">這篇內容被內容檢查自動轉成草稿</div>
+            <div className="text-sm whitespace-pre-line">{unpublishReason}</div>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-4">
         <button onClick={() => navigate(-1)} className="btn btn-ghost">
@@ -722,6 +737,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                     />
                   </div>
 
+                  {!config.hideOrdinal && (
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-medium">排序順序</span>
@@ -741,6 +757,7 @@ export const NewsFormPage = ({ section = 0 }: { section?: NewsSection }) => {
                       placeholder="0"
                     />
                   </div>
+                  )}
                 </div>
               </div>
             </div>

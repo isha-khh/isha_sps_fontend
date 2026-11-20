@@ -11,6 +11,11 @@ public class ContentSettingsDto
     public bool GuestCanViewBusinessDetail { get; set; } = true;
 
     /// <summary>
+    /// 前台企業名錄是否只顯示供給端企業（供給端與供需雙方；需求端不列出）。預設 false＝全部列出（issue #94）
+    /// </summary>
+    public bool BusinessListSupplierOnly { get; set; } = false;
+
+    /// <summary>
     /// 企業列表是否顯示標籤
     /// </summary>
     public bool ShowBusinessListTags { get; set; } = true;

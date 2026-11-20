@@ -117,6 +117,7 @@ public class RegulationsService : IRegulationsService
         if (request.Title != null) regulations.Title = request.Title;
         if (request.Content != null) regulations.Content = request.Content;
         if (request.Published.HasValue) regulations.Published = request.Published.Value;
+        if (regulations.Published) regulations.UnpublishReason = null;
         if (request.Type.HasValue) regulations.Type = request.Type.Value;
         if (request.Ordinal.HasValue) regulations.Ordinal = request.Ordinal.Value;
         if (request.CategoryId.HasValue) regulations.CategoryId = request.CategoryId;
@@ -150,6 +151,7 @@ public class RegulationsService : IRegulationsService
             Title = regulations.Title,
             Content = regulations.Content,
             Published = regulations.Published,
+            UnpublishReason = regulations.UnpublishReason,
             Type = regulations.Type,
             Ordinal = regulations.Ordinal,
             CategoryId = regulations.CategoryId,

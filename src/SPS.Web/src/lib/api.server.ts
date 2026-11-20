@@ -365,10 +365,12 @@ export async function fetchCompaniesPage(options: {
     pageSize: number;
     search?: string;
     tagIds?: number[];
+    /** 套用後台「頁面設定 → 企業名錄排序」；只有企業名錄列表需要，其他呼叫端維持原排序 */
+    useDirectorySort?: boolean;
 }): Promise<{ items: CompanyList[]; totalCount: number; backendAvailable: boolean }> {
     try {
         const response = await apiClient.get<PagedResult<CompanyList>>("/api/Company", {
-            params: { page: options.page, pageSize: options.pageSize, search: options.search || undefined, tagIds: options.tagIds },
+            params: { page: options.page, pageSize: options.pageSize, search: options.search || undefined, tagIds: options.tagIds, useDirectorySort: options.useDirectorySort || undefined },
             paramsSerializer: { indexes: null },
         });
         const items = (response.data.items ?? []).map((c) => ({ ...c, photo: resolveBackendAssetUrl(c.photo) }));
@@ -829,6 +831,35 @@ export async function fetchAboutPage(): Promise<AboutPageContent> {
         };
     } catch {
         return DEFAULT_ABOUT_PAGE;
+    }
+}
+
+export type PrivacyPolicyContent = {
+    title: string;
+    /** yyyy-MM-dd；空字串＝不顯示 */
+    updatedDate: string;
+    sections: { title: string; body: string }[];
+    noticeEnabled: boolean;
+    noticeMessage: string;
+    noticeButtonText: string;
+    noticeLinkText: string;
+};
+
+/** 隱私權政策與 Cookie 告知橫幅（後台「頁面設定」維護）。快取 60 秒；取不到（後端連不到）回 null——政策頁顯示「暫時無法載入」，橫幅不顯示 */
+export async function fetchPrivacyPolicy(): Promise<PrivacyPolicyContent | null> {
+    try {
+        const data = await getBackendJson<Partial<PrivacyPolicyContent>>("/api/page-settings/privacy/public", 60);
+        return {
+            title: data.title || "隱私權政策",
+            updatedDate: data.updatedDate ?? "",
+            sections: data.sections ?? [],
+            noticeEnabled: data.noticeEnabled ?? false,
+            noticeMessage: data.noticeMessage ?? "",
+            noticeButtonText: data.noticeButtonText ?? "",
+            noticeLinkText: data.noticeLinkText ?? "",
+        };
+    } catch {
+        return null;
     }
 }
 

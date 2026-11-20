@@ -1,6 +1,8 @@
 "use client";
 
 import CompanyProfileFields from "@/components/member/CompanyProfileFields";
+import IndustrySelect from "@/components/member/IndustrySelect";
+import { industryError } from "@/lib/member-registration-data";
 import { emptyProfile, profileToRequest, validateProfile, type ProfileState } from "@/lib/company-profile";
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
 import { useState } from "react";
@@ -13,6 +15,7 @@ import CompanyRoleTierSelector, { type CompanyRoleTierSelection } from "@/compon
 import DocumentUploadField from "@/components/member/DocumentUploadField";
 import PersonalDataConsentNotice from "@/components/member/PersonalDataConsentNotice";
 import Modal from "@/components/ui/Modal";
+import FormError from "@/components/ui/FormError";
 
 const REQUIRED = (
   <span className="red me-1" aria-hidden="true">
@@ -65,6 +68,7 @@ export default function UpgradePanel() {
 
   const [roleTier, setRoleTier] = useState<CompanyRoleTierSelection | null>(null);
   const [phone, setPhone] = useState(member?.phone ?? "");
+  const [extension, setExtension] = useState(member?.extension ?? "");
   const [mobilePhone, setMobilePhone] = useState(member?.mobilePhone ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -115,6 +119,8 @@ export default function UpgradePanel() {
     if (!phone || !password || !confirmPassword || !companyName || !industry || !position) {
       return "請完整填寫必填欄位";
     }
+    const industryMsg = industryError(industry);
+    if (industryMsg) return industryMsg;
     if (password !== confirmPassword) return "兩次密碼輸入不一致";
     if (!contactPerson || !unifiedSocialCreditCode) {
       return "請完整填寫公司資料必填欄位";
@@ -156,6 +162,7 @@ export default function UpgradePanel() {
             position,
             email: member!.email,
             phone,
+            extension: extension || undefined,
             mobilePhone: mobilePhone || undefined,
             password,
             confirmPassword,
@@ -221,7 +228,20 @@ export default function UpgradePanel() {
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">{REQUIRED}聯絡電話</label>
-              <input type="text" className="form-control" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <div className="d-flex gap-2">
+                <input type="text" className="form-control" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="form-control"
+                  style={{ maxWidth: "5.5rem" }}
+                  placeholder="分機"
+                  aria-label="聯絡電話分機"
+                  maxLength={10}
+                  value={extension}
+                  onChange={(e) => setExtension(e.target.value.replace(/[^0-9]/g, ""))}
+                />
+              </div>
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">手機</label>
@@ -233,7 +253,7 @@ export default function UpgradePanel() {
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">{REQUIRED}產業別</label>
-              <input type="text" className="form-control" value={industry} onChange={(e) => setIndustry(e.target.value)} />
+              <IndustrySelect value={industry} onChange={setIndustry} />
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">{REQUIRED}職稱</label>
@@ -332,9 +352,9 @@ export default function UpgradePanel() {
           </div>
 
           {error && (
-            <div className="alert alert-danger" role="alert">
+            <FormError as="div" className="alert alert-danger">
               {error}
-            </div>
+            </FormError>
           )}
 
           <button type="button" className="tier-submit-btn" onClick={handleSubmit} disabled={submitting}>

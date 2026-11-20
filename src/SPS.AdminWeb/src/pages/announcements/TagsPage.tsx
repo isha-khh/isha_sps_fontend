@@ -3,6 +3,7 @@ import { isAxiosError } from 'axios';
 import { PageTitle } from '@/components/PageTitle';
 import { tagsApi } from '@/lib/api/tags';
 import { TagType, type Tag } from '@/types/taxonomy';
+import { BadgeColorFields, badgeColorsFrom, badgeColorsToRequest, badgeColorsValid, badgePreviewStyle, emptyBadgeColors, type BadgeColors } from '@/components/shared/BadgeColorFields';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useNotify } from '@/hooks/useNotify';
 
@@ -16,16 +17,18 @@ function errorMessage(err: unknown, fallback: string): string {
   return fallback;
 }
 
-interface TagFormData {
+interface TagFormData extends BadgeColors {
   name: string;
   ordinal: number;
 }
+
+const EMPTY_FORM: TagFormData = { name: '', ordinal: 0, ...emptyBadgeColors };
 
 /**
  * 公告標籤管理。標籤是公告卡片上的藍色關鍵字（跟紫色的「分類」是兩層，見
  * docs/改版規劃.md），管理員在這裡維護標籤清單，再到公告表單替每篇公告勾選。
  * 標籤名稱在後端同一分類內要唯一；仍被公告使用的標籤後端會拒絕刪除，
- * 這裡直接顯示後端回的原因。
+ * 這裡直接顯示後端回的原因。標籤的前台徽章顏色（底色、字體、外框）也在這裡設定。
  */
 export const AnnouncementTagsPage = () => (
   <TagManagementPage
@@ -39,6 +42,7 @@ export const AnnouncementTagsPage = () => (
       usageHeader: '使用中公告數',
       usageBlockedTitle: '仍有公告使用中，無法刪除',
       placeholder: '例如：智慧工安',
+      badgeColors: true,
     }}
   />
 );
@@ -73,6 +77,8 @@ interface TagManagementConfig {
   usageHeader: string;
   usageBlockedTitle: string;
   placeholder: string;
+  /** 這種標籤在前台是徽章，才開放設定顏色（課程類型是下拉選項，沒有徽章） */
+  badgeColors?: boolean;
 }
 
 const TagManagementPage = ({ config }: { config: TagManagementConfig }) => {
@@ -87,7 +93,7 @@ const TagManagementPage = ({ config }: { config: TagManagementConfig }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<Tag | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<TagFormData>({ name: '', ordinal: 0 });
+  const [formData, setFormData] = useState<TagFormData>(EMPTY_FORM);
 
   const fetchTags = useCallback(async () => {
     setIsLoading(true);
@@ -116,7 +122,7 @@ const TagManagementPage = ({ config }: { config: TagManagementConfig }) => {
 
   const openModal = (tag?: Tag) => {
     setEditing(tag ?? null);
-    setFormData(tag ? { name: tag.name, ordinal: tag.ordinal } : { name: '', ordinal: 0 });
+    setFormData(tag ? { name: tag.name, ordinal: tag.ordinal, ...badgeColorsFrom(tag) } : EMPTY_FORM);
     setIsModalOpen(true);
   };
 
@@ -133,12 +139,18 @@ const TagManagementPage = ({ config }: { config: TagManagementConfig }) => {
       return;
     }
 
+    if (config.badgeColors && !badgeColorsValid(formData)) {
+      notify.warning('徽章顏色格式必須是 #RRGGBB');
+      return;
+    }
+
+    const colors = config.badgeColors ? badgeColorsToRequest(formData) : {};
     setIsSaving(true);
     try {
       if (editing) {
-        await tagsApi.updateTag(editing.id, { name, ordinal: formData.ordinal });
+        await tagsApi.updateTag(editing.id, { name, ordinal: formData.ordinal, ...colors });
       } else {
-        await tagsApi.createTag({ type: config.type, name, ordinal: formData.ordinal });
+        await tagsApi.createTag({ type: config.type, name, ordinal: formData.ordinal, ...colors });
       }
       closeModal();
       await fetchTags();
@@ -233,7 +245,11 @@ const TagManagementPage = ({ config }: { config: TagManagementConfig }) => {
                     {tags.map((tag) => (
                       <tr key={tag.id}>
                         <td>
-                          <span className="badge badge-info badge-outline">{tag.name}</span>
+                          {config.badgeColors ? (
+                            <span style={badgePreviewStyle(badgeColorsFrom(tag), 'tag')}>{tag.name}</span>
+                          ) : (
+                            <span className="badge badge-info badge-outline">{tag.name}</span>
+                          )}
                         </td>
                         <td>{tag.usageCount}</td>
                         <td>{tag.ordinal}</td>
@@ -283,7 +299,7 @@ const TagManagementPage = ({ config }: { config: TagManagementConfig }) => {
 
         {isModalOpen && (
           <div className="modal modal-open">
-            <div className="modal-box">
+            <div className="modal-box max-w-2xl">
               <h3 className="font-bold text-lg mb-4">{editing ? '編輯標籤' : '新增標籤'}</h3>
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
@@ -314,6 +330,14 @@ const TagManagementPage = ({ config }: { config: TagManagementConfig }) => {
                       onChange={(e) => setFormData({ ...formData, ordinal: parseInt(e.target.value) || 0 })}
                     />
                   </div>
+                  {config.badgeColors && (
+                    <BadgeColorFields
+                      kind="tag"
+                      previewText={formData.name}
+                      value={formData}
+                      onChange={(colors) => setFormData({ ...formData, ...colors })}
+                    />
+                  )}
                 </div>
                 <div className="modal-action">
                   <button type="button" onClick={closeModal} className="btn btn-ghost" disabled={isSaving}>

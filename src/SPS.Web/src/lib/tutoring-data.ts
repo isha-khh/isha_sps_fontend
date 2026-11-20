@@ -1,4 +1,5 @@
-import type { NewsDetail, NewsItem } from "@/lib/types";
+import type { BadgeStyle, NewsDetail, NewsItem } from "@/lib/types";
+import { tagBadgesOf } from "@/lib/badge-style";
 import { formatIsoDate } from "@/lib/content-list-utils";
 
 /**
@@ -14,6 +15,8 @@ export interface TutoringItem {
   title: string;
   description: string;
   keywords: string[];
+  /** 與 keywords 一一對應的標籤徽章顏色（後台「標籤管理」設定） */
+  keywordBadges?: (BadgeStyle | null | undefined)[];
   applicant: string;
   organizer: string;
   contactPhone: string;
@@ -22,6 +25,8 @@ export interface TutoringItem {
   industry: string;
   /** 所有產業別（一則輔導可以屬於多個） */
   industries: string[];
+  /** 與 industries 一一對應的徽章顏色（後台「分類管理」設定） */
+  industryBadges?: (BadgeStyle | null | undefined)[];
   contributor?: string;
 }
 
@@ -33,12 +38,14 @@ export function toTutoringItem(item: NewsItem | NewsDetail): TutoringItem {
     title: item.title,
     description: item.introduction ?? "",
     keywords: item.tags ?? [],
+    keywordBadges: tagBadgesOf(item),
     applicant: meta.applicant ?? "",
     organizer: meta.organizer ?? "",
     contactPhone: meta.contactPhone ?? "",
     date: formatIsoDate(item.startDate ?? item.createdTime),
     industry: item.categoryName ?? "",
     industries: item.categoryNames && item.categoryNames.length > 0 ? item.categoryNames : item.categoryName ? [item.categoryName] : [],
+    industryBadges: item.categoryNames && item.categoryNames.length > 0 ? item.categoryBadges : item.categoryName ? [item.categoryBadge] : [],
     contributor: meta.contributor || undefined,
   };
 }

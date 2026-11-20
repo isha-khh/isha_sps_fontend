@@ -52,6 +52,13 @@ public class AnalyticsController : ControllerBase
     }
 
     /// <summary>
+    /// 自動同步的設定與最近一次同步結果（儀表板顯示用）
+    /// </summary>
+    [HttpGet("sync-status")]
+    [SwaggerOperation(Summary = "取得 Google Analytics 同步狀態", Description = "自動同步是否開啟、排程時間，以及最近一次同步（手動或自動）的結果")]
+    public async Task<IActionResult> GetSyncStatus() => Ok(await _analyticsService.GetSyncStatusAsync());
+
+    /// <summary>
     /// 手動觸發數據同步
     /// </summary>
     /// <param name="days">同步天數 (預設 1 天，即昨天)</param>
@@ -60,7 +67,7 @@ public class AnalyticsController : ControllerBase
     [SwaggerOperation(Summary = "同步 Google Analytics 數據", Description = "從 Google Analytics 手動同步數據到資料庫")]
     public async Task<IActionResult> Sync([FromQuery] int days = 1)
     {
-        var result = await _analyticsService.SyncAnalyticsDataAsync(days);
+        var result = await _analyticsService.SyncAnalyticsDataAsync(days, "manual");
 
         if (result.IsSuccess)
         {

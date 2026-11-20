@@ -8,11 +8,15 @@ import type { AttachmentLink } from "@/components/ui/AttachmentsPanel";
  * （`GET /api/Demand`，見 `fetchDemands`），這裡只負責把後端形狀轉成畫面用的樣子。
  *
  * 地點、公開摘要、附件由後台「需求張貼管理」填寫；完整內容與附件只有登入的企業會員看得到
- * （設計稿的「企業會員可見完整內容」），其他人只看得到公開摘要。狀態標籤固定為「徵求中」（前台只看得到已發布的需求）。
+ * （設計稿的「企業會員可見完整內容」），其他人只看得到公開摘要。狀態標籤是「徵求中」，刊登端填報對接結果後變成「已成功對接」
+ * （issue #98；只公開狀態，不公開對接到哪家企業）。前台只看得到已發布的需求。
  */
 export interface MatchingNeed {
   id: string;
+  /** 「徵求中」或「已成功對接」 */
   statusLabel: string;
+  /** 已成功對接（狀態標籤用綠色） */
+  matched: boolean;
   title: string;
   /** 列表卡片的簡短描述（內文開頭） */
   description: string;
@@ -33,7 +37,8 @@ export interface MatchingNeed {
 export function demandToNeed(demand: DemandItem): MatchingNeed {
   return {
     id: String(demand.id),
-    statusLabel: "徵求中",
+    statusLabel: demand.matched ? "已成功對接" : "徵求中",
+    matched: Boolean(demand.matched),
     title: demand.name,
     // 摘要由後端決定（公開摘要，沒填就取內容開頭），匿名也看得到
     description: demand.summary ?? "",

@@ -157,7 +157,7 @@ public class AdminRoleService : IAdminRoleService
             new() { Name = "ManageProducts", Value = (long)UserPermission.ManageProducts, Description = "產品管理", Group = "內容管理" },
             new() { Name = "ManageDemands", Value = (long)UserPermission.ManageDemands, Description = "需求管理", Group = "內容管理" },
             new() { Name = "ManageNews", Value = (long)UserPermission.ManageNews, Description = "公告管理（含公告標籤）", Group = "內容管理" },
-            new() { Name = "ManageBanners", Value = (long)UserPermission.ManageBanners, Description = "橫幅管理", Group = "內容管理" },
+            new() { Name = "ManageBanners", Value = (long)UserPermission.ManageBanners, Description = "廣告管理", Group = "內容管理" },
             new() { Name = "ManageSiteContent", Value = (long)UserPermission.ManageSiteContent, Description = "網站內容（成功案例／彈窗公告／關於我們／站台設定）", Group = "內容管理" },
             new() { Name = "ManageMedia", Value = (long)UserPermission.ManageMedia, Description = "媒體管理（相簿／圖片／影音）", Group = "內容管理" },
             new() { Name = "ManageMemos", Value = (long)UserPermission.ManageMemos, Description = "備忘錄管理", Group = "內容管理" },

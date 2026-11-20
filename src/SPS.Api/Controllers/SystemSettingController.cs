@@ -94,6 +94,8 @@ public class SystemSettingController : ControllerBase
     [SwaggerOperation(Summary = "更新 Google Analytics 設定")]
     public async Task<IActionResult> UpdateGoogleAnalyticsSettings([FromBody] GoogleAnalyticsSettingsDto settings)
     {
+        var autoSyncError = settings.ValidateAutoSync();
+        if (autoSyncError != null) return BadRequest(new { error = autoSyncError });
         var result = await _settingService.UpdateSettingAsync("GoogleAnalytics", settings);
         return result.IsSuccess ? Ok(new { message = "Google Analytics settings updated" }) : BadRequest(new { error = result.Error });
     }
@@ -1200,6 +1202,18 @@ public class SystemSettingController : ControllerBase
 
         _embeddingIndexJob.RequestScan();
         return Accepted(new { message = "已要求立即掃描" });
+    }
+
+    /// <summary>取得 LiteLLM 上這把金鑰可用的模型清單（設定頁模型下拉選單用，不儲存設定）</summary>
+    [HttpPost("embedding/models")]
+    [RequirePermission(UserPermission.ManageSettings)]
+    [SwaggerOperation(Summary = "取得 AI 語意搜尋可用的模型清單（不儲存設定）")]
+    public async Task<IActionResult> ListEmbeddingModels([FromBody] EmbeddingSettingsDto settings, CancellationToken ct)
+    {
+        var result = await _embeddingService.ListModelsAsync(settings, ct);
+        return result.IsSuccess
+            ? Ok(new { success = true, models = result.Data })
+            : Ok(new { success = false, models = Array.Empty<string>(), message = result.Error });
     }
 
     [HttpPost("embedding/test")]

@@ -23,6 +23,18 @@ public interface IContentIndexingService
     Task<bool> IndexCompanyAsync(Guid companyId, CancellationToken ct = default, bool force = false);
 
     /// <summary>
+    /// 全站搜尋的語意索引（文件端向量）：最新消息等公告類（News，不分專區）、常見問題、產業案例、
+    /// 以及需求的公開欄位。行為同 <see cref="IndexCompanyAsync"/>：hash 沒變就跳過、失敗只記 log。
+    /// </summary>
+    Task<bool> IndexNewsAsync(int newsId, CancellationToken ct = default, bool force = false);
+    Task<bool> IndexFaqAsync(int questionId, CancellationToken ct = default, bool force = false);
+    Task<bool> IndexCaseAsync(int caseId, CancellationToken ct = default, bool force = false);
+    Task<bool> IndexDemandDocumentAsync(int demandId, CancellationToken ct = default, bool force = false);
+
+    /// <summary>依來源類型分派到上面各個索引方法（排程、全量重新索引、內容異動觸發共用）</summary>
+    Task<bool> IndexAsync(EmbeddingSourceType sourceType, string sourceId, CancellationToken ct = default, bool force = false);
+
+    /// <summary>
     /// 排程掃描路徑：找出需要（重新）索引的 Demand/Company，各處理最多 batchSize 筆。
     /// 條件：完全沒有 ContentEmbedding 記錄的 / SourceTextHash 對不上的 / Status=Failed 且 RetryCount &lt; 5 的。
     /// 回傳實際處理筆數。
@@ -36,7 +48,7 @@ public interface IContentIndexingService
     Task<int> ResetFailedRetryCountsAsync(CancellationToken ct = default);
 
     /// <summary>
-    /// 全量重新索引的對象清單：所有 Demand + 供給端（Supplier/Both）Company。
+    /// 全量重新索引的對象清單：所有 Demand（查詢端與文件端各一）、供給端（Supplier/Both）Company、公告類、常見問題、產業案例。
     /// </summary>
     Task<IReadOnlyList<ReindexTarget>> ListReindexTargetsAsync(CancellationToken ct = default);
 

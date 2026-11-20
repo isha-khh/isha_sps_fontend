@@ -58,4 +58,10 @@ public class MemberInfo
     public string? MobilePhone { get; set; }
     public Guid? CompanyId { get; set; }
     public string? CompanyName { get; set; }
+
+    /// <summary>
+    /// 是否需要先驗證信箱（信箱尚未驗證，且郵件服務有啟用——停用時寄不出驗證碼，不能把人擋在外面）。
+    /// 登入（密碼、Passkey）與 <c>GET /api/Auth/profile</c> 會帶；前台據此導去「驗證信箱」頁。
+    /// </summary>
+    public bool RequireEmailVerification { get; set; }
 }

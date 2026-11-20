@@ -38,7 +38,7 @@ export default async function MatchingEnterprisePage({ searchParams }: PageProps
 
   const [taxonomy, result, bottomBanners, contentSettings] = await Promise.all([
     fetchTagTaxonomy(),
-    fetchCompaniesPage({ page, pageSize: ENTERPRISE_PAGE_SIZE, search: query, tagIds }),
+    fetchCompaniesPage({ page, pageSize: ENTERPRISE_PAGE_SIZE, search: query, tagIds, useDirectorySort: true }),
     fetchBanners("enterprise-bottom"),
     // 後台「系統配置 → 內容設定」：企業列表要不要顯示標籤、簡介與簡介最多幾個字
     getContentSettingsSSR(),

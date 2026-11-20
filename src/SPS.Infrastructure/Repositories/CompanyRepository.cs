@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using SPS.Application.DTOs.Company;
 using SPS.Application.DTOs.Common;
+using SPS.Application.DTOs.SystemSettings;
 using SPS.Application.Interfaces.IRepositories;
+using SPS.Application.Services;
 using SPS.Domain.Entities;
+using SPS.Domain.Enums;
 using SPS.Infrastructure.Data;
 using SPS.Infrastructure.Repositories.Common;
 
@@ -72,6 +75,12 @@ public class CompanyRepository : Repository<Company, Guid>, ICompanyRepository
             query = query.Where(c => c.Type == parameters.Type.Value);
         }
 
+        // 前台名錄「只顯示供給端」：供給端與供需雙方（需求端不列出）
+        if (parameters.SupplierSideOnly)
+        {
+            query = query.Where(c => c.Type == CompanyType.Supplier || c.Type == CompanyType.Both);
+        }
+
         // 級別過濾
         if (parameters.Level.HasValue)
         {
@@ -94,7 +103,9 @@ public class CompanyRepository : Repository<Company, Guid>, ICompanyRepository
         var totalCount = await query.CountAsync(cancellationToken);
 
         // 排序
-        query = ApplySorting(query, parameters.SortBy, parameters.Descending);
+        query = parameters.DirectorySortRules != null
+            ? ApplyDirectorySorting(query, parameters.DirectorySortRules)
+            : ApplySorting(query, parameters.SortBy, parameters.Descending);
 
         // 分頁
         var items = await query
@@ -117,6 +128,10 @@ public class CompanyRepository : Repository<Company, Guid>, ICompanyRepository
             .OrderBy(c => c.Name)
             .ToListAsync(cancellationToken);
     }
+
+    /// <summary>前台企業名錄的排序（後台「頁面設定」），與全站搜尋的企業結果共用 <see cref="CompanyDirectoryOrdering"/></summary>
+    private IQueryable<Company> ApplyDirectorySorting(IQueryable<Company> query, List<EnterpriseSortRuleDto> rules)
+        => CompanyDirectoryOrdering.Apply(query, rules, _context);
 
     private IQueryable<Company> ApplySorting(
         IQueryable<Company> query,

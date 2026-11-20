@@ -185,6 +185,12 @@ public class AuthService : IAuthService
             }
         }
 
+        // 信箱還沒驗證 → 前台登入後導去驗證信箱頁（郵件服務停用時寄不出驗證碼，不擋人）
+        if (tokenResponse.Member != null && !member.IsEmailVerified && await _emailService.IsEnabledAsync())
+        {
+            tokenResponse.Member.RequireEmailVerification = true;
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 記錄登入成功
@@ -313,6 +319,13 @@ public class AuthService : IAuthService
         _logger.LogInformation("Refresh token successful for member {MemberId}", member.Id);
 
         return Result<TokenResponse>.Success(tokenResponse);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> RequiresEmailVerificationAsync(Guid memberId, CancellationToken cancellationToken = default)
+    {
+        var member = await _unitOfWork.Members.GetByIdAsync(memberId, cancellationToken);
+        return member != null && !member.IsEmailVerified && await _emailService.IsEnabledAsync();
     }
 
     /// <summary>

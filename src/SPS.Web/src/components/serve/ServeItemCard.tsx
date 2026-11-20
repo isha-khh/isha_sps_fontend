@@ -1,4 +1,6 @@
 import Badge from "@/components/ui/Badge";
+import { badgeInlineStyle } from "@/lib/badge-style";
+import type { BadgeStyle } from "@/lib/types";
 import Link from "next/link";
 
 export interface ServeItemCardData {
@@ -6,10 +8,13 @@ export interface ServeItemCardData {
   /** 沒有封面圖就不顯示圖片區塊 */
   image?: string;
   category: string;
+  categoryBadge?: BadgeStyle | null;
   date: string;
   title: string;
   description: string;
   keywords?: string[];
+  /** 與 keywords 一一對應的標籤徽章顏色 */
+  keywordBadges?: (BadgeStyle | null | undefined)[];
   /** 有附件才顯示「下載文件」 */
   hasAttachments?: boolean;
 }
@@ -33,9 +38,10 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
     <div className="col-lg-4 col-md-6 col-12 item mb-md-4 mb-4">
       <div className="item_box">
         {data.image && (
-          <Link href={data.href} className="pic" title={data.title}>
+          // 圖片連結跟下面的標題連結是同一個目的地：圖片連結不進 Tab 順序、不給輔助科技念（HM1240402E），名稱由標題連結負責
+          <Link href={data.href} className="pic" tabIndex={-1} aria-hidden="true">
             <div className="ratio ratio-4x3">
-              <img className="img-fluid d-block" src={data.image} alt={data.title} />
+              <img className="img-fluid d-block" src={data.image} alt="" />
             </div>
           </Link>
         )}
@@ -45,7 +51,7 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
             <div className="tit_nsl">
               <div className="tit_three d-flex mb-2">
                 <div className="tag-wrap">
-                  <Badge>{data.category}</Badge>
+                  <Badge style={data.categoryBadge}>{data.category}</Badge>
                 </div>
                 <div className="date">{data.date}</div>
               </div>
@@ -69,11 +75,11 @@ export default function ServeItemCard({ data }: { data: ServeItemCardData }) {
 
           {data.keywords && data.keywords.length > 0 && (
             <ul className="nav ul-key">
-              {data.keywords.map((keyword) => (
+              {data.keywords.map((keyword, index) => (
                 <li key={keyword}>
-                  <a href="#" title={`前往${keyword}`} tabIndex={0}>
+                  <span style={badgeInlineStyle(data.keywordBadges?.[index])}>
                     {keyword}
-                  </a>
+                  </span>
                 </li>
               ))}
             </ul>

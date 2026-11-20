@@ -98,25 +98,6 @@ export default async function PromotionContributePage() {
                 <ShareBox />
               </div>
             </div>
-
-            <ul className="nav ul-key">
-              <li>
-                {industryAi.external ? (
-                  <a href={industryAi.href} title="前往產業AI" tabIndex={0} {...(industryAi.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
-                    產業AI
-                  </a>
-                ) : (
-                  <Link href="/serve?category=產業AI" title="前往產業AI" tabIndex={0}>
-                    產業AI
-                  </Link>
-                )}
-              </li>
-              <li>
-                <Link href="/serve?category=技術文件" title="前往技術文件" tabIndex={0}>
-                  技術文件
-                </Link>
-              </li>
-            </ul>
           </div>
 
           <div className="ratio ratio-4x3">

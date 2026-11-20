@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getGaMeasurementId } from "@/lib/ga";
 
 /**
  * 每個請求產生一組 nonce，組成 Content-Security-Policy 並同時放進「請求」與「回應」標頭：
@@ -17,17 +18,19 @@ export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const basePath = request.nextUrl.basePath ?? "";
   const isDev = process.env.NODE_ENV === "development";
+  // Google Analytics 只有設定了 GA_MEASUREMENT_ID 才載入（見 components/GoogleAnalytics.tsx），CSP 也只在這時才放行 GA 的網域
+  const ga = getGaMeasurementId() !== null;
 
   const csp = [
     "default-src 'self'",
     // 開發模式 React 會用 eval 還原錯誤堆疊，正式版不需要
-    `script-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-eval'" : ""}${ga ? " https://www.googletagmanager.com" : ""}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' data: https://fonts.gstatic.com",
-    "img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://placehold.co",
+    `img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://placehold.co${ga ? " https://www.google-analytics.com https://www.googletagmanager.com" : ""}`,
     "media-src 'self' blob:",
     // 頁尾電子報訂閱直接打 Newsleopard（EDM 服務）的 API
-    "connect-src 'self' https://api-backend.app.newsleopard.com",
+    `connect-src 'self' https://api-backend.app.newsleopard.com${ga ? " https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com" : ""}`,
     "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
     "object-src 'none'",
     "base-uri 'self'",

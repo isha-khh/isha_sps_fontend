@@ -8,7 +8,8 @@ import { withBasePath } from "@/lib/api-client";
  *
  * 舊站 header（page/_uc/nav.html）沒有搜尋框，是 2026-10-02 新增的。用原生
  * `<form method="get">` 送出，不依賴 router，JS 還沒載入也能搜。展開後自動 focus，
- * 按 Esc 或點面板外面會收起來。
+ * 按 Esc 或點面板外面會收起來。快速鍵 `S` 不掛在這幾個元素上（隱藏的版型瀏覽器觸發不了），
+ * 由 `SearchAccesskey` 依目前看得到的版型打開，見該檔案。
  *
  * 兩種版型（`variant`）：
  * - `header`：header 列上的圖示按鈕＋展開面板，只在 ≥1400px 才顯示。桌機版主選單
@@ -71,7 +72,7 @@ export default function HeaderSearch({ variant = "header" }: { variant?: "header
       <button
         type="button"
         className={`btn ${isFloat ? "btn-primary shadow" : "btn-light"} rounded-circle header-search-toggle`}
-        aria-label="開啟全站搜尋"
+        aria-label="開啟全站搜尋（快速鍵 S）"
         aria-expanded={open}
         aria-controls="header-search-panel"
         title="全站搜尋"

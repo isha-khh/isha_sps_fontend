@@ -24,3 +24,17 @@ export function wrapHtmlAsPuckContent(id: string, html: string, fontSize: "norma
     content: [{ type: "ArticleContent", props: { id, content: html, fontSize } }],
   });
 }
+
+/**
+ * 後台上傳的圖片／檔案，網址存的是不帶站台前綴的 `/api/FileManagement/{id}/download`（後端與後台編輯器產生的格式）。
+ * Puck 內容是一整段 JSON 字串，不會經過 `api-client.ts` 的回應欄位補前綴，所以編輯器內容裡的 `<img src>`、
+ * 連結會原樣送到瀏覽器。站台掛在 `/sps` 底下時，這種網址會打到網域根目錄的 `/api/`——
+ * 正式網域（sdd.nat.gov.tw）根目錄 `/api/` 不屬於本站，只有 `/sps/` 底下才是，圖就會 404。
+ *
+ * 在解析 JSON 之前，把「緊接在引號、單引號、等號或左括號後面」的 `/api/FileManagement/` 補上站台前綴。
+ * 限定前一個字元，是為了不動到完整網址（`https://host/api/FileManagement/…` 前一個字元是主機名稱）
+ * 與已經補過的 `/sps/api/…`；`toPublicPath` 傳入 `withBasePath`，本身也不會重複補。
+ */
+export function prefixBackendFileUrls(content: string, toPublicPath: (path: string) => string): string {
+  return content.replace(/(?<=["'=(])\/api\/FileManagement\//g, (match) => toPublicPath(match));
+}

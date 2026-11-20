@@ -8,11 +8,10 @@ import CourseTable from "@/components/talent/CourseTable";
 import PopularCourses from "@/components/talent/PopularCourses";
 import NewsBanner from "@/components/news/NewsBanner";
 import SidebarBanner from "@/components/layout/SidebarBanner";
-import { toTalentCourse } from "@/lib/talent-data";
+import { pickPopularCourses, sortCoursesByDate, toTalentCourse } from "@/lib/talent-data";
 import { withBasePath } from "@/lib/api-client";
 import { fetchBanners, fetchSectionItems, NewsSections } from "@/lib/api.server";
 import { buildListHref, readListQuery } from "@/lib/list-query";
-import { sortByViewCount } from "@/lib/content-list-utils";
 
 export const metadata: Metadata = {
   title: "知識加值",
@@ -25,7 +24,7 @@ const ALL_COURSES_LIMIT = 100;
 // 對應設計稿 page/_uc/side2_banner.html——「熱門課程」下面還有一個共用的廣告欄位。
 /**
  * 人才培訓課程列表，對應設計稿 page/talent/index.html。2026-10-13 起資料來自後台「人才培育 → 課程內容」
- * （跟公告共用 News 資料表，見 `lib/talent-data.ts`），關鍵字搜尋交給後端；「熱門課程」側欄取瀏覽數最高的 5 筆。
+ * （跟公告共用 News 資料表，見 `lib/talent-data.ts`），關鍵字搜尋交給後端；表格依開課起日由新到舊排序；「熱門課程」側欄由後台課程的「熱門課程排序」決定（最多 5 筆）。
  *
  * 搜尋列的「年份」「類型」兩個下拉原本是空的（設計稿的佔位，客戶回報「知識加值選單沒功能」）。現在：
  * - 年份＝課程開課起日的年份（後台「課程資訊 → 開課起日」；沒填就用公告上架日期的年份），選項列出所有課程出現過的年份；
@@ -47,11 +46,13 @@ export default async function TalentIndexPage({ searchParams }: PageProps<"/tale
   const yearOf = (item: (typeof allSource.items)[number]) => (item.meta?.dateStart ?? item.startDate ?? item.createdTime ?? "").slice(0, 4);
   const years = Array.from(new Set(allSource.items.map(yearOf).filter((y) => /^\d{4}$/.test(y)))).sort((a, b) => Number(b) - Number(a));
   const types = Array.from(new Set(allSource.items.flatMap((item) => (item.courseTypes ?? []).map((t) => t.name)))).sort((a, b) => a.localeCompare(b, "zh-Hant"));
-  const filtered = result.items.filter((item) => (!year || yearOf(item) === year) && (!type || (item.courseTypes ?? []).some((t) => t.name === type)));
+  // 表格依時間排序（開課起日由新到舊），不手動維護
+  const filtered = sortCoursesByDate(result.items).filter((item) => (!year || yearOf(item) === year) && (!type || (item.courseTypes ?? []).some((t) => t.name === type)));
   const totalPages = Math.max(1, Math.ceil(filtered.length / TALENT_PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const courses = filtered.slice((currentPage - 1) * TALENT_PAGE_SIZE, currentPage * TALENT_PAGE_SIZE).map(toTalentCourse);
-  const popularCourses = sortByViewCount(allSource.items).slice(0, 5).map(toTalentCourse);
+  // 「熱門課程」獨立排序：後台課程的「熱門課程排序」，不受表格排序影響
+  const popularCourses = pickPopularCourses(allSource.items).map(toTalentCourse);
   const hasFilter = Boolean(query || year || type);
   return (
     <>

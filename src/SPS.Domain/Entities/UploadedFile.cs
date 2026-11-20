@@ -128,6 +128,12 @@ public class UploadedFile
     public bool IsStaticFile { get; set; } = false;
 
     /// <summary>
+    /// 圖片最佳化（轉 WebP、過大縮小）處理過的時間；有值代表上傳時或背景壓縮服務已經評估過（轉了，或轉了也沒比較小而維持原檔），
+    /// 背景服務不會再處理它。<c>null</c> ＝ 還沒評估過。
+    /// </summary>
+    public DateTime? ImageOptimizedAt { get; set; }
+
+    /// <summary>
     /// 靜態檔案相對路徑（相對於 wwwroot）
     /// </summary>
     public string? StaticFilePath { get; set; }

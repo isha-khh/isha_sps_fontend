@@ -268,7 +268,7 @@ public class AuthController : ControllerBase
     [Authorize]
     [ProducesResponseType(typeof(MemberInfo), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult GetProfile()
+    public async Task<IActionResult> GetProfile(CancellationToken cancellationToken)
     {
         var memberId = User.FindFirst("MemberId")?.Value;
         var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
@@ -295,6 +295,7 @@ public class AuthController : ControllerBase
             CompanyId = !string.IsNullOrEmpty(companyId) ? Guid.Parse(companyId) : null,
             CompanyName = companyName
         };
+        memberInfo.RequireEmailVerification = await _authService.RequiresEmailVerificationAsync(memberInfo.Id, cancellationToken);
 
         return Ok(memberInfo);
     }
@@ -306,7 +307,7 @@ public class AuthController : ControllerBase
     [HttpGet("session")]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult GetSession()
+    public async Task<IActionResult> GetSession(CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(User.FindFirst("MemberId")?.Value, out var memberId))
         {
@@ -326,7 +327,9 @@ public class AuthController : ControllerBase
                 Extension = User.FindFirst("Extension")?.Value,
                 MobilePhone = User.FindFirst("MobilePhone")?.Value,
                 CompanyId = Guid.TryParse(companyId, out var cid) ? cid : null,
-                CompanyName = User.FindFirst("CompanyName")?.Value
+                CompanyName = User.FindFirst("CompanyName")?.Value,
+                // 前台每頁都會問一次 session：帶上「信箱還沒驗證」，前台才不會被這支沒帶旗標的回應蓋掉登入時拿到的狀態
+                RequireEmailVerification = await _authService.RequiresEmailVerificationAsync(memberId, cancellationToken)
             }
         });
     }
@@ -706,6 +709,9 @@ public class AuthController : ControllerBase
         );
 
         await SetAuthCookiesAsync(tokenResponse.AccessToken, tokenResponse.RefreshToken!, tokenResponse.ExpiresAt, cancellationToken);
+
+        // Passkey 登入也要驗證信箱，不能成為繞過驗證的後門
+        tokenResponse.Member!.RequireEmailVerification = await _authService.RequiresEmailVerificationAsync(tokenResponse.Member.Id, cancellationToken);
 
         return Ok(new
         {

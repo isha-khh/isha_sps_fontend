@@ -6,7 +6,8 @@ import { DeviceDistributionChart } from '@/components/dashboard/DeviceDistributi
 import { BrowserDistributionChart } from '@/components/dashboard/BrowserDistributionChart';
 import { CountryDistributionChart } from '@/components/dashboard/CountryDistributionChart';
 import type { DashboardData } from '@/types/dashboard';
-import { analyticsApi } from '@/lib/api/analytics';
+import { Link } from 'react-router-dom';
+import { analyticsApi, type AnalyticsSyncStatus } from '@/lib/api/analytics';
 import { adminApplicationsApi } from '@/lib/api/admin-applications';
 import { chatApi } from '@/lib/api/chat';
 import { companiesApi } from '@/lib/api/companies';
@@ -31,6 +32,8 @@ export const DashboardPage = () => {
   const [syncDays, setSyncDays] = useState(1);
   const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [lastSyncDate, setLastSyncDate] = useState<string | null>(null);
+  // 自動同步的設定與最近一次同步結果（手動或自動）；沒有 ViewAnalytics 權限或取不到就是 null
+  const [syncStatus, setSyncStatus] = useState<AnalyticsSyncStatus | null>(null);
   const { has } = usePermission();
 
   // 預設的空 Analytics Report
@@ -56,6 +59,7 @@ export const DashboardPage = () => {
           onlineVisitors,
           companyStats,
           fileStats,
+          syncStatusResult,
         ] = await Promise.all([
           // Analytics - 需要 ViewAnalytics 權限
           has(Permission.ViewAnalytics)
@@ -80,7 +84,12 @@ export const DashboardPage = () => {
           has(Permission.ManageFiles)
             ? safeApiCall(() => filesManagementApi.getStatistics(), emptyFileStats)
             : Promise.resolve(emptyFileStats),
+          // 自動同步的設定與最近一次結果 - 需要 ViewAnalytics 權限
+          has(Permission.ViewAnalytics)
+            ? safeApiCall<AnalyticsSyncStatus | null>(() => analyticsApi.getSyncStatus(), null)
+            : Promise.resolve(null),
         ]);
+        setSyncStatus(syncStatusResult);
 
         // 轉換數據格式
         const transformedData: DashboardData = {
@@ -241,26 +250,67 @@ export const DashboardPage = () => {
     }
   };
 
-  // 計算數據是否過期（>24小時）
+  // 最近一次成功同步的時間（手動或自動）；後端還沒有同步紀錄（舊資料、剛部署）時是 null
+  const lastSuccessAt = syncStatus?.lastSuccessUtc ? new Date(syncStatus.lastSuccessUtc) : null;
+  const hoursSince = (date: Date) => (Date.now() - date.getTime()) / (1000 * 60 * 60);
+
+  // 計算數據是否過期：以「最近一次成功同步」為準，超過 36 小時沒成功同步才算過期（每天自動同步一次，留一點緩衝）。
+  // 原本是拿「最新一筆資料的日期」比現在，但同步的是昨天的資料（日期 00:00），過了中午就永遠判定過期。
+  // 還沒有同步紀錄時才退回看資料本身的最新日期：最新一筆是 3 天（72 小時）以前的才算過期。
   const isDataStale = () => {
+    if (lastSuccessAt) return hoursSince(lastSuccessAt) > 36;
     if (!lastSyncDate) return true;
-    const lastSync = new Date(lastSyncDate);
-    const now = new Date();
-    const hoursDiff = (now.getTime() - lastSync.getTime()) / (1000 * 60 * 60);
-    return hoursDiff > 24;
+    return hoursSince(new Date(lastSyncDate)) > 24 * 2 + 24;
   };
 
   // 計算最後同步時間的相對描述
   const getLastSyncTimeText = () => {
-    if (!lastSyncDate) return '從未同步';
-    const lastSync = new Date(lastSyncDate);
-    const now = new Date();
-    const hoursDiff = Math.floor((now.getTime() - lastSync.getTime()) / (1000 * 60 * 60));
+    const reference = lastSuccessAt ?? (lastSyncDate ? new Date(lastSyncDate) : null);
+    if (!reference) return '從未同步';
+    const hoursDiff = Math.floor(hoursSince(reference));
 
     if (hoursDiff < 1) return '不到1小時前';
     if (hoursDiff < 24) return `${hoursDiff}小時前`;
     const daysDiff = Math.floor(hoursDiff / 24);
     return `${daysDiff}天前`;
+  };
+
+  // 括號裡顯示的具體時間：有同步紀錄用同步時間，否則用資料的最新日期
+  const getLastSyncDetail = () =>
+    lastSuccessAt
+      ? lastSuccessAt.toLocaleString('zh-TW', { hour12: false })
+      : lastSyncDate;
+
+  // 最近一次同步（手動或自動）的結果說明
+  const renderSyncStatus = () => {
+    if (!syncStatus) return null;
+    const lastRun = syncStatus.lastRunUtc ? new Date(syncStatus.lastRunUtc).toLocaleString('zh-TW', { hour12: false }) : null;
+    return (
+      <div className="mt-4 space-y-1 border-t border-base-200 pt-3 text-sm">
+        {!syncStatus.configured && (
+          <p className="flex items-center gap-2 text-warning">
+            <span className="iconify lucide--alert-triangle size-4" />
+            尚未設定 Google Analytics，無法同步。
+            {has(Permission.ManageSettings) && (
+              <Link to="/system/config" className="link">
+                前往系統配置
+              </Link>
+            )}
+          </p>
+        )}
+        <p className="text-base-content/70">
+          {syncStatus.autoSyncEnabled
+            ? `自動同步：每天 ${syncStatus.autoSyncTime}（台灣時間）同步最近 ${syncStatus.autoSyncDays} 天`
+            : '自動同步：已關閉（可在系統配置開啟）'}
+        </p>
+        {lastRun && (
+          <p className={syncStatus.lastSuccess ? 'text-base-content/70' : 'text-error'}>
+            最近一次（{syncStatus.lastTrigger === 'auto' ? '自動' : '手動'}，{lastRun}）：
+            {syncStatus.lastSuccess ? `成功，${syncStatus.lastMessage ?? ''}` : `失敗，${syncStatus.lastMessage ?? '未知原因'}`}
+          </p>
+        )}
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -316,7 +366,7 @@ export const DashboardPage = () => {
                   <div>
                     <p className="font-semibold">數據已過期</p>
                     <p className="text-sm text-base-content/70">
-                      最後更新：{getLastSyncTimeText()} ({lastSyncDate})
+                      最後更新：{getLastSyncTimeText()} ({getLastSyncDetail()})
                     </p>
                   </div>
                 </div>
@@ -368,7 +418,7 @@ export const DashboardPage = () => {
                   <div>
                     <p className="font-semibold">數據已是最新</p>
                     <p className="text-sm text-base-content/70">
-                      最後更新：{getLastSyncTimeText()} ({lastSyncDate})
+                      最後更新：{getLastSyncTimeText()} ({getLastSyncDetail()})
                     </p>
                   </div>
                 </div>
@@ -391,6 +441,8 @@ export const DashboardPage = () => {
                 </button>
               </div>
             )}
+
+            {renderSyncStatus()}
           </div>
         </div>
       )}

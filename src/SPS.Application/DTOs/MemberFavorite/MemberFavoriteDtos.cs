@@ -52,6 +52,15 @@ public class MemberDemandResponse
     /// <summary>true = 已上架（會員不能再改，要改請聯絡承辦單位）；false = 待審核</summary>
     public bool Published { get; set; }
     public DateTime CreatedTime { get; set; }
+
+    /// <summary>true = 自己刊登的（可以改、撤回）；false = 同公司同事刊登或後台代刊登的，只能填報對接結果</summary>
+    public bool SubmittedByMe { get; set; } = true;
+
+    /// <summary>已成功對接（有任何對接結果）</summary>
+    public bool Matched { get; set; }
+
+    /// <summary>對接到哪些供給端企業（刊登端自己看得到）</summary>
+    public List<SPS.Application.DTOs.Demand.MatchedCompanyDto> MatchedCompanies { get; set; } = new();
 }
 
 public class UpdateMemberDemandRequest

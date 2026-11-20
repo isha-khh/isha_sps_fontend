@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/PageTitle';
 import { demandsApi } from '@/lib/api/demands';
-import type { CreateDemandRequest, UpdateDemandRequest } from '@/types/demand';
+import type { CreateDemandRequest, UpdateDemandRequest, DemandMatchCompany } from '@/types/demand';
 import type { CompanyTagOption } from '@/types/company';
 import { FilePickerModal } from '@/components/shared/FilePickerModal';
 import type { FileListItem, FileUploadResponse } from '@/types/files';
@@ -10,6 +10,7 @@ import { TagCategoryTreeSelect } from '@/components/shared/TagCategoryTreeSelect
 import { ProTrackImportModal } from '@/components/shared/ProTrackImportModal';
 import { SimilarCompaniesPanel } from '@/components/shared/SimilarCompaniesPanel';
 import { DemandEmailPreviewModal } from '@/components/shared/DemandEmailPreviewModal';
+import { DemandMatchesSection } from '@/components/shared/DemandMatchesSection';
 import { DemandNotificationProgressModal } from '@/components/shared/DemandNotificationProgressModal';
 import { useNotify } from '@/hooks/useNotify';
 
@@ -38,6 +39,7 @@ export const DemandFormPage = () => {
   const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [showNotificationProgress, setShowNotificationProgress] = useState(false);
   const [publishedDemandId, setPublishedDemandId] = useState<string | null>(null);
+  const [matchedCompanies, setMatchedCompanies] = useState<DemandMatchCompany[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,6 +59,7 @@ export const DemandFormPage = () => {
             published: data.published,
           });
           setAttachments((data.attachments ?? []).map((a) => ({ fileId: a.fileId, name: `${a.fileName}（${a.formattedFileSize}）` })));
+          setMatchedCompanies(data.matchedCompanies ?? []);
           const bound = await demandsApi.getDemandTags(id!);
           setSelectedTagIds(bound.tagIds ?? []);
         }
@@ -369,6 +372,9 @@ export const DemandFormPage = () => {
                 previewIntroduction={formData.introduction}
                 onSelectionChange={setNotifyCompanyIds}
               />
+
+              {/* 對接結果（issue #98）：編輯既有需求時才有，有自己的儲存按鈕 */}
+              {isEditMode && <DemandMatchesSection demandId={id!} initial={matchedCompanies} />}
 
               <div className="flex justify-end">
                 <button

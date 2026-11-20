@@ -7,6 +7,8 @@ import type {
   DemandStatistics,
   DemandTagsResponse,
   DemandNotificationRecord,
+  DemandMatchCompany,
+  MatchCompanyOption,
 } from '@/types/demand';
 import type { PagedResponse } from '@/types/api';
 import type { CompanyTagOption } from '@/types/company';
@@ -128,6 +130,18 @@ export const demandsApi = {
   // 設定某需求的標籤（覆寫綁定，支援多個標籤）
   async setDemandTags(id: string, tagIds: number[]): Promise<DemandTagsResponse> {
     const response = await apiClient.put(`/api/Demand/${id}/tags`, { tagIds });
+    return response.data;
+  },
+
+  // 設定需求的對接結果（整組覆寫；空陣列＝移除全部，前台狀態回到「徵求中」）
+  async setDemandMatches(id: string, companyIds: string[]): Promise<{ demandId: number; matched: boolean; companies: DemandMatchCompany[] }> {
+    const response = await apiClient.put(`/api/Demand/${id}/matches`, { companyIds });
+    return response.data;
+  },
+
+  // 對接結果選企業用的選項（已審核通過的供給端企業）
+  async searchMatchCompanies(search: string): Promise<MatchCompanyOption[]> {
+    const response = await apiClient.get('/api/Demand/match-companies', { params: { search: search || undefined } });
     return response.data;
   },
 

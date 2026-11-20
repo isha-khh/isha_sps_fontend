@@ -1,6 +1,7 @@
 import Carousel from "@/components/ui/Carousel";
 import CarouselControls from "@/components/ui/CarouselControls";
 import type { MatchingNeed } from "@/lib/matching-need-data";
+import NeedStatusBadge from "@/components/matching/NeedStatusBadge";
 import Link from "next/link";
 
 /**
@@ -41,7 +42,7 @@ export default function RelatedNeeds({ id, needs }: { id: string; needs: Matchin
               <div className="tit_nsl">
                 <div className="tit_three d-flex">
                   <div className="tag-wrap">
-                    <span className="badge-tag mb-0">{need.statusLabel}</span>
+                    <NeedStatusBadge need={need} className="badge-tag mb-0" />
                   </div>
                 </div>
 

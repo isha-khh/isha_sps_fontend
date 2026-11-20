@@ -8,6 +8,7 @@ import { authApi } from "@/lib/api/auth";
 import { INBOX_CHANGED_EVENT, memberNotificationsApi } from "@/lib/api/member-notifications";
 import { useAuthStore } from "@/store/auth-store";
 import HeaderSearch from "@/components/layout/HeaderSearch";
+import SearchAccesskey from "@/components/layout/SearchAccesskey";
 import { useIndustryAiLink, useNewsNavCategories } from "@/components/SiteLinksProvider";
 import { resolveServeCategoryLink } from "@/lib/industry-ai-link";
 import { setupHeaderNav } from "@/components/layout/header-nav";
@@ -97,7 +98,7 @@ function MemberNavItem() {
 
   return (
     <li className="nav-item dropdown dropdown-left fadeup">
-      <Link href={member ? "/member" : "/member/login"} className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+      <Link href={member ? "/member" : "/member/login"} className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
         <span className="title-main">會員中心</span>
         {unreadShown > 0 && (
           <span className="badge rounded-pill bg-danger ms-1" aria-label={`${unreadShown} 則未讀通知`}>
@@ -164,7 +165,7 @@ function NavLinks() {
 
       {/* 公告事項：/news 已經做出來了，這裡改成真的路由（其他還沒蓋的頁面暫時維持舊站路徑字串） */}
       <li className="nav-item dropdown dropdown-left fadeup">
-        <Link href="/news" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+        <Link href="/news" className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
           <span className="title-main">公告事項</span>
         </Link>
         <ul className="dropdown-menu">
@@ -190,7 +191,7 @@ function NavLinks() {
           （知識加值／輔導／本計畫補助）目前變成沒有連結指過去的孤兒
           資料，還沒清掉，記在 docs/改版規劃.md。 */}
       <li className="nav-item dropdown dropdown-left fadeup">
-        <Link href="/serve" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+        <Link href="/serve" className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
           <span className="title-main">服務專區</span>
         </Link>
         <ul className="dropdown-menu">
@@ -241,19 +242,14 @@ function NavLinks() {
             </ul>
           </li>
           <li className="hover_r_sider dropdown-submenu">
+            {/* 產業輔導底下只有一項，不再多一層，直接點選（跟推廣專區的「產業案例」一樣是葉節點） */}
             <Link className="dropdown-item" href="/tutoring" title="產業輔導">
               產業輔導
             </Link>
-            <ul className="dropdown-menu">
-              <li>
-                <Link className="dropdown-item" href="/tutoring" title="輔導">
-                  輔導
-                </Link>
-              </li>
-            </ul>
           </li>
           <li className="hover_r_sider dropdown-submenu">
-            <Link className="dropdown-item" href="/support" title="補助資源">
+            {/* 跟「技術工具」「人才培育」一樣是分組標籤，本身不能點，要點下一階的「本計畫補助」「政府補助資源」 */}
+            <Link className="dropdown-item dropdown-toggle disabled" href="/support" title="補助資源">
               補助資源
             </Link>
             <ul className="dropdown-menu">
@@ -274,7 +270,7 @@ function NavLinks() {
 
       {/* 推廣專區 */}
       <li className="nav-item dropdown dropdown-left fadeup">
-        <Link href="/promotion" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+        <Link href="/promotion" className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
           <span className="title-main">推廣專區</span>
         </Link>
         <ul className="dropdown-menu">
@@ -298,7 +294,7 @@ function NavLinks() {
 
       {/* 我要媒合：企業名錄／媒合對接都已經做出來了，兩個子項都改成真的路由。 */}
       <li className="nav-item dropdown dropdown-left fadeup">
-        <Link href="/matching/enterprise" className="nav-link dropdown-toggle" role="button" aria-expanded="false">
+        <Link href="/matching/enterprise" className="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
           <span className="title-main">我要媒合</span>
         </Link>
         <ul className="dropdown-menu">
@@ -336,6 +332,7 @@ export default function Headers() {
       <a href="#header-block" id="header-block" accessKey="U" title="上方功能區塊" className="visually-hidden-focusable">
         ::: 上方功能區塊
       </a>
+      <SearchAccesskey />
 
       <nav className="nav" aria-label="主要導覽">
         <nav className="navbar navbar-expand-md fixed-top bsnav nav-big-wrapper" aria-label="主要導覽選單">
@@ -343,8 +340,11 @@ export default function Headers() {
             {/* 品牌 Logo 區塊 */}
             <div className="nav-brand-wrapper">
               <Link className="navbar-brand" href="/">
+                {/* 連結文字就是網站名稱（讀屏、把連結拖進書籤時都會帶出這段）。畫面上看到的是 CSS 背景的 LOGO 圖，
+                    `.navbar-brand` 用 text-indent 把文字推出畫面，但寬度只有 227px，名稱超過一行時第二行會露出來，
+                    所以整段放進 visually-hidden（issue #100：之前是「高雄技術處logo」） */}
                 <h1 className="fs-6 m-0 p-0">
-                  高雄技術處<span className="visually-hidden">logo</span>
+                  <span className="visually-hidden">智慧工安技術產業資訊暨媒合平台</span>
                 </h1>
               </Link>
             </div>

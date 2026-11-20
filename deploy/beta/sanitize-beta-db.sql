@@ -2,11 +2,25 @@
 -- 複本裡有正式機的系統設定：信件（SMTP）、退信收信、ProTrack 整合都是啟用狀態，
 -- 後端一啟動就會用它們對外寄信、收信、連線到正式的外部系統。這支腳本只關掉這三項，其他資料不動。
 --
---   psql "host=10.19.80.11 dbname=SPS_dev user=<有權限的帳號>" -f sanitize-beta-db.sql
+--   psql "host=10.19.80.11 dbname=SPS_dev user=<有權限的帳號>" -v confirm_sanitize=yes -f sanitize-beta-db.sql
 --
 -- 只能對 SPS_dev 執行；下面第一段會確認連到的資料庫名稱，不是 SPS_dev 就中止。
 
 \set ON_ERROR_STOP on
+
+-- 保險：SPS_dev 已經是正式資料庫（真實使用者資料、郵件服務已開啟），這支腳本會把寄信、退信收信、ProTrack 關掉。
+-- 只有「第一次用正式庫複本建立 beta」才需要，且必須明確加 -v confirm_sanitize=yes 才會執行。
+\if :{?confirm_sanitize}
+\else
+  \echo '中止：這支腳本會關閉寄信、退信收信與 ProTrack。確定要執行請加 -v confirm_sanitize=yes'
+  \quit
+\endif
+SELECT (:'confirm_sanitize' = 'yes') AS confirmed \gset
+\if :confirmed
+\else
+  \echo '中止：confirm_sanitize 必須是 yes'
+  \quit
+\endif
 
 SELECT current_database() AS db;
 DO $$

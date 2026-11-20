@@ -56,6 +56,8 @@ export default function MatchingSearchBar({
   // 勾選狀態一律用標籤 id（字串）當 key，三個面板共用同一份
   const [checked, setChecked] = useState<Record<string, boolean>>(() => Object.fromEntries(selectedTagIds.map((id) => [String(id), true])));
   const containerRef = useRef<HTMLDivElement>(null);
+  // 滑鼠正按在容器內（點到面板裡不能聚焦的文字也會讓焦點先離開），這時的 blur 不算「焦點離開」
+  const pointerInsideRef = useRef(false);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -85,7 +87,22 @@ export default function MatchingSearchBar({
   ];
 
   return (
-    <div className="matching_sear d-flex position-relative" ref={containerRef}>
+    <div
+      className="matching_sear d-flex position-relative"
+      ref={containerRef}
+      onMouseDown={() => {
+        pointerInsideRef.current = true;
+      }}
+      onMouseUp={() => {
+        pointerInsideRef.current = false;
+      }}
+      onBlur={(event) => {
+        // 鍵盤 Tab 走出整個搜尋列（含展開的面板）就自動收起，不然展開的面板會一直蓋住後面的內容（無障礙檢測 CS2240700E）
+        if (pointerInsideRef.current) return;
+        if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) return;
+        setOpenPanel(null);
+      }}
+    >
       <div className="input-group mt-2 mt-md-0">
         <input
           type="text"

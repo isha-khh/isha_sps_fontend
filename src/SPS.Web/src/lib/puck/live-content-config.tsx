@@ -44,6 +44,23 @@ const rem = (px: number) => `${px / 16}rem`;
  * 預設值會連同內容存進資料庫、前台直接輸出成 <img src>，連外部網站的話，前台一旦開跨來源嵌入政策（COEP require-corp）
  * 沒換圖的內容就會破圖，也多一個對外連線；內嵌圖不需要網路、前台與後台編輯器都能顯示（CSP img-src 本來就允許 data:）。
  */
+/**
+ * 圖片區塊的文字：「替代文字」是唯一必填的欄位（螢幕閱讀器念的），「顯示圖說」打開就把同一段文字顯示在圖片下方，
+ * 不用寫兩次、也不會有人只填一邊。舊內容有獨立的「圖片說明」（`imageCaption`，沒有 `showCaption`）：
+ * 圖說有值就照舊顯示，替代文字是空的或還是舊的「這是一張範例圖片」時改用圖說當替代文字（無障礙檢測 HM1110100E）。
+ */
+const SAMPLE_ALT = "這是一張範例圖片";
+function imageTexts(alt: unknown, imageCaption: unknown, showCaption: unknown): { alt: string; caption: string } {
+  const own = typeof alt === "string" ? alt.trim() : "";
+  const validAlt = own && own !== SAMPLE_ALT ? own : "";
+  const legacyCaption = typeof imageCaption === "string" ? imageCaption.trim() : "";
+  const text = validAlt || legacyCaption;
+  return {
+    alt: text || "內容圖片",
+    caption: showCaption === undefined ? legacyCaption : showCaption ? text : "",
+  };
+}
+
 const SAMPLE_IMAGE = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="#dfe8ef"/><text x="400" y="310" font-size="40" text-anchor="middle" fill="#6b7c8c" font-family="sans-serif">範例圖片</text></svg>',
 )}`;
@@ -168,9 +185,11 @@ type Props = {
   ImageFeature: {
     imageUrl: string;
     alt: string;
+    showCaption?: boolean;
     layout: "left" | "right" | "top";
     description: string;
-    imageCaption: string;
+    /** 舊版獨立的圖片說明（新內容不再有這個欄位，見 imageTexts） */
+    imageCaption?: string;
   };
   CallToAction: {
     heading: string;
@@ -408,7 +427,14 @@ export const puckConfig: Config<Props> = {
           render: ({ value, onChange }) => <ImageUploadField value={typeof value === "string" ? value : ""} onChange={(url) => onChange(url)} label="圖片" />,
         },
         alt: { type: "textarea", label: "替代文字（必填）" },
-        imageCaption: inlineText("圖片說明"),
+        showCaption: {
+          type: "radio",
+          label: "在圖片下方顯示圖說（內容同替代文字）",
+          options: [
+            { label: "顯示", value: true },
+            { label: "不顯示", value: false },
+          ],
+        },
         description: inlineRich("詳細描述"),
         layout: {
           type: "radio",
@@ -422,18 +448,19 @@ export const puckConfig: Config<Props> = {
       },
       defaultProps: {
         imageUrl: SAMPLE_IMAGE,
-        alt: "這是一張範例圖片",
-        imageCaption: "圖片說明",
+        alt: "",
+        showCaption: false,
         description: "",
         layout: "top",
       },
-      render: ({ imageUrl, alt, imageCaption, description, layout }) => {
+      render: ({ imageUrl, alt, imageCaption, showCaption, description, layout }) => {
+        const texts = imageTexts(alt, imageCaption, showCaption);
         const isTop = layout === "top";
         const hasText = typeof description === "string" ? description.trim() !== "" : Boolean(description);
         const linkable = safeUrl(imageUrl);
         const image = (
-          // 圖片外面包了連結（點擊看原圖），替代文字不能是空的（無障礙檢測 HM1240401C）：後台沒填就用圖說，再沒有就用通用說明
-          <img src={imageUrl} alt={(typeof alt === "string" && alt.trim()) || (typeof imageCaption === "string" && imageCaption.trim()) || "內容圖片"} loading="lazy" style={{ display: "block", width: "100%", height: "auto", borderRadius: 20 }} />
+          // 圖片外面包了連結（點擊看原圖），替代文字不能是空的（無障礙檢測 HM1240401C）
+          <img src={imageUrl} alt={texts.alt} loading="lazy" style={{ display: "block", width: "100%", height: "auto", borderRadius: 20 }} />
         );
 
         return (
@@ -441,14 +468,25 @@ export const puckConfig: Config<Props> = {
             <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "center", flexDirection: layout === "right" ? "row-reverse" : "row" }}>
               <div style={{ flex: isTop || !hasText ? "1 1 100%" : "1 1 320px", minWidth: 0 }}>
                 {linkable ? (
-                  <a href={linkable} target="_blank" rel="noopener noreferrer" title="點擊另開視窗看原圖">
+                  // 點圖用站內燈箱放大（整站 coreScript.js 對 `[data-fancybox]` 做了全域綁定，同一篇內容的圖片歸同一組可左右切換）；
+                  // 圖片網址常是沒有副檔名的 `/api/FileManagement/<id>/download`，要明講 `data-type="image"` 燈箱才會當圖片載入。
+                  // 沒有 JS 時仍是一般連結，另開視窗看原圖。
+                  <a
+                    href={linkable}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="點擊放大看原圖"
+                    data-fancybox="content-images"
+                    data-type="image"
+                    data-caption={texts.caption || undefined}
+                  >
                     {image}
                   </a>
                 ) : (
                   image
                 )}
-                {imageCaption ? (
-                  <figcaption style={{ marginTop: 8, fontSize: rem(14), color: "#666", textAlign: "center" }}>{imageCaption}</figcaption>
+                {texts.caption ? (
+                  <figcaption style={{ marginTop: 8, fontSize: rem(14), color: "#666", textAlign: "center" }}>{texts.caption}</figcaption>
                 ) : null}
               </div>
               {hasText && (

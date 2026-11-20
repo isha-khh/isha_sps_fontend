@@ -1,4 +1,6 @@
 import Badge from "@/components/ui/Badge";
+import { badgeInlineStyle } from "@/lib/badge-style";
+import type { BadgeStyle } from "@/lib/types";
 import { withBasePath } from "@/lib/api-client";
 import Link from "next/link";
 
@@ -12,6 +14,8 @@ export interface NewsListCardData {
   /** 封面圖；沒有設定就不顯示圖片區塊（不用假圖佔位），文字區佔滿整列 */
   image?: string;
   category: string;
+  /** 分類徽章顏色（後台「分類管理」設定），沒設定用預設紫色 */
+  categoryBadge?: BadgeStyle | null;
   date: string;
   /** 例如「活動進行中」，沒有就不顯示那顆時間狀態小標籤 */
   status?: string;
@@ -20,7 +24,7 @@ export interface NewsListCardData {
   /** 活動時間／地點這類條列資訊，沒有就不顯示 */
   meta?: NewsListCardMeta[];
   /** 標題下方的關鍵字連結，沒有就不顯示；跟詳情頁 `ul-key` 是同一組資料。`href` 沒給就維持不可點的 `#` */
-  keywords?: { label: string; href?: string }[];
+  keywords?: { label: string; href?: string; badge?: BadgeStyle | null }[];
 }
 
 const META_ICON_CLASS: Record<NewsListCardMeta["icon"], string> = {
@@ -38,9 +42,10 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
     <div className={data.image ? "item" : "item no-pic"}>
       <div className="d-flex">
         {data.image && (
-          <Link href={data.href} className="pic" title={data.title}>
+          // 縮圖連結跟標題連結同一目的地：不進 Tab 順序、不給輔助科技念（HM1240402E）
+          <Link href={data.href} className="pic" tabIndex={-1} aria-hidden="true">
             <div className="ratio ratio-4x3">
-              <img className="img-fluid d-block" src={data.image} alt={data.title} />
+              <img className="img-fluid d-block" src={data.image} alt="" />
             </div>
           </Link>
         )}
@@ -50,7 +55,7 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
             <div className="tit_nsl">
               <div className="tit_three d-flex mb-2">
                 <div className="tag-wrap">
-                  <Badge>{data.category}</Badge>
+                  <Badge style={data.categoryBadge}>{data.category}</Badge>
                 </div>
                 <div className="date">{data.date}</div>
                 {data.status && (
@@ -88,7 +93,7 @@ export default function NewsListCard({ data }: { data: NewsListCardData }) {
             <ul className="nav ul-key">
               {data.keywords.map((keyword) => (
                 <li key={keyword.label}>
-                  <Link href={keyword.href ? keyword.href : "#"} title={`查看標籤「${keyword.label}」的公告`} tabIndex={0}>
+                  <Link href={keyword.href ? keyword.href : "#"} title={`查看標籤「${keyword.label}」的公告`} tabIndex={0} style={badgeInlineStyle(keyword.badge)}>
                     {keyword.label}
                   </Link>
                 </li>

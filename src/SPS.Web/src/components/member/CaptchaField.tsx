@@ -1,6 +1,7 @@
 "use client";
 
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { apiClient } from "@/lib/api-client";
 import { captchaApi } from "@/lib/api/captcha";
 import { CaptchaType, type CaptchaData } from "@/types/captcha";
 
@@ -40,8 +41,72 @@ const CaptchaField = forwardRef<CaptchaFieldHandle>(function CaptchaField(_props
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  // 語音驗證碼（後端 `GET /api/captcha/audio/{id}`，後台「驗證碼設定」的 `enableAudio` 控制）：
+  // 視障使用者看不到圖片，按鈕會把驗證碼的數字念出來；沒開就不顯示按鈕。無障礙檢測 GN1110111E 要求要有不同形式的替代驗證。
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioStatus, setAudioStatus] = useState("");
+  const [audioFailed, setAudioFailed] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  function stopAudio() {
+    const audio = audioRef.current;
+    audioRef.current = null;
+    if (!audio) return;
+    audio.onplaying = null;
+    audio.onended = null;
+    audio.onerror = null;
+    audio.pause();
+  }
+
+  /**
+   * 播放語音驗證碼。**`play()` 一定要在點擊的同一個動作裡直接呼叫**：Safari 與部分瀏覽器的自動播放規則，
+   * 要求 `play()` 由使用者手勢「同步」觸發，先 `await` 抓檔案（axios 抓成 blob）再播會被當成自動播放而靜音擋掉，
+   * 實測下載下來的 WAV 能聽、網頁上按了卻沒聲音就是這個原因。所以這裡直接把音檔網址交給 `Audio`，瀏覽器自己串流。
+   * 網址用 apiClient 的 baseURL（含 basePath）拼，跟其他 API 同一條路；音檔端點是匿名的，不需要 cookie 或標頭。
+   */
+  function playAudio() {
+    if (!captchaId) return;
+    stopAudio();
+    setAudioFailed(false);
+    setAudioStatus("");
+    setAudioLoading(true);
+
+    const base = (apiClient.defaults.baseURL ?? "").replace(/\/+$/, "");
+    const audio = new Audio(`${base}/api/captcha/audio/${captchaId}`);
+    audioRef.current = audio;
+    audio.onplaying = () => {
+      setAudioLoading(false);
+      setAudioStatus("正在播放語音驗證碼");
+    };
+    audio.onended = () => {
+      setAudioStatus("");
+      stopAudio();
+    };
+    audio.onerror = () => {
+      setAudioLoading(false);
+      setAudioFailed(true);
+      setAudioStatus("語音驗證碼載入失敗，請按「更換驗證碼」後再試一次");
+    };
+
+    audio.play().catch((error: unknown) => {
+      // 被瀏覽器擋下（例如網站被設成不能自動播放聲音）或載入失敗；onerror 已經處理載入失敗，這裡處理被擋
+      if (audioRef.current !== audio) return;
+      setAudioLoading(false);
+      setAudioFailed(true);
+      setAudioStatus(
+        error instanceof DOMException && error.name === "NotAllowedError"
+          ? "瀏覽器擋下了聲音播放，請檢查這個網站的聲音權限後再按一次"
+          : "語音驗證碼播放失敗，請按「更換驗證碼」後再試一次",
+      );
+    });
+  }
 
   async function load() {
+    stopAudio();
+    setAudioStatus("");
+    setAudioFailed(false);
+    setAudioLoading(false);
     setLoading(true);
     setError(undefined);
     setCode("");
@@ -60,7 +125,14 @@ const CaptchaField = forwardRef<CaptchaFieldHandle>(function CaptchaField(_props
 
   useEffect(() => {
     load();
+    // 語音開關是全站共用的圖片驗證碼設定，各場景一樣，用登入場景查一次就好
+    captchaApi
+      .getPublicSettings("member-login")
+      .then((settings) => setAudioEnabled(Boolean(settings.enableAudio)))
+      .catch(() => setAudioEnabled(false));
+    return stopAudio;
     // 只在掛載時拿第一組，不需要依賴陣列
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useImperativeHandle(ref, () => ({
@@ -81,6 +153,7 @@ const CaptchaField = forwardRef<CaptchaFieldHandle>(function CaptchaField(_props
         onChange={(e) => setCode(e.target.value)}
         autoComplete="off"
         maxLength={10}
+        aria-describedby={audioEnabled ? "captcha-audio-hint" : undefined}
       />
       <button
         type="button"
@@ -106,6 +179,27 @@ const CaptchaField = forwardRef<CaptchaFieldHandle>(function CaptchaField(_props
           <span className="text-muted small text-nowrap">{error ?? "載入中…"}</span>
         )}
       </button>
+      {audioEnabled && (
+        <>
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm ms-2 flex-shrink-0"
+            onClick={playAudio}
+            disabled={loading || audioLoading || !captchaId}
+            title="播放語音驗證碼"
+          >
+            <i className="bi bi-volume-up me-1" aria-hidden="true"></i>
+            語音
+          </button>
+          <span id="captcha-audio-hint" className="visually-hidden">
+            看不到圖片的話，可以按「語音」按鈕聽驗證碼的數字，再輸入到這個欄位。
+          </span>
+          {/* 播放狀態：失敗時要看得到（之前只放在隱藏文字，使用者看不到為什麼沒聲音），成功播放時只給輔助科技念 */}
+          <span className={audioFailed ? "small text-danger ms-2" : "visually-hidden"} role={audioFailed ? "alert" : "status"} aria-live="polite">
+            {audioStatus}
+          </span>
+        </>
+      )}
     </div>
   );
 });

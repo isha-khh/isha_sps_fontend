@@ -2,6 +2,9 @@
 
 import { Render, type Data } from '@puckeditor/core';
 import { puckConfig } from '@/lib/puck/live-content-config';
+import { prefixBackendFileUrls } from '@/lib/puck-content';
+import { withBasePath } from '@/lib/api-client';
+import { normalizeHeadingLevelsDeep } from '@/lib/heading-levels';
 
 interface PuckRendererProps {
   content: string;
@@ -46,7 +49,7 @@ export const PuckRenderer = ({ content }: PuckRendererProps) => {
   let isLegacyContent = false;
 
   try {
-    const parsed = JSON.parse(content.replace(EMPTY_HEADING, ''));
+    const parsed = JSON.parse(prefixBackendFileUrls(content.replace(EMPTY_HEADING, ''), withBasePath));
 
     // Validate data structure
     if (parsed.content && Array.isArray(parsed.content)) {
@@ -77,5 +80,6 @@ export const PuckRenderer = ({ content }: PuckRendererProps) => {
     );
   }
 
-  return <Render config={puckConfig} data={data} />;
+  // 內容裡的標題層級重排成不跳級（富文字欄位到區塊 render 時已是 React 節點，要在這裡先處理）
+  return <Render config={puckConfig} data={normalizeHeadingLevelsDeep(data)} />;
 };

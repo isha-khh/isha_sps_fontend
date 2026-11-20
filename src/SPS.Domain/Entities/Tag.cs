@@ -28,6 +28,15 @@ public class Tag : BaseEntity<int>
     /// </summary>
     public int? CategoryId { get; set; }
 
+    /// <summary>徽章底色（<c>#RRGGBB</c>）；沒設定就套前台預設樣式</summary>
+    public string? BadgeColor { get; set; }
+
+    /// <summary>徽章文字顏色（<c>#RRGGBB</c>）；沒設定就用前台預設（白色）</summary>
+    public string? BadgeTextColor { get; set; }
+
+    /// <summary>徽章外框顏色（<c>#RRGGBB</c>）；沒設定就不加外框</summary>
+    public string? BadgeBorderColor { get; set; }
+
     // Navigation properties
     public Category? Category { get; set; }
     public ICollection<EntityTag> EntityTags { get; set; } = new List<EntityTag>();

@@ -12,11 +12,13 @@ public class QuestionService : IQuestionService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<QuestionService> _logger;
+    private readonly IContentIndexTrigger _indexTrigger;
 
-    public QuestionService(IUnitOfWork unitOfWork, ILogger<QuestionService> logger)
+    public QuestionService(IUnitOfWork unitOfWork, ILogger<QuestionService> logger, IContentIndexTrigger indexTrigger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _indexTrigger = indexTrigger;
     }
 
     public async Task<Result<PagedResult<QuestionResponse>>> GetPagedAsync(
@@ -93,6 +95,7 @@ public class QuestionService : IQuestionService
 
             // 提交事務
             await transaction.CommitAsync(cancellationToken);
+            _indexTrigger.Trigger(EmbeddingSourceType.Faq, question.Id.ToString());
 
             return Result<QuestionResponse>.Success(new QuestionResponse
             {
@@ -100,6 +103,7 @@ public class QuestionService : IQuestionService
                 Subject = request.Subject,
                 Answer = request.Answer,
                 Published = question.Published,
+                UnpublishReason = question.UnpublishReason,
                 Ordinal = question.Ordinal,
                 CategoryId = question.CategoryId,
                 CreatedTime = question.CreatedTime,
@@ -155,12 +159,14 @@ public class QuestionService : IQuestionService
         }
 
         if (request.Published.HasValue) question.Published = request.Published.Value;
+        if (question.Published) question.UnpublishReason = null;
         if (request.Ordinal.HasValue) question.Ordinal = request.Ordinal.Value;
         question.CategoryId = request.CategoryId;
         question.UpdatedTime = DateTime.UtcNow;
 
         await _unitOfWork.Questions.UpdateAsync(question, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _indexTrigger.Trigger(EmbeddingSourceType.Faq, question.Id.ToString());
 
         return Result<QuestionResponse>.Success(new QuestionResponse
         {
@@ -168,6 +174,7 @@ public class QuestionService : IQuestionService
             Subject = question.Subject?.DefaultText ?? request.Subject,
             Answer = question.Answer?.DefaultText ?? request.Answer,
             Published = question.Published,
+            UnpublishReason = question.UnpublishReason,
             Ordinal = question.Ordinal,
             CategoryId = question.CategoryId,
             CategoryName = question.Category?.Name,
@@ -197,6 +204,7 @@ public class QuestionService : IQuestionService
             Subject = question.Subject?.DefaultText,
             Answer = question.Answer?.DefaultText,
             Published = question.Published,
+            UnpublishReason = question.UnpublishReason,
             Ordinal = question.Ordinal,
             CategoryId = question.CategoryId,
             CategoryName = question.Category?.Name,

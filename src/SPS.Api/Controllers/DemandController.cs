@@ -54,6 +54,8 @@ public class DemandController : ControllerBase
         if (!User.IsInRole("Admin"))
         {
             p.Published = true;
+            // 已成功對接的排在後面（後台列表維持原本的順序）
+            p.UnmatchedFirst = true;
         }
 
         var r = await _demandService.GetPagedAsync(p, ct);
@@ -91,6 +93,12 @@ public class DemandController : ControllerBase
             await ApplyVisibilityAsync(r.Data!, includeAttachments: true, ct);
             // 追蹤人數只給供應端會員（回應彈窗提示收件對象）與後台，其他人不公開
             if (User.IsInRole("Admin") || User.IsInRole("Supplier")) r.Data!.FollowerCount = await _replyService.CountFollowersAsync(r.Data.Id, ct);
+            // 對接到哪些企業只給後台（編輯表單用）；前台公開的只有 Matched（已成功對接）狀態
+            if (User.IsInRole("Admin"))
+            {
+                var matches = await _demandService.GetMatchesAsync(r.Data!.Id, ct);
+                if (matches.IsSuccess) r.Data.MatchedCompanies = matches.Data!.Companies;
+            }
         }
 
         return r.IsSuccess ? Ok(r.Data) : NotFound(new { error = r.Error });
@@ -290,6 +298,27 @@ public class DemandController : ControllerBase
         var r = await _demandService.UpdateAsync(id, req, publisherEmail, ct);
         return r.IsSuccess ? Ok(r.Data) : BadRequest(new { error = r.Error });
     }
+
+    /// <summary>後台設定需求的對接結果（整組覆寫；空陣列＝移除全部，狀態回到「徵求中」）</summary>
+    [HttpPut("{id:int}/matches")]
+    [RequirePermission(UserPermission.ManageDemands)]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(DemandMatchesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SetMatches(int id, [FromBody] SetDemandMatchesRequest req, CancellationToken ct)
+    {
+        Guid? userId = Guid.TryParse(User.FindFirst("UserId")?.Value, out var uid) ? uid : null;
+        var r = await _demandService.SetMatchesByAdminAsync(userId, id, req, ct);
+        if (r.IsSuccess) return Ok(r.Data);
+        return r.Error == "需求不存在" ? NotFound(new { error = r.Error }) : BadRequest(new { error = r.Error });
+    }
+
+    /// <summary>對接結果選企業用的選項（已審核通過、啟用的供給端企業）；登入的會員與後台都可以用</summary>
+    [HttpGet("match-companies")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<MatchCompanyOptionDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SearchMatchCompanies([FromQuery] string? search, CancellationToken ct)
+        => Ok(await _demandService.SearchMatchCompanyOptionsAsync(search, ct));
 
     /// <summary>
     /// 刪除需求

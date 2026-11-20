@@ -14,11 +14,13 @@ public class NewsService : INewsService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<NewsService> _logger;
+    private readonly IContentIndexTrigger _indexTrigger;
 
-    public NewsService(IUnitOfWork unitOfWork, ILogger<NewsService> logger)
+    public NewsService(IUnitOfWork unitOfWork, ILogger<NewsService> logger, IContentIndexTrigger indexTrigger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _indexTrigger = indexTrigger;
     }
 
     public async Task<Result<PagedResult<NewsListItemResponse>>> GetPagedAsync(
@@ -33,6 +35,7 @@ public class NewsService : INewsService
             pagedResult.Items.Select(n => n.Id).ToList(), cancellationToken, TagType.CourseType);
 
         var categoryNames = await GetCategoryNamesAsync(pagedResult.Items.SelectMany(n => AllCategoryIds(n).Concat(n.IndustryIds)), cancellationToken);
+        var categoryBadges = await GetCategoryBadgesAsync(pagedResult.Items.SelectMany(n => AllCategoryIds(n)), cancellationToken);
 
         var response = new PagedResult<NewsListItemResponse>
         {
@@ -44,10 +47,13 @@ public class NewsService : INewsService
                 StartDate = n.StartDate,
                 EndDate = n.EndDate,
                 Published = n.Published,
+                UnpublishReason = n.UnpublishReason,
                 CategoryId = n.CategoryId,
                 CategoryName = n.Category?.Name,
+                CategoryBadge = BadgeStyleDto.From(n.Category?.BadgeColor, n.Category?.BadgeTextColor, n.Category?.BadgeBorderColor),
                 CategoryIds = AllCategoryIds(n).ToList(),
                 CategoryNames = AllCategoryIds(n).Where(categoryNames.ContainsKey).Select(cid => categoryNames[cid]).ToList(),
+                CategoryBadges = AllCategoryIds(n).Where(categoryNames.ContainsKey).Select(cid => categoryBadges.GetValueOrDefault(cid)).ToList(),
                 IndustryIds = n.IndustryIds.ToList(),
                 IndustryNames = n.IndustryIds.Where(categoryNames.ContainsKey).Select(cid => categoryNames[cid]).ToList(),
                 ViewCount = n.ViewCount,
@@ -79,6 +85,7 @@ public class NewsService : INewsService
         var courseTypes = await _unitOfWork.News.GetNewsTagsAsync(id, cancellationToken, TagType.CourseType);
         var detailCategoryIds = AllCategoryIds(news).ToList();
         var detailCategoryNames = await GetCategoryNamesAsync(detailCategoryIds.Concat(news.IndustryIds), cancellationToken);
+        var detailCategoryBadges = await GetCategoryBadgesAsync(detailCategoryIds, cancellationToken);
 
         return Result<NewsResponse>.Success(new NewsResponse
         {
@@ -89,11 +96,14 @@ public class NewsService : INewsService
             StartDate = news.StartDate,
             EndDate = news.EndDate,
             Published = news.Published,
+            UnpublishReason = news.UnpublishReason,
             Ordinal = news.Ordinal,
             CategoryId = news.CategoryId,
             CategoryName = news.Category?.Name,
+            CategoryBadge = BadgeStyleDto.From(news.Category?.BadgeColor, news.Category?.BadgeTextColor, news.Category?.BadgeBorderColor),
             CategoryIds = detailCategoryIds,
             CategoryNames = detailCategoryIds.Where(detailCategoryNames.ContainsKey).Select(cid => detailCategoryNames[cid]).ToList(),
+            CategoryBadges = detailCategoryIds.Where(detailCategoryNames.ContainsKey).Select(cid => detailCategoryBadges.GetValueOrDefault(cid)).ToList(),
             IndustryIds = news.IndustryIds.ToList(),
             IndustryNames = news.IndustryIds.Where(detailCategoryNames.ContainsKey).Select(cid => detailCategoryNames[cid]).ToList(),
             Type = news.Type,
@@ -188,6 +198,7 @@ public class NewsService : INewsService
 
             // 提交事務
             await transaction.CommitAsync(cancellationToken);
+            _indexTrigger.Trigger(EmbeddingSourceType.News, news.Id.ToString());
             var createdTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
             var createdCourseTypes = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken, TagType.CourseType);
 
@@ -200,6 +211,7 @@ public class NewsService : INewsService
                 StartDate = news.StartDate,
                 EndDate = news.EndDate,
                 Published = news.Published,
+                UnpublishReason = news.UnpublishReason,
                 Ordinal = news.Ordinal,
                 CategoryId = news.CategoryId,
                 CategoryIds = AllCategoryIds(news).ToList(),
@@ -337,6 +349,8 @@ public class NewsService : INewsService
         if (request.ClearEndDate == true) news.EndDate = null;
         else if (request.EndDate.HasValue) news.EndDate = request.EndDate;
         if (request.Published.HasValue) news.Published = request.Published.Value;
+        // 重新發布就清掉「被內容檢查轉草稿」的原因（存成草稿時保留，後台才看得到為什麼）
+        if (news.Published) news.UnpublishReason = null;
         if (request.Ordinal.HasValue) news.Ordinal = request.Ordinal.Value;
         if (newCategoryIds != null)
         {
@@ -374,6 +388,7 @@ public class NewsService : INewsService
             await _unitOfWork.Tags.ReplaceEntityTagsAsync(EntityType.News, news.Id.ToString(), newCourseTypeIds, cancellationToken, TagType.CourseType);
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _indexTrigger.Trigger(EmbeddingSourceType.News, news.Id.ToString());
         var updatedTags = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken);
         var updatedCourseTypes = await _unitOfWork.News.GetNewsTagsAsync(news.Id, cancellationToken, TagType.CourseType);
         var updatedCategoryNames = await GetCategoryNamesAsync(AllCategoryIds(news).Concat(news.IndustryIds), cancellationToken);
@@ -387,6 +402,7 @@ public class NewsService : INewsService
             StartDate = news.StartDate,
             EndDate = news.EndDate,
             Published = news.Published,
+            UnpublishReason = news.UnpublishReason,
             Ordinal = news.Ordinal,
             CategoryId = news.CategoryId,
             CategoryName = updatedCategoryNames.GetValueOrDefault(news.CategoryId ?? 0),
@@ -439,6 +455,18 @@ public class NewsService : INewsService
         return await _unitOfWork.GetDbContext().Set<Category>()
             .Where(c => wanted.Contains(c.Id))
             .ToDictionaryAsync(c => c.Id, c => c.Name ?? string.Empty, cancellationToken);
+    }
+
+    /// <summary>分類的徽章顏色（只回有設定顏色的分類；沒設定的查不到，呼叫端取 null）</summary>
+    private async Task<Dictionary<int, BadgeStyleDto?>> GetCategoryBadgesAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
+    {
+        var wanted = ids.Distinct().ToList();
+        if (wanted.Count == 0) return new Dictionary<int, BadgeStyleDto?>();
+        var rows = await _unitOfWork.GetDbContext().Set<Category>()
+            .Where(c => wanted.Contains(c.Id) && (c.BadgeColor != null || c.BadgeTextColor != null || c.BadgeBorderColor != null))
+            .Select(c => new { c.Id, c.BadgeColor, c.BadgeTextColor, c.BadgeBorderColor })
+            .ToListAsync(cancellationToken);
+        return rows.ToDictionary(r => r.Id, r => BadgeStyleDto.From(r.BadgeColor, r.BadgeTextColor, r.BadgeBorderColor));
     }
 
     /// <summary>封面圖：為檔案管理的檔案建立一筆新的圖片紀錄（每次都新建，不改既有的，避免動到別處共用的圖片）</summary>
@@ -555,12 +583,16 @@ public class NewsService : INewsService
         if (meta == null || meta.Count == 0) return (result, null);
 
         var allowed = NewsSection.MetaKeys.GetValueOrDefault(section) ?? Array.Empty<string>();
+        var retired = NewsSection.RetiredMetaKeys.GetValueOrDefault(section) ?? Array.Empty<string>();
         foreach (var (key, raw) in meta)
         {
+            if (retired.Contains(key)) continue; // 已停用的舊欄位：丟掉，不報錯
             if (!allowed.Contains(key)) return (result, $"這個專區不支援欄位「{key}」");
             var value = (raw ?? string.Empty).Trim();
             if (value.Length == 0) continue;
             if (value.Length > MaxMetaValueLength) return (result, $"欄位「{key}」內容過長（上限 {MaxMetaValueLength} 字）");
+            if (key == "popularOrder" && (!int.TryParse(value, out var order) || order < 0 || order > 9999))
+                return (result, "熱門課程排序請填 0 到 9999 的整數");
             result[key] = value;
         }
         return (result, null);

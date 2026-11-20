@@ -778,6 +778,18 @@ namespace SPS.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BadgeBorderColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<string>("BadgeColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<string>("BadgeTextColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
                     b.Property<DateTime>("CreatedTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -1315,6 +1327,42 @@ namespace SPS.Infrastructure.Migrations
                     b.HasIndex("PictureId");
 
                     b.ToTable("Demands");
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.DemandMatchResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DemandId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ReportedByMemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ReportedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("DemandId", "CompanyId")
+                        .IsUnique();
+
+                    b.ToTable("DemandMatchResult", (string)null);
                 });
 
             modelBuilder.Entity("SPS.Domain.Entities.DemandNotification", b =>
@@ -2874,6 +2922,9 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<short>("Type")
                         .HasColumnType("smallint");
 
+                    b.Property<string>("UnpublishReason")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -3305,6 +3356,9 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<int?>("SubjectId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UnpublishReason")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -3358,6 +3412,9 @@ namespace SPS.Infrastructure.Migrations
 
                     b.Property<short>("Type")
                         .HasColumnType("smallint");
+
+                    b.Property<string>("UnpublishReason")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedTime")
                         .HasColumnType("timestamp with time zone");
@@ -3720,6 +3777,9 @@ namespace SPS.Infrastructure.Migrations
                     b.Property<int>("TitleId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UnpublishReason")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -3778,6 +3838,18 @@ namespace SPS.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BadgeBorderColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<string>("BadgeColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<string>("BadgeTextColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
 
                     b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
@@ -3852,6 +3924,9 @@ namespace SPS.Infrastructure.Migrations
 
                     b.Property<long>("FileSize")
                         .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("ImageOptimizedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsFolder")
                         .HasColumnType("boolean");
@@ -4371,6 +4446,25 @@ namespace SPS.Infrastructure.Migrations
                     b.Navigation("Company");
 
                     b.Navigation("Picture");
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.DemandMatchResult", b =>
+                {
+                    b.HasOne("SPS.Domain.Entities.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SPS.Domain.Entities.Demand", "Demand")
+                        .WithMany()
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Demand");
                 });
 
             modelBuilder.Entity("SPS.Domain.Entities.DemandNotification", b =>

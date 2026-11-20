@@ -57,6 +57,12 @@ const nextConfig: NextConfig = {
     //  CSP 又已把可載入的第三方來源限死在這份名單，所以影響很小。已知會被擋的：沒有 CORP 的外部圖片（例如舊內容裡的 placehold.co 範例圖，
     //  新增的圖片區塊已改用內嵌圖）、可能沒有 CORP 的 Google 地圖嵌入（前台沒有固定的地圖嵌入，只有編輯者貼進內容才會有）。
     //  若上線後有第三方內容被擋（主控台 ERR_BLOCKED_BY_RESPONSE），先把下面 COEP 那一行拿掉即可還原。
+    //
+    //  2026-11-16（issue #103）已拿掉 COEP：影音專區的影片彈窗顯示「www.youtube-nocookie.com 拒絕連線」。
+    //  原因：頁面有 COEP: require-corp 時，被嵌入的 iframe 文件自己也必須回 COEP，否則瀏覽器直接擋掉；
+    //  YouTube 嵌入頁只回 `cross-origin-embedder-policy-report-only`（僅回報、尚未正式啟用），所以一定被擋，
+    //  上面「YouTube 自己宣告支援 COEP」的判斷是錯的（只看了 CORP）。有 YouTube 嵌入就不能開 COEP
+    //  （credentialless 也一樣要求 iframe 回 COEP）。弱掃報告若再列 COEP（VAS02），需回覆為「站內有 YouTube 影片嵌入，開啟會讓影片無法播放」。
     const securityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -64,7 +70,6 @@ const nextConfig: NextConfig = {
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()" },
       { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
       { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
-      { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
     ];
     return [
       { source: "/:path*", headers: securityHeaders },

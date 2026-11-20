@@ -7,6 +7,8 @@ import type { CompanyProfile } from "@/types/application";
  */
 export interface ProfileState {
   phone: string;
+  /** 公司電話的分機（選填）。後端公司電話只有一個欄位，送出時接成 `電話#分機`，讀回來再拆開 */
+  phoneExt: string;
   city: string;
   district: string;
   /** 3 碼郵遞區號（選好鄉鎮區自動帶出，也可以直接輸入） */
@@ -28,8 +30,28 @@ export interface ProfileState {
   logo: File | null;
 }
 
+/** 公司電話與分機之間的分隔符號；前台企業詳情的撥號連結也是用 `#` 切掉分機 */
+const PHONE_EXT_SEPARATOR = "#";
+
+/** 把後端存的 `電話#分機` 拆成電話與分機 */
+export function splitPhoneExt(value: string | null | undefined): { phone: string; ext: string } {
+  const raw = value ?? "";
+  const index = raw.indexOf(PHONE_EXT_SEPARATOR);
+  if (index < 0) return { phone: raw.trim(), ext: "" };
+  return { phone: raw.slice(0, index).trim(), ext: raw.slice(index + 1).trim() };
+}
+
+/** 電話與分機接成 `電話#分機`；沒有分機就只回電話，電話空白則整個回 undefined */
+export function joinPhoneExt(phone: string, ext: string): string | undefined {
+  const main = phone.trim();
+  if (!main) return undefined;
+  const extension = ext.trim();
+  return extension ? `${main}${PHONE_EXT_SEPARATOR}${extension}` : main;
+}
+
 export const emptyProfile = (): ProfileState => ({
   phone: "",
+  phoneExt: "",
   city: "",
   district: "",
   postalCode: "",
@@ -50,9 +72,11 @@ export const emptyProfile = (): ProfileState => ({
 });
 
 export function profileFromApplication(profile: CompanyProfile | undefined, address: string | undefined): ProfileState {
+  const { phone, ext } = splitPhoneExt(profile?.phone);
   return {
     ...emptyProfile(),
-    phone: profile?.phone ?? "",
+    phone,
+    phoneExt: ext,
     city: profile?.city ?? "",
     district: profile?.district ?? "",
     postalCode: profile?.postalCode ?? "",
@@ -77,7 +101,7 @@ export function profileToRequest(state: ProfileState, role: { isSupplier: boolea
   const text = (value: string) => value.trim() || undefined;
   const revenue = state.revenue.trim() === "" ? undefined : Number(state.revenue.replace(/,/g, ""));
   return {
-    phone: text(state.phone),
+    phone: joinPhoneExt(state.phone, state.phoneExt),
     city: text(state.city),
     district: text(state.district),
     postalCode: text(state.postalCode),

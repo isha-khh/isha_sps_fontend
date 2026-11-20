@@ -8,6 +8,12 @@ public class Regulations : BaseEntity<int>
     public DataMode DataMode { get; set; }
     public string? Name { get; set; }
     public bool Published { get; set; }
+
+    /// <summary>
+    /// 內容檢查（後台「系統設定 → 內容檢查」）發現問題而自動轉成草稿時，寫下原因（哪個區塊、什麼規則）；沒被自動轉草稿過、或重新發布之後為 null。
+    /// 規則見 <c>ArticleContentRules</c>。重新發布（<c>Published = true</c>）會清掉這個欄位。
+    /// </summary>
+    public string? UnpublishReason { get; set; }
     public short Type { get; set; }
     public int Ordinal { get; set; }
     public int? PictureId { get; set; }

@@ -20,7 +20,14 @@ export default function RedirectIfLoggedIn({ to = "/member" }: { to?: string }) 
   }, [checkSession]);
 
   useEffect(() => {
-    if (member) router.replace(readNextFromLocation() ?? to);
+    if (!member) return;
+    const next = readNextFromLocation();
+    // 剛登入但信箱還沒驗證：去驗證頁（跟登入表單導的是同一個地方，避免兩邊各導各的）
+    if (member.requireEmailVerification) {
+      router.replace(next ? `/member/verify-email?next=${encodeURIComponent(next)}` : "/member/verify-email");
+      return;
+    }
+    router.replace(next ?? to);
   }, [member, router, to]);
 
   return null;

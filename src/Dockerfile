@@ -43,6 +43,12 @@ RUN apt-get update -o Acquire::Retries=3 \
     && rm -rf /var/lib/apt/lists/* \
     && fc-cache -f -v
 
+# smtp.isha.org.tw 的 TWCA 新憑證鏈以「自簽版 TWCA CYBER Root CA G3」結尾，該根太新，基底映像的信任庫沒有，
+# MailKit 連線會報 UntrustedRoot。這是公開根憑證，先在映像內信任它（副檔名必須是 .crt）。
+# 待 smtp 伺服器改送跨簽鏈後可移除這兩行與 certs/。
+COPY certs/TWCA_CYBER_Root_CA_G3_selfsigned.pem /usr/local/share/ca-certificates/twca-cyber-root-g3.crt
+RUN update-ca-certificates
+
 COPY --from=build /app/publish .
 
 ENV ConnectionStrings__DefaultConnection="" \

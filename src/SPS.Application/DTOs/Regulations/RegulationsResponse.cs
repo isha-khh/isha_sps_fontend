@@ -7,6 +7,9 @@ public class RegulationsResponse
     public string? Title { get; set; }
     public string? Content { get; set; }
     public bool Published { get; set; }
+
+    /// <summary>被內容檢查自動轉成草稿的原因；沒有則為 null（後台表單用來顯示提示）</summary>
+    public string? UnpublishReason { get; set; }
     public short Type { get; set; }
     public int Ordinal { get; set; }
     public int? CategoryId { get; set; }

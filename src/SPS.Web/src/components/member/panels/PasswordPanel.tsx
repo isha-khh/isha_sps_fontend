@@ -5,6 +5,7 @@ import PasswordField from "@/components/member/PasswordField";
 import { memberprofileApi } from "@/lib/api/memberprofile";
 import { VerificationCodePurpose } from "@/types/memberprofile";
 import { getApiErrorMessage } from "@/lib/error-utils";
+import FormError from "@/components/ui/FormError";
 
 const RESEND_SECONDS = 60;
 
@@ -134,10 +135,10 @@ export default function PasswordPanel() {
         </p>
       )}
       {error && (
-        <p className="text-danger w-100 mb-0" role="alert">
+        <FormError as="p" className="text-danger w-100 mb-0">
           <i className="bi bi-exclamation-circle-fill me-1" aria-hidden="true"></i>
           {error}
-        </p>
+        </FormError>
       )}
 
       <div className="w-100">

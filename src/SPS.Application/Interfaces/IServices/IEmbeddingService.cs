@@ -21,9 +21,21 @@ public interface IEmbeddingService
     Task<Result<float[]>> EmbedQueryAsync(string queryText, CancellationToken ct = default);
 
     /// <summary>
+    /// 全站搜尋的查詢向量：用「找出網站上最相關的內容」這種通用指令，不是媒合用的「找供給端業者」指令。
+    /// 搜尋詞很短、常見的還會重複，所以呼叫端應該自己做快取與頻率限制。
+    /// </summary>
+    Task<Result<float[]>> EmbedSearchQueryAsync(string queryText, CancellationToken ct = default);
+
+    /// <summary>
     /// 使用指定設定測試連線（不儲存），回傳向量維度與延遲，供設定頁「測試連線」使用。
     /// </summary>
     Task<EmbeddingTestResult> TestConnectionAsync(EmbeddingSettingsDto settings, CancellationToken ct = default);
+
+    /// <summary>
+    /// 向 LiteLLM 取得這把金鑰可用的模型清單（<c>GET /models</c>），供設定頁的模型下拉選單用（不儲存設定）。
+    /// 用清單選模型，就不會打錯名稱或選到這把金鑰沒有權限的模型。
+    /// </summary>
+    Task<Result<List<string>>> ListModelsAsync(EmbeddingSettingsDto settings, CancellationToken ct = default);
 
     /// <summary>
     /// 取得目前設定的 embedding 模型名稱（不呼叫 API，純讀設定），供索引服務記錄 ContentEmbedding.Model 用。

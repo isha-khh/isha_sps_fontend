@@ -5,6 +5,12 @@ namespace SPS.Application.Interfaces;
 public interface IGoogleAnalyticsProvider
 {
     /// <summary>
+    /// Google Analytics 是否已設定完成：資源 ID 與服務帳戶憑證都有（來源是後台「系統配置」或 appsettings）。
+    /// 自動同步用它判斷要不要略過；沒設定時不該去打 Google。
+    /// </summary>
+    Task<bool> IsConfiguredAsync();
+
+    /// <summary>
     /// 從 Google Analytics 獲取指定日期範圍的數據
     /// </summary>
     /// <param name="startDate">開始日期</param>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import PasswordField from "@/components/member/PasswordField";
 import DocumentUploadField, { type DocumentPreviewData } from "@/components/member/DocumentUploadField";
@@ -11,7 +11,10 @@ import { applicationDocumentUrl, applicationsApi } from "@/lib/api/applications"
 import CompanyProfileFields from "@/components/member/CompanyProfileFields";
 import { emptyProfile, profileFromApplication, profileToRequest, validateProfile, type ProfileState } from "@/lib/company-profile";
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
+import IndustrySelect from "@/components/member/IndustrySelect";
+import { industryError } from "@/lib/member-registration-data";
 import { getApiErrorMessage } from "@/lib/error-utils";
+import { focusFirstInvalidField } from "@/lib/form-focus";
 import { DocumentType } from "@/types/api";
 import { ApplicantType as ApplicantTypeEnum, CompanyLevel, MemberRole, type ApplicationResponse, type CreateApplicationRequest } from "@/types/application";
 
@@ -125,6 +128,7 @@ export default function MemberDetailsForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
+  const [extension, setExtension] = useState("");
   const [mobilePhone, setMobilePhone] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [industry, setIndustry] = useState("");
@@ -137,6 +141,13 @@ export default function MemberDetailsForm({
   const [docs, setDocs] = useState<DocumentSlots>({ companyRegistration: null, capability: null, application: null, other: null });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>();
+  // 驗證沒過時把焦點帶到第一個沒填的必填欄位（或錯誤訊息），見 lib/form-focus.ts
+  const errorRef = useRef<HTMLDivElement>(null);
+  const [errorSeq, setErrorSeq] = useState(0);
+  useEffect(() => {
+    if (errorSeq === 0) return;
+    focusFirstInvalidField(errorRef.current?.closest("main"), errorRef.current);
+  }, [errorSeq]);
 
   // ---- Step4（mode="review"）送出狀態 ----
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
@@ -146,6 +157,8 @@ export default function MemberDetailsForm({
     if (!email || !password || !confirmPassword || !contactName || !phone || !companyName || !industry || !position) {
       return "請完整填寫必填欄位";
     }
+    const industryMsg = industryError(industry);
+    if (industryMsg) return industryMsg;
     if (password.length < 8) {
       return "密碼長度不能少於 8 位";
     }
@@ -183,6 +196,7 @@ export default function MemberDetailsForm({
     const validationError = validateEditForm();
     if (validationError) {
       setError(validationError);
+      setErrorSeq((n) => n + 1);
       return;
     }
 
@@ -205,6 +219,7 @@ export default function MemberDetailsForm({
             position,
             email,
             phone,
+            extension: extension || undefined,
             mobilePhone: mobilePhone || undefined,
             password,
             confirmPassword,
@@ -323,14 +338,31 @@ export default function MemberDetailsForm({
 
         <div className="menb_inp_tit form-group">
           <label className="mb-2">{requiredMark}聯絡電話</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="請輸入聯絡電話"
-            value={disabled ? reviewValue(reviewMember?.phone) : phone}
-            onChange={(e) => setPhone(e.target.value)}
-            disabled={disabled}
-          />
+          <div className="d-flex gap-2">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="請輸入聯絡電話"
+              value={disabled ? reviewValue(reviewMember?.phone) : phone}
+              onChange={(e) => setPhone(e.target.value)}
+              disabled={disabled}
+            />
+            {/* 分機選填（後端 Extension 欄位，上限 20 字）；Step 4 檢視沒填就不顯示 */}
+            {(!disabled || reviewMember?.extension) && (
+              <input
+                type="text"
+                inputMode="numeric"
+                className="form-control"
+                style={{ maxWidth: "5.5rem" }}
+                placeholder="分機"
+                aria-label="聯絡電話分機"
+                maxLength={10}
+                value={disabled ? reviewValue(reviewMember?.extension) : extension}
+                onChange={(e) => setExtension(e.target.value.replace(/[^0-9]/g, ""))}
+                disabled={disabled}
+              />
+            )}
+          </div>
         </div>
 
         <div className="menb_inp_tit form-group">
@@ -361,14 +393,12 @@ export default function MemberDetailsForm({
 
         <div className="menb_inp_tit form-group">
           <label className="mb-2">{requiredMark}產業別</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="請輸入產業別"
-            value={disabled ? reviewValue(application?.industry) : industry}
-            onChange={(e) => setIndustry(e.target.value)}
-            disabled={disabled}
-          />
+          {disabled ? (
+            <input type="text" className="form-control" value={reviewValue(application?.industry)} disabled />
+          ) : (
+            // issue #101：個人、企業會員都用下拉選單；選「製造業」要再選中類
+            <IndustrySelect value={industry} onChange={setIndustry} />
+          )}
         </div>
 
         <div className="menb_inp_tit form-group">
@@ -543,7 +573,7 @@ export default function MemberDetailsForm({
       )}
 
       {mode === "edit" && error && (
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger" role="alert" ref={errorRef} tabIndex={-1}>
           {error}
         </div>
       )}

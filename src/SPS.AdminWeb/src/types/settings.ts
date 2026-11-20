@@ -13,6 +13,12 @@ export interface EmailSettings {
 export interface GoogleAnalyticsSettings {
   propertyId: string;
   credentialsJson: string;
+  /** 每天自動從 Google Analytics 同步流量資料（儀表板、分析報表用）；GA 沒設定時自動略過 */
+  autoSyncEnabled: boolean;
+  /** 自動同步時間（台灣時間 HH:mm） */
+  autoSyncTime: string;
+  /** 每次自動同步往回抓幾天（1～30） */
+  autoSyncDays: number;
 }
 
 export interface FileStorageSettings {
@@ -156,6 +162,8 @@ export interface BounceMailSettings {
 export interface ContentSettings {
   /** 訪客是否可以查看企業名錄詳情 */
   guestCanViewBusinessDetail: boolean;
+  /** 前台企業名錄是否只顯示供給端企業（供給端與供需雙方；需求端不列出） */
+  businessListSupplierOnly: boolean;
   /** 企業列表是否顯示標籤 */
   showBusinessListTags: boolean;
   /** 企業列表是否顯示關於我們 */

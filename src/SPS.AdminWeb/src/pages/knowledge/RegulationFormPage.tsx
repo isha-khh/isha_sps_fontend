@@ -4,6 +4,7 @@ import { PageTitle } from '@/components/PageTitle';
 import { regulationsApi } from '@/lib/api/regulations';
 import { categoriesApi } from '@/lib/api/category';
 import { PuckEditor } from '@/components/puck/PuckEditor';
+import { guardPublish } from '@/lib/puck/content-guard';
 import type { CreateRegulationsRequest, UpdateRegulationsRequest } from '@/types/regulations';
 import type { CategoryResponse } from '@/types/category';
 import { useNotify } from '@/hooks/useNotify';
@@ -28,6 +29,8 @@ export const RegulationFormPage = () => {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
+  // 被內容檢查（系統設定 → 內容檢查）自動轉成草稿的原因，有的話在表單上方提示；重新發布後後端會清掉
+  const [unpublishReason, setUnpublishReason] = useState<string | null>(null);
 
   // 使用 ref 保存最新的 Puck 內容
   const puckContentRef = useRef<string>('');
@@ -53,6 +56,7 @@ export const RegulationFormPage = () => {
       setIsLoading(true);
       try {
         const data = await regulationsApi.getById(Number(id));
+        setUnpublishReason(data.unpublishReason ?? null);
         setFormData({
           name: data.name || '',
           title: data.title || '',
@@ -84,6 +88,7 @@ export const RegulationFormPage = () => {
 
     // 使用 ref 中的最新內容
     const latestContent = puckContentRef.current;
+    if (publish && !guardPublish(latestContent, notify)) return;
 
     setIsSaving(true);
     try {
@@ -130,6 +135,16 @@ export const RegulationFormPage = () => {
           { label: isEditMode ? '編輯' : '新增', active: true },
         ]}
       />
+
+      {unpublishReason && !formData.published && (
+        <div role="alert" className="alert alert-warning items-start">
+          <span className="iconify lucide--triangle-alert mt-0.5 size-5 shrink-0" />
+          <div>
+            <div className="font-semibold">這篇內容被內容檢查自動轉成草稿</div>
+            <div className="text-sm whitespace-pre-line">{unpublishReason}</div>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-4">
         <button onClick={() => navigate(-1)} className="btn btn-ghost">

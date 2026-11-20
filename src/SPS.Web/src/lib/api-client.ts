@@ -222,7 +222,15 @@ apiClient.interceptors.response.use(
 
       // 重定向到登入頁——公開網站的登入頁是 `/member/login`，不是
       // 管理後台那個不存在於這個網站的 `/login`。
-      window.location.href = '/member/login';
+      // `window.location.href` 是整頁導向，不像 Next 的 `router.push`／`<Link>` 會自動加 basePath，
+      // 所以一定要自己用 `withBasePath`：正式網域 `sdd.nat.gov.tw` 只有 `/sps` 底下是本站，
+      // 導到沒有前綴的 `/member/login` 會連不到（Chrome 錯誤頁），未登入的人開會員中心就會卡在那裡；
+      // 舊網域 `match.isafe.org.tw` 因為根目錄是舊系統，沒有前綴也剛好打得開，所以之前沒被發現。
+      // 已經在登入頁就不再導（登入頁自己的 401 不需要再導一次）。
+      const loginPath = withBasePath('/member/login');
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith(loginPath)) {
+        window.location.href = loginPath;
+      }
 
       return Promise.reject(refreshError);
     } finally {

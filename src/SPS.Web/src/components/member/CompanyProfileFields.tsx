@@ -87,7 +87,25 @@ export default function CompanyProfileFields({
         <label className="mb-2" htmlFor="profile-phone">
           {requiredMark}公司電話
         </label>
-        <input id="profile-phone" type="text" className="form-control" placeholder="請輸入公司電話" value={value.phone} onChange={(e) => onChange({ phone: e.target.value })} disabled={readOnly} />
+        <div className="d-flex gap-2">
+          <input id="profile-phone" type="text" className="form-control" placeholder="請輸入公司電話" value={value.phone} onChange={(e) => onChange({ phone: e.target.value })} disabled={readOnly} />
+          {/* 分機選填；唯讀檢視沒填就不顯示。送出時跟電話接成「電話#分機」（見 lib/company-profile.ts） */}
+          {(!readOnly || value.phoneExt) && (
+            <input
+              id="profile-phone-ext"
+              type="text"
+              inputMode="numeric"
+              className="form-control"
+              style={{ maxWidth: "5.5rem" }}
+              placeholder="分機"
+              aria-label="公司電話分機"
+              maxLength={10}
+              value={value.phoneExt}
+              onChange={(e) => onChange({ phoneExt: e.target.value.replace(/[^0-9]/g, "") })}
+              disabled={readOnly}
+            />
+          )}
+        </div>
       </div>
 
       <div className="menb_inp_tit form-group w-100">

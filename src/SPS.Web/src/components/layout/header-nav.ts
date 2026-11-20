@@ -53,11 +53,18 @@ export function setupHeaderNav(): () => void {
   const toggler = () => doc.querySelector<HTMLElement>(".navbar-toggler");
   const closeButton = () => doc.querySelector<HTMLElement>(".bsnavclose");
 
+  // 手機版選單面板沒打開時整塊設成 inert：放大到 200% 以上、選單變成摺疊式之後，Tab 鍵不會再走進看不見的選單項目（無障礙檢測 CS2240700E）
+  const closeNavPanelInert = () => {
+    const nav = mobileNav();
+    if (nav && !nav.classList.contains("in")) nav.inert = true;
+  };
+
   function closeMobileNav() {
     const nav = mobileNav();
     if (!nav?.classList.contains("in")) return;
     const button = toggler();
     nav.classList.remove("in");
+    nav.inert = true;
     button?.classList.remove("active");
     button?.setAttribute("aria-expanded", "false");
     closeButton()?.classList.remove("active");
@@ -70,6 +77,7 @@ export function setupHeaderNav(): () => void {
     const nav = mobileNav();
     if (!nav) return;
     const button = toggler();
+    nav.inert = false;
     nav.classList.add("in");
     button?.classList.add("active");
     button?.setAttribute("aria-expanded", "true");
@@ -202,6 +210,8 @@ export function setupHeaderNav(): () => void {
       if (!item.contains(doc.activeElement)) setExpanded(item, false);
     }, 10);
   }
+
+  closeNavPanelInert();
 
   doc.addEventListener("click", onClick, true);
   doc.addEventListener("keydown", onKeydown);

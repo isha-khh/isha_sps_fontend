@@ -102,14 +102,15 @@ export default async function HomeIndustry() {
                   </div>
 
                   <div className="mo_pa_box">
-                    <MoreLink href={item.href} label="查看更多" title="查看更多產業案例" />
+                    {/* 「查看更多」跟上面的標題連結、右邊的縮圖是同一個目的地：只留標題連結給鍵盤與輔助科技（HM1240402E） */}
+                    <MoreLink href={item.href} label="查看更多" title="查看更多產業案例" hidden />
                     <CarouselControls carouselId={CAROUSEL_ID} prevLabel="上一則服務" nextLabel="下一則服務" />
                   </div>
                 </div>
 
-                <Link href={item.href} className="pic" title="查看更多產業案例內容">
+                <Link href={item.href} className="pic" tabIndex={-1} aria-hidden="true">
                   <div className="ratio ratio-4x3">
-                    <img className="img-fluid d-block" src={item.image} alt={item.title} />
+                    <img className="img-fluid d-block" src={item.image} alt="" />
                   </div>
                 </Link>
               </div>
