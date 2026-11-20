@@ -4746,14 +4746,14 @@ h2.h2 {
         .new_box .news-date .day {
             font-weight: bold;
             line-height: 1;
-            color: #00d2aa;
+            color: #007a6a;
             font-size: 4.375rem;
         }
 
         .new_box .news-date .year-month {
             font-size: 1.125rem;
             font-weight: bold;
-            color: #00d2aa;
+            color: #007a6a;
             margin-top: 6px;
         }
 
