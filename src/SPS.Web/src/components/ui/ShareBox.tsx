@@ -37,6 +37,7 @@ export default function ShareBox() {
         <li>
           <a
             href="#"
+            role="button"
             title="分享到 Facebook（另開新視窗）"
             onClick={(event) => {
               event.preventDefault();
@@ -50,6 +51,7 @@ export default function ShareBox() {
         <li>
           <a
             href="#"
+            role="button"
             title="分享到 LINE（另開新視窗）"
             onClick={(event) => {
               event.preventDefault();
@@ -63,6 +65,7 @@ export default function ShareBox() {
         <li>
           <a
             href="#"
+            role="button"
             title="分享到 Threads（另開新視窗）"
             onClick={(event) => {
               event.preventDefault();

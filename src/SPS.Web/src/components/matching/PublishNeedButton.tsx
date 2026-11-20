@@ -21,7 +21,7 @@ export default function PublishNeedButton({ modalId }: { modalId: string }) {
 
   if (ready && role === "buyer") {
     return (
-      <a href="#" data-bs-toggle="modal" data-bs-target={`#${modalId}`} className="me_Publish more_x">
+      <a href="#" role="button" data-bs-toggle="modal" data-bs-target={`#${modalId}`} className="me_Publish more_x">
         <span>我要刊登</span>
         <i className="bi bi-pencil-square" aria-hidden="true" />
       </a>
@@ -46,6 +46,7 @@ export default function PublishNeedButton({ modalId }: { modalId: string }) {
     <>
       <a
         href="#"
+        role="button"
         className={`me_Publish more_x${role === "supplier" ? " is-disabled" : ""}`}
         aria-disabled={role === "supplier" ? "true" : undefined}
         onClick={(event) => {

@@ -178,6 +178,7 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
           <a
             className="ma_bat blue"
             href="#"
+            role="button"
             data-bs-toggle="modal"
             data-bs-target="#privacyConsentModal"
             title="前往閱讀個資蒐集同意條款（開啟對話框）"
@@ -211,7 +212,7 @@ export default function DownloadRequestForm({ itemId }: { itemId: number | strin
           </div>
         )}
 
-        <a href="#" title="提交" className="more_x" aria-disabled={submitting} onClick={(event) => void submit(event)}>
+        <a href="#" role="button" title="提交" className="more_x" aria-disabled={submitting} onClick={(event) => void submit(event)}>
           <span>{submitting ? "送出中…" : "提交"}</span>
           <i className="bi bi-arrow-right" aria-hidden="true"></i>
         </a>

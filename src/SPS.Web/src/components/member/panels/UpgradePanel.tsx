@@ -344,7 +344,7 @@ export default function UpgradePanel() {
             </label>
             <span>
               我已詳細閱讀並同意「
-              <a href="#" data-bs-toggle="modal" data-bs-target="#upgradeConsentModal" className="blue text-decoration-underline" title="開啟個人資料同意書">
+              <a href="#" role="button" data-bs-toggle="modal" data-bs-target="#upgradeConsentModal" className="blue text-decoration-underline" title="開啟個人資料同意書">
                 個人資料同意書
               </a>
               」

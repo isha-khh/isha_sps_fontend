@@ -94,7 +94,7 @@ export default async function Footer() {
             </div>
 
             <div className="footer-col footer-links">
-              <div className="footer-title">Links</div>
+              <div className="footer-title" lang="en">Links</div>
               <ul className="nav-links">
                 <li>
                   <Link href="/about" title="前往 關於我們">
@@ -153,7 +153,7 @@ export default async function Footer() {
             </div>
 
             <div className="footer-col footer-contact">
-              <div className="footer-title">Contact Us</div>
+              <div className="footer-title" lang="en">Contact Us</div>
               <ul className="contact-list">
                 {address && (
                   <li>
