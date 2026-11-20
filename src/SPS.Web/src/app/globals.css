@@ -122,6 +122,52 @@
 }
 
 /*
+ * 首頁各區塊（服務專區、產業案例、最新消息、影音專區、企業刊登、關於我們）的鍵盤焦點框（無障礙檢測 2.4.7 焦點可視）。
+ * 全站的 `:focus-visible` 是一圈 3px 藍框（#0d6efd），在這些區塊都看不清楚：
+ * - 服務專區的頁籤「選取中」本來就是藍色邊框（#0474d6），焦點框一樣是藍的，分不出是焦點還是選取；
+ * - 「查看更多」是藍色漸層按鈕、產業案例的標題區在藍色漸層底上，藍框跟底色融在一起；
+ * 改成深色外框＋白色內圈的雙層框：不管底是白、灰、藍，至少有一層跟它對比，也不會跟「選取中」的藍框混淆。
+ * 用 `box-shadow` 畫內圈（全站 `:focus-visible` 把 box-shadow 設成 none !important，這裡要用更高的優先序蓋回來）。
+ */
+.home_about :is(a, button):focus-visible,
+.home_news :is(a, button):focus-visible,
+.home_service :is(a, button):focus-visible,
+.home_industry :is(a, button):focus-visible,
+.home_video_section :is(a, button):focus-visible,
+.home_enterprise :is(a, button):focus-visible {
+  outline: 3px solid #111 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 3px #fff !important;
+}
+
+/*
+ * 企業刊登的企業名稱連結包在 `h3` 裡，而 `h3` 為了「最多兩行加刪節號」設了 `overflow: hidden`，
+ * 連結自己的焦點框被 `h3` 的邊界切掉（只看到文字被切了一圈，或完全沒有框）。
+ * 改成：連結取得焦點時，框畫在 `h3` 上（元素自己的外框不受自己的 overflow 影響），連結本身不畫。
+ * 用 `:has()`（Safari 15.4+、Chrome 105+）；不支援的舊瀏覽器維持原本的框（`@supports` 擋住，不會變成完全沒有框）。
+ */
+@supports selector(:has(a)) {
+  .home_enterprise_box .tit h3 a:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  .home_enterprise_box .tit h3:has(> a:focus-visible) {
+    outline: 3px solid #111;
+    outline-offset: 4px;
+    box-shadow: 0 0 0 4px #fff;
+    border-radius: 6px;
+  }
+}
+
+/*
+ * 產業案例的標題連結裡包的是整塊的 `div`（標題＋編號）和 `p`（說明），但連結本身是 `display: inline`；
+ * 瀏覽器對「行內元素裡包區塊」不畫外框，焦點移上去什麼都看不到。改成 block（內容本來就是整塊的，排版不變）。
+ */
+.home_industry .tit_1 > a {
+  display: block;
+}
+
+/*
  * 手機版：頁籤下面那個三欄 `.row.gy-4` 自己有 -24px 的上邊距，平常靠子欄位的 margin-top（也是 24px）補回來；
  * 但 style_rwd.css 在手機（max-width: 767px）把 `.main .content` 的 margin-top 改成 5px，補不回來，
  * 搜尋列（年份下拉）就整個往上頂、蓋到頁籤（實測重疊約 3px，應該有 16px 間距）。
