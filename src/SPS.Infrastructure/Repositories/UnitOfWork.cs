@@ -43,6 +43,7 @@ public class UnitOfWork : IUnitOfWork
     private ITagRepository? _tags;
     private INotificationRepository? _notifications;
     private IFidoCredentialRepository? _fidoCredentials;
+    private IPasswordHistoryRepository? _passwordHistories;
     private IPopupAnnouncementRepository? _popupAnnouncements;
     private ISiteCounterRepository? _siteCounter;
     private ISiteStatisticsRepository? _siteStatistics;
@@ -348,6 +349,15 @@ public class UnitOfWork : IUnitOfWork
         {
             _fidoCredentials ??= new FidoCredentialRepository(_context);
             return _fidoCredentials;
+        }
+    }
+
+    public IPasswordHistoryRepository PasswordHistories
+    {
+        get
+        {
+            _passwordHistories ??= new PasswordHistoryRepository(_context);
+            return _passwordHistories;
         }
     }
 

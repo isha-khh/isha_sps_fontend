@@ -18,6 +18,7 @@ public class ApplicationReviewService : IApplicationReviewService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IPasswordPolicyService _passwordPolicyService;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
     private readonly IScoringService _scoringService;
@@ -27,6 +28,7 @@ public class ApplicationReviewService : IApplicationReviewService
     public ApplicationReviewService(
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
+        IPasswordPolicyService passwordPolicyService,
         IEmailService emailService,
         IConfiguration configuration,
         IScoringService scoringService,
@@ -35,6 +37,7 @@ public class ApplicationReviewService : IApplicationReviewService
     {
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
+        _passwordPolicyService = passwordPolicyService;
         _emailService = emailService;
         _configuration = configuration;
         _scoringService = scoringService;
@@ -678,6 +681,8 @@ public class ApplicationReviewService : IApplicationReviewService
                     };
 
                     await _unitOfWork.Members.AddAsync(member, cancellationToken);
+                    // 申請時設的密碼是這個帳號的第一筆密碼歷史
+                    await _passwordPolicyService.RecordForMemberAsync(member.Id, member.Password, cancellationToken);
 
                     // 更新 ApplicationMember 的 CreatedMemberId
                     appMember.CreatedMemberId = member.Id;

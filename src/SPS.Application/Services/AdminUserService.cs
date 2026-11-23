@@ -16,15 +16,18 @@ public class AdminUserService : IAdminUserService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IPasswordPolicyService _passwordPolicyService;
     private readonly ILogger<AdminUserService> _logger;
 
     public AdminUserService(
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
+        IPasswordPolicyService passwordPolicyService,
         ILogger<AdminUserService> logger)
     {
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
+        _passwordPolicyService = passwordPolicyService;
         _logger = logger;
     }
 
@@ -70,6 +73,13 @@ public class AdminUserService : IAdminUserService
             return Result<Guid>.Failure("郵箱已存在");
         }
 
+        // 驗證密碼策略
+        var policyResult = await _passwordPolicyService.ValidatePasswordAsync(request.Password, cancellationToken);
+        if (!policyResult.IsSuccess)
+        {
+            return Result<Guid>.Failure(policyResult.Error!);
+        }
+
         // 驗證角色
         var roles = new List<Role>();
         if (request.RoleIds != null && request.RoleIds.Any())
@@ -113,6 +123,7 @@ public class AdminUserService : IAdminUserService
         }
 
         await _unitOfWork.Users.AddAsync(user, cancellationToken);
+        await _passwordPolicyService.RecordForUserAsync(user.Id, user.Password, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Admin user created: {UserId}", user.Id);

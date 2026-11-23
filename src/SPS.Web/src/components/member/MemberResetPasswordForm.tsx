@@ -6,6 +6,7 @@ import PasswordField from "@/components/member/PasswordField";
 import { authApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import FormError from "@/components/ui/FormError";
+import { usePasswordPolicy } from "@/hooks/usePasswordPolicy";
 
 /**
  * 積木元件：重設密碼表單。忘記密碼信裡的連結是 `/member/reset-password?token=…`，
@@ -21,6 +22,7 @@ export default function MemberResetPasswordForm({ token }: { token: string }) {
   const [email, setEmail] = useState<string>();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { validate: validatePasswordPolicy, hint: passwordHint } = usePasswordPolicy();
   const [error, setError] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
 
@@ -52,6 +54,11 @@ export default function MemberResetPasswordForm({ token }: { token: string }) {
     }
     if (newPassword !== confirmPassword) {
       setError("兩次輸入的密碼不一致");
+      return;
+    }
+    const passwordPolicyError = validatePasswordPolicy(newPassword);
+    if (passwordPolicyError) {
+      setError(passwordPolicyError);
       return;
     }
 
@@ -108,7 +115,7 @@ export default function MemberResetPasswordForm({ token }: { token: string }) {
         <label className="mb-2">
           新密碼<span className="text-danger ms-1" aria-hidden="true">*</span>
         </label>
-        <PasswordField label="新密碼" placeholder="請輸入新密碼" value={newPassword} onChange={setNewPassword} />
+        <PasswordField label="新密碼" placeholder="請輸入新密碼" value={newPassword} onChange={setNewPassword} hint={passwordHint} />
       </div>
 
       <div className="form-group g-input">

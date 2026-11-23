@@ -17,7 +17,6 @@ public class ChangePasswordRequest
     /// 新密碼
     /// </summary>
     [Required(ErrorMessage = "新密碼為必填")]
-    [MinLength(8, ErrorMessage = "密碼長度至少 8 個字元")]
     public string NewPassword { get; set; } = string.Empty;
 
     /// <summary>

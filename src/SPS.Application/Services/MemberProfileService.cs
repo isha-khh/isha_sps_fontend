@@ -17,17 +17,20 @@ public class MemberProfileService : IMemberProfileService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IVerificationCodeService _verificationCodeService;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IPasswordPolicyService _passwordPolicyService;
     private readonly ILogger<MemberProfileService> _logger;
 
     public MemberProfileService(
         IUnitOfWork unitOfWork,
         IVerificationCodeService verificationCodeService,
         IPasswordHasher passwordHasher,
+        IPasswordPolicyService passwordPolicyService,
         ILogger<MemberProfileService> logger)
     {
         _unitOfWork = unitOfWork;
         _verificationCodeService = verificationCodeService;
         _passwordHasher = passwordHasher;
+        _passwordPolicyService = passwordPolicyService;
         _logger = logger;
     }
 
@@ -155,6 +158,13 @@ public class MemberProfileService : IMemberProfileService
             return Result.Failure(verifyResult.Error ?? "驗證碼驗證失敗");
         }
 
+        // 驗證密碼策略（後台「系統設定 → 安全性」：長度、大小寫、數字、特殊字元、不可重複前 N 組密碼）
+        var policyResult = await _passwordPolicyService.ValidateForMemberAsync(request.NewPassword, member.Id, cancellationToken);
+        if (!policyResult.IsSuccess)
+        {
+            return Result.Failure(policyResult.Error!);
+        }
+
         // 檢查新密碼是否與目前密碼相同
         if (_passwordHasher.Verify(request.NewPassword, member.Password))
         {
@@ -162,7 +172,9 @@ public class MemberProfileService : IMemberProfileService
         }
 
         // 更新密碼
-        member.Password = _passwordHasher.Hash(request.NewPassword);
+        var newPasswordHash = _passwordHasher.Hash(request.NewPassword);
+        member.Password = newPasswordHash;
+        await _passwordPolicyService.RecordForMemberAsync(member.Id, newPasswordHash, cancellationToken);
         member.PasswordChanged = true;
         member.FirstChanged = true;
         member.PasswordChangedTime = DateTime.UtcNow;
@@ -412,8 +424,17 @@ public class MemberProfileService : IMemberProfileService
             return Result.Failure("不能使用此功能重置自己的密碼");
         }
 
+        // 驗證密碼策略
+        var policyResult = await _passwordPolicyService.ValidateForMemberAsync(request.NewPassword, targetMember.Id, cancellationToken);
+        if (!policyResult.IsSuccess)
+        {
+            return Result.Failure(policyResult.Error!);
+        }
+
         // 重置密碼
-        targetMember.Password = _passwordHasher.Hash(request.NewPassword);
+        var newPasswordHash = _passwordHasher.Hash(request.NewPassword);
+        targetMember.Password = newPasswordHash;
+        await _passwordPolicyService.RecordForMemberAsync(targetMember.Id, newPasswordHash, cancellationToken);
         targetMember.FirstChanged = !request.RequirePasswordChange;
         targetMember.PasswordChanged = false;
         targetMember.PasswordChangedTime = DateTime.UtcNow;
@@ -450,6 +471,11 @@ public class MemberProfileService : IMemberProfileService
         if (emailExists)
             return Result<MemberListItemResponse>.Failure("該 Email 已被使用");
 
+        // 驗證密碼策略
+        var policyResult = await _passwordPolicyService.ValidatePasswordAsync(request.Password, cancellationToken);
+        if (!policyResult.IsSuccess)
+            return Result<MemberListItemResponse>.Failure(policyResult.Error!);
+
         // 依成員身分與公司角色套用權限（擁有者可編輯公司資料；一般成員只能查看），和審核通過時一致
         var memberPermissions = MemberPermissionCalculator.Calculate(manager.Role, request.MemberPosition);
         if (memberPermissions == MemberPermission.None) memberPermissions = MemberPermission.ViewCompany;
@@ -479,6 +505,7 @@ public class MemberProfileService : IMemberProfileService
         };
 
         await _unitOfWork.Members.AddAsync(member, cancellationToken);
+        await _passwordPolicyService.RecordForMemberAsync(member.Id, member.Password, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Company member created {MemberId} by manager {ManagerId}", member.Id, managerId);

@@ -16,6 +16,7 @@ import DocumentUploadField from "@/components/member/DocumentUploadField";
 import PersonalDataConsentNotice from "@/components/member/PersonalDataConsentNotice";
 import Modal from "@/components/ui/Modal";
 import FormError from "@/components/ui/FormError";
+import { usePasswordPolicy } from "@/hooks/usePasswordPolicy";
 
 const REQUIRED = (
   <span className="red me-1" aria-hidden="true">
@@ -72,6 +73,7 @@ export default function UpgradePanel() {
   const [mobilePhone, setMobilePhone] = useState(member?.mobilePhone ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { validate: validatePasswordPolicy, hint: passwordHint } = usePasswordPolicy();
   const [companyName, setCompanyName] = useState(member?.companyName ?? "");
   const [industry, setIndustry] = useState("");
   const [position, setPosition] = useState("");
@@ -121,6 +123,8 @@ export default function UpgradePanel() {
     }
     const industryMsg = industryError(industry);
     if (industryMsg) return industryMsg;
+    const passwordPolicyError = validatePasswordPolicy(password);
+    if (passwordPolicyError) return passwordPolicyError;
     if (password !== confirmPassword) return "兩次密碼輸入不一致";
     if (!contactPerson || !unifiedSocialCreditCode) {
       return "請完整填寫公司資料必填欄位";
@@ -220,7 +224,8 @@ export default function UpgradePanel() {
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">{REQUIRED}密碼</label>
-              <input type="password" className="form-control" placeholder="請輸入密碼" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <input type="password" className="form-control" placeholder="請輸入密碼" value={password} onChange={(e) => setPassword(e.target.value)} aria-describedby="upgrade-password-hint" />
+              <div id="upgrade-password-hint" className="form-text">{passwordHint}</div>
             </div>
             <div className="menb_inp_tit form-group">
               <label className="mb-2">{REQUIRED}確認密碼</label>

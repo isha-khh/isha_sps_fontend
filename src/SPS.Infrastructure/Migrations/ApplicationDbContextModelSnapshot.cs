@@ -3026,6 +3026,38 @@ namespace SPS.Infrastructure.Migrations
                     b.ToTable("PasswordChangeLogs");
                 });
 
+            modelBuilder.Entity("SPS.Domain.Entities.PasswordHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("MemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId", "CreatedTime");
+
+                    b.HasIndex("UserId", "CreatedTime");
+
+                    b.ToTable("PasswordHistories", (string)null);
+                });
+
             modelBuilder.Entity("SPS.Domain.Entities.Person", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4845,6 +4877,23 @@ namespace SPS.Infrastructure.Migrations
                     b.Navigation("Picture");
 
                     b.Navigation("Title");
+                });
+
+            modelBuilder.Entity("SPS.Domain.Entities.PasswordHistory", b =>
+                {
+                    b.HasOne("SPS.Domain.Entities.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SPS.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Member");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SPS.Domain.Entities.Person", b =>

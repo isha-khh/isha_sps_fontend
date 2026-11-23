@@ -19,7 +19,6 @@ public class RegisterRequest
     /// 密碼
     /// </summary>
     [Required(ErrorMessage = "密碼不能為空")]
-    [MinLength(6, ErrorMessage = "密碼至少6個字符")]
     public string Password { get; set; } = string.Empty;
 
     /// <summary>

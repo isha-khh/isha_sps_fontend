@@ -7,6 +7,7 @@ import { memberprofileApi } from "@/lib/api/memberprofile";
 import type { CreateCompanyMemberRequest, MemberListItemResponse } from "@/types/memberprofile";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import FormError from "@/components/ui/FormError";
+import { usePasswordPolicy } from "@/hooks/usePasswordPolicy";
 
 /** 後端 `Status`：成員帳號只能在啟用與停用之間切換（鎖定、待審核由後台管理） */
 const STATUS_ACTIVE = 1;
@@ -47,7 +48,7 @@ const EMPTY_FORM: MemberForm = {
  * 沒有權限的成員（一般成員）後端回 403，這裡顯示說明而不是錯誤。**指定聯絡窗口的人，就是企業名錄「取得聯繫窗口」
  * 給出去的聯絡人與電話**，所以這裡改的資料會直接對外。
  *
- * 後端會擋：只能管同公司、不能刪除或停用自己、狀態只能啟用／停用、新密碼至少 8 個字元。
+ * 後端會擋：只能管同公司、不能刪除或停用自己、狀態只能啟用／停用、新密碼要符合後台「系統設定 → 安全性 → 密碼策略」（長度、字元種類、不可重複前 N 組）。
  */
 export default function MembersPanel() {
   const myId = useAuthStore((state) => state.member?.id);
@@ -62,6 +63,7 @@ export default function MembersPanel() {
   const [form, setForm] = useState<MemberForm>(EMPTY_FORM);
   const [resetting, setResetting] = useState<string | null>(null);
   const [resetPassword, setResetPassword] = useState("");
+  const { validate: validatePasswordPolicy, hint: passwordHint } = usePasswordPolicy();
 
   const load = useCallback(async () => {
     try {
@@ -143,7 +145,8 @@ export default function MembersPanel() {
   async function save() {
     if (editing === "new") {
       if (!form.email.trim()) return setError("請輸入 Email");
-      if (form.password.length < 8) return setError("密碼至少 8 個字元");
+      const passwordPolicyError = validatePasswordPolicy(form.password);
+      if (passwordPolicyError) return setError(passwordPolicyError);
       await run(async () => {
         await memberprofileApi.createMember({ ...form, email: form.email.trim(), memberPosition: form.memberPosition as CreateCompanyMemberRequest["memberPosition"] });
         setEditing(null);
@@ -236,8 +239,8 @@ export default function MembersPanel() {
                 </select>
               </div>
               <div className="menb_inp_tit form-group">
-                <label className="mb-2">初始密碼（至少 8 個字元）</label>
-                <PasswordField label="初始密碼" placeholder="請輸入初始密碼" value={form.password} onChange={(value) => setForm((prev) => ({ ...prev, password: value }))} />
+                <label className="mb-2">初始密碼</label>
+                <PasswordField label="初始密碼" placeholder="請輸入初始密碼" value={form.password} onChange={(value) => setForm((prev) => ({ ...prev, password: value }))} hint={passwordHint} />
               </div>
             </>
           )}
@@ -356,20 +359,22 @@ export default function MembersPanel() {
                 {resetting === member.id && (
                   <div className="mt-3 d-flex flex-wrap gap-2 align-items-end">
                     <div style={{ minWidth: 260 }}>
-                      <label className="mb-2 small">新密碼（至少 8 個字元，對方下次登入需改密碼）</label>
-                      <PasswordField label="新密碼" placeholder="請輸入新密碼" value={resetPassword} onChange={setResetPassword} />
+                      <label className="mb-2 small">新密碼（對方下次登入需改密碼）</label>
+                      <PasswordField label="新密碼" placeholder="請輸入新密碼" value={resetPassword} onChange={setResetPassword} hint={passwordHint} />
                     </div>
                     <button
                       type="button"
                       className="tier-submit-btn"
-                      disabled={busy || resetPassword.length < 8}
-                      onClick={() =>
-                        run(async () => {
+                      disabled={busy || !resetPassword}
+                      onClick={() => {
+                        const passwordPolicyError = validatePasswordPolicy(resetPassword);
+                        if (passwordPolicyError) return setError(passwordPolicyError);
+                        return run(async () => {
                           await memberprofileApi.resetPasswordById(member.id, { newPassword: resetPassword, requirePasswordChange: true });
                           setResetting(null);
                           setResetPassword("");
-                        }, "已重設密碼，請把新密碼告知對方。")
-                      }
+                        }, "已重設密碼，請把新密碼告知對方。");
+                      }}
                     >
                       <span>確認重設</span>
                     </button>

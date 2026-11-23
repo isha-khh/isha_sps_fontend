@@ -118,7 +118,7 @@ export const MemberDetailPage = () => {
       fetchMember();
     } catch (error) {
       console.error('Failed to reset password:', error);
-      await notify.error('重置密碼失敗');
+      await notify.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || '重置密碼失敗');
     } finally {
       setIsResettingPassword(false);
     }

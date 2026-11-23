@@ -152,6 +152,7 @@ public class AdminAuthService : IAdminAuthService
         });
 
         await _unitOfWork.Users.AddAsync(user, cancellationToken);
+        await _passwordPolicyService.RecordForUserAsync(user.Id, user.Password, cancellationToken);
 
         // 生成 Token
         var tokenResponse = _tokenService.GenerateAdminToken(user);
@@ -406,7 +407,7 @@ public class AdminAuthService : IAdminAuthService
         }
 
         // 驗證密碼策略
-        var policyResult = await _passwordPolicyService.ValidatePasswordAsync(request.NewPassword, cancellationToken);
+        var policyResult = await _passwordPolicyService.ValidateForUserAsync(request.NewPassword, user.Id, cancellationToken);
         if (!policyResult.IsSuccess)
         {
             return Result.Failure(policyResult.Error!);
@@ -419,7 +420,9 @@ public class AdminAuthService : IAdminAuthService
         }
 
         // 更新密碼
-        user.Password = _passwordHasher.Hash(request.NewPassword);
+        var newPasswordHash = _passwordHasher.Hash(request.NewPassword);
+        user.Password = newPasswordHash;
+        await _passwordPolicyService.RecordForUserAsync(user.Id, newPasswordHash, cancellationToken);
         user.PasswordChanged = true;
         user.FirstChanged = true;
         user.PasswordChangedTime = DateTime.UtcNow;
@@ -536,7 +539,7 @@ public class AdminAuthService : IAdminAuthService
         }
 
         // 驗證密碼策略
-        var policyResult = await _passwordPolicyService.ValidatePasswordAsync(request.NewPassword, cancellationToken);
+        var policyResult = await _passwordPolicyService.ValidateForUserAsync(request.NewPassword, user.Id, cancellationToken);
         if (!policyResult.IsSuccess)
         {
             return Result.Failure(policyResult.Error!);
@@ -549,7 +552,9 @@ public class AdminAuthService : IAdminAuthService
         }
 
         // 更新密碼
-        user.Password = _passwordHasher.Hash(request.NewPassword);
+        var newPasswordHash = _passwordHasher.Hash(request.NewPassword);
+        user.Password = newPasswordHash;
+        await _passwordPolicyService.RecordForUserAsync(user.Id, newPasswordHash, cancellationToken);
         user.PasswordChanged = true;
         user.FirstChanged = true;
         user.PasswordChangedTime = DateTime.UtcNow;
