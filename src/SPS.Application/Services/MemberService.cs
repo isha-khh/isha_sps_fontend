@@ -15,12 +15,14 @@ public class MemberService : IMemberService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<MemberService> _logger;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IPasswordPolicyService _passwordPolicyService;
 
-    public MemberService(IUnitOfWork unitOfWork, ILogger<MemberService> logger, IPasswordHasher passwordHasher)
+    public MemberService(IUnitOfWork unitOfWork, ILogger<MemberService> logger, IPasswordHasher passwordHasher, IPasswordPolicyService passwordPolicyService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _passwordHasher = passwordHasher;
+        _passwordPolicyService = passwordPolicyService;
     }
 
     public async Task<Result<PagedResult<MemberListItemResponse>>> GetPagedAsync(MemberQueryParameters parameters, CancellationToken cancellationToken = default)
@@ -83,12 +85,23 @@ public class MemberService : IMemberService
         if (member == null) return Result<MemberResponse>.Failure("會員不存在");
 
         // 生成或使用提供的密碼
-        var newPassword = string.IsNullOrEmpty(request.NewPassword)
-            ? GenerateRandomPassword()
-            : request.NewPassword;
+        string newPassword;
+        if (string.IsNullOrEmpty(request.NewPassword))
+        {
+            newPassword = await _passwordPolicyService.GeneratePasswordAsync(cancellationToken);
+        }
+        else
+        {
+            // 管理員自己指定的密碼也要符合後台設定的密碼策略（含不可重複前 N 組）
+            var policyResult = await _passwordPolicyService.ValidateForMemberAsync(request.NewPassword, member.Id, cancellationToken);
+            if (!policyResult.IsSuccess) return Result<MemberResponse>.Failure(policyResult.Error!);
+            newPassword = request.NewPassword;
+        }
 
-        // 使用密碼哈希服務加密密碼
-        member.Password = _passwordHasher.Hash(newPassword);
+        // 使用密碼哈希服務加密密碼，並記入密碼歷史
+        var newPasswordHash = _passwordHasher.Hash(newPassword);
+        member.Password = newPasswordHash;
+        await _passwordPolicyService.RecordForMemberAsync(member.Id, newPasswordHash, cancellationToken);
         member.PasswordChanged = true;
         member.PasswordChangedTime = DateTime.UtcNow;
 
@@ -147,12 +160,6 @@ public class MemberService : IMemberService
         return Result<MemberResponse>.Success(MapToResponse(member));
     }
 
-    private static string GenerateRandomPassword(int length = 12)
-    {
-        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%";
-        var random = new Random();
-        return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
-    }
 
     public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
@@ -219,8 +226,10 @@ public class MemberService : IMemberService
 
         foreach (var member in members)
         {
-            var newPassword = GenerateRandomPassword();
-            member.Password = _passwordHasher.Hash(newPassword);
+            var newPassword = await _passwordPolicyService.GeneratePasswordAsync(cancellationToken);
+            var newPasswordHash = _passwordHasher.Hash(newPassword);
+            member.Password = newPasswordHash;
+            await _passwordPolicyService.RecordForMemberAsync(member.Id, newPasswordHash, cancellationToken);
             member.PasswordChanged = true;
             member.PasswordChangedTime = DateTime.UtcNow;
             member.FirstChanged = !request.RequireChangeOnLogin;

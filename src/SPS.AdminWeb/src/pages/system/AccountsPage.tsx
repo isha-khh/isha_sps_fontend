@@ -7,6 +7,7 @@ import type { AdminUser, CreateAdminUserRequest } from '@/types/admin-user';
 import type { RoleDto } from '@/types/admin-role';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useNotify } from '@/hooks/useNotify';
+import { usePasswordPolicy } from '@/hooks/usePasswordPolicy';
 
 interface AccountFormData {
   account: string;
@@ -18,6 +19,7 @@ interface AccountFormData {
 
 export const AccountsPage = () => {
   const notify = useNotify();
+  const { validate: validatePasswordPolicy, policySummary } = usePasswordPolicy();
   const [accounts, setAccounts] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<RoleDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -116,6 +118,14 @@ export const AccountsPage = () => {
       return;
     }
 
+    if (!editingAccount) {
+      const passwordErrors = validatePasswordPolicy(formData.password);
+      if (passwordErrors.length > 0) {
+        await notify.warning(passwordErrors.join('；'));
+        return;
+      }
+    }
+
     if (formData.roleIds.length === 0) {
       await notify.warning('請至少選擇一個角色');
       return;
@@ -145,7 +155,7 @@ export const AccountsPage = () => {
       await fetchAccounts();
     } catch (error) {
       console.error('Failed to save account:', error);
-      await notify.error('儲存帳號失敗');
+      await notify.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || '儲存帳號失敗');
     } finally {
       setIsSaving(false);
     }
@@ -400,6 +410,9 @@ export const AccountsPage = () => {
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         required
                       />
+                      <label className="label">
+                        <span className="label-text-alt">{policySummary}</span>
+                      </label>
                     </div>
                   </>
                 )}

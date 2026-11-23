@@ -6,12 +6,13 @@ import { memberprofileApi } from "@/lib/api/memberprofile";
 import { VerificationCodePurpose } from "@/types/memberprofile";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import FormError from "@/components/ui/FormError";
+import { usePasswordPolicy } from "@/hooks/usePasswordPolicy";
 
 const RESEND_SECONDS = 60;
 
 /**
  * 積木元件：會員中心「變更密碼」面板，接 `POST /api/member/send-verification-code`（用途＝變更密碼）與
- * `POST /api/member/change-password`。流程：先寄驗證碼到會員信箱，再填驗證碼與新密碼（至少 8 個字元，
+ * `POST /api/member/change-password`。流程：先寄驗證碼到會員信箱，再填驗證碼與新密碼（密碼規則依後台「密碼策略」設定，
  * 不能與目前密碼相同；規則由後端檢查，訊息直接顯示）。驗證碼 60 秒內不能重寄（前端提示，後端也有頻率限制）。
  */
 export default function PasswordPanel() {
@@ -19,6 +20,7 @@ export default function PasswordPanel() {
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { validate: validatePasswordPolicy, hint: passwordHint } = usePasswordPolicy();
   const [sending, setSending] = useState(false);
   const [saving, setSaving] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -72,7 +74,8 @@ export default function PasswordPanel() {
     setMessage(undefined);
     if (!email) return setError("無法取得會員信箱，請重新整理頁面");
     if (!/^\d{6}$/.test(code.trim())) return setError("請輸入 6 位數的驗證碼");
-    if (newPassword.length < 8) return setError("新密碼至少 8 個字元");
+    const passwordPolicyError = validatePasswordPolicy(newPassword);
+    if (passwordPolicyError) return setError(passwordPolicyError);
     if (newPassword !== confirmPassword) return setError("確認密碼與新密碼不一致");
 
     setSaving(true);
@@ -119,8 +122,8 @@ export default function PasswordPanel() {
       </div>
 
       <div className="menb_inp_tit form-group w-100">
-        <label className="mb-2">新密碼（至少 8 個字元）</label>
-        <PasswordField label="新密碼" placeholder="請輸入新密碼" value={newPassword} onChange={setNewPassword} />
+        <label className="mb-2">新密碼</label>
+        <PasswordField label="新密碼" placeholder="請輸入新密碼" value={newPassword} onChange={setNewPassword} hint={passwordHint} />
       </div>
 
       <div className="menb_inp_tit form-group w-100">

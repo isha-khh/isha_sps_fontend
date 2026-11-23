@@ -99,6 +99,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; } = null!;
     public DbSet<VerificationRecord> VerificationRecords { get; set; } = null!;
     public DbSet<PasswordChangeLog> PasswordChangeLogs { get; set; } = null!;
+    public DbSet<PasswordHistory> PasswordHistories { get; set; } = null!;
     public DbSet<ActionLog> ActionLogs { get; set; } = null!;
     public DbSet<Sequence> Sequences { get; set; } = null!;
     public DbSet<Resource> Resources { get; set; } = null!;

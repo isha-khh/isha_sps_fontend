@@ -17,6 +17,7 @@ import { getApiErrorMessage } from "@/lib/error-utils";
 import { focusFirstInvalidField } from "@/lib/form-focus";
 import { DocumentType } from "@/types/api";
 import { ApplicantType as ApplicantTypeEnum, CompanyLevel, MemberRole, type ApplicationResponse, type CreateApplicationRequest } from "@/types/application";
+import { usePasswordPolicy } from "@/hooks/usePasswordPolicy";
 
 const REQUIRED = (
   <span className="red me-1" aria-hidden="true">
@@ -126,6 +127,7 @@ export default function MemberDetailsForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { validate: validatePasswordPolicy, hint: passwordHint } = usePasswordPolicy();
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
   const [extension, setExtension] = useState("");
@@ -159,8 +161,9 @@ export default function MemberDetailsForm({
     }
     const industryMsg = industryError(industry);
     if (industryMsg) return industryMsg;
-    if (password.length < 8) {
-      return "密碼長度不能少於 8 位";
+    const passwordPolicyError = validatePasswordPolicy(password);
+    if (passwordPolicyError) {
+      return passwordPolicyError;
     }
     if (password !== confirmPassword) {
       return "兩次密碼輸入不一致";
@@ -309,7 +312,7 @@ export default function MemberDetailsForm({
 
         <div className="menb_inp_tit form-group">
           <label className="mb-2">{requiredMark}會員密碼</label>
-          <PasswordField disabled={disabled} defaultValue={disabled ? "********" : undefined} value={disabled ? undefined : password} onChange={disabled ? undefined : setPassword} />
+          <PasswordField disabled={disabled} defaultValue={disabled ? "********" : undefined} value={disabled ? undefined : password} onChange={disabled ? undefined : setPassword} hint={disabled ? undefined : passwordHint} />
         </div>
 
         {mode === "edit" && (

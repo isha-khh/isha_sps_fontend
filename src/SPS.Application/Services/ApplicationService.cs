@@ -19,6 +19,7 @@ public class ApplicationService : IApplicationService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IPasswordPolicyService _passwordPolicyService;
     private readonly IFileStorageService _fileStorageService;
     private readonly IFileManagementService _fileManagementService;
     private readonly IEmailService _emailService;
@@ -28,6 +29,7 @@ public class ApplicationService : IApplicationService
     public ApplicationService(
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
+        IPasswordPolicyService passwordPolicyService,
         IFileStorageService fileStorageService,
         IFileManagementService fileManagementService,
         IEmailService emailService,
@@ -37,6 +39,7 @@ public class ApplicationService : IApplicationService
         _configuration = configuration;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
+        _passwordPolicyService = passwordPolicyService;
         _fileStorageService = fileStorageService;
         _fileManagementService = fileManagementService;
         _emailService = emailService;
@@ -71,6 +74,17 @@ public class ApplicationService : IApplicationService
             if (duplicates.Any())
             {
                 return Result<ApplicationResponse>.Failure($"Email 重複: {string.Join(", ", duplicates)}");
+            }
+
+            // 3.5 驗證每位成員的密碼符合後台「系統設定 → 安全性 → 密碼策略」
+            // （帳號要等審核通過才建立，所以這裡只檢查組成規則；歷史紀錄在建立帳號時才開始記）
+            foreach (var memberDto in request.Members)
+            {
+                var policyResult = await _passwordPolicyService.ValidatePasswordAsync(memberDto.Password, cancellationToken);
+                if (!policyResult.IsSuccess)
+                {
+                    return Result<ApplicationResponse>.Failure(policyResult.Error!);
+                }
             }
 
             // 4. 升級申請（ExistingMemberId 有值）要先確認這個既有會員真的

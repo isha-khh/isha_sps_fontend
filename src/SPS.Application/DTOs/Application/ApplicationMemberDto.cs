@@ -58,7 +58,6 @@ public class ApplicationMemberDto
     /// 密碼（必填）
     /// </summary>
     [Required(ErrorMessage = "密碼不能為空")]
-    [MinLength(8, ErrorMessage = "密碼長度不能少於8位")]
     public string Password { get; set; } = string.Empty;
 
     /// <summary>

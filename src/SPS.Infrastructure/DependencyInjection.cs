@@ -70,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<IMultilingualTextRepository, MultilingualTextRepository>();
         services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
         services.AddScoped<IFidoCredentialRepository, FidoCredentialRepository>();
+        services.AddScoped<IPasswordHistoryRepository, PasswordHistoryRepository>();
 
 
         // HTTP Client

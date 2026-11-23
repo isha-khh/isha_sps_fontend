@@ -172,6 +172,11 @@ public interface IUnitOfWork : IDisposable
     IFidoCredentialRepository FidoCredentials { get; }
 
     /// <summary>
+    /// 密碼歷史倉儲（密碼策略的「不可重複前 N 組密碼」）
+    /// </summary>
+    IPasswordHistoryRepository PasswordHistories { get; }
+
+    /// <summary>
     /// 彈窗公告倉儲
     /// </summary>
     IPopupAnnouncementRepository PopupAnnouncements { get; }

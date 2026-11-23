@@ -262,8 +262,9 @@ public class AuthService : IAuthService
         member.RefreshToken = tokenResponse.RefreshToken;
         member.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7); // RefreshToken 有效期 7 天
 
-        // 保存會員
+        // 保存會員（連同第一筆密碼歷史）
         await _unitOfWork.Members.AddAsync(member, cancellationToken);
+        await _passwordPolicyService.RecordForMemberAsync(member.Id, member.Password, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Registration successful for member {MemberId}", member.Id);
@@ -385,7 +386,7 @@ public class AuthService : IAuthService
         }
 
         // 驗證密碼策略
-        var policyResult = await _passwordPolicyService.ValidatePasswordAsync(request.NewPassword, cancellationToken);
+        var policyResult = await _passwordPolicyService.ValidateForMemberAsync(request.NewPassword, member.Id, cancellationToken);
         if (!policyResult.IsSuccess)
         {
             return Result.Failure(policyResult.Error!);
@@ -398,7 +399,9 @@ public class AuthService : IAuthService
         }
 
         // 更新密碼
-        member.Password = _passwordHasher.Hash(request.NewPassword);
+        var newPasswordHash = _passwordHasher.Hash(request.NewPassword);
+        member.Password = newPasswordHash;
+        await _passwordPolicyService.RecordForMemberAsync(member.Id, newPasswordHash, cancellationToken);
         member.PasswordChanged = true;
         member.FirstChanged = true;
         member.PasswordChangedTime = DateTime.UtcNow;
@@ -519,7 +522,7 @@ public class AuthService : IAuthService
         }
 
         // 驗證密碼策略
-        var policyResult = await _passwordPolicyService.ValidatePasswordAsync(request.NewPassword, cancellationToken);
+        var policyResult = await _passwordPolicyService.ValidateForMemberAsync(request.NewPassword, member.Id, cancellationToken);
         if (!policyResult.IsSuccess)
         {
             return Result.Failure(policyResult.Error!);
@@ -532,7 +535,9 @@ public class AuthService : IAuthService
         }
 
         // 更新密碼
-        member.Password = _passwordHasher.Hash(request.NewPassword);
+        var newPasswordHash = _passwordHasher.Hash(request.NewPassword);
+        member.Password = newPasswordHash;
+        await _passwordPolicyService.RecordForMemberAsync(member.Id, newPasswordHash, cancellationToken);
         member.PasswordChanged = true;
         member.FirstChanged = true;
         member.PasswordChangedTime = DateTime.UtcNow;

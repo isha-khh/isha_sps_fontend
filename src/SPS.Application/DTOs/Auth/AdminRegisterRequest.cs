@@ -31,7 +31,6 @@ public class AdminRegisterRequest
     /// 密碼
     /// </summary>
     [Required(ErrorMessage = "密碼不能為空")]
-    [MinLength(8, ErrorMessage = "密碼至少8個字符")]
     public string Password { get; set; } = string.Empty;
 
     /// <summary>

@@ -22,6 +22,7 @@ export default function PasswordField({
   defaultValue,
   value,
   onChange,
+  hint,
 }: {
   label?: string;
   placeholder?: string;
@@ -30,12 +31,16 @@ export default function PasswordField({
   defaultValue?: string;
   value?: string;
   onChange?: (value: string) => void;
+  /** 欄位下方的說明文字（例如密碼規則），會用 aria-describedby 關聯給螢幕閱讀器 */
+  hint?: string;
 }) {
   const [visible, setVisible] = useState(false);
   const inputId = useId();
+  const hintId = `${inputId}-hint`;
   const isControlled = value !== undefined;
 
   return (
+    <>
     <div className="pwd position-relative">
       <input
         type={visible ? "text" : "password"}
@@ -45,6 +50,7 @@ export default function PasswordField({
         required={required}
         aria-required={required}
         aria-label={label}
+        aria-describedby={hint ? hintId : undefined}
         disabled={disabled}
         {...(isControlled ? { value, onChange: (e: ChangeEvent<HTMLInputElement>) => onChange?.(e.target.value) } : { defaultValue })}
       />
@@ -60,5 +66,11 @@ export default function PasswordField({
         <i className={`bi ${visible ? "bi-eye" : "bi-eye-slash"}`} aria-hidden="true"></i>
       </button>
     </div>
+    {hint && (
+      <div id={hintId} className="form-text">
+        {hint}
+      </div>
+    )}
+    </>
   );
 }
