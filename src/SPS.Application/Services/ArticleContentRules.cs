@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using SPS.Application.Interfaces.IServices;
 
 namespace SPS.Application.Services;
@@ -22,6 +23,27 @@ public static class ArticleContentRules
     /// </summary>
     private static readonly string[] PlaceholderKeywords = { SampleAlt };
 
+    /// <summary>
+    /// 其他元件的預設範例文字（只是「提醒」，不轉草稿）：這些句子很長、不太可能是編輯者刻意寫的真實內容，出現多半是忘了改。
+    /// 比對方式是「文字欄位裡包含這段字」。短的預設標題（「立即提出申請」「補助專區」…）可能是真的標題，不列在這裡。
+    /// </summary>
+    private static readonly string[] PlaceholderHints =
+    {
+        "請在此輸入文章內容", "左欄內容。", "右欄內容。", "[受訪者姓名]", "[公司／單位名稱]",
+        "導入智慧工安技術之後，現場異常的發現時間縮短了一半。", "感測資料即時回傳，異常即刻通知。",
+        "依法登記之製造業公司，且於申請時已完成工廠登記。", "說明會將於 11 月 5 日下午 2 點舉行，採線上直播。",
+        "申請期間內請先下載申請須知，再依說明填寫。", "查看目前開放申請的補助計畫與申請方式。", "請參考申請須知，備齊公司登記證明與計畫書。",
+    };
+
+    /// <summary>整個文字欄位「剛好等於」這些才算預設值（太短，包含比對會誤判）</summary>
+    private static readonly string[] PlaceholderExactTexts = { "計畫重點", "計畫特色" };
+
+    /// <summary>圖片區塊預設的範例圖（畫著「範例圖片」的內嵌 SVG）網址裡的標記：「範例圖片」四個字的網址編碼</summary>
+    private const string SampleImageMarker = "%E7%AF%84%E4%BE%8B%E5%9C%96%E7%89%87";
+
+    /// <summary>富文字裡的 H1：整頁只該有一個 H1（網站頁首已經有），前台會自動改成 H3 顯示，但編輯者選錯了層級</summary>
+    private static readonly Regex H1Tag = new(@"<h1[\s>]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
     private static readonly Dictionary<string, string> BlockLabels = new()
     {
         ["HeroBlock"] = "標題區塊",
@@ -33,6 +55,12 @@ public static class ArticleContentRules
         ["ImageFeature"] = "圖片區塊",
         ["NavigationCard"] = "導覽卡片",
         ["ArticleContent"] = "文章內容",
+        ["TwoColumnLayout"] = "雙欄排版",
+        ["Quote"] = "引言",
+        ["Accordion"] = "問答摺疊",
+        ["AlertBanner"] = "提示橫幅",
+        ["VideoEmbed"] = "影片",
+        ["DataTable"] = "表格",
     };
 
     private static readonly HashSet<string> GenericLinkTexts = new(StringComparer.OrdinalIgnoreCase)
@@ -94,6 +122,16 @@ public static class ArticleContentRules
                     issues.Add(new ArticleContentIssue("error", i + 1, LabelOf(block),
                         $"還留著編輯器的預設範例文字「{keyword}」，請改成真正的內容（圖片請填能描述這張圖的替代文字）。"));
                 }
+
+                // ---- 規則 0b：其他預設範例內容、範例圖、富文字裡的 H1（只提醒）----
+                foreach (var hint in PlaceholderHints.Where(h => ContainsText(block, h)))
+                    issues.Add(new ArticleContentIssue("warning", i + 1, LabelOf(block), $"還留著編輯器的預設範例文字「{hint}」，請確認是不是忘了改。"));
+                foreach (var exact in PlaceholderExactTexts.Where(e => AnyString(block, v => v.Trim() == e)))
+                    issues.Add(new ArticleContentIssue("warning", i + 1, LabelOf(block), $"標題還是編輯器預設的「{exact}」，請確認是不是忘了改。"));
+                if (type == "ImageFeature" && AnyString(block, v => v.Contains(SampleImageMarker, StringComparison.Ordinal)))
+                    issues.Add(new ArticleContentIssue("warning", i + 1, LabelOf(block), "還在用編輯器的預設範例圖（畫著「範例圖片」的圖），請換成真正的圖片。"));
+                if (AnyString(block, v => H1Tag.IsMatch(v)))
+                    issues.Add(new ArticleContentIssue("warning", i + 1, LabelOf(block), "內容裡用了 H1：頁面已經有一個 H1（網站名稱），前台會自動改成 H3 顯示，但建議改選 H2～H4。"));
 
                 // ---- 規則 2：圖片一定要有替代文字（唯一必填欄位；「顯示圖說」只是把它顯示在圖片下方）----
                 // 舊內容有獨立的圖片說明（imageCaption），前台會拿它當替代文字，所以也算有；兩個都沒有才是錯誤
@@ -174,6 +212,15 @@ public static class ArticleContentRules
         JsonValueKind.String => element.GetString()?.Contains(text, StringComparison.Ordinal) == true,
         JsonValueKind.Object => element.EnumerateObject().Any(p => ContainsText(p.Value, text)),
         JsonValueKind.Array => element.EnumerateArray().Any(item => ContainsText(item, text)),
+        _ => false,
+    };
+
+    /// <summary>這個 JSON 節點底下（含所有巢狀的物件、陣列）有沒有任何字串符合條件</summary>
+    private static bool AnyString(JsonElement element, Func<string, bool> predicate) => element.ValueKind switch
+    {
+        JsonValueKind.String => element.GetString() is { } s && predicate(s),
+        JsonValueKind.Object => element.EnumerateObject().Any(p => AnyString(p.Value, predicate)),
+        JsonValueKind.Array => element.EnumerateArray().Any(item => AnyString(item, predicate)),
         _ => false,
     };
 
