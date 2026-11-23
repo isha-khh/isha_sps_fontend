@@ -120,7 +120,7 @@ function MemberNavItem() {
               </Link>
             </li>
             <li className="hover_r_sider dropdown-submenu">
-              <a className="dropdown-item dropdown-toggle" href="#" title="登出" onClick={handleLogout}>
+              <a className="dropdown-item dropdown-toggle" href="#" role="button" title="登出" onClick={handleLogout}>
                 {loggingOut ? "登出中…" : "登出"}
               </a>
             </li>
@@ -206,7 +206,7 @@ function NavLinks() {
                   <a
                     className="dropdown-item"
                     href={industryAiTarget.href}
-                    title="產業AI"
+                    title={industryAiTarget.newTab ? "產業AI（另開新視窗）" : "產業AI"}
                     {...(industryAiTarget.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                   >
                     產業AI
@@ -359,7 +359,7 @@ export default function Headers() {
             <div className="small-btn-box nav-3 d-flex align-items-center">
               <HeaderSearch />
 
-              <a href="#" className="btn btn-light rounded-pill btn-scroll-newsletter" title="訂閱電子報">
+              <a href="#" role="button" className="btn btn-light rounded-pill btn-scroll-newsletter" title="訂閱電子報">
                 <span>訂閱電子報</span>
               </a>
 

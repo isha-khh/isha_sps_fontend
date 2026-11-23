@@ -56,6 +56,7 @@ export default function SearchAccesskey() {
   return (
     <a
       href="#"
+      role="button"
       accessKey="S"
       title="全站搜尋"
       className="visually-hidden-focusable"

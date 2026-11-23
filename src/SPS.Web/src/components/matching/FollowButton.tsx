@@ -52,6 +52,7 @@ export default function FollowButton({ demandId, variant }: { demandId: number; 
       <>
         <a
           href="#"
+          role="button"
           title={followed ? "取消追蹤此需求" : "追蹤此需求"}
           className="connec_s more_x more_x_gu"
           onClick={(event) => {

@@ -44,6 +44,12 @@ const BLOCK_LABELS: Record<string, string> = {
   ImageFeature: "圖片區塊",
   NavigationCard: "導覽卡片",
   ArticleContent: "文章內容",
+  TwoColumnLayout: "雙欄排版",
+  Quote: "引言",
+  Accordion: "問答摺疊",
+  AlertBanner: "提示橫幅",
+  VideoEmbed: "影片",
+  DataTable: "表格",
 };
 
 /** 舊版圖片區塊的預設替代文字，沒改就存的內容會被檢測退件 */
@@ -54,6 +60,34 @@ const SAMPLE_ALT = "這是一張範例圖片";
  * 掃區塊裡所有文字欄位，不分欄位。要跟後端 ArticleContentRules.cs 的 PlaceholderKeywords 同步。
  */
 const PLACEHOLDER_KEYWORDS = [SAMPLE_ALT];
+
+/**
+ * 其他元件的預設範例文字（只是「提醒」，不擋發布）：這些句子很長、不太可能是編輯者刻意寫的真實內容，出現多半是忘了改。
+ * 短的預設標題（「立即提出申請」「補助專區」…）可能是真的標題，不列在這裡。要跟後端 PlaceholderHints 同步。
+ */
+const PLACEHOLDER_HINTS = [
+  "請在此輸入文章內容", "左欄內容。", "右欄內容。", "[受訪者姓名]", "[公司／單位名稱]",
+  "導入智慧工安技術之後，現場異常的發現時間縮短了一半。", "感測資料即時回傳，異常即刻通知。",
+  "依法登記之製造業公司，且於申請時已完成工廠登記。", "說明會將於 11 月 5 日下午 2 點舉行，採線上直播。",
+  "申請期間內請先下載申請須知，再依說明填寫。", "查看目前開放申請的補助計畫與申請方式。", "請參考申請須知，備齊公司登記證明與計畫書。",
+];
+
+/** 整個文字欄位「剛好等於」這些才算預設值（太短，包含比對會誤判） */
+const PLACEHOLDER_EXACT_TEXTS = ["計畫重點", "計畫特色"];
+
+/** 圖片區塊預設範例圖（畫著「範例圖片」的內嵌 SVG）網址裡的標記：「範例圖片」四個字的網址編碼 */
+const SAMPLE_IMAGE_MARKER = "%E7%AF%84%E4%BE%8B%E5%9C%96%E7%89%87";
+
+/** 富文字裡的 H1：整頁只該有一個 H1（網站頁首已經有），前台會自動改成 H3 顯示，但編輯者選錯了層級 */
+const H1_TAG = /<h1[\s>]/i;
+
+/** 這個值底下（含巢狀的物件、陣列）有沒有任何字串符合條件 */
+function anyString(value: unknown, predicate: (text: string) => boolean): boolean {
+  if (typeof value === "string") return predicate(value);
+  if (Array.isArray(value)) return value.some((item) => anyString(item, predicate));
+  if (value && typeof value === "object") return Object.values(value).some((item) => anyString(item, predicate));
+  return false;
+}
 
 /** 這個值底下（含巢狀的物件、陣列）有沒有任何字串包含指定文字 */
 function containsText(value: unknown, text: string): boolean {
@@ -150,6 +184,20 @@ export function checkContentRules(data: unknown): ContentIssue[] {
       if (!containsText(block, keyword)) continue;
       placeholderHit = true;
       add(index, block, "error", `還留著編輯器的預設範例文字「${keyword}」，請改成真正的內容（圖片請填能描述這張圖的替代文字）。`);
+    }
+
+    // ---- 規則 0b：其他預設範例內容、範例圖、富文字裡的 H1（只提醒）----
+    for (const hint of PLACEHOLDER_HINTS.filter((h) => containsText(block, h))) {
+      add(index, block, "warning", `還留著編輯器的預設範例文字「${hint}」，請確認是不是忘了改。`);
+    }
+    for (const exact of PLACEHOLDER_EXACT_TEXTS.filter((e) => anyString(block, (v) => v.trim() === e))) {
+      add(index, block, "warning", `標題還是編輯器預設的「${exact}」，請確認是不是忘了改。`);
+    }
+    if (block.type === "ImageFeature" && anyString(block, (v) => v.includes(SAMPLE_IMAGE_MARKER))) {
+      add(index, block, "warning", "還在用編輯器的預設範例圖（畫著「範例圖片」的圖），請換成真正的圖片。");
+    }
+    if (anyString(block, (v) => H1_TAG.test(v))) {
+      add(index, block, "warning", "內容裡用了 H1：頁面已經有一個 H1（網站名稱），前台會自動改成 H3 顯示，但建議改選 H2～H4。");
     }
 
     // ---- 規則 2：圖片一定要有替代文字（唯一必填欄位；「顯示圖說」只是把它顯示在圖片下方）----

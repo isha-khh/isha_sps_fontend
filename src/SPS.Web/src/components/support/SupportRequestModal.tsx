@@ -137,7 +137,7 @@ export default function SupportRequestModal({ id, resourceId, resourceTitle }: {
           )}
 
           <div className="card-footer d-flex justify-content-center">
-            <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
+            <a className="btn-outline-dark me-2" href="#" role="button" title="取消" data-bs-dismiss="modal">
               取消
             </a>
             <button type="submit" className="btn-theme mat_Send" disabled={submitting}>

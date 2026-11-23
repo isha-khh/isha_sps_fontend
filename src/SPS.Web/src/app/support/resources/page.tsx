@@ -198,6 +198,7 @@ export default async function SupportResourcesPage({ searchParams }: PageProps<"
 
                     <a
                       href="#"
+                      role="button"
                       data-bs-toggle="modal"
                       data-bs-target={`#${modalId}`}
                       className="det_more"
