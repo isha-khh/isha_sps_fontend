@@ -118,11 +118,12 @@ export default function ReplyNeedModal({ id, demandId, demandTitle, followerCoun
       {submitted && <p className="text-success mb-3">已收到您的回應，審核通過後會寄給刊登者與追蹤者，可以到會員中心「我的回應」查看審核狀態。</p>}
 
       <div className="card-footer d-flex justify-content-center">
-        <a className="btn-outline-dark me-2" href="#" title="取消" data-bs-dismiss="modal">
+        <a className="btn-outline-dark me-2" href="#" role="button" title="取消" data-bs-dismiss="modal">
           取消
         </a>
         <a
           href="#"
+          role="button"
           className="btn-theme mat_Send"
           aria-disabled={submitting}
           onClick={(event) => {

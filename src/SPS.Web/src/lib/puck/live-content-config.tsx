@@ -1091,7 +1091,7 @@ export const puckConfig: Config<Props> = {
                           rel={newTab ? "noopener noreferrer" : undefined}
                           {...(download ? { download: f.name || true } : {})}
                           style={{ color: "#090909", textDecoration: "none", minWidth: 0, overflowWrap: "anywhere" }}
-                          aria-label={`下載檔案：${f.name || "附件"}`}
+                          aria-label={`下載檔案：${f.name || "附件"}${newTab ? "（另開新視窗）" : ""}`}
                         >
                           {f.name || "未命名檔案"}
                         </a>

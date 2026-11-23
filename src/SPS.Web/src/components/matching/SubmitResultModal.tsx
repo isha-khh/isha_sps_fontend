@@ -14,7 +14,7 @@ export default function SubmitResultModal({ id, title, children }: { id: string;
         <div className="mb-2">{children}</div>
       </div>
       <div className="card-footer d-flex justify-content-center">
-        <a className="btn-theme" href="#" title="我知道了" data-bs-dismiss="modal" onClick={(event) => event.preventDefault()}>
+        <a className="btn-theme" href="#" role="button" title="我知道了" data-bs-dismiss="modal" onClick={(event) => event.preventDefault()}>
           我知道了
         </a>
       </div>

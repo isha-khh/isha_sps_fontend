@@ -564,7 +564,7 @@ export default function MemberDetailsForm({
           </label>
           <span>
             我已詳細閱讀「
-            <a href="#" data-bs-toggle="modal" data-bs-target="#staticmembership" className="blue text-decoration-underline" title={isCompany ? "我已詳細閱讀資料同意書" : "我已詳細閱讀個人資料同意書"}>
+            <a href="#" role="button" data-bs-toggle="modal" data-bs-target="#staticmembership" className="blue text-decoration-underline" title={isCompany ? "我已詳細閱讀資料同意書" : "我已詳細閱讀個人資料同意書"}>
               {isCompany ? "資料同意書" : "個人資料同意書"}
             </a>
             」

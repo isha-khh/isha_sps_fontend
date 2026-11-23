@@ -61,7 +61,13 @@ document.addEventListener('keydown', function (e) {
         isTabPressed = true;
     }
 
-    const key = e.key.toUpperCase();
+    // Mac 上 Option+字母是打重音字元的組合鍵（Option+U = ¨），Safari 的 e.key 不是 "u"，
+    // 光看 e.key 會認不得 Ctrl+Option+U，改走瀏覽器原生 accesskey（Safari 只「點擊」連結、不移焦點，
+    // 下一個 Tab 的起點就不對）。所以 Ctrl+Option 這個組合再用實體按鍵（e.code）判斷。
+    let key = e.key.toUpperCase();
+    if (!['U', 'C', 'B'].includes(key) && e.ctrlKey && e.altKey && /^Key[A-Z]$/.test(e.code)) {
+        key = e.code.slice(3);
+    }
     const isTriggered = isTabPressed || e.altKey;
 
     if (isTriggered && ['U', 'C', 'B'].includes(key)) {

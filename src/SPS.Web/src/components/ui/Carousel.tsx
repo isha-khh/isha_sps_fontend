@@ -40,7 +40,25 @@ export default function Carousel({
     if (!$ || !track) return;
 
     const $track = $(track);
+
+    // slick 的 accessibility 會把「目前這一張投影片」整個設成 `tabindex="0"`：Tab 會先停在一個沒有名稱的整張投影片上，
+    // 而它的焦點框又被輪播容器的 `overflow: hidden` 整個切掉，畫面上看起來「焦點消失了」，下一次 Tab 才進到裡面的連結。
+    // 投影片本身不是互動元素，只讓裡面的連結／按鈕可以 Tab（slick 對它們的 tabindex 管理照舊）。
+    // slick 每次換張都會重設一次，所以每個事件之後都再收一次。
+    // 另外，slick 換張時會把「作用中投影片」裡所有 a／button 的 tabindex 一律改回 0，連原始碼裡刻意設 `tabindex="-1"` ＋
+    // `aria-hidden="true"` 的重複連結（縮圖連結、隱藏的「查看更多」，無障礙檢測 HM1240402E）也被改回來：
+    // 鍵盤會停在一個輔助科技看不到的連結上，而且焦點框常被輪播容器切掉。所以同樣收回 -1。
+    const releaseSlideFocus = () => {
+      $track.find(".slick-slide").attr("tabindex", "-1");
+      $track.find('a[aria-hidden="true"], button[aria-hidden="true"]').attr("tabindex", "-1");
+    };
+    $track.on("init.slidefocus reInit.slidefocus setPosition.slidefocus beforeChange.slidefocus afterChange.slidefocus breakpoint.slidefocus", () => {
+      releaseSlideFocus();
+      window.setTimeout(releaseSlideFocus, 0);
+    });
+
     $track.slick({ arrows: false, ...options });
+    releaseSlideFocus();
 
     function handleControlClick(event: MouseEvent) {
       const target = (event.target as HTMLElement).closest<HTMLElement>(
@@ -77,12 +95,29 @@ export default function Carousel({
       }
     }
 
+    // 鍵盤焦點在輪播裡面時暫停自動換張（無障礙：2.2.2 暫停、停止、隱藏；2.4.7 焦點可視）。
+    // slick 自己有 `pauseOnFocus`，但實測焦點停在投影片裡的連結時輪播照樣每 3 秒換張（它的 focussed 一直是 false），
+    // 焦點所在的那張被換走、滑到畫面外，焦點框跟著消失，看起來像「選到就不見」。這裡自己補一層：
+    // 焦點進到輪播內就暫停，離開輪播才恢復；使用者按過「暫停輪播」就維持暫停，不被焦點離開蓋掉。
+    function handleFocusIn() {
+      if (isPlayingRef.current) $track.slick("slickPause");
+    }
+    function handleFocusOut(event: FocusEvent) {
+      if (event.relatedTarget instanceof Node && track!.contains(event.relatedTarget)) return;
+      if (isPlayingRef.current) $track.slick("slickPlay");
+    }
+    track.addEventListener("focusin", handleFocusIn);
+    track.addEventListener("focusout", handleFocusOut);
+
     document.addEventListener("click", handleControlClick);
     $(document).on(`shown.bs.tab.carousel-${id}`, handleTabShown);
 
     return () => {
+      track.removeEventListener("focusin", handleFocusIn);
+      track.removeEventListener("focusout", handleFocusOut);
       document.removeEventListener("click", handleControlClick);
       $(document).off(`.carousel-${id}`);
+      $track.off(".slidefocus");
       if ($track.hasClass("slick-initialized")) {
         $track.slick("unslick");
       }

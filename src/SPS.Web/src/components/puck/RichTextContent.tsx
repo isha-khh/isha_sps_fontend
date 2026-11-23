@@ -10,6 +10,7 @@
 
 import type { ReactNode } from "react";
 import { normalizeHeadingLevels } from "@/lib/heading-levels";
+import { addNewWindowHints } from "@/lib/link-hints";
 
 interface RichTextContentProps {
   html: string | ReactNode | undefined | null;
@@ -27,7 +28,7 @@ export function RichTextContent({ html, className }: RichTextContentProps) {
     );
   }
 
-  const safeHtml = normalizeHeadingLevels(toHtml(html));
+  const safeHtml = addNewWindowHints(normalizeHeadingLevels(toHtml(html)));
   return (
     <>
       <div

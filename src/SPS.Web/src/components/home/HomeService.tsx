@@ -220,7 +220,7 @@ export default async function HomeService() {
               </i>
               <span>
                 {category.label}
-                <small className="d-block" aria-hidden="true">
+                <small className="d-block" aria-hidden="true" lang="en">
                   {category.englishLabel}
                 </small>
               </span>

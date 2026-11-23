@@ -214,7 +214,7 @@ export default async function SitemapPage() {
                                   {child.label === "產業AI" && industryAi.external ? (
                                     <a
                                       href={industryAi.href}
-                                      title={`前往 ${child.label}`}
+                                      title={industryAi.newTab ? `前往 ${child.label}（另開新視窗）` : `前往 ${child.label}`}
                                       {...(industryAi.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                                     >
                                       {child.label}
