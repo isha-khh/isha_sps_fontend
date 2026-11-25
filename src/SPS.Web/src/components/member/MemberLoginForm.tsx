@@ -11,6 +11,7 @@ import { getApiErrorMessage } from "@/lib/error-utils";
 import { fromAssertionResponse, toRequestOptions } from "@/lib/webauthn";
 import { readNextFromLocation } from "@/lib/login-next";
 import FormError from "@/components/ui/FormError";
+import { clearPasswordChangeReason, setPasswordChangeReason } from "@/lib/password-change-flag";
 
 /**
  * 積木元件：會員登入表單本體，對應舊站 login.html 的 `.melo_box_left`。
@@ -57,10 +58,15 @@ export default function MemberLoginForm() {
   }, []);
 
   // 信箱還沒驗證的會員（密碼或 Passkey 登入都一樣）先去驗證信箱，驗證完再回原本要去的頁面
-  function goAfterLogin(requireEmailVerification?: boolean) {
+  // 用密碼登入且被要求改密碼（管理員要求、密碼過期）的，驗證完信箱後直接導去變更密碼；Passkey 登入不會有這個旗標
+  function goAfterLogin(requireEmailVerification?: boolean, requirePasswordChange?: boolean) {
     const next = readNextFromLocation();
     if (requireEmailVerification) {
       router.push(next ? `/member/verify-email?next=${encodeURIComponent(next)}` : "/member/verify-email");
+      return;
+    }
+    if (requirePasswordChange) {
+      router.push("/member?section=password");
       return;
     }
     router.push(next ?? "/member");
@@ -75,6 +81,7 @@ export default function MemberLoginForm() {
       if (!credential) throw new Error("cancelled");
       const { member } = await authApi.fido2AuthenticateComplete({ assertionResponse: fromAssertionResponse(credential) });
       setMember(member);
+      clearPasswordChangeReason(); // Passkey 登入沒有用到密碼，不要求改密碼
       goAfterLogin(member.requireEmailVerification);
     } catch (err) {
       const name = (err as { name?: string }).name;
@@ -98,9 +105,11 @@ export default function MemberLoginForm() {
 
     setSubmitting(true);
     try {
-      const { member } = await authApi.login({ email: account, password, captcha });
+      const { member, requirePasswordChange, passwordChangeReason } = await authApi.login({ email: account, password, captcha });
       setMember(member);
-      goAfterLogin(member.requireEmailVerification);
+      if (requirePasswordChange) setPasswordChangeReason(passwordChangeReason ?? "");
+      else clearPasswordChangeReason();
+      goAfterLogin(member.requireEmailVerification, requirePasswordChange);
     } catch (err) {
       setError(getApiErrorMessage(err, "登入失敗，請確認帳號密碼是否正確"));
       captchaRef.current?.refresh();
