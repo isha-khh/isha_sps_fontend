@@ -84,6 +84,9 @@ public class CompanyController : ControllerBase
             parameters.SupplierSideOnly = content.IsSuccess && content.Data is { BusinessListSupplierOnly: true };
         }
 
+        // 前台企業名錄的搜尋框同時做語意搜尋；後台公司管理（Admin）與其他呼叫端維持純關鍵字
+        parameters.UseSemanticSearch = parameters.UseDirectorySort && !User.IsInRole("Admin");
+
         var result = await _companyService.GetPagedAsync(parameters, cancellationToken);
 
         if (!result.IsSuccess)
