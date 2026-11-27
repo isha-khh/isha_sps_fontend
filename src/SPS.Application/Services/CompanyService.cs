@@ -18,13 +18,48 @@ public class CompanyService : ICompanyService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CompanyService> _logger;
+    private readonly ISemanticSearchEngine _semanticEngine;
 
     public CompanyService(
         IUnitOfWork unitOfWork,
-        ILogger<CompanyService> logger)
+        ILogger<CompanyService> logger,
+        ISemanticSearchEngine semanticEngine)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _semanticEngine = semanticEngine;
+    }
+
+    /// <summary>企業名錄的語意命中最多取幾筆（要分頁瀏覽，所以比全站搜尋每類 10 筆寬）；引擎另有總數 40 筆的上限</summary>
+    private const int DirectorySemanticMaxHits = 40;
+
+    /// <summary>
+    /// 企業名錄的搜尋框除了比對名稱、簡介、標籤名稱，也用語意搜尋找「意思相近」的企業（搜「馬達異常偵測」找到寫「設備預知保養」的）。
+    /// 比對的是企業的語意索引（主要產品暨服務、簡介、標籤名稱，目前只有供給端企業有索引）。
+    /// 語意搜尋沒啟用、模型連不上、逾時、頻率超過上限都不影響搜尋，退回純關鍵字（見 <see cref="ISemanticSearchEngine"/>）。
+    /// 命中的結果不標示「語意命中」之類的依據，使用者看到的就是名單。
+    /// </summary>
+    private async Task FillSemanticCompanyIdsAsync(CompanyQueryParameters parameters, CancellationToken cancellationToken)
+    {
+        parameters.SemanticCompanyIds = null;
+        var keyword = parameters.Search?.Trim();
+        if (!parameters.UseSemanticSearch || string.IsNullOrEmpty(keyword) || keyword.Length > SearchService.MaxKeywordLength) return;
+
+        try
+        {
+            var hits = await _semanticEngine.FindHitsAsync(
+                _unitOfWork.GetDbContext(), keyword, new[] { EmbeddingSourceType.Company }, cancellationToken,
+                maxHitsPerType: DirectorySemanticMaxHits);
+            var ids = hits
+                .Select(h => Guid.TryParse(h.Id, out var id) ? id : Guid.Empty)
+                .Where(id => id != Guid.Empty)
+                .ToList();
+            if (ids.Count > 0) parameters.SemanticCompanyIds = ids;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogWarning(ex, "企業名錄語意搜尋失敗，改用純關鍵字：{Keyword}", keyword);
+        }
     }
 
     public async Task<Result<PagedResult<CompanyListItemResponse>>> GetPagedAsync(
@@ -32,6 +67,8 @@ public class CompanyService : ICompanyService
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Getting paged companies with parameters: {@Parameters}", parameters);
+
+        await FillSemanticCompanyIdsAsync(parameters, cancellationToken);
 
         var pagedResult = await _unitOfWork.Companies.GetPagedAsync(parameters, cancellationToken);
 

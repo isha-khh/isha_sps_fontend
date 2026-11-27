@@ -69,6 +69,19 @@ public class CompanyQueryParameters
     [BindNever]
     public bool SupplierSideOnly { get; set; }
 
+    /// <summary>
+    /// 搜尋要不要也做「語意搜尋」（由 Controller 決定：只有前台企業名錄列表會開，後台公司管理維持純關鍵字）。
+    /// </summary>
+    [BindNever]
+    public bool UseSemanticSearch { get; set; }
+
+    /// <summary>
+    /// 語意搜尋命中的企業 Id（由高分到低分，由 <c>CompanyService</c> 查好後填入；沒開語意搜尋或模型沒啟用就是 null）。
+    /// Repository 把「關鍵字／標籤名稱比對到的」排在前面，這裡命中、但關鍵字沒比對到的接在後面。
+    /// </summary>
+    [BindNever]
+    public List<Guid>? SemanticCompanyIds { get; set; }
+
     /// <summary>已啟用的名錄排序規則，由 API 讀設定後填入，不接受使用者從網址傳入</summary>
     [BindNever]
     public List<EnterpriseSortRuleDto>? DirectorySortRules { get; set; }

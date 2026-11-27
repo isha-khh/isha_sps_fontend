@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<IApplicationService, ApplicationService>();
         services.AddScoped<IApplicationReviewService, ApplicationReviewService>();
         services.AddScoped<IScoringService, ScoringService>();
+        services.AddScoped<ISemanticSearchEngine, SemanticSearchEngine>();
         services.AddScoped<ISearchService, SearchService>();
         services.AddSingleton<IContentIndexTrigger, ContentIndexTrigger>();
         services.AddScoped<IFileManagementService, FileManagementService>();
