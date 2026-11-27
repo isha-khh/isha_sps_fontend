@@ -116,15 +116,21 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         ))}
         <BootstrapModalRouteCleanup />
         <SiteVisitTracker />
+        {/* Google Analytics：只有設定了執行時環境變數 GA_MEASUREMENT_ID 才會載入 */}
+        <GoogleAnalytics />
+
+        <SiteLinksProvider industryAi={industryAi} newsCategories={newsCategories?.filter((c) => !c.parentId).map(({ id, name }) => ({ id, name })) ?? null}>{children}</SiteLinksProvider>
+
+        {/*
+          彈窗公告與 Cookie 橫幅一律放在頁面內容「之後」：它們都是 position: fixed，畫面位置不受 DOM 順序影響，
+          但鍵盤焦點順序跟著 DOM 走——放在前面會讓「跳至主要內容」不是第一個可取得焦點的元素（無障礙檢測 GN1240100E）。
+          彈窗開著時由 PopupAnnouncements 自己負責把焦點移進去並鎖住（GN1240301E）。
+        */}
         <PopupAnnouncements />
         {/* 後台「頁面設定 → 隱私權政策」的 Cookie 告知橫幅（關閉或後端連不到時不顯示） */}
         {privacy?.noticeEnabled && privacy.noticeMessage && privacy.noticeButtonText && (
           <CookieNotice message={privacy.noticeMessage} buttonText={privacy.noticeButtonText} linkText={privacy.noticeLinkText || undefined} />
         )}
-        {/* Google Analytics：只有設定了執行時環境變數 GA_MEASUREMENT_ID 才會載入 */}
-        <GoogleAnalytics />
-
-        <SiteLinksProvider industryAi={industryAi} newsCategories={newsCategories?.filter((c) => !c.parentId).map(({ id, name }) => ({ id, name })) ?? null}>{children}</SiteLinksProvider>
 
         {/* 舊站第三方套件，依照原本的載入順序保留，元件轉換完成後再逐步移除 */}
         <Script src={withBasePath("/js/jquery-3.7.1.min.js")} strategy="beforeInteractive" />

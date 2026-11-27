@@ -10,6 +10,19 @@ export interface CaptchaFieldHandle {
   getValue: () => CaptchaData | null;
   /** 送出失敗後呼叫，強制換一組新的圖——圖片驗證碼後端驗證過一次就會失效，繼續沿用舊的一定會再錯一次 */
   refresh: () => void;
+  /** 驗證碼沒填時，把鍵盤焦點帶到輸入框 */
+  focus: () => void;
+}
+
+export interface CaptchaFieldProps {
+  /** 輸入框的 id：給外面的 `<label htmlFor>` 用（沒給就退回用 aria-label 命名） */
+  id?: string;
+  /** 欄位目前有錯誤：設 `aria-invalid` */
+  invalid?: boolean;
+  /** 錯誤訊息元素的 id：用 `aria-describedby` 跟輸入框關聯 */
+  errorId?: string;
+  /** 使用者開始輸入時通知外面（清掉這個欄位的錯誤訊息） */
+  onInput?: () => void;
 }
 
 /**
@@ -35,7 +48,7 @@ export interface CaptchaFieldHandle {
  * 用 ref 比較單純，也不用擔心呼叫端沒把 `onChange` 包 `useCallback`
  * 就造成無限重新 render。
  */
-const CaptchaField = forwardRef<CaptchaFieldHandle>(function CaptchaField(_props, ref) {
+const CaptchaField = forwardRef<CaptchaFieldHandle, CaptchaFieldProps>(function CaptchaField({ id, invalid, errorId, onInput }, ref) {
   const [captchaId, setCaptchaId] = useState<string>();
   const [imageBase64, setImageBase64] = useState<string>();
   const [code, setCode] = useState("");
@@ -48,6 +61,7 @@ const CaptchaField = forwardRef<CaptchaFieldHandle>(function CaptchaField(_props
   const [audioFailed, setAudioFailed] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function stopAudio() {
     const audio = audioRef.current;
@@ -138,22 +152,31 @@ const CaptchaField = forwardRef<CaptchaFieldHandle>(function CaptchaField(_props
   useImperativeHandle(ref, () => ({
     getValue: () => (captchaId && code ? { type: CaptchaType.ImageCode, captchaId, code } : null),
     refresh: load,
+    focus: () => inputRef.current?.focus(),
   }));
+
+  const describedBy = [audioEnabled ? "captcha-audio-hint" : null, invalid ? errorId : null].filter(Boolean).join(" ") || undefined;
 
   return (
     <div className="msk_sdcv">
       <input
+        ref={inputRef}
         type="text"
+        id={id}
         className="form-control me-2"
         placeholder="請輸入驗證碼"
         required
         aria-required="true"
-        aria-label="驗證碼"
+        aria-label={id ? undefined : "驗證碼"}
+        aria-invalid={invalid ? true : undefined}
         value={code}
-        onChange={(e) => setCode(e.target.value)}
+        onChange={(e) => {
+          setCode(e.target.value);
+          onInput?.();
+        }}
         autoComplete="off"
         maxLength={10}
-        aria-describedby={audioEnabled ? "captcha-audio-hint" : undefined}
+        aria-describedby={describedBy}
       />
       <button
         type="button"

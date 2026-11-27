@@ -82,12 +82,18 @@ function resolveLink(link?: string | null): string | undefined {
  * 彈窗有開「今日不再顯示」時，使用者勾選後當天（本機日期）任何頻率都不再出現。
  * 儲存空間用不了時（無痕模式）當作沒看過、照常彈出。取不到資料（後端連不到）就什麼都不彈，不影響頁面。
  * 內容是純文字（保留換行），不渲染 HTML。
+ *
+ * 鍵盤焦點（無障礙檢測 GN1240301E、GN1240100E）：這支元件放在頁面內容「之後」（見 layout.tsx），所以彈窗開著時要自己管焦點——
+ * 開啟時記住原本的焦點位置、把焦點移進彈窗（優先「關閉」鈕，沒有就移到彈窗本身）；Tab／Shift+Tab 只在彈窗內循環；
+ * 背景其餘內容加上 `inert`（滑鼠、鍵盤、輔助科技都碰不到）；按 Esc 或關閉後，焦點回到原本的位置（原本沒有焦點就回到「跳至主要內容」）。
  */
 export default function PopupAnnouncements() {
   const pathname = usePathname();
   const [queue, setQueue] = useState<PopupAnnouncement[]>([]);
   const [dontShowToday, setDontShowToday] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   // 換頁就重新要這一頁的彈窗
   useEffect(() => {
@@ -111,11 +117,35 @@ export default function PopupAnnouncements() {
 
   const current = queue[0];
 
-  // 目前這則一出現就記下「看過了」，並把焦點放到關閉按鈕
+  const open = Boolean(current);
+
+  // 彈窗開著的整段期間（連續好幾則也算同一段）：背景加 inert、記住原本的焦點位置，關掉後還原並把焦點交回去
+  useEffect(() => {
+    if (!open) return;
+    const overlay = overlayRef.current;
+    const previouslyFocused = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null;
+    const inerted: HTMLElement[] = [];
+    for (const element of Array.from(document.body.children)) {
+      if (!(element instanceof HTMLElement) || element === overlay || element.inert) continue;
+      if (["SCRIPT", "STYLE", "LINK", "NOSCRIPT"].includes(element.tagName)) continue;
+      element.inert = true;
+      inerted.push(element);
+    }
+    return () => {
+      inerted.forEach((element) => {
+        element.inert = false;
+      });
+      // 原本的焦點位置還在就回去；沒有（一進站就彈出）就回到頁面最前面的「跳至主要內容」
+      const target = previouslyFocused?.isConnected ? previouslyFocused : document.querySelector<HTMLElement>('a[href="#main-content"]');
+      target?.focus({ preventScroll: true });
+    };
+  }, [open]);
+
+  // 目前這則一出現就記下「看過了」，並把焦點移進彈窗：有「關閉」鈕先到關閉鈕，沒有就到彈窗本身
   useEffect(() => {
     if (!current) return;
     markShown(current);
-    closeButtonRef.current?.focus();
+    (closeButtonRef.current ?? dialogRef.current)?.focus({ preventScroll: true });
   }, [current]);
 
   const close = () => {
@@ -128,7 +158,35 @@ export default function PopupAnnouncements() {
   useEffect(() => {
     if (!current) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
+      if (event.key === "Escape") {
+        close();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      // 焦點鎖定：Tab／Shift+Tab 只在彈窗內循環
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'),
+      ).filter((element) => element.offsetParent !== null);
+      if (focusable.length === 0) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (!dialog.contains(active) || active === dialog) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
@@ -144,6 +202,7 @@ export default function PopupAnnouncements() {
 
   return (
     <div
+      ref={overlayRef}
       role="presentation"
       onClick={(event) => {
         if (event.target === event.currentTarget) close();
@@ -151,10 +210,12 @@ export default function PopupAnnouncements() {
       style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(0, 0, 0, 0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={current.title}
-        style={{ position: "relative", width: "100%", maxWidth: "560px", maxHeight: "90vh", overflowY: "auto", background: "#fff", borderRadius: "8px", boxShadow: "0 10px 40px rgba(0,0,0,0.35)" }}
+        tabIndex={-1}
+        style={{ position: "relative", width: "100%", maxWidth: "560px", maxHeight: "90vh", overflowY: "auto", background: "#fff", borderRadius: "8px", boxShadow: "0 10px 40px rgba(0,0,0,0.35)", outline: "none" }}
       >
         {current.showCloseButton && (
           <button

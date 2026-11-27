@@ -20,6 +20,7 @@ import InboxPanel from "@/components/member/panels/InboxPanel";
 import ChatPanel from "@/components/member/panels/ChatPanel";
 import LicensePanel from "@/components/member/panels/LicensePanel";
 import { memberFavoritesApi } from "@/lib/api/member-favorites";
+import { clearPasswordChangeReason, getPasswordChangeReason } from "@/lib/password-change-flag";
 
 /**
  * 積木元件：會員中心（`/member`）主要內容——這是全新頁面，舊站
@@ -46,8 +47,19 @@ export default function MemberCenterContent() {
   const sectionParam = useSearchParams().get("section");
   const [picked, setPicked] = useState<{ key: MemberCenterSection; param: string | null } | null>(null);
   const paramSection = MEMBER_CENTER_NAV_GROUPS.flatMap((group) => group.items.map((item) => item.key)).find((key) => key === sectionParam);
-  const active: MemberCenterSection = picked && picked.param === sectionParam ? picked.key : (paramSection ?? "profile");
-  const setActive = (key: MemberCenterSection) => setPicked({ key, param: sectionParam });
+  const pickedActive: MemberCenterSection = picked && picked.param === sectionParam ? picked.key : (paramSection ?? "profile");
+  // 用密碼登入後被要求改密碼（管理員要求、密碼已過期）：會員中心鎖在「變更密碼」，改完才放行。
+  // 旗標存在 sessionStorage（見 lib/password-change-flag.ts），要掛載後才讀得到，讀完之前先顯示載入中，免得先閃一下別的分頁
+  const [passwordChangeReason, setPasswordChangeReasonState] = useState<string | null>(null);
+  const [flagChecked, setFlagChecked] = useState(false);
+  useEffect(() => {
+    setPasswordChangeReasonState(getPasswordChangeReason());
+    setFlagChecked(true);
+  }, []);
+  const active: MemberCenterSection = passwordChangeReason ? "password" : pickedActive;
+  const setActive = (key: MemberCenterSection) => {
+    if (!passwordChangeReason) setPicked({ key, param: sectionParam });
+  };
   const [loggingOut, setLoggingOut] = useState(false);
   // 需求端／供給端：決定側邊欄有沒有「媒合資料維護」（刊登，需求端）與「我的回應」（供給端）
   const [role, setRole] = useState<MemberCenterRole>("");
@@ -75,12 +87,13 @@ export default function MemberCenterContent() {
     } catch {
       // 就算登出 API 失敗，Cookie 過期時間到了也會失效，前端還是把本地狀態清掉、導去登入頁
     } finally {
+      clearPasswordChangeReason();
       clear();
       router.push("/member/login");
     }
   }
 
-  if (loading || needEmailVerification) {
+  if (loading || needEmailVerification || !flagChecked) {
     return <p className="text-muted">載入中…</p>;
   }
 
@@ -122,6 +135,12 @@ export default function MemberCenterContent() {
 
         <div style={{ flex: "1 1 400px" }}>
           <h3 className="mb-4 me_sho">{activeLabel}</h3>
+          {passwordChangeReason && (
+            <div className="alert alert-warning" role="alert">
+              <i className="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i>
+              {passwordChangeReason}。請先完成密碼變更，才能使用會員中心的其他功能。
+            </div>
+          )}
           {active === "profile" ? (
             <ProfilePanel />
           ) : active === "upgrade" ? (
@@ -131,7 +150,12 @@ export default function MemberCenterContent() {
           ) : active === "product" ? (
             <ProductPanel />
           ) : active === "password" ? (
-            <PasswordPanel />
+            <PasswordPanel
+              onChanged={() => {
+                clearPasswordChangeReason();
+                setPasswordChangeReasonState(null);
+              }}
+            />
           ) : active === "passkey" ? (
             <PasskeyPanel />
           ) : active === "contact" ? (

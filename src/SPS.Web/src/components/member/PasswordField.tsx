@@ -23,6 +23,9 @@ export default function PasswordField({
   value,
   onChange,
   hint,
+  id,
+  invalid,
+  errorId,
 }: {
   label?: string;
   placeholder?: string;
@@ -33,9 +36,16 @@ export default function PasswordField({
   onChange?: (value: string) => void;
   /** 欄位下方的說明文字（例如密碼規則），會用 aria-describedby 關聯給螢幕閱讀器 */
   hint?: string;
+  /** 輸入框的 id：給外面的 `<label htmlFor>` 用（沒給就用 aria-label 命名，維持原本行為） */
+  id?: string;
+  /** 欄位目前有錯誤：設 `aria-invalid` */
+  invalid?: boolean;
+  /** 錯誤訊息元素的 id：用 `aria-describedby` 跟輸入框關聯 */
+  errorId?: string;
 }) {
   const [visible, setVisible] = useState(false);
-  const inputId = useId();
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
   const hintId = `${inputId}-hint`;
   const isControlled = value !== undefined;
 
@@ -49,8 +59,9 @@ export default function PasswordField({
         placeholder={placeholder}
         required={required}
         aria-required={required}
-        aria-label={label}
-        aria-describedby={hint ? hintId : undefined}
+        aria-label={id ? undefined : label}
+        aria-invalid={invalid ? true : undefined}
+        aria-describedby={[hint ? hintId : null, invalid ? errorId : null].filter(Boolean).join(" ") || undefined}
         disabled={disabled}
         {...(isControlled ? { value, onChange: (e: ChangeEvent<HTMLInputElement>) => onChange?.(e.target.value) } : { defaultValue })}
       />
