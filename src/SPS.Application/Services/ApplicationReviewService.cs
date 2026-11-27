@@ -674,7 +674,8 @@ public class ApplicationReviewService : IApplicationReviewService
                         IsApproved = true,
                         IsDesignatedContact = needsDesignatedContact && appMember == applicationMembers.First(),
                         Status = Domain.Enums.Status.Active,
-                        FirstChanged = false,
+                        // 申請時密碼是本人自己設的，審核通過後登入不用強制改密碼
+                        FirstChanged = true,
                         PasswordChanged = false,
                         LoginFailure = 0,
                         CreatedTime = DateTime.UtcNow
