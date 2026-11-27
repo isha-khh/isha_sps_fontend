@@ -53,12 +53,17 @@ export default function NewsletterForm() {
   return (
     <div className="footer_right d-flex">
       <div className="input-group">
+        {/* 標籤文字（含必填說明）：版面是固定的一列，所以用視覺隱藏的 <label> 關聯輸入框，並把「必填」寫進 placeholder（GN1330201E） */}
+        <label htmlFor="newsletter-email" className="visually-hidden">
+          電子郵件（必填）
+        </label>
         <input
           ref={emailRef}
+          id="newsletter-email"
           type="email"
           className="form-control"
-          placeholder="你的電子郵件位置"
-          aria-label="請輸入您的電子郵件信箱"
+          placeholder="你的電子郵件位置（必填）"
+          aria-required="true"
           autoComplete="email"
           maxLength={320}
           required

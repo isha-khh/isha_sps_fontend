@@ -338,22 +338,20 @@ export default function UpgradePanel() {
           </div>
 
           <div className="checkbox d-flex mb-3 mt-4">
-            <label className="relative">
-              <input
-                type="checkbox"
-                aria-label="同意已充分知悉告知事項"
-                className="form-check-input peer me-1"
-                checked={consentChecked}
-                onChange={(e) => setConsentChecked(e.target.checked)}
-              />
-            </label>
-            <span>
+            <input
+              type="checkbox"
+              id="upgrade-consent"
+              className="form-check-input peer me-2 flex-shrink-0"
+              checked={consentChecked}
+              onChange={(e) => setConsentChecked(e.target.checked)}
+            />
+            <label htmlFor="upgrade-consent">
               我已詳細閱讀並同意「
               <a href="#" role="button" data-bs-toggle="modal" data-bs-target="#upgradeConsentModal" className="blue text-decoration-underline" title="開啟個人資料同意書">
                 個人資料同意書
               </a>
               」
-            </span>
+            </label>
           </div>
 
           {error && (

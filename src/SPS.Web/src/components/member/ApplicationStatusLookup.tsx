@@ -6,6 +6,7 @@ import { applicationsApi } from "@/lib/api/applications";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import type { ApplicationStatusResponse } from "@/types/application";
 import FormError from "@/components/ui/FormError";
+import RequiredNote from "@/components/ui/RequiredNote";
 
 /**
  * 積木元件：會員申請進度查詢。
@@ -125,6 +126,8 @@ export default function ApplicationStatusLookup({ initialApplicationNumber = "" 
   return (
     <div className="melo_box d-flex">
       <form className="melo_box_left w-100" onSubmit={handleSubmit} noValidate>
+        <RequiredNote />
+
         <div className="d-flex gap-2 mb-4" role="tablist" aria-label="查詢方式">
           <button
             type="button"

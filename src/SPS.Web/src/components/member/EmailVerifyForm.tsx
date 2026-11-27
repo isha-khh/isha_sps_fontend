@@ -10,6 +10,7 @@ import { VerificationCodePurpose } from "@/types/memberprofile";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { readNextFromLocation } from "@/lib/login-next";
 import FormError from "@/components/ui/FormError";
+import RequiredNote from "@/components/ui/RequiredNote";
 
 /** 寄驗證碼後要等多久才能再寄（後端冷卻期是 60 秒，這裡跟著擋，避免按了只拿到錯誤訊息） */
 const RESEND_SECONDS = 60;
@@ -112,6 +113,8 @@ export default function EmailVerifyForm() {
 
   return (
     <form className="melo_box_left w-100" onSubmit={handleVerify} noValidate>
+      <RequiredNote />
+
       <p className="mb-3">
         為了確保帳號安全，請先驗證您的電子信箱：<strong>{member.email}</strong>
       </p>

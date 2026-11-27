@@ -342,7 +342,7 @@ body .main .side1 .nav > li a:focus-visible {
 
 .tier-answer-btn.active {
   border-color: transparent;
-  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+  background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
   color: #fff;
 }
 
@@ -350,7 +350,7 @@ body .main .side1 .nav > li a:focus-visible {
   border-radius: 50px;
   border: none;
   padding: 10px 32px;
-  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+  background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
   color: #fff;
   transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
 }
@@ -377,7 +377,7 @@ body .main .side1 .nav > li a:focus-visible {
 
 .tier-reset-btn:hover,
 .favorite-btn[aria-pressed="true"] {
-  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+  background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
   color: #fff;
   border-color: transparent;
 }
@@ -483,7 +483,7 @@ body .main .side1 .nav > li a:focus-visible {
  * 贏」，沒加會被 style.css 蓋掉。
  */
 .card-footer button.btn-theme {
-  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%) !important;
+  background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%) !important;
   color: #fff !important;
   border-radius: 50px !important;
   padding: 10px 20px !important;
@@ -492,7 +492,7 @@ body .main .side1 .nav > li a:focus-visible {
 
 .card-footer button.btn-theme:focus-within,
 .card-footer button.btn-theme:hover {
-  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%) !important;
+  background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%) !important;
   color: #fff !important;
   transform: translateY(-3px);
   box-shadow: 0 12px 25px rgba(0, 102, 255, 0.38);
@@ -515,7 +515,7 @@ body .main .side1 .nav > li a:focus-visible {
   transform: none !important;
   box-shadow: 0 8px 20px rgba(0, 102, 255, 0.25) !important;
   opacity: 1 !important;
-  background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%) !important;
+  background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%) !important;
 }
 
 .matching .more_x.me_Publish:hover i,

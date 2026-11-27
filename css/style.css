@@ -389,7 +389,7 @@ a:focus-visible {
     padding-top: 0;
     font-weight: bold;
     opacity: 1;
-    background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+    background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
     opacity: 1;
     width: 50px;
     height: 50px;
@@ -473,8 +473,8 @@ input.form-control {
 }
 
 .btn_a {
-    background: #0398B9;
-    background: linear-gradient(53deg,rgba(3, 152, 185, 1) 0%, rgba(4, 109, 220, 1) 100%);
+    background: #027A96;
+    background: linear-gradient(53deg,rgba(2, 122, 150, 1) 0%, rgba(4, 109, 220, 1) 100%);
     border-color: unset;
     border-radius: 50px !important;
     border: none;
@@ -500,7 +500,7 @@ input.form-control {
 }
 .header .dropdown-item:focus,
 .header .dropdown-item:hover {
-    background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+    background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
     color: #ffffff;
 }
 .header .navbar {
@@ -545,7 +545,7 @@ input.form-control {
 
 .small-btn-box a.btn-light {
     background: #046DDC;
-    background: linear-gradient(279deg,rgba(4, 109, 220, 1) 0%, rgba(3, 152, 185, 1) 100%);
+    background: linear-gradient(279deg,rgba(4, 109, 220, 1) 0%, rgba(2, 122, 150, 1) 100%);
     font-size: 1.125rem;
     border-radius: 50px;
     color: #fff;
@@ -556,7 +556,7 @@ input.form-control {
 
     .small-btn-box a.btn-light:hover {
         background: #046DDC;
-        background: linear-gradient(83deg,rgba(4, 109, 220, 1) 0%, rgba(3, 152, 185, 1) 100%);
+        background: linear-gradient(83deg,rgba(4, 109, 220, 1) 0%, rgba(2, 122, 150, 1) 100%);
         -moz-transform: scale(1.05);
         transform: scale(1.05);
         color: #fff;
@@ -710,7 +710,7 @@ input.form-control {
 
 
     .home .banner_home .item ul li.b1 a {
-        background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+        background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
         color: #ffffff;
         box-shadow: 0 8px 20px rgba(0, 102, 255, 0.25);
     }
@@ -748,7 +748,7 @@ input.form-control {
         .home .banner_home .item ul li.b2 a:focus,
         .home .banner_home .item ul li.b2 a:hover {
             transform: translateY(-3px);
-            background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+            background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
             color: #ffffff;
             box-shadow: 0 10px 22px rgba(0, 82, 204, 0.22);
         }
@@ -901,7 +901,7 @@ input.form-control {
         letter-spacing: 1px;
         box-sizing: border-box;
         transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+        background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
         color: #ffffff;
         box-shadow: 0 8px 20px rgba(0, 102, 255, 0.25);
     }
@@ -1138,7 +1138,7 @@ body .main .side1 ul.wid-cont {
 body .main .side1 .nav > li a:focus,
 body .main .side1 .nav > li a:hover,
 body .main .side1 .nav > li a.active {
-    background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+    background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
     color: #ffffff;
     box-shadow: 0 8px 20px rgba(0, 102, 255, 0.25);
 }
@@ -1571,7 +1571,7 @@ body   .main .side .nav > li + li {
         font-size: 1.25rem;
     }
         .item_box_six .item_box_six_1 .tit .tit_dt a.connec_s:hover {
-            background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+            background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
         }
         .item_box_six .item_box_six_1 .tit .tit_dt a.connec_s {
             background: linear-gradient(90deg, #009688 0%, #009688 100%);
@@ -1660,7 +1660,7 @@ body   .main .side .nav > li + li {
     }
     /*我要媒合 企業名錄 matching enterprise*/
     .item:hover a.det_more {
-        background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+        background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
         color: #ffffff;
     }
 a.det_more {
@@ -1915,7 +1915,7 @@ a.det_more {
 
 
             .step-progress .step li.active a::before {
-                background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+                background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
                 color: #fff;
             }
 
@@ -1932,7 +1932,7 @@ a.det_more {
                 left: 50%;
                 width: 100%;
                 height: 2px;
-                background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+                background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
                 z-index: -1;
             }
 
@@ -1963,14 +1963,14 @@ a.det_more {
     }
 
     .card-footer a.btn-theme {
-        background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+        background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
         color: #fff;
     }
         .card-footer a.btn-outline-dark:focus-within,
         .card-footer a.btn-theme:focus-within,
         .card-footer a.btn-outline-dark:hover,
         .card-footer a.btn-theme:hover {
-            background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+            background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
             color: #fff;
             transform: translateY(-3px);
             box-shadow: 0 12px 25px rgba(0, 102, 255, 0.38);
@@ -2380,7 +2380,7 @@ h3.me_sho {
 
 
         .sm_techn_left .tab-btn.active {
-            background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+            background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
             color: #fff;
             font-weight: 600;
         }
@@ -3180,7 +3180,7 @@ a.more_x.more_x_gu,
     margin-bottom: 20px;
 }
     .support_box .d-flex .support_er h3 i {
-        background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(3, 152, 185) 100%);
+        background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(2, 122, 150) 100%);
         color: #fff;
         border-radius: 50%;
         width: 90px;
@@ -3272,7 +3272,7 @@ a.more_x.more_x_gu,
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(3, 152, 185) 100%);
+            background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(2, 122, 150) 100%);
             border-radius: 50%;
             margin: 30px auto 0;
         }
@@ -3323,7 +3323,7 @@ a.more_x.more_x_gu,
 }
 .xr_list3 ul li span {
     display: flex;
-    background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+    background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
     color: #fff;
     height: 100%;
     width: 15%;
@@ -3426,7 +3426,7 @@ a.more_x.more_x_gu,
     font-size: 1.25rem;
 }
 .xr_list1 .d-flex ul li> i.bi {
-    background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(3, 152, 185) 100%);
+    background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(2, 122, 150) 100%);
     color: #fff;
     border-radius: 50%;
     width: 50px;
@@ -3452,7 +3452,7 @@ a.more_x.more_x_gu,
     padding: 20px 10px;
 }
 .xr_list1 .d-flex .xr_le h4 {
-    background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+    background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
     color: #ffffff;
     padding: 20px 10px;
     text-align: center;
@@ -4055,7 +4055,7 @@ a.more_x.more_x_gu,
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(3, 152, 185) 100%);
+                background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(2, 122, 150) 100%);
                 border-radius: 50%;
             }
 
@@ -4181,7 +4181,7 @@ a.more_x.more_x_gu,
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(3, 152, 185) 100%);
+            background: linear-gradient(279deg, rgb(4, 109, 220) 0%, rgb(2, 122, 150) 100%);
             border-radius: 50%;
         }
         .sitemap_box .sitmp_fx .unit_col h4{
@@ -4220,7 +4220,7 @@ a.more_x.more_x_gu,
 
 /*首頁 Fancybox   彈跳*/
 .fancybox__content > .f-button.is-close-btn {
-    background: linear-gradient(90deg, #0099ff 0%, #0052cc 100%);
+    background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
     border-radius: 50%;
     top: -16px !important;
     right: -20px !important;
@@ -5055,7 +5055,7 @@ ul.ul-key{
 }
 
 .ser_box .tit p {
-    color: #7f7f7f;
+    color: #595959;
     font-size: clamp(1rem, 3vw, 1.375rem);
     text-align: left;
     font-weight: 400;
@@ -5161,7 +5161,7 @@ body  .slick-track {
         position: relative;
         padding: 70px 0;
         padding-left: 12%;
-        background: linear-gradient(279deg, rgb(3, 152, 185) 0%, rgb(4, 109, 220) 100%);
+        background: linear-gradient(279deg, rgb(2, 122, 150) 0%, rgb(4, 109, 220) 100%);
         border-radius: 0 20px 20px 0;
         color: #fff;
         display: table;

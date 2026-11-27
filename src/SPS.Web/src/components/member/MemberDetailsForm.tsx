@@ -555,23 +555,20 @@ export default function MemberDetailsForm({
 
       {mode === "edit" && (
         <div className="checkbox d-flex mb-3">
-          <label className="relative">
-            <input
-              type="checkbox"
-              aria-label="同意已充分知悉告知事項"
-              title="本人已充分知悉貴署上述告知事項"
-              className="form-check-input peer me-1"
-              checked={consentChecked}
-              onChange={(e) => setConsentChecked(e.target.checked)}
-            />
-          </label>
-          <span>
+          <input
+            type="checkbox"
+            id="member-consent"
+            className="form-check-input peer me-2 flex-shrink-0"
+            checked={consentChecked}
+            onChange={(e) => setConsentChecked(e.target.checked)}
+          />
+          <label htmlFor="member-consent">
             我已詳細閱讀「
             <a href="#" role="button" data-bs-toggle="modal" data-bs-target="#staticmembership" className="blue text-decoration-underline" title={isCompany ? "我已詳細閱讀資料同意書" : "我已詳細閱讀個人資料同意書"}>
               {isCompany ? "資料同意書" : "個人資料同意書"}
             </a>
             」
-          </span>
+          </label>
         </div>
       )}
 

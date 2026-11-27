@@ -6,6 +6,7 @@ import PasswordField from "@/components/member/PasswordField";
 import { authApi } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import FormError from "@/components/ui/FormError";
+import RequiredNote from "@/components/ui/RequiredNote";
 import { usePasswordPolicy } from "@/hooks/usePasswordPolicy";
 
 /**
@@ -109,20 +110,22 @@ export default function MemberResetPasswordForm({ token }: { token: string }) {
 
   return (
     <form className="melo_box_left w-100" onSubmit={handleSubmit} noValidate>
+      <RequiredNote />
+
       {email && <p className="mb-3">為帳號 <strong>{email}</strong> 設定新密碼</p>}
 
       <div className="form-group g-input">
-        <label className="mb-2">
+        <label htmlFor="resetNewPassword" className="mb-2">
           新密碼<span className="text-danger ms-1" aria-hidden="true">*</span>
         </label>
-        <PasswordField label="新密碼" placeholder="請輸入新密碼" value={newPassword} onChange={setNewPassword} hint={passwordHint} />
+        <PasswordField id="resetNewPassword" label="新密碼" placeholder="請輸入新密碼" value={newPassword} onChange={setNewPassword} hint={passwordHint} />
       </div>
 
       <div className="form-group g-input">
-        <label className="mb-2">
+        <label htmlFor="resetConfirmPassword" className="mb-2">
           確認新密碼<span className="text-danger ms-1" aria-hidden="true">*</span>
         </label>
-        <PasswordField label="確認新密碼" placeholder="請再輸入一次新密碼" value={confirmPassword} onChange={setConfirmPassword} />
+        <PasswordField id="resetConfirmPassword" label="確認新密碼" placeholder="請再輸入一次新密碼" value={confirmPassword} onChange={setConfirmPassword} />
       </div>
 
       {error && (

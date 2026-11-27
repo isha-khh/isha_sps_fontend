@@ -112,6 +112,8 @@ export function setupHeaderNav(): () => void {
       event.preventDefault();
       const footerTop = doc.querySelector<HTMLElement>(".footer-top");
       if (footerTop) window.scrollTo({ top: footerTop.getBoundingClientRect().top + window.scrollY, behavior: "smooth" });
+      // 焦點也要跟過去，鍵盤使用者再按 Tab 才會從頁尾的 Email 欄位接著走，而不是回到頁首選單（GN1210101E 建議）
+      footerTop?.querySelector<HTMLElement>("input[type=email]")?.focus({ preventScroll: true });
       return;
     }
 
