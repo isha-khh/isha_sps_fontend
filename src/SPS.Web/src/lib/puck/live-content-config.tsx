@@ -65,7 +65,7 @@ const SAMPLE_IMAGE = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="#dfe8ef"/><text x="400" y="310" font-size="40" text-anchor="middle" fill="#6b7c8c" font-family="sans-serif">範例圖片</text></svg>',
 )}`;
 
-const GRADIENT_BTN = "linear-gradient(90deg, #0099ff 0%, #0052cc 100%)";
+const GRADIENT_BTN = "linear-gradient(90deg, #0070d0 0%, #0052cc 100%)";
 
 const headingGradient: CSSProperties = {
   background: "linear-gradient(to right, #2f6ea7 16%, #0e3f6b 100%)",

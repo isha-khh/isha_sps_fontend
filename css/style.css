@@ -982,7 +982,7 @@ input.form-control {
         height: 0;
         left: 0;
         bottom: 0;
-        background: linear-gradient(90deg, rgb(0, 153, 255) 0%, rgb(0, 82, 204) 100%);
+        background: linear-gradient(90deg, rgb(0, 112, 208) 0%, rgb(0, 82, 204) 100%);
         opacity: 0;
         transition: all 0.5s;
     }
@@ -1103,7 +1103,7 @@ input.form-control {
     height: 0;
     left: 0;
     bottom: 0;
-    background: linear-gradient(90deg, rgb(0, 153, 255) 0%, rgb(0, 82, 204) 100%);
+    background: linear-gradient(90deg, rgb(0, 112, 208) 0%, rgb(0, 82, 204) 100%);
     opacity: 0;
     transition: all 0.5s;
 }
@@ -3251,7 +3251,7 @@ a.more_x.more_x_gu,
                 height: 0;
                 left: 0;
                 bottom: 0;
-                background: linear-gradient(90deg, rgb(0, 153, 255) 0%, rgb(0, 82, 204) 100%);
+                background: linear-gradient(90deg, rgb(0, 112, 208) 0%, rgb(0, 82, 204) 100%);
                 opacity: 0;
                 transition: all 0.5s;
             }
@@ -3565,7 +3565,7 @@ a.more_x.more_x_gu,
 
     /* 藍色表頭 */
     .course-table thead {
-        background: linear-gradient(90deg, rgb(0, 153, 255) 0%, rgb(0, 82, 204) 100%);
+        background: linear-gradient(90deg, rgb(0, 112, 208) 0%, rgb(0, 82, 204) 100%);
         color: #fff;
     }
 
