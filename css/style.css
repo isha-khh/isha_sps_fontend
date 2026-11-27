@@ -36,7 +36,7 @@ a {
 }
 
 body  .btn.btn-primary {
-    background: linear-gradient(90deg, #009688 0%, #009688 100%);
+    background: linear-gradient(90deg, #00796B 0%, #00796B 100%);
     border-color:unset;
 }
 
@@ -1191,7 +1191,7 @@ body   .main .side .nav > li + li {
         .page-box .pagination .page-link:hover {
             color: #0056b3;
             color: rgb(255, 255, 255);
-            background: linear-gradient(rgb(0, 136, 255) 0%, rgb(0, 153, 204) 100%);
+            background: linear-gradient(rgb(0, 102, 204) 0%, rgb(0, 122, 153) 100%);
         }
 
   /*side2*/
@@ -1574,7 +1574,7 @@ body   .main .side .nav > li + li {
             background: linear-gradient(90deg, #0070d0 0%, #0052cc 100%);
         }
         .item_box_six .item_box_six_1 .tit .tit_dt a.connec_s {
-            background: linear-gradient(90deg, #009688 0%, #009688 100%);
+            background: linear-gradient(90deg, #00796B 0%, #00796B 100%);
             color: #fff;
             padding: 6px 15px;
             border-radius: 50px;
@@ -1653,10 +1653,10 @@ body   .main .side .nav > li + li {
         font-size: 1rem;
     }
     .ente_box .item_box .tit ul li.su_1 {
-        background: linear-gradient(-180deg, rgba(4, 116, 215, 1) 0%, rgba(3, 149, 187, 1) 100%);
+        background: linear-gradient(-180deg, rgba(4, 116, 215, 1) 0%, rgba(2, 122, 150, 1) 100%);
     }
     .ente_box .item_box .tit ul li.su_2 {
-        background: linear-gradient(90deg, #009688 0%, #009688 100%);
+        background: linear-gradient(90deg, #00796B 0%, #00796B 100%);
     }
     /*我要媒合 企業名錄 matching enterprise*/
     .item:hover a.det_more {
@@ -1790,7 +1790,7 @@ a.det_more {
         width: 100%;
     }
         .melo_box_right_2 a:hover {
-            background: linear-gradient(90deg, #009688 0%, #009688 100%);
+            background: linear-gradient(90deg, #00796B 0%, #00796B 100%);
             color:#fff;
       
         }
@@ -1946,7 +1946,7 @@ a.det_more {
     border-radius: 10px;
     border: 1px solid #d8d8d8;
     margin-bottom: 60px;
-    background: linear-gradient(90deg, #009688 0%, #009688 100%);
+    background: linear-gradient(90deg, #00796B 0%, #00796B 100%);
     color: #fff;
 }
 
@@ -2439,8 +2439,8 @@ h3.me_sho {
 .review_box .review_box_r span {
     padding: 5px 15px;
     border-radius: 10px;
-    border: 1px solid #009688;
-    color: #009688;
+    border: 1px solid #00796B;
+    color: #00796B;
     display: table;
 }
 .review_box label{
@@ -2661,7 +2661,7 @@ body .flatpickr-months .flatpickr-next-month:hover svg {
 
 a.more_x.more_x_gu,
 .dow_box a.more_x {
-    background: linear-gradient(90deg, #009688 0%, #009688 100%);
+    background: linear-gradient(90deg, #00796B 0%, #00796B 100%);
     box-shadow:unset;
 }
 .dow_box {
@@ -2980,7 +2980,7 @@ a.more_x.more_x_gu,
     }
     .course-info-card .info-row a {
         color: #fff;
-        background: linear-gradient(90deg, #009688 0%, #009688 100%);
+        background: linear-gradient(90deg, #00796B 0%, #00796B 100%);
         padding: 8px 10px;
         border-radius: 50px;
         font-size: 0.875rem;
@@ -3147,7 +3147,7 @@ a.more_x.more_x_gu,
         color: #0076c8;
     }
 .support_box .d-flex .support_er > ul > li a {
-    color: #009688;
+    color: #00796B;
 }
 .support_box .d-flex .support_er > ul > li ul {
     margin: 5px 0;
@@ -3158,7 +3158,7 @@ a.more_x.more_x_gu,
     padding:5px 0;
 }
 .support_box .d-flex .support_er > ul > li span b{
-    color:#009688;
+    color:#00796B;
     font-weight:600;
 }
 .support_box .d-flex .support_er > ul > li  span{
@@ -3333,10 +3333,10 @@ a.more_x.more_x_gu,
     align-items: center;
 }
 .xr_list3 ul li:nth-child(2n) span {
-    background: linear-gradient(90deg, rgb(0, 150, 136) 0%, rgb(0, 150, 136) 100%);
+    background: linear-gradient(90deg, rgb(0, 121, 107) 0%, rgb(0, 121, 107) 100%);
 }
 .xr_list3 ul li:nth-child(2n) h4 {
-    color: #009688;
+    color: #00796B;
 }
 
 .xr_list3 ul li h4 {
@@ -3445,7 +3445,7 @@ a.more_x.more_x_gu,
     padding: 30px;
 }
 .xr_list1 .d-flex .xr_ri h4 {
-    background: linear-gradient(90deg, #009688 0%, #009688 100%);
+    background: linear-gradient(90deg, #00796B 0%, #00796B 100%);
     color: #ffffff;
     padding: 10px;
     text-align: center;
@@ -3648,7 +3648,7 @@ a.more_x.more_x_gu,
 
 .btn-course-link {
     color: #fff;
-    background: linear-gradient(90deg, #009688 0%, #009688 100%);
+    background: linear-gradient(90deg, #00796B 0%, #00796B 100%);
     padding: 8px 10px;
     border-radius: 50px;
     font-size:0.875rem;
@@ -3687,7 +3687,7 @@ a.more_x.more_x_gu,
     justify-content: center;
     width: 50px;
     height: 50px;
-    background: linear-gradient(180deg, #0088ff 0%, #0099cc 100%);
+    background: linear-gradient(180deg, #0066cc 0%, #007a99 100%);
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 136, 255, 0.25);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -4010,10 +4010,10 @@ a.more_x.more_x_gu,
     font-weight:600;
 }
 .contribute_box a.contribute_more_1 {
-    background: linear-gradient(-180deg, rgb(4, 116, 215) 0%, rgb(3, 149, 187) 100%);
+    background: linear-gradient(-180deg, rgb(4, 116, 215) 0%, rgb(2, 122, 150) 100%);
 }
 .contribute_box a.contribute_more_2 {
-    background: linear-gradient(90deg, rgb(0, 150, 136) 0%, rgb(0, 150, 136) 100%);
+    background: linear-gradient(90deg, rgb(0, 121, 107) 0%, rgb(0, 121, 107) 100%);
 
 }
 .contribute_box {
@@ -5037,7 +5037,7 @@ ul.ul-key{
         display: table;
         padding: 5px 10px;
         background: #0474D7;
-        background: linear-gradient(-180deg,rgba(4, 116, 215, 1) 0%, rgba(3, 149, 187, 1) 100%);
+        background: linear-gradient(-180deg,rgba(4, 116, 215, 1) 0%, rgba(2, 122, 150, 1) 100%);
         color: #fff;
         border-radius: 5px;
         margin-bottom: 8px;

@@ -7,12 +7,23 @@ import { INDUSTRY_OPTIONS, INDUSTRY_SEPARATOR, MANUFACTURING_LABEL, MANUFACTURIN
  * 值存成單一字串「製造業／食品製造業」（後端欄位是自由文字，不用 migration）。
  * 只選了「製造業」、還沒選中類時值就是「製造業」，送出前用 `industryError` 擋下來。
  */
-export default function IndustrySelect({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+export default function IndustrySelect({
+  value,
+  onChange,
+  id,
+  required,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  /** 大類下拉的 id：給外面的 `<label htmlFor>` 用（有給就由該標籤命名，沒給維持 aria-label） */
+  id?: string;
+  required?: boolean;
+}) {
   const [main, sub = ""] = value.split(INDUSTRY_SEPARATOR);
 
   return (
     <>
-      <select className="form-select" aria-label="產業別" value={main} onChange={(e) => onChange(e.target.value)}>
+      <select className="form-select" id={id} aria-label={id ? undefined : "產業別"} required={required} aria-required={required ? true : undefined} value={main} onChange={(e) => onChange(e.target.value)}>
         <option value="">請選擇產業別</option>
         {INDUSTRY_OPTIONS.map((name) => (
           <option key={name} value={name}>

@@ -24,6 +24,7 @@ export default function MemberTypeCard({
   onChange,
   name = "member_type",
   readOnly = false,
+  required = false,
 }: {
   option: MemberTypeOption;
   defaultChecked?: boolean;
@@ -31,6 +32,8 @@ export default function MemberTypeCard({
   onChange?: (value: string) => void;
   name?: string;
   readOnly?: boolean;
+  /** 同組單選必須選一個：設在 radio 上，螢幕閱讀器會念出必填 */
+  required?: boolean;
 }) {
   const isControlled = checked !== undefined;
   return (
@@ -43,6 +46,7 @@ export default function MemberTypeCard({
           value={option.value}
           className="visually-hidden custom-radio"
           readOnly={readOnly}
+          required={required}
           {...(isControlled ? { checked, onChange: () => onChange?.(option.value) } : { defaultChecked })}
         />
         <div className="card_inner">

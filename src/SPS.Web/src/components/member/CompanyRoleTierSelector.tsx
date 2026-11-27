@@ -72,11 +72,13 @@ export default function CompanyRoleTierSelector({
 
   return (
     <>
-      <h3 className="mb-4 me_sho mt-4">請選擇需求端或供給端</h3>
-      <fieldset className="menb_type_fieldset border-0 p-0 m-0">
+      <h3 className="mb-4 me_sho mt-4" id="company-role-heading">
+        請選擇需求端或供給端<span className="text-danger ms-1" aria-hidden="true">*</span>
+      </h3>
+      <fieldset className="menb_type_fieldset border-0 p-0 m-0" aria-labelledby="company-role-heading">
         <div className="d-flex flex-wrap menb_type gap-3">
           {COMPANY_ROLE_OPTIONS.map((option) => (
-            <MemberTypeCard key={option.id} option={option} checked={companyRole === option.value} onChange={handleCompanyRoleChange} name="company_role" />
+            <MemberTypeCard key={option.id} option={option} checked={companyRole === option.value} onChange={handleCompanyRoleChange} name="company_role" required />
           ))}
         </div>
       </fieldset>
