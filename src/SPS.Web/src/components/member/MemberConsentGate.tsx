@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import RequiredNote from "@/components/ui/RequiredNote";
 
 /**
  * 積木元件：會員註冊 Step1「使用條款」的兩個同意勾選框＋底部按鈕。
@@ -19,6 +20,7 @@ export default function MemberConsentGate() {
 
   return (
     <>
+      <RequiredNote />
       <div className="peer_box">
         <div className="mb-3">
           <p>
@@ -33,9 +35,13 @@ export default function MemberConsentGate() {
             className="form-check-input peer me-2 flex-shrink-0"
             checked={agreedNotice}
             onChange={(e) => setAgreedNotice(e.target.checked)}
+            required
+            aria-required="true"
           />
           {/* 文字就是核取方塊的 <label>：點文字也能勾選（GN1330201E） */}
-          <label htmlFor="consent-notice">本人已充分知悉貴署上述告知事項。</label>
+          <label htmlFor="consent-notice">
+            本人已充分知悉貴署上述告知事項。<span aria-hidden="true">*</span>
+          </label>
         </div>
 
         <div className="peer d-flex">
@@ -45,8 +51,11 @@ export default function MemberConsentGate() {
             className="form-check-input peer me-2 flex-shrink-0"
             checked={agreedCollection}
             onChange={(e) => setAgreedCollection(e.target.checked)}
+            required
+            aria-required="true"
           />
-          <label htmlFor="consent-collection">本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</label>
+          <label htmlFor="consent-collection">本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。<span aria-hidden="true">*</span>
+          </label>
         </div>
       </div>
 

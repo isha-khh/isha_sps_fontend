@@ -46,6 +46,9 @@ export default function CompanyProfileFields({
 }) {
   const requiredMark = readOnly ? null : REQUIRED;
   const profileMark = !readOnly && isSupplier ? REQUIRED : null;
+  // 輸入框本身也要標必填（`required`＋`aria-required`）：螢幕閱讀器才會念出必填，送出失敗時也才找得到第一個沒填的欄位
+  const reqAttrs = readOnly ? {} : ({ required: true, "aria-required": true } as const);
+  const profileReqAttrs = !readOnly && isSupplier ? ({ required: true, "aria-required": true } as const) : {};
   const checked = Object.fromEntries(value.tagIds.map((id) => [String(id), true]));
 
   function toggleTag(rawId: string) {
@@ -88,7 +91,7 @@ export default function CompanyProfileFields({
           {requiredMark}公司電話
         </label>
         <div className="d-flex gap-2">
-          <input id="profile-phone" type="text" className="form-control" placeholder="請輸入公司電話" value={value.phone} onChange={(e) => onChange({ phone: e.target.value })} disabled={readOnly} />
+          <input id="profile-phone" type="text" {...reqAttrs} className="form-control" placeholder="請輸入公司電話" value={value.phone} onChange={(e) => onChange({ phone: e.target.value })} disabled={readOnly} />
           {/* 分機選填；唯讀檢視沒填就不顯示。送出時跟電話接成「電話#分機」（見 lib/company-profile.ts） */}
           {(!readOnly || value.phoneExt) && (
             <input
@@ -123,6 +126,7 @@ export default function CompanyProfileFields({
             onAddressLine1Change={(address) => onChange({ address })}
             addressPlaceholder="請輸入詳細地址（路名、門牌、樓層）"
             disabled={readOnly}
+            required={!readOnly}
           />
         </div>
       </div>
@@ -148,28 +152,28 @@ export default function CompanyProfileFields({
         <label className="mb-2" htmlFor="profile-established">
           {profileMark}成立日期
         </label>
-        <input id="profile-established" type="date" className="form-control" value={value.establishmentDate} onChange={(e) => onChange({ establishmentDate: e.target.value })} disabled={readOnly} />
+        <input id="profile-established" type="date" {...profileReqAttrs} className="form-control" value={value.establishmentDate} onChange={(e) => onChange({ establishmentDate: e.target.value })} disabled={readOnly} />
       </div>
 
       <div className="menb_inp_tit form-group">
         <label className="mb-2" htmlFor="profile-revenue">
           {profileMark}資本總額（新臺幣元）
         </label>
-        <input id="profile-revenue" type="text" inputMode="numeric" className="form-control" placeholder="例如 5000000" value={value.revenue} onChange={(e) => onChange({ revenue: e.target.value })} disabled={readOnly} />
+        <input id="profile-revenue" type="text" inputMode="numeric" {...profileReqAttrs} className="form-control" placeholder="例如 5000000" value={value.revenue} onChange={(e) => onChange({ revenue: e.target.value })} disabled={readOnly} />
       </div>
 
       <div className="menb_inp_tit form-group w-100">
         <label className="mb-2" htmlFor="profile-orgurl">
           {profileMark}公司網址
         </label>
-        <input id="profile-orgurl" type="text" className="form-control" placeholder="https://" value={value.orgUrl} onChange={(e) => onChange({ orgUrl: e.target.value })} disabled={readOnly} />
+        <input id="profile-orgurl" type="text" {...profileReqAttrs} className="form-control" placeholder="https://" value={value.orgUrl} onChange={(e) => onChange({ orgUrl: e.target.value })} disabled={readOnly} />
       </div>
 
       <div className="menb_inp_tit form-group w-100">
         <label className="mb-2" htmlFor="profile-intro">
           {profileMark}公司簡介
         </label>
-        <textarea id="profile-intro" className="form-control" rows={5} maxLength={2000} placeholder="請輸入公司簡介" value={value.introduction} onChange={(e) => onChange({ introduction: e.target.value })} disabled={readOnly} />
+        <textarea id="profile-intro" {...profileReqAttrs} className="form-control" rows={5} maxLength={2000} placeholder="請輸入公司簡介" value={value.introduction} onChange={(e) => onChange({ introduction: e.target.value })} disabled={readOnly} />
       </div>
 
       {isSupplier && (
@@ -178,7 +182,7 @@ export default function CompanyProfileFields({
             <label className="mb-2" htmlFor="profile-subject">
               {requiredMark}主要產品暨服務
             </label>
-            <input id="profile-subject" type="text" className="form-control" maxLength={500} placeholder="請輸入主要產品暨服務" value={value.subject} onChange={(e) => onChange({ subject: e.target.value })} disabled={readOnly} />
+            <input id="profile-subject" type="text" {...reqAttrs} className="form-control" maxLength={500} placeholder="請輸入主要產品暨服務" value={value.subject} onChange={(e) => onChange({ subject: e.target.value })} disabled={readOnly} />
           </div>
 
           {checklist("應用情境", taxonomy.scenarios, selectedTags.scenario, "fxContext", true)}
@@ -210,7 +214,7 @@ export default function CompanyProfileFields({
             <label className="mb-2" htmlFor="profile-factory-name">
               {requiredMark}工廠名稱
             </label>
-            <input id="profile-factory-name" type="text" className="form-control" placeholder="請輸入工廠名稱" value={value.factoryName} onChange={(e) => onChange({ factoryName: e.target.value })} disabled={readOnly} />
+            <input id="profile-factory-name" type="text" {...reqAttrs} className="form-control" placeholder="請輸入工廠名稱" value={value.factoryName} onChange={(e) => onChange({ factoryName: e.target.value })} disabled={readOnly} />
           </div>
 
           <div className="menb_inp_tit form-group w-100">
@@ -228,6 +232,7 @@ export default function CompanyProfileFields({
                 onAddressLine1Change={(factoryAddress) => onChange({ factoryAddress })}
                 addressPlaceholder="請輸入詳細地址（路名、門牌）"
                 disabled={readOnly}
+                required={!readOnly}
               />
             </div>
           </div>

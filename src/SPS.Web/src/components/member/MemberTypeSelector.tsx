@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import MemberTypeCard from "@/components/member/MemberTypeCard";
 import CompareTable from "@/components/member/CompareTable";
+import RequiredNote from "@/components/ui/RequiredNote";
 import CompanyRoleTierSelector, { type CompanyRoleTierSelection } from "@/components/member/CompanyRoleTierSelector";
 import { APPLICANT_TYPE_OPTIONS } from "@/lib/member-registration-data";
 
@@ -55,8 +56,11 @@ export default function MemberTypeSelector() {
 
   return (
     <>
-      <h3 className="mb-4 me_sho">請選擇會員類型</h3>
-      <fieldset className="menb_type_fieldset border-0 p-0 m-0">
+      <RequiredNote />
+      <h3 className="mb-4 me_sho" id="applicant-type-heading">
+        請選擇會員類型<span className="text-danger ms-1" aria-hidden="true">*</span>
+      </h3>
+      <fieldset className="menb_type_fieldset border-0 p-0 m-0" aria-labelledby="applicant-type-heading">
         <div className="d-flex flex-wrap menb_type gap-3">
           {APPLICANT_TYPE_OPTIONS.map((option) => (
             <MemberTypeCard
@@ -65,6 +69,7 @@ export default function MemberTypeSelector() {
               checked={applicantType === option.value}
               onChange={handleApplicantTypeChange}
               name="applicant_type"
+              required
             />
           ))}
         </div>

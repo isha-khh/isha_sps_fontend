@@ -26,6 +26,8 @@ export interface TaiwanAddressSelectorProps {
   idPrefix: string;
   addressPlaceholder?: string;
   disabled?: boolean;
+  /** 這組地址是必填：四個欄位都標 `required`／`aria-required` */
+  required?: boolean;
   selectClassName?: string;
   inputClassName?: string;
 }
@@ -74,12 +76,14 @@ export default function TaiwanAddressSelector({
   idPrefix,
   addressPlaceholder = "請輸入詳細地址（路名、門牌、樓層）",
   disabled,
+  required,
   selectClassName = "form-select",
   inputClassName = "form-control",
 }: TaiwanAddressSelectorProps) {
   const areaList = useMemo(() => getDistricts(cityValue), [cityValue]);
   const roads = useRoads(cityValue && districtValue ? postalCodeValue : "");
   const listId = `${idPrefix}-roads`;
+  const reqAttrs = required ? ({ required: true, "aria-required": true } as const) : {};
 
   function handlePostalCodeChange(value: string) {
     // 只收數字、最多 3 碼；湊滿 3 碼且查得到就自動帶出縣市與鄉鎮區
@@ -104,6 +108,7 @@ export default function TaiwanAddressSelector({
           maxLength={3}
           className={inputClassName}
           aria-label="郵遞區號"
+          {...reqAttrs}
           placeholder="郵遞區號"
           value={postalCodeValue}
           disabled={disabled}
@@ -115,6 +120,7 @@ export default function TaiwanAddressSelector({
           id={`${idPrefix}-county`}
           className={selectClassName}
           aria-label="縣市"
+          {...reqAttrs}
           value={cityValue}
           disabled={disabled}
           onChange={(e) => onCityChange(e.target.value)}
@@ -132,6 +138,7 @@ export default function TaiwanAddressSelector({
           id={`${idPrefix}-district`}
           className={selectClassName}
           aria-label="鄉鎮市區"
+          {...reqAttrs}
           value={districtValue}
           disabled={disabled || !cityValue}
           onChange={(e) => handleDistrictChange(e.target.value)}
@@ -146,8 +153,11 @@ export default function TaiwanAddressSelector({
       </div>
       <div className="col-12">
         <input
+          id={`${idPrefix}-address`}
           type="text"
           className={inputClassName}
+          aria-label="詳細地址"
+          {...reqAttrs}
           placeholder={addressPlaceholder}
           list={listId}
           autoComplete="off"

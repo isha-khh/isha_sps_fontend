@@ -12,6 +12,7 @@ import CompanyProfileFields from "@/components/member/CompanyProfileFields";
 import { emptyProfile, profileFromApplication, profileToRequest, validateProfile, type ProfileState } from "@/lib/company-profile";
 import { useTagTaxonomy } from "@/lib/use-tag-taxonomy";
 import IndustrySelect from "@/components/member/IndustrySelect";
+import RequiredNote from "@/components/ui/RequiredNote";
 import { industryError } from "@/lib/member-registration-data";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import { focusFirstInvalidField } from "@/lib/form-focus";
@@ -292,16 +293,21 @@ export default function MemberDetailsForm({
 
   return (
     <>
+      {mode === "edit" && <RequiredNote />}
       <h3 className="mb-4 me_sho">
-        帳號註冊{mode === "edit" && <label>({REQUIRED}為必填欄位)</label>}
+        帳號註冊
       </h3>
       <div className="menb_inp_box d-flex">
         <div className="menb_inp_tit form-group">
-          <label className="mb-2">
+          <label htmlFor="regEmail" className="mb-2">
             {requiredMark}電子郵件(登入帳號)
           </label>
           <input
             type="text"
+            id="regEmail"
+            required={mode === "edit"}
+            aria-required={mode === "edit" ? true : undefined}
+            autoComplete="email"
             className="form-control"
             placeholder="請輸入電子郵件"
             value={disabled ? reviewValue(application?.email) : email}
@@ -311,26 +317,29 @@ export default function MemberDetailsForm({
         </div>
 
         <div className="menb_inp_tit form-group">
-          <label className="mb-2">{requiredMark}會員密碼</label>
-          <PasswordField disabled={disabled} defaultValue={disabled ? "********" : undefined} value={disabled ? undefined : password} onChange={disabled ? undefined : setPassword} hint={disabled ? undefined : passwordHint} />
+          <label htmlFor="regPassword" className="mb-2">{requiredMark}會員密碼</label>
+          <PasswordField id="regPassword" disabled={disabled} defaultValue={disabled ? "********" : undefined} value={disabled ? undefined : password} onChange={disabled ? undefined : setPassword} hint={disabled ? undefined : passwordHint} />
         </div>
 
         {mode === "edit" && (
           <div className="menb_inp_tit form-group">
-            <label className="mb-2">{REQUIRED}確認密碼</label>
-            <PasswordField label="確認密碼" placeholder="請輸入確認密碼" value={confirmPassword} onChange={setConfirmPassword} />
+            <label htmlFor="regConfirmPassword" className="mb-2">{REQUIRED}確認密碼</label>
+            <PasswordField id="regConfirmPassword" label="確認密碼" placeholder="請輸入確認密碼" value={confirmPassword} onChange={setConfirmPassword} />
           </div>
         )}
       </div>
 
       <h3 className="mb-4 me_sho mt-4">
-        個人資料{mode === "edit" && <label>({REQUIRED}為必填欄位)</label>}
+        個人資料
       </h3>
       <div className="menb_inp_box d-flex">
         <div className="menb_inp_tit form-group">
-          <label className="mb-2">{requiredMark}姓名</label>
+          <label htmlFor="regContactName" className="mb-2">{requiredMark}姓名</label>
           <input
             type="text"
+            id="regContactName"
+            required={mode === "edit"}
+            aria-required={mode === "edit" ? true : undefined}
             className="form-control"
             placeholder="請輸入姓名"
             value={disabled ? reviewValue(reviewMember?.contactName) : contactName}
@@ -340,10 +349,13 @@ export default function MemberDetailsForm({
         </div>
 
         <div className="menb_inp_tit form-group">
-          <label className="mb-2">{requiredMark}聯絡電話</label>
+          <label htmlFor="regPhone" className="mb-2">{requiredMark}聯絡電話</label>
           <div className="d-flex gap-2">
             <input
               type="text"
+              id="regPhone"
+              required={mode === "edit"}
+              aria-required={mode === "edit" ? true : undefined}
               className="form-control"
               placeholder="請輸入聯絡電話"
               value={disabled ? reviewValue(reviewMember?.phone) : phone}
@@ -369,9 +381,12 @@ export default function MemberDetailsForm({
         </div>
 
         <div className="menb_inp_tit form-group">
-          <label className="mb-2">{requiredMark}手機</label>
+          <label htmlFor="regMobile" className="mb-2">{requiredMark}手機</label>
           <input
             type="text"
+            id="regMobile"
+            required={mode === "edit"}
+            aria-required={mode === "edit" ? true : undefined}
             className="form-control"
             placeholder="請輸入手機"
             value={disabled ? reviewValue(reviewMember?.mobilePhone) : mobilePhone}
@@ -383,9 +398,12 @@ export default function MemberDetailsForm({
         {/* 2026-09-10：這三個欄位所有人都要填，含個人會員——見上面
             元件說明的官方文件引述。 */}
         <div className="menb_inp_tit form-group">
-          <label className="mb-2">{requiredMark}所屬公司名稱</label>
+          <label htmlFor="regCompanyName" className="mb-2">{requiredMark}所屬公司名稱</label>
           <input
             type="text"
+            id="regCompanyName"
+            required={mode === "edit"}
+            aria-required={mode === "edit" ? true : undefined}
             className="form-control"
             placeholder="請輸入所屬公司名稱"
             value={disabled ? reviewValue(application?.companyName) : companyName}
@@ -395,19 +413,22 @@ export default function MemberDetailsForm({
         </div>
 
         <div className="menb_inp_tit form-group">
-          <label className="mb-2">{requiredMark}產業別</label>
+          <label htmlFor="regIndustry" className="mb-2">{requiredMark}產業別</label>
           {disabled ? (
-            <input type="text" className="form-control" value={reviewValue(application?.industry)} disabled />
+            <input type="text" id="regIndustry" className="form-control" value={reviewValue(application?.industry)} disabled />
           ) : (
             // issue #101：個人、企業會員都用下拉選單；選「製造業」要再選中類
-            <IndustrySelect value={industry} onChange={setIndustry} />
+            <IndustrySelect id="regIndustry" required value={industry} onChange={setIndustry} />
           )}
         </div>
 
         <div className="menb_inp_tit form-group">
-          <label className="mb-2">{requiredMark}職稱</label>
+          <label htmlFor="regPosition" className="mb-2">{requiredMark}職稱</label>
           <input
             type="text"
+            id="regPosition"
+            required={mode === "edit"}
+            aria-required={mode === "edit" ? true : undefined}
             className="form-control"
             placeholder="請輸入職稱"
             value={disabled ? reviewValue(reviewMember?.position) : position}
@@ -423,13 +444,16 @@ export default function MemberDetailsForm({
       {isCompany && (
         <>
           <h3 className="mb-4 me_sho mt-4">
-            公司資料{mode === "edit" && <label>({REQUIRED}為必填欄位)</label>}
+            公司資料
           </h3>
           <div className="menb_inp_box d-flex">
             <div className="menb_inp_tit form-group">
-              <label className="mb-2">{requiredMark}公司負責人姓名</label>
+              <label htmlFor="regContactPerson" className="mb-2">{requiredMark}公司負責人姓名</label>
               <input
                 type="text"
+                id="regContactPerson"
+                required={mode === "edit"}
+                aria-required={mode === "edit" ? true : undefined}
                 className="form-control"
                 placeholder="請輸入公司負責人姓名"
                 value={disabled ? reviewValue(application?.contactPerson) : contactPerson}
@@ -439,9 +463,12 @@ export default function MemberDetailsForm({
             </div>
 
             <div className="menb_inp_tit form-group">
-              <label className="mb-2">{requiredMark}統一編號</label>
+              <label htmlFor="regUnifiedCode" className="mb-2">{requiredMark}統一編號</label>
               <input
                 type="text"
+                id="regUnifiedCode"
+                required={mode === "edit"}
+                aria-required={mode === "edit" ? true : undefined}
                 className="form-control"
                 placeholder="請輸入統一編號"
                 value={disabled ? reviewValue(application?.unifiedSocialCreditCode) : unifiedSocialCreditCode}
@@ -471,7 +498,7 @@ export default function MemberDetailsForm({
       {isCompany && (
         <>
           <h3 className="mb-4 me_sho mt-md-5 mt-4">
-            上傳文件{mode === "edit" && <label>({REQUIRED}為必填欄位)</label>}
+            上傳文件
           </h3>
           {mode === "edit" && downloads && (
             <RegisterDownloadList
@@ -558,6 +585,8 @@ export default function MemberDetailsForm({
           <input
             type="checkbox"
             id="member-consent"
+            required
+            aria-required="true"
             className="form-check-input peer me-2 flex-shrink-0"
             checked={consentChecked}
             onChange={(e) => setConsentChecked(e.target.checked)}

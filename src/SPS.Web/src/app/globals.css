@@ -389,7 +389,7 @@ body .main .side1 .nav > li a:focus-visible {
 /*
  * 3 題問答的外層容器——一開始借用 `.peer_box`（p01.html 那個「已充分
  * 知悉告知事項」勾選框用的既有 class），結果 `.peer_box` 本身帶了
- * `background: linear-gradient(90deg, #009688 0%, #009688 100%)`
+ * `background: linear-gradient(90deg, #00796B 0%, #00796B 100%)`
  * 純色綠底＋白字（那是給 Step1 同意書那段深色背景用的），套在這裡
  * 變成一大塊突兀的綠色。2026-09-10 使用者要求拿掉底色只留外框，
  * 改成跟 `.menb_type_card .card_inner`（白底＋淺灰外框）同一種
