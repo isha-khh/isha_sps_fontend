@@ -30,6 +30,9 @@ public class CompanyService : ICompanyService
         _semanticEngine = semanticEngine;
     }
 
+    /// <summary>企業名錄的語意命中最多取幾筆（要分頁瀏覽，所以比全站搜尋每類 10 筆寬）；引擎另有總數 40 筆的上限</summary>
+    private const int DirectorySemanticMaxHits = 40;
+
     /// <summary>
     /// 企業名錄的搜尋框除了比對名稱、簡介、標籤名稱，也用語意搜尋找「意思相近」的企業（搜「馬達異常偵測」找到寫「設備預知保養」的）。
     /// 比對的是企業的語意索引（主要產品暨服務、簡介、標籤名稱，目前只有供給端企業有索引）。
@@ -45,7 +48,8 @@ public class CompanyService : ICompanyService
         try
         {
             var hits = await _semanticEngine.FindHitsAsync(
-                _unitOfWork.GetDbContext(), keyword, new[] { EmbeddingSourceType.Company }, cancellationToken);
+                _unitOfWork.GetDbContext(), keyword, new[] { EmbeddingSourceType.Company }, cancellationToken,
+                maxHitsPerType: DirectorySemanticMaxHits);
             var ids = hits
                 .Select(h => Guid.TryParse(h.Id, out var id) ? id : Guid.Empty)
                 .Where(id => id != Guid.Empty)

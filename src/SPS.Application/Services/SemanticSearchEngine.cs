@@ -24,7 +24,10 @@ public interface ISemanticSearchEngine
     /// 找出跟搜尋詞意思相近的項目，由高分到低分。<paramref name="onlyTypes"/> 有指定時只比對這幾種來源，
     /// 而且門檻的「相對最高分」也只在這幾種之間算（企業名錄只搜企業，不會被別種內容的高分墊高門檻）；不指定就比對全站搜尋涵蓋的所有來源。
     /// </summary>
-    Task<List<SemanticHit>> FindHitsAsync(DbContext db, string keyword, IReadOnlyCollection<EmbeddingSourceType>? onlyTypes, CancellationToken ct);
+    /// <param name="maxHitsPerType">每一種來源最多取幾筆（預設 10，全站搜尋每個分類只顯示一小部分）；企業名錄要分頁瀏覽，會放寬。總數仍受 40 筆上限限制。</param>
+    Task<List<SemanticHit>> FindHitsAsync(DbContext db, string keyword, IReadOnlyCollection<EmbeddingSourceType>? onlyTypes, CancellationToken ct, int maxHitsPerType = DefaultMaxHitsPerType);
+
+    const int DefaultMaxHitsPerType = 10;
 }
 
 public class SemanticSearchEngine : ISemanticSearchEngine
@@ -32,7 +35,6 @@ public class SemanticSearchEngine : ISemanticSearchEngine
     /// <summary>每分鐘最多向 embedding 服務查幾個「沒快取過的」搜尋詞；超過就這一分鐘不做語意搜尋（匿名端點的成本保護）</summary>
     private const int MaxQueryEmbeddingsPerMinute = 30;
 
-    private const int SemanticMaxHitsPerType = 10;
     private const int SemanticMaxTotalHits = 40;
     private static readonly TimeSpan SemanticQueryTimeout = TimeSpan.FromSeconds(5);
     private const string VectorsCacheKey = "search:semantic-vectors";
@@ -62,7 +64,7 @@ public class SemanticSearchEngine : ISemanticSearchEngine
     }
 
     /// <summary>算搜尋詞跟所有已索引向量的相似度，依門檻挑出命中的項目（由高到低）</summary>
-    public async Task<List<SemanticHit>> FindHitsAsync(DbContext db, string keyword, IReadOnlyCollection<EmbeddingSourceType>? onlyTypes, CancellationToken ct)
+    public async Task<List<SemanticHit>> FindHitsAsync(DbContext db, string keyword, IReadOnlyCollection<EmbeddingSourceType>? onlyTypes, CancellationToken ct, int maxHitsPerType = ISemanticSearchEngine.DefaultMaxHitsPerType)
     {
         var empty = new List<SemanticHit>();
         var query = await GetQueryVectorAsync(keyword, ct);
@@ -91,7 +93,7 @@ public class SemanticSearchEngine : ISemanticSearchEngine
             .Where(h => h.Score >= cutoff)
             .OrderByDescending(h => h.Score)
             .GroupBy(h => h.Type)
-            .SelectMany(g => g.Take(SemanticMaxHitsPerType))
+            .SelectMany(g => g.Take(maxHitsPerType))
             .OrderByDescending(h => h.Score)
             .Take(SemanticMaxTotalHits)
             .ToList();
