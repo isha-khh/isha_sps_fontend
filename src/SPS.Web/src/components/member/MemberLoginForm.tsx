@@ -11,6 +11,8 @@ import { getApiErrorMessage } from "@/lib/error-utils";
 import { fromAssertionResponse, toRequestOptions } from "@/lib/webauthn";
 import { readNextFromLocation } from "@/lib/login-next";
 import FormError from "@/components/ui/FormError";
+import RequiredNote from "@/components/ui/RequiredNote";
+import FieldError from "@/components/ui/FieldError";
 
 /**
  * 積木元件：會員登入表單本體，對應舊站 login.html 的 `.melo_box_left`。
@@ -37,9 +39,12 @@ import FormError from "@/components/ui/FormError";
 export default function MemberLoginForm() {
   const router = useRouter();
   const captchaRef = useRef<CaptchaFieldHandle>(null);
+  const accountRef = useRef<HTMLInputElement>(null);
   const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string>();
+  // 每個必填欄位各自的錯誤訊息（空白送出時一次全部列出，並把焦點帶到第一個錯誤欄位）
+  const [fieldErrors, setFieldErrors] = useState<{ account?: string; password?: string; captcha?: string }>({});
   const [submitting, setSubmitting] = useState(false);
   const setMember = useAuthStore((s) => s.setMember);
   const [passkeyAvailable, setPasskeyAvailable] = useState(false);
@@ -91,14 +96,23 @@ export default function MemberLoginForm() {
     setError(undefined);
 
     const captcha = captchaRef.current?.getValue();
-    if (!captcha) {
-      setError("請輸入驗證碼");
+    const errors = {
+      account: account.trim() ? undefined : "請輸入會員帳號",
+      password: password ? undefined : "請輸入會員密碼",
+      captcha: captcha ? undefined : "請輸入驗證碼",
+    };
+    setFieldErrors(errors);
+    if (errors.account || errors.password || errors.captcha) {
+      // 焦點移到第一個有錯誤的欄位（GN2330300E）
+      if (errors.account) accountRef.current?.focus();
+      else if (errors.password) document.getElementById("memberPassword")?.focus();
+      else captchaRef.current?.focus();
       return;
     }
 
     setSubmitting(true);
     try {
-      const { member } = await authApi.login({ email: account, password, captcha });
+      const { member } = await authApi.login({ email: account, password, captcha: captcha ?? undefined });
       setMember(member);
       goAfterLogin(member.requireEmailVerification);
     } catch (err) {
@@ -112,6 +126,8 @@ export default function MemberLoginForm() {
 
   return (
     <form className="melo_box_left" onSubmit={handleSubmit} noValidate>
+      <RequiredNote />
+
       <div className="form-group">
         <label htmlFor="memberAccount" className="mb-2">
           會員帳號<span className="text-danger" aria-hidden="true">*</span>
@@ -119,19 +135,26 @@ export default function MemberLoginForm() {
         <input
           type="text"
           id="memberAccount"
+          ref={accountRef}
           className="form-control"
           placeholder="請輸入會員帳號"
           required
           aria-required="true"
+          aria-invalid={fieldErrors.account ? true : undefined}
+          aria-describedby={fieldErrors.account ? "memberAccount-error" : undefined}
           value={account}
-          onChange={(e) => setAccount(e.target.value)}
+          onChange={(e) => {
+            setAccount(e.target.value);
+            setFieldErrors((prev) => ({ ...prev, account: undefined }));
+          }}
           autoComplete="username"
         />
+        <FieldError id="memberAccount-error" message={fieldErrors.account} />
       </div>
 
       <div className="form-group g-input">
         <div className="so_pass d-flex justify-content-between align-items-center mb-2">
-          <label className="mb-0">
+          <label htmlFor="memberPassword" className="mb-0">
             會員密碼<span className="text-danger ms-1" aria-hidden="true">*</span>
           </label>
           <Link href="/member/forgot" title="前往忘記密碼頁面" className="blue">
@@ -139,14 +162,31 @@ export default function MemberLoginForm() {
           </Link>
         </div>
 
-        <PasswordField value={password} onChange={setPassword} />
+        <PasswordField
+          id="memberPassword"
+          value={password}
+          onChange={(value) => {
+            setPassword(value);
+            setFieldErrors((prev) => ({ ...prev, password: undefined }));
+          }}
+          invalid={Boolean(fieldErrors.password)}
+          errorId="memberPassword-error"
+        />
+        <FieldError id="memberPassword-error" message={fieldErrors.password} />
       </div>
 
       <div className="form-group">
-        <label className="mb-2">
+        <label htmlFor="memberCaptcha" className="mb-2">
           驗證碼<span className="text-danger" aria-hidden="true">*</span>
         </label>
-        <CaptchaField ref={captchaRef} />
+        <CaptchaField
+          ref={captchaRef}
+          id="memberCaptcha"
+          invalid={Boolean(fieldErrors.captcha)}
+          errorId="memberCaptcha-error"
+          onInput={() => setFieldErrors((prev) => ({ ...prev, captcha: undefined }))}
+        />
+        <FieldError id="memberCaptcha-error" message={fieldErrors.captcha} />
       </div>
 
       {error && (

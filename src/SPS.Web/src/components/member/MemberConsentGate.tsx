@@ -27,31 +27,26 @@ export default function MemberConsentGate() {
         </div>
 
         <div className="peer d-flex mb-3">
-          <label className="relative">
-            <input
-              type="checkbox"
-              aria-label="同意已充分知悉告知事項"
-              title="本人已充分知悉貴署上述告知事項"
-              className="form-check-input peer me-1"
-              checked={agreedNotice}
-              onChange={(e) => setAgreedNotice(e.target.checked)}
-            />
-          </label>
-          <span>本人已充分知悉貴署上述告知事項。</span>
+          <input
+            type="checkbox"
+            id="consent-notice"
+            className="form-check-input peer me-2 flex-shrink-0"
+            checked={agreedNotice}
+            onChange={(e) => setAgreedNotice(e.target.checked)}
+          />
+          {/* 文字就是核取方塊的 <label>：點文字也能勾選（GN1330201E） */}
+          <label htmlFor="consent-notice">本人已充分知悉貴署上述告知事項。</label>
         </div>
 
         <div className="peer d-flex">
-          <label className="relative">
-            <input
-              type="checkbox"
-              aria-label="同意個人資料蒐集處理利用"
-              title="本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料"
-              className="form-check-input peer me-1"
-              checked={agreedCollection}
-              onChange={(e) => setAgreedCollection(e.target.checked)}
-            />
-          </label>
-          <span>本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</span>
+          <input
+            type="checkbox"
+            id="consent-collection"
+            className="form-check-input peer me-2 flex-shrink-0"
+            checked={agreedCollection}
+            onChange={(e) => setAgreedCollection(e.target.checked)}
+          />
+          <label htmlFor="consent-collection">本人同意貴署或貴署授權之專案管理單位，蒐集、處理、利用本人之個人資料，以及其他公務機關請求行政協助目的之提供。</label>
         </div>
       </div>
 

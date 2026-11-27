@@ -7,6 +7,7 @@ import { authApi } from "@/lib/api/auth";
 import { captchaApi } from "@/lib/api/captcha";
 import { getApiErrorMessage } from "@/lib/error-utils";
 import FormError from "@/components/ui/FormError";
+import RequiredNote from "@/components/ui/RequiredNote";
 
 /**
  * 積木元件：忘記密碼表單，對應舊站 forgot.html 的 `.melo_box_left`。
@@ -88,6 +89,8 @@ export default function MemberForgotForm() {
 
   return (
     <form className="melo_box_left w-100" onSubmit={handleSubmit} noValidate>
+      <RequiredNote />
+
       <div className="form-group">
         <label htmlFor="forgotEmail" className="mb-2">
           會員電子信箱<span className="text-danger" aria-hidden="true">*</span>
@@ -108,10 +111,10 @@ export default function MemberForgotForm() {
 
       {captchaEnabled && (
         <div className="form-group">
-          <label className="mb-2">
+          <label htmlFor="forgotCaptcha" className="mb-2">
             驗證碼<span className="text-danger" aria-hidden="true">*</span>
           </label>
-          <CaptchaField ref={captchaRef} />
+          <CaptchaField ref={captchaRef} id="forgotCaptcha" />
         </div>
       )}
 
