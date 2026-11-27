@@ -716,8 +716,9 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             member = tokenResponse.Member,
-            requirePasswordChange = tokenResponse.RequirePasswordChange,
-            passwordChangeReason = tokenResponse.PasswordChangeReason
+            // Passkey 登入沒有用到密碼，不要求改密碼（要求改密碼只在用密碼登入時才有意義）
+            requirePasswordChange = false,
+            passwordChangeReason = (string?)null
         });
     }
 

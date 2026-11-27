@@ -247,7 +247,8 @@ public class AuthService : IAuthService
             LoginTime = DateTime.UtcNow,
             LastVisitedTime = DateTime.UtcNow,
             DataMode = DataMode.Normal,
-            FirstChanged = false,
+            // 自己註冊的新會員不用強制改密碼（密碼是他自己設的）；只有管理員要求、密碼過期才會要求
+            FirstChanged = true,
             PasswordChanged = false,
             LoginFailure = 0,
             PasswordExpirationPolicy = 0,

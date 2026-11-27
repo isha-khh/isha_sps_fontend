@@ -15,7 +15,7 @@ const RESEND_SECONDS = 60;
  * `POST /api/member/change-password`。流程：先寄驗證碼到會員信箱，再填驗證碼與新密碼（密碼規則依後台「密碼策略」設定，
  * 不能與目前密碼相同；規則由後端檢查，訊息直接顯示）。驗證碼 60 秒內不能重寄（前端提示，後端也有頻率限制）。
  */
-export default function PasswordPanel() {
+export default function PasswordPanel({ onChanged }: { onChanged?: () => void } = {}) {
   const [email, setEmail] = useState<string>();
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -85,6 +85,7 @@ export default function PasswordPanel() {
       setNewPassword("");
       setConfirmPassword("");
       setMessage("密碼已更新，下次登入請使用新密碼。");
+      onChanged?.();
     } catch (err) {
       setError(getApiErrorMessage(err, "變更密碼失敗，請稍後再試"));
     } finally {
